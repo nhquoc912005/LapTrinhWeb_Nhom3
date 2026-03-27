@@ -9,6 +9,46 @@ document.addEventListener('DOMContentLoaded', function () {
   const perPage = 10;
   let filteredData = [...MOCK_HO_SO];
   let editingId = null;
+  let currentViewingHoSoId = null;
+  const canManageHoSo = user.role === 'vanthu';
+  const hsNgayTaoInput = document.getElementById('hsNgayTao');
+  const hsThoiGianBaoQuanSelect = document.getElementById('hsThoiGianBaoQuan');
+  const hsSoNamLuuTruInput = document.getElementById('hsSoNamLuuTru');
+  const hsRetentionPreview = document.getElementById('hsRetentionPreview');
+
+  function getStatusStyles(status) {
+    return status === 'Hiện hành'
+      ? { color: '#166534', bg: '#DCFCE7' }
+      : { color: '#475569', bg: '#E2E8F0' };
+  }
+
+  function getYearFromDate(value) {
+    if (!value) return '';
+    const yearAtStart = value.match(/^(19|20)\d{2}/);
+    if (yearAtStart) return yearAtStart[0];
+    const yearAtEnd = value.match(/(19|20)\d{2}$/);
+    return yearAtEnd ? yearAtEnd[0] : '';
+  }
+
+  function getStorageYearsFromRetention(value) {
+    const match = String(value || '').match(/(\d+)\s*năm/i);
+    return match ? match[1] : '';
+  }
+
+  function updateRetentionInfo() {
+    const retentionValue = hsThoiGianBaoQuanSelect?.value || 'Vĩnh viễn';
+    const storageYears = getStorageYearsFromRetention(retentionValue);
+
+    if (hsSoNamLuuTruInput) {
+      hsSoNamLuuTruInput.value = storageYears;
+    }
+
+    if (hsRetentionPreview) {
+      hsRetentionPreview.textContent = storageYears
+        ? `Lưu trữ ${storageYears} năm kể từ năm hình thành`
+        : 'Vĩnh viễn';
+    }
+  }
 
   // Populate dropdown for add document to file
   function populateVBSelects() {
@@ -61,6 +101,39 @@ document.addEventListener('DOMContentLoaded', function () {
           <td style="color:var(--text-main);">${hs.thoiGianBaoQuan}</td>
           <td style="color:var(--text-main);">${hs.donVi}</td>
           <td><span style="background:${statusBg}; color:${statusColor}; padding:4px 12px; border-radius:20px; font-size:13px; font-weight:600;">${hs.trangThai}</span></td>
+        </tr>`;
+    }).join('');
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('hoSoBody');
+    const paginationInfo = document.getElementById('paginationInfo');
+
+    const total = filteredData.length;
+    const pageData = filteredData.slice(0, total);
+
+    if (paginationInfo) paginationInfo.textContent = `Hiển thị ${total} văn bản`;
+
+    if (!pageData.length) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><svg width="48" height="48" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg><h3>Chưa có hồ sơ nào</h3></div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = pageData.map((hs) => {
+      const status = hs.trangThai || 'Hiện hành';
+      const statusStyles = getStatusStyles(status);
+      const namHinhThanh = hs.namHinhThanh || getYearFromDate(hs.ngayTao) || '—';
+      const thoiGianBaoQuan = hs.thoiGianBaoQuan || 'Chưa cập nhật';
+      const donVi = hs.donVi || 'Chưa cập nhật';
+
+      return `
+        <tr style="border-bottom: 1px solid var(--border-color); background: #fff;">
+          <td style="font-weight:700; color:#0284C7; cursor:pointer;" onclick="window.viewHoSoDetail(${hs.id})">${hs.tenHoSo}</td>
+          <td style="color:var(--text-main);">${hs.maHoSo}</td>
+          <td style="color:var(--text-main);">${namHinhThanh}</td>
+          <td style="color:var(--text-main);">${thoiGianBaoQuan}</td>
+          <td style="color:var(--text-main);">${donVi}</td>
+          <td><span style="background:${statusStyles.bg}; color:${statusStyles.color}; padding:4px 12px; border-radius:20px; font-size:13px; font-weight:600;">${status}</span></td>
         </tr>`;
     }).join('');
   }
@@ -710,9 +783,392 @@ document.addEventListener('DOMContentLoaded', function () {
     renderChips();
   };
 
+  function getSelectedPhongBanValues() {
+    return Array.from(chkPhongBanItems).filter(item => item.checked).map(item => item.value);
+  }
+
+  function updatePhongBanText() {
+    if (!phongBanText) return;
+
+    const selectedValues = getSelectedPhongBanValues();
+    if (!selectedValues.length) {
+      phongBanText.textContent = '-- Chọn đơn vị --';
+      phongBanText.style.color = 'var(--text-muted)';
+    } else {
+      phongBanText.textContent = selectedValues.join(', ');
+      phongBanText.style.color = 'var(--text-main)';
+    }
+
+    if (chkAllPhongBan) {
+      chkAllPhongBan.checked = selectedValues.length > 0 && selectedValues.length === chkPhongBanItems.length;
+    }
+  }
+
+  function setSelectedPhongBanValues(rawValue) {
+    const values = Array.isArray(rawValue)
+      ? rawValue
+      : String(rawValue || '').split(',').map(item => item.trim()).filter(Boolean);
+
+    const availableValues = Array.from(chkPhongBanItems).map(item => item.value);
+    const matchedValues = values.filter(value => availableValues.includes(value));
+
+    chkPhongBanItems.forEach(item => {
+      item.checked = matchedValues.includes(item.value);
+    });
+
+    if (matchedValues.length) {
+      updatePhongBanText();
+      return;
+    }
+
+    if (phongBanText) {
+      phongBanText.textContent = values.length ? values.join(', ') : '-- Chọn đơn vị --';
+      phongBanText.style.color = values.length ? 'var(--text-main)' : 'var(--text-muted)';
+    }
+
+    if (chkAllPhongBan) chkAllPhongBan.checked = false;
+  }
+
+  function normalizeText(value) {
+    return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  }
+
+  function getSelectedNguoiXuLyText() {
+    return Array.from(globalSelectedMembers.values()).map(member => member.name).join(', ');
+  }
+
+  function setSelectedNguoiXuLy(rawValue) {
+    const names = String(rawValue || '').split(',').map(item => item.trim()).filter(Boolean);
+    const allMembers = treeData.reduce((acc, group) => acc.concat(group.members), []);
+
+    globalSelectedMembers.clear();
+
+    names.forEach((name, index) => {
+      const normalizedName = normalizeText(name);
+      const matchedMember = allMembers.find(member => {
+        const memberName = normalizeText(member.name);
+        return memberName === normalizedName || memberName.includes(normalizedName) || normalizedName.includes(memberName);
+      });
+
+      if (matchedMember) {
+        globalSelectedMembers.set(matchedMember.id, matchedMember);
+      } else {
+        globalSelectedMembers.set(`custom-${index}-${normalizedName}`, {
+          id: `custom-${index}-${normalizedName}`,
+          name,
+          role: '',
+          phone: '',
+          email: ''
+        });
+      }
+    });
+
+    renderChips();
+  }
+
+  function resetHoSoForm() {
+    editingId = null;
+
+    const hsIdInput = document.getElementById('hsId');
+    if (hsIdInput) hsIdInput.value = '';
+
+    const modalTitle = document.getElementById('modalHSTitle');
+    if (modalTitle) modalTitle.textContent = 'Thêm hồ sơ mới';
+
+    ['hsMaHoSo', 'hsTenHoSo', 'hsMoTa', 'hsNgayTao'].forEach(id => {
+      const input = document.getElementById(id);
+      if (input) input.value = '';
+    });
+
+    if (document.getElementById('hsTrangThai')) {
+      document.getElementById('hsTrangThai').selectedIndex = 0;
+    }
+
+    if (hsThoiGianBaoQuanSelect) {
+      hsThoiGianBaoQuanSelect.value = 'Vĩnh viễn';
+    }
+
+    setSelectedPhongBanValues([]);
+    globalSelectedMembers.clear();
+    renderChips();
+    updateRetentionInfo();
+
+    if (popupPhongBan) popupPhongBan.style.display = 'none';
+  }
+
+  function fillHoSoForm(hs) {
+    editingId = hs.id;
+
+    const hsIdInput = document.getElementById('hsId');
+    if (hsIdInput) hsIdInput.value = hs.id;
+
+    const modalTitle = document.getElementById('modalHSTitle');
+    if (modalTitle) modalTitle.textContent = 'Chỉnh sửa hồ sơ';
+
+    const fields = {
+      hsMaHoSo: hs.maHoSo || '',
+      hsTenHoSo: hs.tenHoSo || '',
+      hsMoTa: hs.moTa || '',
+      hsNgayTao: hs.ngayTao || ''
+    };
+
+    Object.keys(fields).forEach(id => {
+      const input = document.getElementById(id);
+      if (input) input.value = fields[id];
+    });
+
+    if (hsThoiGianBaoQuanSelect) {
+      const retentionValue = hs.thoiGianBaoQuan || 'Vĩnh viễn';
+      const availableOptions = Array.from(hsThoiGianBaoQuanSelect.options).map(option => option.value);
+      hsThoiGianBaoQuanSelect.value = availableOptions.includes(retentionValue) ? retentionValue : 'Vĩnh viễn';
+    }
+
+    updateRetentionInfo();
+
+    if (hsSoNamLuuTruInput) {
+      hsSoNamLuuTruInput.value = hs.soNamLuuTru || getStorageYearsFromRetention(hs.thoiGianBaoQuan);
+    }
+
+    setSelectedPhongBanValues(hs.donVi || '');
+    setSelectedNguoiXuLy(hs.quyenXuLy || '');
+  }
+
+  function saveHoSoForm(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
+    const maHoSo = document.getElementById('hsMaHoSo')?.value.trim() || '';
+    const tenHoSo = document.getElementById('hsTenHoSo')?.value.trim() || '';
+    const ngayTao = hsNgayTaoInput?.value.trim() || '';
+    const moTa = document.getElementById('hsMoTa')?.value.trim() || '';
+    const thoiGianBaoQuan = hsThoiGianBaoQuanSelect?.value || 'Vĩnh viễn';
+    const soNamLuuTru = (hsSoNamLuuTruInput?.value || '').trim() || getStorageYearsFromRetention(thoiGianBaoQuan);
+    const quyenXuLy = getSelectedNguoiXuLyText();
+    let donVi = getSelectedPhongBanValues().join(', ');
+
+    if (!donVi && phongBanText && !phongBanText.textContent.includes('-- Chọn')) {
+      donVi = phongBanText.textContent.trim();
+    }
+
+    if (!maHoSo || !tenHoSo || !ngayTao) {
+      showToast('Vui lòng nhập đầy đủ tiêu đề, ký hiệu và ngày tạo hồ sơ.', 'error');
+      return;
+    }
+
+    if (!donVi) {
+      showToast('Vui lòng chọn đơn vị hoặc phòng ban.', 'error');
+      return;
+    }
+
+    if (!quyenXuLy) {
+      showToast('Vui lòng chọn ít nhất một người xử lý văn bản.', 'error');
+      return;
+    }
+
+    const existingHoSo = editingId ? MOCK_HO_SO.find(item => item.id === editingId) : null;
+    const hoSoPayload = {
+      id: existingHoSo?.id || (MOCK_HO_SO.reduce((max, item) => Math.max(max, item.id || 0), 0) + 1),
+      maHoSo,
+      tenHoSo,
+      moTa,
+      ngayTao,
+      namHinhThanh: getYearFromDate(ngayTao) || existingHoSo?.namHinhThanh || '',
+      thoiGianBaoQuan,
+      donVi,
+      trangThai: existingHoSo?.trangThai || 'Hiện hành',
+      quyenXuLy,
+      soNamLuuTru: soNamLuuTru || undefined
+    };
+
+    if (existingHoSo) {
+      Object.assign(existingHoSo, hoSoPayload);
+      showToast('Cập nhật hồ sơ thành công!', 'success');
+    } else {
+      MOCK_HO_SO.unshift(hoSoPayload);
+      showToast('Thêm hồ sơ thành công!', 'success');
+    }
+
+    closeModal('modalHoSo');
+    applyFilters();
+
+    if (currentViewingHoSoId && document.getElementById('hoSoDetailView')?.style.display === 'block') {
+      window.viewHoSoDetail(hoSoPayload.id);
+    }
+  }
+
+  window.backToList = function() {
+    currentViewingHoSoId = null;
+    document.getElementById('hoSoDetailView').style.display = 'none';
+    document.getElementById('vanBanDetailView').style.display = 'none';
+    document.getElementById('hoSoListView').style.display = 'block';
+  };
+
+  window.viewHoSoDetail = function(id) {
+    const hs = MOCK_HO_SO.find(item => item.id === id);
+    if (!hs) return;
+
+    currentViewingHoSoId = id;
+    document.getElementById('hoSoListView').style.display = 'none';
+    document.getElementById('vanBanDetailView').style.display = 'none';
+
+    const detailView = document.getElementById('hoSoDetailView');
+    detailView.style.display = 'block';
+
+    const status = hs.trangThai || 'Hiện hành';
+    const statusStyles = getStatusStyles(status);
+    const isArchived = status === 'Lưu trữ';
+    const actionMarkup = canManageHoSo
+      ? `
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:12px;">
+          <div style="display:flex; gap:12px;">
+            <button class="btn btn-primary" ${isArchived ? 'disabled' : `onclick="window.editHoSo(${hs.id})"`} style="padding:8px 18px; border:none; background:${isArchived ? '#94A3B8' : '#0284C7'}; ${isArchived ? 'cursor:not-allowed; opacity:0.75;' : ''}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="white" style="margin-right:6px;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"/></svg>
+              Chỉnh sửa
+            </button>
+            <button class="btn btn-danger" onclick="window.deleteHoSo(${hs.id})" style="padding:8px 18px; border:none; background:#EF4444;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="white" style="margin-right:6px;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+              Xóa
+            </button>
+          </div>
+          <span style="background:${statusStyles.bg}; color:${statusStyles.color}; padding:6px 16px; border-radius:20px; font-size:13px; font-weight:600;">${status}</span>
+        </div>
+      `
+      : `<span style="background:${statusStyles.bg}; color:${statusStyles.color}; padding:6px 16px; border-radius:20px; font-size:13px; font-weight:600;">${status}</span>`;
+
+    detailView.innerHTML = `
+      <div class="breadcrumb-bar" style="margin-bottom:24px;">
+        <a href="#" onclick="window.backToList()" style="text-decoration:none; color:var(--text-muted);"><svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px;"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Hồ sơ văn bản</a>
+        <span class="breadcrumb-sep" style="margin:0 8px; color:var(--text-muted);">›</span><span style="color:var(--text-main); font-weight:500;">Chi tiết hồ sơ văn bản</span>
+      </div>
+
+      <div style="background:#fff; border:1px solid var(--border-color); border-radius:4px; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,0.05); margin-bottom:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:24px;">
+          <h3 style="color:var(--primary); font-size:16px; font-weight:700; border-left:4px solid var(--primary); padding-left:12px; margin:0; text-transform:uppercase;">THÔNG TIN HỒ SƠ VĂN BẢN</h3>
+          ${actionMarkup}
+        </div>
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px;">
+          <div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Tiêu đề hồ sơ</div>
+              <div style="font-size:15px; color:var(--text-main); font-weight:500;">${hs.tenHoSo || '—'}</div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Ngày tạo hồ sơ</div>
+              <div style="font-size:15px; color:var(--text-main);">${hs.ngayTao || '—'}</div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Đơn vị / Phòng ban</div>
+              <div style="font-size:15px; color:var(--text-main);">${hs.donVi || '—'}</div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Mô tả</div>
+              <div style="font-size:15px; color:var(--text-main);">${hs.moTa || '—'}</div>
+            </div>
+          </div>
+          <div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Ký hiệu hồ sơ</div>
+              <div style="font-size:15px; color:var(--text-main);">${hs.maHoSo || '—'}</div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Thời gian bảo quản</div>
+              <div style="font-size:15px; color:var(--text-main);">${hs.thoiGianBaoQuan || '—'}</div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Quyền xử lý văn bản</div>
+              <div style="font-size:15px; color:var(--text-main);">${hs.quyenXuLy || '—'}</div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Số năm lưu trữ</div>
+              <div style="font-size:15px; color:var(--text-main);">${hs.soNamLuuTru || '—'}</div>
+            </div>
+          </div>
+        </div>
+        <hr style="border:none; border-top:1px solid var(--border-color); margin:24px 0;">
+        <div style="font-size:14px; color:var(--text-main);">Văn thư: <span style="font-weight:700;">${user.name}</span></div>
+      </div>
+
+      <div style="background:#fff; border:1px solid var(--border-color); border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.05); overflow:hidden;">
+        <h3 style="color:var(--primary); font-size:14px; font-weight:700; border-left:4px solid var(--primary); padding-left:12px; margin:24px 24px 16px 24px; text-transform:uppercase;">DANH SÁCH HỒ SƠ (2)</h3>
+        <table class="data-table" style="border-top:1px solid var(--border-color);">
+          <thead style="background:#F8FAFC;">
+            <tr>
+              <th class="text-center" style="width:60px;">STT</th>
+              <th>Số ký hiệu</th>
+              <th>Trích yếu</th>
+              <th>Đơn vị ban hành</th>
+              <th>Ngày văn bản</th>
+              <th class="text-center">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border-color);">
+              <td class="text-center">1</td>
+              <td style="color:#0284C7; font-weight:600; cursor:pointer;" onclick="window.viewVanBanDetail(1, ${hs.id})">123/UBND</td>
+              <td>Về việc triển khai kế hoạch năm 2024</td>
+              <td>UBND Thành phố</td>
+              <td>03/02/2025</td>
+              <td class="text-center"><button class="btn btn-icon btn-sm" style="color:var(--text-muted); border:1px solid var(--border-color);"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button></td>
+            </tr>
+            <tr>
+              <td class="text-center">2</td>
+              <td style="color:#0284C7; font-weight:600; cursor:pointer;" onclick="window.viewVanBanDetail(2, ${hs.id})">VB.002/2026</td>
+              <td>Báo cáo kết quả hoạt động quý I</td>
+              <td>Phòng Hành chính</td>
+              <td>2026-03-20</td>
+              <td class="text-center"><button class="btn btn-icon btn-sm" style="color:var(--text-muted); border:1px solid var(--border-color);"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    window.scrollTo(0, 0);
+  };
+
+  window.editHoSo = function(id) {
+    const hs = MOCK_HO_SO.find(item => item.id === id);
+    if (!hs) return;
+
+    fillHoSoForm(hs);
+    openModal('modalHoSo');
+  };
+
+  window.deleteHoSo = function(id) {
+    showConfirm('Xác nhận xóa hồ sơ', 'Bạn có chắc chắn muốn xóa hồ sơ này?', () => {
+      const index = MOCK_HO_SO.findIndex(item => item.id === id);
+      if (index !== -1) {
+        MOCK_HO_SO.splice(index, 1);
+      }
+
+      if (currentViewingHoSoId === id) {
+        window.backToList();
+      }
+
+      applyFilters();
+      showToast('Đã xóa hồ sơ.', 'success');
+    });
+  };
+
+  document.getElementById('btnThemHoSo')?.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
+    resetHoSoForm();
+    openModal('modalHoSo');
+  }, true);
+
+  document.getElementById('btnSaveHoSo')?.addEventListener('click', saveHoSoForm, true);
+  hsThoiGianBaoQuanSelect?.addEventListener('change', updateRetentionInfo);
+
   // Initial page render
   populateVBSelects();
   applyFilters();
+  updateRetentionInfo();
+  updatePhongBanText();
   renderChips();
 
 });

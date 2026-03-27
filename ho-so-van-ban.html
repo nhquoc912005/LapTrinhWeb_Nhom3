@@ -84,10 +84,20 @@
           <!-- Filter + Actions -->
           <div class="filter-card">
             <div style="margin-bottom: 24px;">
-              <h3
-                style="color:var(--primary); font-size:16px; font-weight:700; border-left:4px solid var(--primary); padding-left:12px; margin:0; text-transform:uppercase;">
-                TRA CỨU THÔNG TIN</h3>
-              <hr style="border:none; border-top:1px solid var(--border-color); margin:16px 0 24px 0;">
+              <div
+                style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:16px;">
+                <h3
+                  style="color:var(--primary); font-size:16px; font-weight:700; border-left:4px solid var(--primary); padding-left:12px; margin:0; text-transform:uppercase;">
+                  TRA CỨU THÔNG TIN</h3>
+                <button class="btn btn-primary" id="btnThemHoSo" data-roles="vanthu"
+                  style="display:inline-flex; align-items:center; gap:8px; padding:10px 22px; font-weight:600; border:none; background:#0284C7;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                  </svg>
+                  Thêm mới
+                </button>
+              </div>
+              <hr style="border:none; border-top:1px solid var(--border-color); margin:0 0 24px 0;">
 
               <div class="filter-tabs"
                 style="display:flex; background:#F1F5F9; border-radius:4px; width:fit-content; margin-bottom:24px;">
@@ -238,13 +248,15 @@
         <div class="form-row cols-2" style="margin-bottom:16px; display:grid; grid-template-columns:1fr 1fr; gap:16px;">
           <div class="form-group"><label class="form-label"
               style="font-weight:600; font-size:13px; margin-bottom:6px;">Thời gian bảo quản <span class="required"
-                style="color:#DC2626;">*</span></label><select class="form-control"
+                style="color:#DC2626;">*</span></label><select class="form-control" id="hsThoiGianBaoQuan"
               style="padding:10px; font-size:14px;">
-              <option>Vĩnh viễn</option>
+              <option value="Vĩnh viễn">Vĩnh viễn</option>
+              <option value="Theo quy định - 2 năm">Theo quy định - 2 năm</option>
+              <option value="Theo quy định - 5 năm">Theo quy định - 5 năm</option>
             </select></div>
           <div class="form-group"><label class="form-label"
               style="font-weight:600; font-size:13px; margin-bottom:6px;">Số năm lưu trữ <span class="required"
-                style="color:#DC2626;">*</span></label><input type="text" class="form-control" disabled
+                style="color:#DC2626;">*</span></label><input type="text" id="hsSoNamLuuTru" class="form-control" disabled
               style="padding:10px; font-size:14px; background:#F1F5F9;"></div>
         </div>
         <div class="form-row cols-2"
@@ -311,7 +323,7 @@
             </svg>
             THỜI HẠN LƯU TRỮ DỰ KIẾN
           </div>
-          <div style="color:var(--primary); font-size:13px;">Vĩnh viễn</div>
+          <div id="hsRetentionPreview" style="color:var(--primary); font-size:13px;">Vĩnh viễn</div>
         </div>
 
         <hr style="border:none; border-top:1px solid var(--border-color); margin-bottom:24px;">
