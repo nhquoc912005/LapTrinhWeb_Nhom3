@@ -98,6 +98,105 @@ document.addEventListener('DOMContentLoaded', function () {
 
   window.goToCongViecList = goToListView;
 
+  const GIAO_VIEC_PREFILL_KEY = 'giao_viec_prefill_from_vbd';
+
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function getTaskFileTypeLabel(fileName) {
+    const name = String(fileName || '').toLowerCase();
+    if (name.endsWith('.pdf')) return 'PDF';
+    if (name.endsWith('.docx')) return 'DOCX';
+    if (name.endsWith('.doc')) return 'DOC';
+    if (name.endsWith('.xlsx')) return 'XLSX';
+    if (name.endsWith('.xls')) return 'XLS';
+    return 'FILE';
+  }
+
+  function getTaskFileTypeText(fileName) {
+    const type = getTaskFileTypeLabel(fileName);
+    if (type === 'PDF') return 'PDF Document';
+    if (type === 'DOC' || type === 'DOCX') return 'Word Document';
+    if (type === 'XLS' || type === 'XLSX') return 'Excel Document';
+    return 'File Document';
+  }
+
+  function normalizeTaskFileEntries(files) {
+    if (!files) return [];
+    const source = Array.isArray(files) ? files : [files];
+    return source
+      .map(file => {
+        if (!file) return null;
+        if (typeof file === 'string') return { name: file };
+        if (file.name) return { name: file.name };
+        return null;
+      })
+      .filter(Boolean);
+  }
+
+  function renderTaskUploadedFiles(files, type) {
+    if (!files.length) return '';
+
+    return files.map((file, index) => `
+      <div style="display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid #E5E7EB; border-radius:6px; background:#fff;">
+        <div style="min-width:46px; text-align:center; background:${getTaskFileTypeLabel(file.name) === 'PDF' ? '#FEF2F2' : '#EFF6FF'}; color:${getTaskFileTypeLabel(file.name) === 'PDF' ? '#DC2626' : '#2563EB'}; border-radius:4px; padding:4px 6px; font-size:10px; font-weight:700;">
+          ${getTaskFileTypeLabel(file.name)}
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div style="font-size:14px; font-weight:600; color:var(--text-color); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(file.name)}</div>
+          <div style="font-size:12px; color:var(--text-muted);">${getTaskFileTypeText(file.name)}</div>
+        </div>
+        <button type="button" class="task-file-remove" data-type="${type}" data-index="${index}" style="border:none; background:none; color:#DC2626; font-size:18px; cursor:pointer; line-height:1;">×</button>
+      </div>
+    `).join('');
+  }
+
+  function renderTaskFileDisplay(files, emptyText = '—') {
+    const normalizedFiles = normalizeTaskFileEntries(files);
+    if (!normalizedFiles.length) {
+      return `<div style="font-size:15px; color:var(--text-color);">${escapeHtml(emptyText)}</div>`;
+    }
+
+    return `
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        ${normalizedFiles.map(file => `
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="min-width:46px; text-align:center; background:${getTaskFileTypeLabel(file.name) === 'PDF' ? '#FEF2F2' : '#EFF6FF'}; color:${getTaskFileTypeLabel(file.name) === 'PDF' ? '#DC2626' : '#2563EB'}; border-radius:4px; padding:4px 6px; font-size:10px; font-weight:700;">
+              ${getTaskFileTypeLabel(file.name)}
+            </div>
+            <div>
+              <div style="font-size:14px; font-weight:600; color:var(--text-color);">${escapeHtml(file.name)}</div>
+              <div style="font-size:12px; color:var(--text-muted);">${getTaskFileTypeText(file.name)}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function consumeCongViecPrefill() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('from') !== 'van-ban-den') return null;
+
+    const raw = sessionStorage.getItem(GIAO_VIEC_PREFILL_KEY);
+    sessionStorage.removeItem(GIAO_VIEC_PREFILL_KEY);
+    window.history.replaceState({}, document.title, 'giao-viec.html');
+
+    if (!raw) return null;
+
+    try {
+      return JSON.parse(raw);
+    } catch (error) {
+      return null;
+    }
+  }
+
   function renderBadgeGV(st) {
     const meta = GV_STATUS[normalizeGVStatus(st)] || { label: st, bg: '#E5E7EB', color: '#374151' };
     return `<span style="display:inline-block;padding:6px 16px;border-radius:16px;font-size:12px;font-weight:600;background:${meta.bg};color:${meta.color};">${meta.label}</span>`;
@@ -621,6 +720,386 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   };
 
+  window.renderForm = function(cvId = null, prefillData = null) {
+    const cv = cvId ? getCongViecById(cvId) : null;
+    const isEdit = !!cv;
+    const prefill = !isEdit ? (prefillData || null) : null;
+    const title = isEdit ? 'CHỈNH SỬA CÔNG VIỆC' : 'GIAO CÔNG VIỆC MỚI';
+    const breadcrumbs = isEdit
+      ? [{ text: 'Quản lý công việc', link: true, view: 'congViecListView' }, { text: 'Thông tin chi tiết công việc', link: true, view: 'congViecDetailView', id: cvId }, { text: 'Chỉnh sửa công việc' }]
+      : [{ text: 'Quản lý công việc', link: true, view: 'congViecListView' }, { text: 'Giao việc' }];
+
+    const leaderValue = cv?.tenLanhDao || prefill?.tenLanhDao || user.name;
+    const sourceValue = cv?.nguonCV || prefill?.nguonCV || '';
+    const sourceDetail = cv?.nguonChiTiet || prefill?.nguonChiTiet || '';
+    const startValue = cv?.ngayBatDau ? formatDateForInput(cv.ngayBatDau) : formatDateForInput(prefill?.ngayBatDau || '');
+    const dueValue = cv?.hanXuLy ? formatDateForInput(cv.hanXuLy) : formatDateForInput(prefill?.hanXuLy || '');
+    const taskName = cv?.tenCongViec || prefill?.tenCongViec || '';
+    const assigneeValue = cv?.nguoiThucHien || prefill?.nguoiThucHien || '';
+    const collaboratorValue = cv?.nguoiPhoiHop || prefill?.nguoiPhoiHop || '';
+    const contentValue = cv?.noiDungCV || prefill?.noiDungCV || '';
+    const noteValue = cv?.ghiChu || prefill?.ghiChu || '';
+
+    let mainFiles = normalizeTaskFileEntries(isEdit ? cv?.fileDinhKem : prefill?.fileDinhKem);
+    let relatedFiles = normalizeTaskFileEntries(isEdit ? cv?.taiLieuLienQuan : prefill?.taiLieuLienQuan);
+
+    const html = `
+      <div class="card" style="background:#fff; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1); padding:24px;">
+        <h3 style="color:var(--text-color); font-size:16px; font-weight:700; border-left:4px solid var(--primary); padding-left:12px; margin:0 0 24px 0; text-transform:uppercase;">
+          ${title}
+        </h3>
+
+        <div style="border-top:1px solid var(--border-color); padding-top:24px;">
+          ${prefill ? `
+            <div style="margin-bottom:20px; padding:12px 16px; border-radius:6px; background:#EFF6FF; border:1px solid #BFDBFE; color:#1D4ED8; font-size:14px;">
+              Đã nạp sẵn thông tin từ văn bản đến${sourceDetail ? `: ${escapeHtml(sourceDetail)}` : '.'}
+            </div>
+          ` : ''}
+
+          <input type="hidden" id="formNguonChiTiet" value="${escapeHtml(sourceDetail)}">
+
+          <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:20px; margin-bottom:20px;">
+            <div class="form-group">
+              <label class="form-label" style="font-size:13px; color:var(--text-muted);">Lãnh đạo giao việc</label>
+              <input type="text" class="form-control" value="${escapeHtml(leaderValue)}" readonly style="background:#E5E7EB; border-color:#D1D5DB;">
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size:13px;">Nguồn giao <span style="color:#EF4444;">*</span></label>
+              <select id="formNguonGiao" class="form-control" style="font-size:14px; height:40px;">
+                <option value="">Chọn nguồn văn bản</option>
+                ${sourceValue && !['Văn bản đến', 'Văn bản đi'].includes(sourceValue) ? `<option value="${escapeHtml(sourceValue)}" selected>${escapeHtml(sourceValue)}</option>` : ''}
+                <option value="Văn bản đến" ${sourceValue === 'Văn bản đến' ? 'selected' : ''}>Văn bản đến</option>
+                <option value="Văn bản đi" ${sourceValue === 'Văn bản đi' ? 'selected' : ''}>Văn bản đi</option>
+              </select>
+              ${sourceDetail ? `<div style="font-size:12px; color:var(--text-muted); margin-top:6px;">${escapeHtml(sourceDetail)}</div>` : ''}
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size:13px;">Ngày bắt đầu <span style="color:#EF4444;">*</span></label>
+              <input type="date" id="formNgayBatDau" class="form-control" value="${startValue}">
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size:13px;">Hạn xử lý <span style="color:#EF4444;">*</span></label>
+              <input type="date" id="formHanXuLy" class="form-control" value="${dueValue}">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:20px;">
+            <label class="form-label" style="font-size:13px;">Tên công việc <span style="color:#EF4444;">*</span></label>
+            <input type="text" id="formTenCV" class="form-control" placeholder="Nhập tên công việc..." value="${escapeHtml(taskName)}">
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:20px;">
+            <div class="form-group">
+              <label class="form-label" style="font-size:13px;">Chuyên viên thực hiện <span style="color:#EF4444;">*</span></label>
+              <select id="formChuyenVien" class="form-control" style="font-size:14px; height:40px;">
+                <option value="">-- Chọn chuyên viên --</option>
+                <option value="Trần Tấn Tú" ${assigneeValue === 'Trần Tấn Tú' ? 'selected' : ''}>Trần Tấn Tú</option>
+                <option value="Nguyễn Văn A" ${assigneeValue === 'Nguyễn Văn A' ? 'selected' : ''}>Nguyễn Văn A</option>
+                <option value="Trần Thị Thúy Na" ${assigneeValue === 'Trần Thị Thúy Na' ? 'selected' : ''}>Trần Thị Thúy Na</option>
+                <option value="Phạm Thị Phương" ${assigneeValue === 'Phạm Thị Phương' ? 'selected' : ''}>Phạm Thị Phương</option>
+                <option value="Ngô Đăng Hà" ${assigneeValue === 'Ngô Đăng Hà' ? 'selected' : ''}>Ngô Đăng Hà</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size:13px;">Người phối hợp</label>
+              <select id="formNguoiPhoiHop" class="form-control" style="font-size:14px; height:40px;">
+                <option value="">-- Chọn người phối hợp --</option>
+                <option value="Trần Thị Thúy Na" ${collaboratorValue === 'Trần Thị Thúy Na' ? 'selected' : ''}>Trần Thị Thúy Na</option>
+                <option value="Phòng KT-TC" ${collaboratorValue === 'Phòng KT-TC' ? 'selected' : ''}>Phòng KT-TC</option>
+                <option value="Phạm Thị Phương" ${collaboratorValue === 'Phạm Thị Phương' ? 'selected' : ''}>Phạm Thị Phương</option>
+                <option value="Nguyễn Văn A" ${collaboratorValue === 'Nguyễn Văn A' ? 'selected' : ''}>Nguyễn Văn A</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:20px;">
+            <label class="form-label" style="font-size:13px;">Nội dung công việc <span style="color:#EF4444;">*</span></label>
+            <textarea id="formNoiDung" class="form-control" rows="6" placeholder="Nhập nội dung công việc...">${escapeHtml(contentValue)}</textarea>
+          </div>
+
+          <div class="form-group" style="margin-bottom:20px;">
+            <label class="form-label" style="font-size:13px;">Ghi chú</label>
+            <textarea id="formGhiChu" class="form-control" rows="2" placeholder="Nhập ghi chú (nếu có)...">${escapeHtml(noteValue)}</textarea>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:32px;">
+            <div class="form-group">
+              <label class="form-label" style="font-size:13px;">File đính kèm</label>
+              <input id="formMainFileInput" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx" style="display:none;">
+              <div id="formMainFileZone" class="upload-zone" style="border:1px dashed #D1D5DB; border-radius:4px; padding:20px; text-align:center; background:#F9FAFB; cursor:pointer;">
+                <div style="font-size:14px; color:var(--text-color); margin-bottom:4px;">Kéo thả file hoặc <span style="color:var(--primary); font-weight:600;">chọn file</span></div>
+                <div style="font-size:11px; color:var(--text-muted);">PDF, DOC, DOCX, XLS, XLSX (Tối đa 50MB/1 file)</div>
+              </div>
+              <div id="formMainFileList" style="display:flex; flex-direction:column; gap:10px; margin-top:12px;"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size:13px;">Tài liệu liên quan</label>
+              <input id="formRelatedFileInput" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx" multiple style="display:none;">
+              <div id="formRelatedFileZone" class="upload-zone" style="border:1px dashed #D1D5DB; border-radius:4px; padding:20px; text-align:center; background:#F9FAFB; cursor:pointer;">
+                <div style="font-size:14px; color:var(--text-color); margin-bottom:4px;">Kéo thả file hoặc <span style="color:var(--primary); font-weight:600;">chọn file</span></div>
+                <div style="font-size:11px; color:var(--text-muted);">PDF, DOC, DOCX, XLS, XLSX (Tối đa 50MB/1 file)</div>
+              </div>
+              <div id="formRelatedFileList" style="display:flex; flex-direction:column; gap:10px; margin-top:12px;"></div>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:12px; border-top:1px solid var(--border-color); padding-top:24px;">
+            <button class="btn btn-secondary" id="btnCancelFormCongViec" style="padding:8px 32px; background:#F1F5F9; border:none; color:var(--text-color);">Hủy</button>
+            <button class="btn btn-primary" id="btnSaveForm" style="padding:8px 32px; opacity:0.6; cursor:not-allowed;" disabled>Lưu</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('congViecFormView').innerHTML = html;
+    switchView('congViecFormView', breadcrumbs);
+
+    const formView = document.getElementById('congViecFormView');
+    const reqFields = ['formNguonGiao', 'formNgayBatDau', 'formHanXuLy', 'formTenCV', 'formChuyenVien', 'formNoiDung'];
+    const mainFileInput = document.getElementById('formMainFileInput');
+    const relatedFileInput = document.getElementById('formRelatedFileInput');
+    const mainFileZone = document.getElementById('formMainFileZone');
+    const relatedFileZone = document.getElementById('formRelatedFileZone');
+    const mainFileList = document.getElementById('formMainFileList');
+    const relatedFileList = document.getElementById('formRelatedFileList');
+    const allowedExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx'];
+
+    function validate() {
+      let valid = true;
+      reqFields.forEach(id => {
+        if (!document.getElementById(id).value) valid = false;
+      });
+
+      const btn = document.getElementById('btnSaveForm');
+      btn.disabled = !valid;
+      btn.style.opacity = valid ? '1' : '0.6';
+      btn.style.cursor = valid ? 'pointer' : 'not-allowed';
+    }
+
+    function getValidTaskFiles(fileList) {
+      const files = Array.from(fileList || []);
+      const validFiles = files
+        .filter(file => {
+          const extension = String(file.name || '').split('.').pop().toLowerCase();
+          return allowedExtensions.includes(extension);
+        })
+        .map(file => ({ name: file.name }));
+
+      if (files.length && !validFiles.length) {
+        showToast('Chỉ chấp nhận file PDF, DOC, DOCX, XLS, XLSX.', 'error');
+      } else if (validFiles.length !== files.length) {
+        showToast('Một số file không đúng định dạng đã bị bỏ qua.', 'error');
+      }
+
+      return validFiles;
+    }
+
+    function syncTaskFileLists() {
+      mainFileList.innerHTML = renderTaskUploadedFiles(mainFiles, 'main');
+      relatedFileList.innerHTML = renderTaskUploadedFiles(relatedFiles, 'related');
+
+      formView.querySelectorAll('.task-file-remove').forEach(button => {
+        button.addEventListener('click', () => {
+          const fileType = button.getAttribute('data-type');
+          const fileIndex = Number(button.getAttribute('data-index'));
+
+          if (fileType === 'main') {
+            mainFiles = mainFiles.filter((_, index) => index !== fileIndex);
+          } else {
+            relatedFiles = relatedFiles.filter((_, index) => index !== fileIndex);
+          }
+
+          syncTaskFileLists();
+        });
+      });
+    }
+
+    function restoreZoneState(zone) {
+      zone.style.borderColor = '#D1D5DB';
+      zone.style.background = '#F9FAFB';
+    }
+
+    function handleTaskFiles(type, fileList) {
+      const selectedFiles = getValidTaskFiles(fileList);
+      if (!selectedFiles.length) return;
+
+      if (type === 'main') {
+        mainFiles = selectedFiles.slice(0, 1);
+      } else {
+        relatedFiles = [...relatedFiles, ...selectedFiles].filter((file, index, list) => {
+          return list.findIndex(item => item.name === file.name) === index;
+        });
+      }
+
+      syncTaskFileLists();
+    }
+
+    function bindTaskUploadZone(zone, input, type) {
+      zone.addEventListener('click', () => input.click());
+      zone.addEventListener('dragover', event => {
+        event.preventDefault();
+        zone.style.borderColor = '#0284C7';
+        zone.style.background = '#EFF6FF';
+      });
+      zone.addEventListener('dragleave', () => restoreZoneState(zone));
+      zone.addEventListener('drop', event => {
+        event.preventDefault();
+        restoreZoneState(zone);
+        handleTaskFiles(type, event.dataTransfer.files);
+      });
+      input.addEventListener('change', () => {
+        handleTaskFiles(type, input.files);
+        input.value = '';
+      });
+    }
+
+    reqFields.forEach(id => document.getElementById(id).addEventListener('input', validate));
+    reqFields.forEach(id => document.getElementById(id).addEventListener('change', validate));
+
+    bindTaskUploadZone(mainFileZone, mainFileInput, 'main');
+    bindTaskUploadZone(relatedFileZone, relatedFileInput, 'related');
+    syncTaskFileLists();
+    validate();
+
+    document.getElementById('btnCancelFormCongViec')?.addEventListener('click', () => {
+      if (isEdit) viewCongViecDetail(cvId);
+      else goToListView();
+    });
+
+    document.getElementById('btnSaveForm')?.addEventListener('click', () => {
+      const payload = {
+        tenLanhDao: leaderValue,
+        nguonCV: document.getElementById('formNguonGiao')?.value || '',
+        nguonChiTiet: document.getElementById('formNguonChiTiet')?.value || '',
+        ngayBatDau: formatDateForDisplay(document.getElementById('formNgayBatDau')?.value || ''),
+        hanXuLy: formatDateForDisplay(document.getElementById('formHanXuLy')?.value || ''),
+        tenCongViec: document.getElementById('formTenCV')?.value.trim() || '',
+        nguoiThucHien: document.getElementById('formChuyenVien')?.value || '',
+        nguoiPhoiHop: document.getElementById('formNguoiPhoiHop')?.value || '',
+        noiDungCV: document.getElementById('formNoiDung')?.value.trim() || '',
+        ghiChu: document.getElementById('formGhiChu')?.value.trim() || '',
+        fileDinhKem: mainFiles[0]?.name || '',
+        taiLieuLienQuan: relatedFiles.map(file => file.name)
+      };
+
+      if (isEdit) {
+        Object.assign(cv, payload);
+        filteredData = [...MOCK_CONG_VIEC];
+        applyFilters();
+        showToast('Đã cập nhật công việc.', 'success');
+        viewCongViecDetail(cv.id);
+        return;
+      }
+
+      const newCv = {
+        id: Date.now(),
+        maGiaoViec: `GV-${String(MOCK_CONG_VIEC.length + 1).padStart(3, '0')}`,
+        trangThai: getGVStatusLabel('cho-xu-ly'),
+        ...payload
+      };
+
+      MOCK_CONG_VIEC.unshift(newCv);
+      filteredData = [...MOCK_CONG_VIEC];
+      applyFilters();
+      showToast('Đã tạo công việc mới.', 'success');
+      viewCongViecDetail(newCv.id);
+    });
+  };
+
+  window.viewCongViecDetail = function(id) {
+    const cv = getCongViecById(id);
+    if (!cv) return;
+
+    const extraField = getDetailExtraField(cv);
+    const extraFieldHtml = extraField ? `
+      <div style="margin-bottom:16px;">
+        <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">${extraField.label}</div>
+        <div style="font-size:15px; color:var(--text-color); font-weight:600;">${escapeHtml(extraField.value)}</div>
+      </div>
+    ` : '';
+
+    const sourceDetailHtml = cv.nguonChiTiet ? `
+      <div style="margin-bottom:16px;">
+        <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Chi tiết nguồn</div>
+        <div style="font-size:15px; color:var(--text-color); font-weight:600;">${escapeHtml(cv.nguonChiTiet)}</div>
+      </div>
+    ` : '';
+
+    const html = `
+      <div class="card" style="background:#fff; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1); padding:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:24px;">
+          <h3 style="color:var(--text-color); font-size:16px; font-weight:700; border-left:4px solid var(--primary); padding-left:12px; margin:0; text-transform:uppercase;">
+            THÔNG TIN CHI TIẾT CÔNG VIỆC
+          </h3>
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:12px;">
+            <div style="display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px;">${getDetailButtons(cv)}</div>
+            ${renderBadgeGV(cv.trangThai)}
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-bottom:32px;">
+          <div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Lãnh đạo giao việc</div>
+              <div style="font-size:15px; color:var(--text-color); font-weight:600;">${escapeHtml(cv.tenLanhDao || '—')}</div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Nguồn giao</div>
+              <div style="font-size:15px; color:var(--text-color); font-weight:600;">${escapeHtml(cv.nguonCV || '—')}</div>
+            </div>
+            ${sourceDetailHtml}
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Chuyên viên thực hiện</div>
+              <div style="font-size:15px; color:var(--text-color); font-weight:600;">${escapeHtml(cv.nguoiThucHien || '—')}</div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Ngày bắt đầu</div>
+              <div style="font-size:15px; color:var(--text-color); font-weight:600;">${escapeHtml(cv.ngayBatDau || '—')}</div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Nội dung công việc</div>
+              <div style="font-size:15px; color:var(--text-color); line-height:1.6; white-space:pre-line;">${escapeHtml(cv.noiDungCV || '—')}</div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Ghi chú</div>
+              <div style="font-size:15px; color:var(--text-color); white-space:pre-line;">${escapeHtml(cv.ghiChu || '—')}</div>
+            </div>
+          </div>
+          <div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Mã giao việc</div>
+              <div style="font-size:15px; color:var(--text-color); font-weight:600;">${escapeHtml(cv.maGiaoViec || '—')}</div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Tên công việc</div>
+              <div style="font-size:15px; color:var(--text-color); font-weight:600;">${escapeHtml(cv.tenCongViec || '—')}</div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Người phối hợp</div>
+              <div style="font-size:15px; color:var(--text-color); font-weight:600;">${escapeHtml(cv.nguoiPhoiHop || '—')}</div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Hạn xử lý</div>
+              <div style="font-size:15px; color:var(--text-color); font-weight:600;">${escapeHtml(cv.hanXuLy || '—')}</div>
+            </div>
+            ${extraFieldHtml}
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">File đính kèm</div>
+              ${renderTaskFileDisplay(cv.fileDinhKem, 'Chưa có file đính kèm.')}
+            </div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">Tài liệu liên quan</div>
+              ${renderTaskFileDisplay(cv.taiLieuLienQuan, 'Chưa có tài liệu liên quan.')}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('congViecDetailView').innerHTML = html;
+    switchView('congViecDetailView', [{ text: 'Quản lý công việc', link: true, view: 'congViecListView' }, { text: 'Thông tin chi tiết công việc' }]);
+  };
+
   // Event Listeners for Filter Tabs
   document.querySelectorAll('.filter-tab').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -639,6 +1118,12 @@ document.addEventListener('DOMContentLoaded', function () {
   const btnThem = document.getElementById('btnThemCongViec');
   if (btnThem) btnThem.addEventListener('click', () => renderForm());
 
+  const pendingPrefill = consumeCongViecPrefill();
   applyFilters();
-  goToListView();
+  if (pendingPrefill) {
+    renderForm(null, pendingPrefill);
+    showToast('Đã nạp thông tin từ văn bản đến.', 'success');
+  } else {
+    goToListView();
+  }
 });

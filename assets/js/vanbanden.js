@@ -181,6 +181,8 @@ document.addEventListener('DOMContentLoaded', function () {
     expandedGroupIds: new Set(['pb1'])
   };
 
+  const GIAO_VIEC_PREFILL_KEY = 'giao_viec_prefill_from_vbd';
+
   const elements = {
     listView: document.getElementById('vbdListView'),
     formView: document.getElementById('vbdFormView'),
@@ -361,6 +363,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function getCurrentDetailDocument() {
     return getDocumentById(state.currentDetailId);
+  }
+
+  function buildCongViecPrefillFromDocument(doc) {
+    return {
+      sourceType: 'Văn bản đến',
+      sourceDocumentId: doc.id,
+      tenLanhDao: doc.lanhDaoTiepNhan || user.name,
+      nguonCV: 'Văn bản đến',
+      nguonChiTiet: `Văn bản đến số ${doc.soKyHieu}`,
+      ngayBatDau: doc.ngayDen || doc.ngayVanBan || '',
+      hanXuLy: doc.hanXuLy || doc.ngayDen || doc.ngayVanBan || '',
+      tenCongViec: doc.trichYeu || '',
+      noiDungCV: [
+        `Xử lý văn bản đến số ${doc.soKyHieu || '—'}.`,
+        doc.trichYeu ? `Trích yếu: ${doc.trichYeu}` : '',
+        doc.donViBanHanh ? `Đơn vị ban hành: ${doc.donViBanHanh}` : '',
+        doc.noiDungTrinh ? `Nội dung trình: ${doc.noiDungTrinh}` : ''
+      ].filter(Boolean).join('\n'),
+      ghiChu: doc.doKhan && doc.doKhan !== 'Bình thường' ? `Độ khẩn: ${doc.doKhan}` : '',
+      fileDinhKem: doc.mainFile ? doc.mainFile.name : '',
+      taiLieuLienQuan: (doc.relatedFiles || []).map(function (file) { return file.name; })
+    };
+  }
+
+  function openGiaoViecFromDocument(doc) {
+    sessionStorage.setItem(GIAO_VIEC_PREFILL_KEY, JSON.stringify(buildCongViecPrefillFromDocument(doc)));
+    window.location.href = 'giao-viec.html?from=van-ban-den';
   }
 
   function initEvents() {
@@ -807,7 +836,7 @@ document.addEventListener('DOMContentLoaded', function () {
           '<button id="btnLeaderAssign" class="btn" style="background:#0284C7; color:white; border:none; font-weight:600;">Chuyển tiếp</button>' +
           '<button id="btnLeaderSave" class="btn" style="background:#64748B; color:white; border:none; font-weight:600;">Lưu</button>' +
           '<button id="btnLeaderReturn" class="btn" style="background:#DE5353; color:white; border:none; font-weight:600;">Hoàn trả</button>';
-        document.getElementById('btnLeaderTask').addEventListener('click', function () { window.location.href = 'giao-viec.html?id=' + doc.id; });
+        document.getElementById('btnLeaderTask').addEventListener('click', function () { openGiaoViecFromDocument(doc); });
         document.getElementById('btnLeaderAssign').addEventListener('click', function () { openNhanVienModal('assign', doc.id); });
         document.getElementById('btnLeaderSave').addEventListener('click', function () { showToast('Đã lưu thông tin xử lý.', 'success'); });
         document.getElementById('btnLeaderReturn').addEventListener('click', function () { openReturnModal(doc); });
