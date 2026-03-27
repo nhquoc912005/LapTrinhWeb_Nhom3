@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xử lý Công việc - QLVB</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+  <div class="app-layout">
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="header-brand-icon"><svg width="20" height="20" viewBox="0 0 24 24">
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z" />
+          </svg></div>
+        <div class="header-brand-text">
+          <h1>HỆ THỐNG QUẢN LÝ VĂN BẢN VÀ ĐIỀU HÀNH</h1>
+          <p>Công ty TNHH Kiểm toán và Tư vấn Thuế ATAX</p>
+        </div>
+      </div>
+      <div class="header-user" id="headerUserBtn">
+        <div class="header-avatar" id="headerAvatar">CV</div>
+        <div class="header-user-info">
+          <div class="user-name" id="headerUserName">Người dùng</div>
+          <div class="user-role" id="headerUserRole">Vai trò</div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="rgba(255,255,255,0.7)">
+          <path d="M7 10l5 5 5-5H7z" />
+        </svg>
+        <div class="user-dropdown" id="userDropdown">
+          <a href="#"><svg width="16" height="16" viewBox="0 0 24 24">
+              <path
+                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>Hồ sơ cá nhân</a>
+          <hr class="dropdown-divider"><a href="#" id="logoutBtn" style="color:#EF4444;"><svg width="16" height="16"
+              viewBox="0 0 24 24" fill="#EF4444">
+              <path
+                d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
+            </svg>Đăng xuất</a>
+        </div>
+      </div>
+    </header>
+    <div class="app-body">
+      <aside class="app-sidebar">
+        <nav class="sidebar-nav">
+          <div class="sidebar-nav-item"><a href="van-ban-den.html" class="sidebar-nav-link"><svg width="18" height="18"
+                viewBox="0 0 24 24">
+                <path
+                  d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+              </svg>Văn bản đến</a></div>
+          <div class="sidebar-nav-item"><a href="van-ban-di.html" class="sidebar-nav-link"><svg width="18" height="18"
+                viewBox="0 0 24 24">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+              </svg>Văn bản đi</a></div>
+          <div class="sidebar-nav-item">
+            <a href="giao-viec.html" class="sidebar-nav-link active"><svg width="18" height="18" viewBox="0 0 24 24">
+                <path
+                  d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+              </svg>Quản lý công việc</a>
+          </div>
+          <div class="sidebar-nav-item"><a href="ho-so-van-ban.html" class="sidebar-nav-link"><svg width="18"
+                height="18" viewBox="0 0 24 24">
+                <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+              </svg>Hồ sơ văn bản</a></div>
+          <div class="sidebar-nav-item"><a href="bao-cao-thong-ke.html" class="sidebar-nav-link"><svg width="18"
+                height="18" viewBox="0 0 24 24">
+                <path
+                  d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z" />
+              </svg>Báo cáo thống kê</a></div>
+        </nav>
+      </aside>
+
+      <main class="app-content">
+        <div class="breadcrumb-bar">
+          <a href="dashboard.html"><svg width="14" height="14" viewBox="0 0 24 24">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+            </svg>Trang chủ</a>
+          <span class="breadcrumb-sep">›</span><span>Quản lý công việc</span>
+          <span class="breadcrumb-sep">›</span><span>Xử lý công việc</span>
+        </div>
+
+        <div class="page-main">
+          <h1 class="page-title">XỬ LÝ CÔNG VIỆC</h1>
+
+          <!-- Filter Card -->
+          <div class="filter-card">
+            <div class="filter-row" style="align-items:flex-end;">
+              <div class="filter-input-group filter-search">
+                <label>Từ khóa</label>
+                <div class="search-input-wrap">
+                  <svg width="16" height="16" viewBox="0 0 24 24">
+                    <path
+                      d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                  </svg>
+                  <input type="text" id="searchKeyword" class="form-control"
+                    placeholder="Tìm theo tên công việc, người giao...">
+                </div>
+              </div>
+              <div class="filter-input-group">
+                <label>Trạng thái</label>
+                <select id="filterStatus" class="form-control">
+                  <option value="">-- Tất cả --</option>
+                  <option value="cho-xu-ly">Chờ xử lý</option>
+                  <option value="dang-xu-ly">Đang thực hiện</option>
+                  <option value="cho-duyet">Chờ duyệt</option>
+                  <option value="da-hoan-thanh">Đã hoàn thành</option>
+                  <option value="hoan-tra">Hoàn trả</option>
+                </select>
+              </div>
+              <div class="filter-input-group">
+                <label>Người giao việc</label>
+                <select id="filterNguoiGiao" class="form-control">
+                  <option value="">-- Tất cả --</option>
+                  <option>Nguyễn Văn Lãnh Đạo</option>
+                </select>
+              </div>
+              <div class="filter-actions">
+                <button class="btn btn-primary btn-sm" id="btnSearch"><svg width="14" height="14" viewBox="0 0 24 24"
+                    fill="white">
+                    <path
+                      d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                  </svg>Tìm kiếm</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="table-container">
+            <div class="table-toolbar">
+              <div class="table-toolbar-left"><span class="table-info" id="tableInfo">Đang tải...</span></div>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th class="text-center">STT</th>
+                    <th style="min-width:200px;">Tên công việc</th>
+                    <th style="min-width:140px;">Người giao việc</th>
+                    <th style="min-width:120px;">Ngày bắt đầu</th>
+                    <th style="min-width:100px;">Hạn xử lý</th>
+                    <th style="min-width:110px;">Trạng thái</th>
+                    <th style="min-width:220px;" class="text-center">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="xuLyCVBody"></tbody>
+              </table>
+            </div>
+            <div class="pagination">
+              <span class="pagination-info" id="paginationInfo">Hiển thị 0 công việc</span>
+              <div class="pagination-btns" id="paginationBtns"></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: Cập nhật xử lý công việc -->
+  <div class="modal-overlay" id="modalXuLyCV">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <div class="modal-title" id="modalXLTitle">Cập nhật xử lý công việc</div>
+        <button class="modal-close" data-dismiss="modal"><svg width="16" height="16" viewBox="0 0 24 24">
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+          </svg></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="xlCvId">
+        <input type="hidden" id="xlAction">
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label">Kết quả / Nội dung xử lý <span class="required">*</span></label>
+          <textarea id="xlKetQua" class="form-control" rows="4"
+            placeholder="Mô tả kết quả xử lý công việc..."></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:14px;" id="lyDoHoanTraWrap">
+          <label class="form-label">Lý do hoàn trả <span class="required">*</span></label>
+          <textarea id="xlLyDo" class="form-control" rows="3"
+            placeholder="Nêu rõ lý do hoàn trả công việc..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">File đính kèm</label>
+          <div class="file-upload-area" onclick="document.getElementById('xlFile').click()" style="padding:14px;">
+            <input type="file" id="xlFile" accept=".pdf,.doc,.docx,.xls,.xlsx" multiple>
+            <p style="font-size:13px;">Kéo thả hoặc <a>chọn file</a></p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+        <button class="btn btn-primary" id="btnSaveXuLy">Xác nhận</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/xulycongviec.js"></script>
+</body>
+
+</html>

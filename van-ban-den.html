@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý Văn bản đến - QLVB</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="header-brand-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z"/></svg>
+      </div>
+      <div class="header-brand-text">
+        <h1>HỆ THỐNG QUẢN LÝ VĂN BẢN VÀ ĐIỀU HÀNH</h1>
+        <p>Công ty TNHH Kiểm toán và Tư vấn Thuế ATAX</p>
+      </div>
+    </div>
+    <div class="header-user" id="headerUserBtn">
+      <div class="header-avatar" id="headerAvatar">LĐ</div>
+      <div class="header-user-info">
+        <div class="user-name" id="headerUserName">Ngô Đăng Hà</div>
+        <div class="user-role" id="headerUserRole">Văn thư</div>
+      </div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="rgba(255,255,255,0.7)"><path d="M7 10l5 5 5-5H7z"/></svg>
+      <div class="user-dropdown" id="userDropdown">
+        <a href="#"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>Hồ sơ cá nhân</a>
+        <hr class="dropdown-divider">
+        <a href="#" id="logoutBtn" style="color:#EF4444;"><svg width="16" height="16" viewBox="0 0 24 24" fill="#EF4444"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>Đăng xuất</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <!-- SIDEBAR -->
+    <aside class="app-sidebar">
+      <nav class="sidebar-nav">
+        <div class="sidebar-nav-item"><a href="van-ban-den.html" class="sidebar-nav-link active"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>Văn bản đến</a></div>
+        <div class="sidebar-nav-item"><a href="van-ban-di.html" class="sidebar-nav-link"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>Văn bản đi</a></div>
+        <div class="sidebar-nav-item"><a href="giao-viec.html" class="sidebar-nav-link"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Quản lý công việc</a></div>
+        <div class="sidebar-nav-item"><a href="ho-so-van-ban.html" class="sidebar-nav-link"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>Hồ sơ văn bản</a></div>
+        <div class="sidebar-nav-item"><a href="bao-cao-thong-ke.html" class="sidebar-nav-link"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>Báo cáo thống kê</a></div>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="app-content">
+      <div class="breadcrumb-bar" id="vbdBreadcrumb" style="background:#fff; border-bottom: 1px solid var(--border-color); padding:0 32px; height:var(--breadcrumb-height); display:flex; align-items:center;">
+        <a href="#" onclick="showListView(); return false;" style="text-decoration: none; color: var(--primary); display: flex; align-items: center; gap: 8px; font-weight: 500;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          <span id="breadcrumbText">Văn bản đến</span>
+        </a>
+      </div>
+
+      <!-- LIST VIEW -->
+      <div id="vbdListView" class="page-main">
+
+
+        <style>
+          .tab-filter-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+          .tab-filter-group { display: flex; background: #F1F5F9; border-radius: 4px; overflow: hidden; }
+          .tab-filter-group .tab-filter-btn { border:none; background:transparent; padding:8px 24px; font-size: 14px; font-weight: 500; color:var(--text-secondary); cursor:pointer; }
+          .tab-filter-group .tab-filter-btn.active { background:white; font-weight: 600; color:var(--primary); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+          .custom-filter-row { display: flex; gap: 16px; margin-bottom: 16px; }
+          .custom-search-wrap { position: relative; flex: 1; }
+          .custom-search-wrap svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); fill: var(--text-muted); }
+          .custom-search-wrap input { width: 100%; padding: 10px 14px 10px 40px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+          .custom-search-wrap input:focus { border-color: var(--primary); }
+          .custom-select-wrap { flex: 1; }
+          .custom-select-wrap select { width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 14px; outline: none; appearance: none; background: white url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 14px center; cursor: pointer; }
+          
+          /* Badges overrides for Van Ban Den */
+          .badge-cho-xu-ly { background: #FEF9C3; color: #B45309; }
+          .badge-da-xu-ly { background: #DBEAFE; color: #1E40AF; }
+          .badge-hoan-tra { background: #FCE7F3; color: #BE185D; }
+          .badge-xem-de-biet { background: #DCFCE7; color: #166534; }
+          
+          .vanban-table th { padding: 12px; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); text-align: left; }
+          .vanban-table td { border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+          .vanban-table .badge { display: inline-flex; align-items: center; justify-content: center; padding: 4px 12px; border-radius: 9999px; font-size: 13px; font-weight: 500; }
+          
+          .pagination-custom { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; }
+          .pagination-controls { display: flex; gap: 4px; align-items: center; }
+          .page-btn-text { padding: 6px 12px; border: 1px solid var(--border-color); background: white; border-radius: 4px; color: var(--text-secondary); cursor: pointer; }
+          .page-btn-text:hover { background: #F8FAFC; }
+          .page-btn-text:disabled { opacity: 0.5; cursor: not-allowed; }
+          .page-btn-num { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; border: 1px solid var(--border-color); background: white; color: var(--text-secondary); cursor: pointer; }
+          .page-btn-num.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: 600; }
+          
+          /* Form & Detail View Supplements */
+          .file-item-card { display: flex; align-items: center; gap: 12px; padding: 8px; }
+          .file-item-icon { width: 32px; height: 32px; background: #FEE2E2; color: #DC2626; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; border-radius: 4px; }
+          .file-item-icon.docx { background: #DBEAFE; color: #2563EB; }
+          .file-item-name { font-size: 14px; font-weight: 600; color: var(--text-main); }
+          .file-item-type { font-size: 12px; color: var(--text-muted); }
+          .file-remove-btn { color: var(--primary); cursor: pointer; background: none; border: none; font-size: 18px; line-height: 1; padding: 0; outline: none; margin-left: 12px; }
+          
+          .detail-grid { display: grid; grid-template-columns: 2fr 1.5fr 1fr; gap: 24px 16px; margin-bottom: 24px; }
+          .detail-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
+          .detail-value { font-size: 14px; color: var(--text-main); font-weight: 500; }
+          .detail-box { background: #F8FAFC; padding: 16px; border-radius: 4px; border-left: 4px solid var(--primary); margin-bottom: 16px; }
+          .detail-box-title { color: var(--primary); font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+          .detail-box-return { background: #FEF2F2; border-left-color: #DC2626; }
+          .detail-box-return .detail-box-title { color: #DC2626; }
+          
+          /* Form Inputs Height adjustments for visual parity */
+          .custom-search-wrap input { height: 42px; }
+          .custom-select-wrap select { height: 42px; }
+          
+          /* Tree Modal specific styling */
+          .tree-node-content { display: grid; grid-template-columns: 40px 3fr 2fr 2fr 2fr; align-items: center; padding: 12px; border-bottom: 1px solid var(--border-color); background: #fff; }
+          .tree-node-group { background: #F8FAFC; }
+          .tree-node-group .tree-col-name { font-weight: 600; color: var(--text-main); }
+          .tree-col-name { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--text-main); }
+          .tree-col-val { font-size: 14px; color: var(--text-secondary); }
+          .tree-expand-btn { width: 14px; height: 14px; border: 1px solid var(--text-muted); background: white; display: inline-flex; justify-content: center; align-items: center; cursor: pointer; border-radius: 2px; font-size: 12px; font-family: monospace; line-height: 1; user-select: none; color: var(--text-secondary); }
+          .tree-checkbox { width: 16px; height: 16px; cursor: pointer; accent-color: #006D9E; }
+        </style>
+
+        <!-- Filter Card -->
+        <div class="filter-card" style="margin-top: 8px; padding: 24px;">
+          <div class="filter-title" style="border-left: 4px solid var(--primary); padding-left: 12px; font-size: 15px; color: var(--text-main); fill: none; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);">TRA CỨU THÔNG TIN</div>
+
+          <div class="tab-filter-container">
+            <div class="tab-filter-group" id="tabFilter" style="border: 1px solid var(--border-color); background: #F8FAFC; padding: 1px;">
+              <button class="tab-filter-btn active" data-status="all">Tất cả</button>
+              <button class="tab-filter-btn" data-status="cho-xu-ly">Chờ xử lý</button>
+              <button class="tab-filter-btn" data-status="da-xu-ly">Đã xử lý</button>
+              <button class="tab-filter-btn" data-status="hoan-tra">Hoàn trả</button>
+              <button class="tab-filter-btn" data-status="xem-de-biet">Xem để biết</button>
+            </div>
+            <button class="btn" id="btnAddVanBanDen" data-roles="vanthu" style="background: #0D9488; color: white; padding: 8px 20px; border-radius: 4px; font-weight: 600; font-size: 14px; border: none; cursor: pointer;">+ Trình văn bản đến</button>
+          </div>
+
+          <div class="custom-filter-row">
+            <div class="custom-search-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+              <input type="text" id="searchKeyword" placeholder="Tìm theo số ký hiệu, trích yếu văn bản...">
+            </div>
+          </div>
+          
+          <div class="custom-filter-row" style="margin-bottom: 0;">
+            <div class="custom-select-wrap">
+              <select id="filterLoaiVB">
+                <option value="">-- Loại văn bản --</option>
+                <option>Quyết định</option><option>Công văn</option><option>Thông tư</option>
+                <option>Thông báo</option><option>Báo cáo</option><option>Kế hoạch</option>
+              </select>
+            </div>
+            <div class="custom-select-wrap">
+              <select id="filterHinhThuc">
+                <option value="">-- Hình thức văn bản --</option>
+                <option>Công văn</option><option>Quyết định</option><option>Thông tư</option>
+                <option>Thông báo</option><option>Tờ trình</option>
+              </select>
+            </div>
+            <div class="custom-select-wrap">
+              <select id="filterDoMat">
+                <option value="">-- Độ mật --</option>
+                <option>Bình thường</option><option>Mật</option><option>Tối mật</option>
+              </select>
+            </div>
+            <div class="custom-select-wrap">
+              <select id="filterDoKhan">
+                <option value="">-- Độ khẩn --</option>
+                <option>Thường</option><option>Khẩn</option><option>Hỏa tốc</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="table-container" style="background: white; border: 1px solid var(--border-color); border-radius: 4px; padding: 0 24px;">
+          <div style="overflow-x:auto;">
+            <table class="vanban-table" id="vanBanDenTable" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr>
+                  <th class="text-center" style="width:60px;">STT</th>
+                  <th style="min-width:120px;">Số ký hiệu</th>
+                  <th style="min-width:280px;">Trích yếu</th>
+                  <th style="min-width:140px;">Ngày văn bản</th>
+                  <th style="min-width:180px;">Đơn vị ban hành</th>
+                  <th style="min-width:160px;">Độ mật / Độ khẩn</th>
+                  <th style="min-width:140px;">Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody id="vanBanDenBody">
+                <tr><td colspan="7"><div class="empty-state">Đang tải dữ liệu...</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination-custom">
+            <span style="color: var(--text-secondary); font-size: 14px;" id="paginationInfo">Hiển thị 0 văn bản</span>
+            <div class="pagination-controls" id="paginationBtns"></div>
+          </div>
+        </div>
+      </div><!-- /#vbdListView -->
+
+      <!-- FORM VIEW -->
+      <div id="vbdFormView" class="page-main" style="display: none;">
+        <div class="card" style="padding: 32px; border: 1px solid var(--border-color); box-shadow: none;">
+          <div class="filter-title" id="formViewTitle" style="border-left: 4px solid var(--primary); padding-left: 12px; font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 24px; text-transform: none;">Trình văn bản đến</div>
+          
+          <input type="hidden" id="vbdId">
+          
+          <div style="color: var(--primary); font-weight: 700; font-size: 15px; margin-bottom: 16px;">Thông tin xử lý</div>
+          
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 20px;">
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 600;">Số ký hiệu <span class="required">*</span></label>
+              <input type="text" id="vbdSoKyHieu" class="form-control" placeholder="VD: 123/UBND">
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 600;">Đơn vị ban hành <span class="required">*</span></label>
+              <input type="text" id="vbdDonViBanHanh" class="form-control" placeholder="VD: Sở kế hoạch">
+            </div>
+            <div class="form-group" style="position: relative;">
+              <label class="form-label" style="font-weight: 400; color: var(--text-secondary);">Loại văn bản <span class="required">*</span></label>
+              <select id="vbdLoaiVB" class="form-control">
+                <option value="">Hành chính</option>
+                <option>Quyết định</option><option>Công văn</option><option>Thông tư</option>
+                <option>Thông báo</option><option>Báo cáo</option><option>Kế hoạch</option>
+              </select>
+            </div>
+            <div class="form-group" style="position: relative;">
+              <label class="form-label" style="font-weight: 400; color: var(--text-secondary);">Hình thức văn bản <span class="required">*</span></label>
+              <select id="vbdHinhThuc" class="form-control">
+                <option value="">Công văn</option>
+                <option>Quyết định</option><option>Thông tư</option><option>Thông báo</option><option>Tờ trình</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label class="form-label" style="font-weight: 600;">Trích yếu <span class="required">*</span></label>
+            <textarea id="vbdTrichYeu" class="form-control" rows="3" placeholder="Nội dung tóm tắt văn bản..."></textarea>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 24px; margin-bottom: 24px;">
+            <div class="form-group"><label class="form-label" style="font-weight: 600;">Ngày văn bản <span class="required">*</span></label><input type="date" id="vbdNgayVanBan" class="form-control"></div>
+            <div class="form-group"><label class="form-label" style="font-weight: 600;">Ngày đến</label><input type="date" id="vbdNgayDen" class="form-control"></div>
+            <div class="form-group"><label class="form-label" style="font-weight: 600;">Hạn xử lý</label><input type="date" id="vbdHanXuLy" class="form-control"></div>
+            <div class="form-group"><label class="form-label" style="font-weight: 600;">Độ mật</label>
+              <select id="vbdDoMat" class="form-control"><option>Bình thường</option><option>Mật</option><option>Tối mật</option></select>
+            </div>
+            <div class="form-group"><label class="form-label" style="font-weight: 600;">Độ khẩn</label>
+              <select id="vbdDoKhan" class="form-control"><option>Bình thường</option><option>Thường</option><option>Khẩn</option><option>Hỏa tốc</option></select>
+            </div>
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 24px;">
+            <label class="form-label" style="font-weight: 600;">File đính kèm <span class="required">*</span></label>
+            <div id="vbdFileContainer">
+              <!-- Upload Area -->
+              <div class="file-upload-area" id="vbdFileUploadArea" onclick="document.getElementById('vbdFile').click()" style="padding: 32px; background: #fff; border: 1px dashed var(--border-color);">
+                <input type="file" id="vbdFile" accept=".pdf,.doc,.docx,.xls,.xlsx" style="display:none;">
+                <p style="margin:0; font-size:14px; color:var(--text-main);">Kéo thả file hoặc <a style="color:var(--primary); cursor:pointer;">chọn file</a></p>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:8px;">PDF, DOC, DOCX, XLS, XLSX (Tối đa 50MB/1 file)</p>
+              </div>
+              <!-- Uploaded List -->
+              <div id="vbdFileList" style="display:none; margin-top: 12px; border: 1px dashed var(--border-color); padding: 16px; border-radius: 4px;"></div>
+            </div>
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 32px;">
+            <label class="form-label" style="font-weight: 600;">Tài liệu liên quan</label>
+            <div id="vbdFileLienQuanContainer">
+              <!-- Upload Area -->
+              <div class="file-upload-area" id="vbdFileLienQuanUploadArea" onclick="document.getElementById('vbdFileLienQuan').click()" style="padding: 32px; background: #fff; border: 1px dashed var(--border-color);">
+                <input type="file" id="vbdFileLienQuan" accept=".pdf,.doc,.docx,.xls,.xlsx" multiple style="display:none;">
+                <p style="margin:0; font-size:14px; color:var(--text-main);">Kéo thả file hoặc <a style="color:var(--primary); cursor:pointer;">chọn file</a></p>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:8px;">PDF, DOC, DOCX, XLS, XLSX (Tối đa 50MB/1 file)</p>
+              </div>
+              <!-- Uploaded List -->
+              <div id="vbdFileLienQuanList" style="display:none; margin-top: 12px; border: 1px dashed var(--border-color); padding: 16px; border-radius: 4px;"></div>
+            </div>
+          </div>
+
+          <hr style="border:none; border-top: 1px solid var(--border-color); margin-bottom: 24px;">
+          
+          <div style="color: var(--primary); font-weight: 700; font-size: 15px; margin-bottom: 16px;">Thông tin xử lý</div>
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label class="form-label" style="font-weight: 600;">Lãnh đạo xử lý <span class="required">*</span></label>
+            <input type="text" id="vbdLanhDao" class="form-control" placeholder="Chọn lãnh đạo hoặc nhập tên" readonly style="cursor: pointer; background: #fff;" onclick="openNhanVienModal('leader')">
+          </div>
+          <div class="form-group" style="margin-bottom: 32px;">
+            <label class="form-label" style="font-weight: 400; color: var(--text-secondary);">Nội dung trình lãnh đạo</label>
+            <textarea id="vbdNoiDungTrinh" class="form-control" rows="4" placeholder="Nhập nội dung trình..."></textarea>
+          </div>
+          
+          <div style="display: flex; justify-content: flex-end; gap: 12px;">
+            <button class="btn btn-secondary" onclick="showListView(); return false;" style="background: #F1F5F9; color: var(--text-main); font-weight: 500;">Hủy</button>
+            <button class="btn btn-primary" id="btnSaveVBD" disabled style="background: var(--text-muted); border-color: var(--text-muted); cursor: not-allowed; font-weight: 500;">Gửi trình lãnh đạo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- DETAIL VIEW -->
+      <div id="vbdDetailView" class="page-main" style="display: none;">
+        <div class="card" style="padding: 24px 32px; border: 1px solid var(--border-color); box-shadow: none; margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 4px;">
+            <div class="filter-title" style="border-left: 4px solid var(--primary); padding-left: 12px; font-size: 16px; font-weight: 700; color: var(--primary); text-transform: uppercase;">THÔNG TIN VĂN BẢN ĐẾN</div>
+            <div id="detailHeaderActions" style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;"></div>
+          </div>
+          
+          <div id="detailContentBlock" style="margin-top: 16px;">
+            <!-- Content injected by JS -->
+          </div>
+        </div>
+
+        <div id="detailRoleBlock" class="card" style="display: none; padding: 24px 32px; border: 1px solid var(--border-color); box-shadow: none; margin-bottom: 24px;">
+          <!-- Role-specific section injected by JS -->
+        </div>
+        
+        <div class="card" style="padding: 24px 32px; border: 1px solid var(--border-color); box-shadow: none;">
+          <div class="filter-title" style="border-left: 4px solid var(--primary); padding-left: 12px; font-size: 16px; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 24px;">DANH SÁCH VĂN BẢN</div>
+          
+          <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px;">File đính kèm:</div>
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;" id="detailMainFile">
+            <!-- Injected by JS -->
+          </div>
+          
+          <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px;">Xem trước</div>
+          <div style="background: #3f3f46; border-radius: 4px; padding: 12px; height: 500px; display: flex; flex-direction: column; margin-bottom: 24px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="display: flex; justify-content: space-between; color: #fff; font-size: 12px; margin-bottom: 12px; padding: 0 12px; font-family: sans-serif;">
+              <span id="previewFileName">CV_1735_CT_CS.pdf</span>
+              <span style="color: #a1a1aa; letter-spacing: 2px;">1 / 1 &nbsp;&nbsp;|&nbsp;&nbsp; – &nbsp; + &nbsp;&nbsp;|&nbsp;&nbsp; 🖨️ &nbsp; 📥</span>
+            </div>
+            <div style="flex: 1; background: #fff; margin: 0 auto; padding: 40px; width: 100%; max-width: 600px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-size: 13px; line-height: 1.5; color: #333;">
+               <div style="display:flex; justify-content: space-between; margin-bottom: 32px;">
+                 <div style="text-align: center; font-weight: bold; font-size: 13px;">BỘ TÀI CHÍNH<br/><span style="text-decoration:underline;">CỤC THUẾ</span><br/><br/><span style="font-weight: normal; font-size: 12px;">Số: 1735/CT-CS</span></div>
+                 <div style="text-align: center; font-weight: bold; font-size: 14px;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br/><span style="text-decoration:underline; font-size: 13px;">Độc lập - Tự do - Hạnh phúc</span><br/><br/><span style="font-style: italic; font-weight: normal; font-size: 12px;">Hà Nội, ngày 13 tháng 6 năm 2025</span></div>
+               </div>
+               <div style="margin-bottom: 24px; font-weight: 500;">V/v giới thiệu nội dung mới tại Nghị định số 117/2025/NĐ-CP của Chính phủ...</div>
+               <div style="text-align: center; font-weight: bold; margin-bottom: 24px;">Kính gửi: Các Chi cục Thuế khu vực.</div>
+               <div>Ngày 09/6/2025, Chính phủ đã ban hành Nghị định số 117/2025/NĐ-CP quy định về quản lý thuế đối với hoạt động kinh doanh trên nền tảng thương mại điện tử...</div>
+            </div>
+          </div>
+          
+          <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px;">Tài liệu liên quan:</div>
+          <div style="display: flex; gap: 24px;" id="detailRelatedFiles">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- MODAL: Chon Nhan Vien -->
+<div class="modal-overlay" id="modalChonNhanVien">
+  <div class="modal" style="max-width: 900px; padding: 0;">
+    <div style="padding: 24px;">
+      <div style="display:flex; gap: 16px; margin-bottom: 24px;">
+        <div style="width: 200px;">
+          <select id="modalNhanVienUnitFilter" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 4px; background: #F8FAFC; color: var(--text-main); font-weight: 500; height: 42px; outline: none;">
+            <option>VNPT Đà Nẵng</option>
+          </select>
+        </div>
+        <div style="flex: 1;">
+          <input type="text" id="modalNhanVienSearch" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 4px; height: 42px; outline: none;" placeholder="Tìm nhanh nhân viên, email hoặc số điện thoại...">
+        </div>
+      </div>
+
+      <div style="border: 1px solid var(--border-color); border-radius: 4px; overflow: hidden;">
+        <div style="display: grid; grid-template-columns: 40px 3fr 2fr 2fr 2fr; background: #006D9E; color: white; padding: 12px; font-weight: 600; font-size: 14px; align-items: center;">
+          <div style="display: flex; justify-content: center;"><input type="checkbox" id="chkAllNhanVien" class="tree-checkbox" onclick="toggleAllNhanVien(this.checked)"></div>
+          <div>Đơn vị / Thành viên</div>
+          <div>Chức vụ</div>
+          <div>Số điện thoại</div>
+          <div>Email</div>
+        </div>
+        <div id="treeNhanVienBody" style="max-height: 400px; overflow-y: auto;">
+          <!-- JS fills this -->
+        </div>
+      </div>
+    </div>
+    
+    <div style="padding: 16px 24px; border-top: 1px solid var(--border-color); background: #F8FAFC; display: flex; flex-direction: column; align-items: stretch;">
+      <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px;">
+        Đang chọn: <strong id="lblSelectedCount" style="color: #006D9E; font-size: 14px;">0</strong> nhân viên
+      </div>
+      <div style="display: flex; justify-content: center; gap: 16px; margin-bottom: 8px;">
+        <button class="btn btn-primary" onclick="saveChonNhanVien()" style="padding: 10px 40px; font-weight: 600; background: #006D9E;">LƯU LẠI</button>
+        <button class="btn btn-secondary" onclick="closeModal('modalChonNhanVien')" style="padding: 10px 40px; font-weight: 600; background: #94A3B8; color: white; border: none;">HỦY BỎ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Hoan Tra -->
+<div class="modal-overlay" id="modalHoanTra">
+  <div class="modal" style="max-width: 600px;">
+    <div style="padding: 24px 32px;">
+      <h3 style="color: #006D9E; font-size: 20px; font-weight: 700; margin-top: 8px; margin-bottom: 24px; text-transform: none;">Hoàn trả văn bản</h3>
+      <div id="returnClerkName" style="font-size: 15px; font-weight: 600; color: var(--text-main); margin-bottom: 24px;">Văn thư : Nguyễn Hữu Quốc</div>
+      
+      <div class="form-group" style="margin-bottom: 32px;">
+        <label class="form-label" style="font-weight: 600; font-size: 14px;">Lý do / Yêu cầu chỉnh sửa</label>
+        <textarea id="txtLyDoHoanTra" class="form-control" rows="5" placeholder="Nhập lý do / Yêu cầu chỉnh sửa cho văn thư..." oninput="validateHoanTra()"></textarea>
+      </div>
+      
+      <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 8px;">
+        <button class="btn btn-secondary" onclick="closeModal('modalHoanTra')" style="padding: 10px 32px; background: #F1F5F9; color: var(--text-main); font-weight: 600; border: none;">Hủy</button>
+        <button class="btn btn-danger" onclick="submitHoanTra()" id="btnSubmitHoanTra" disabled style="padding: 10px 32px; background: #DE5353; border: none; font-weight: 600; opacity: 0.6; cursor: not-allowed;">Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Thêm văn bản vào hồ sơ -->
+<div class="modal-overlay" id="modalThemVB">
+  <div class="modal" style="max-width: 680px; padding: 0;">
+    <div class="modal-header">
+      <div class="modal-title" style="font-size: 20px; color: #006D9E; font-weight: 700;">Thêm văn bản vào hồ sơ</div>
+      <button class="modal-close" data-dismiss="modal"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+    </div>
+    <div class="modal-body" style="padding: 24px 32px;">
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label class="form-label" style="font-weight: 700; font-size: 14px; color: var(--text-main); margin-bottom: 8px;">Hồ sơ văn bản <span class="required">*</span></label>
+        <select id="selectHoSoVBD" class="form-control" style="height: 46px; font-size: 16px;">
+          <option value="">-- Tìm kiếm hoặc chọn tiêu đề hồ sơ --</option>
+        </select>
+      </div>
+      <button type="button" class="btn btn-primary" onclick="window.location.href='ho-so-van-ban.html'" style="background:#0284C7; border:none; padding:10px 24px; font-weight:600;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="white" style="margin-right:8px; vertical-align:middle;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Thêm mới hồ sơ
+      </button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+      <button class="btn btn-primary" id="btnSaveThemVBHoSo" disabled style="background:#94A3B8; border-color:#94A3B8; cursor:not-allowed;">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/vanbanden.js"></script>
+</body>
+</html>
