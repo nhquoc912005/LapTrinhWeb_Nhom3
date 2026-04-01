@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -5,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tổng quan - Hệ Thống Quản Lý Văn Bản và Điều Hành</title>
-  <link rel="stylesheet" href="../static/assets/css/style.css">
+  <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
 </head>
 
 <body>
@@ -26,10 +27,10 @@
         </div>
       </div>
       <div class="header-user" id="headerUserBtn">
-        <div class="header-avatar" id="headerAvatar">LĐ</div>
+        <div class="header-avatar" id="headerAvatar">{{ user_initials }}</div>
         <div class="header-user-info">
-          <div class="user-name" id="headerUserName">Nguyễn Văn A</div>
-          <div class="user-role" id="headerUserRole">Lãnh đạo</div>
+          <div class="user-name" id="headerUserName">{{ user_display_name }}</div>
+          <div class="user-role" id="headerUserRole">{{ user_role_display }}</div>
         </div>
         <svg width="16" height="16" viewBox="0 0 24 24">
           <path d="M7 10l5 5 5-5H7z" />
@@ -43,7 +44,7 @@
             Hồ sơ cá nhân
           </a>
           <hr class="dropdown-divider">
-          <a href="#" id="logoutBtn" style="color:#EF4444;">
+          <a href="{% url 'accounts:logout' %}" id="logoutBtn" style="color:#EF4444;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="#EF4444">
               <path
                 d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
@@ -108,7 +109,7 @@
       <main class="app-content">
         <!-- Breadcrumb -->
         <div class="breadcrumb-bar">
-          <a href="dashboard.html">
+          <a href="{% url 'core:dashboard' %}">
             <svg width="14" height="14" viewBox="0 0 24 24">
               <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
             </svg>
@@ -186,7 +187,7 @@
                   Công việc cần xử lý gấp
                 </div>
                 <a href="xu-ly-cong-viec.html" class="widget-link">Xem tất cả <svg width="14" height="14"
-                                                                                   viewBox="0 0 24 24" fill="currentColor">
+                    viewBox="0 0 24 24" fill="currentColor">
                     <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z" />
                   </svg></a>
               </div>
@@ -200,9 +201,9 @@
   </div><!-- /.app-layout -->
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="assets/js/auth.js"></script>
-  <script src="assets/js/main.js"></script>
-  <script src="assets/js/dashboard.js"></script>
+  <script src="{% static 'assets/js/auth.js' %}"></script>
+  <script src="{% static 'assets/js/main.js' %}"></script>
+  <script src="{% static 'assets/js/dashboard.js' %}"></script>
 </body>
 
 </html>

@@ -37,12 +37,30 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'apps.core.apps.CoreConfig',
     'apps.accounts.apps.AccountsConfig',
     # 'apps.quanlyvanbandi.apps.QuanlyvanbandiConfig',
     # 'apps.quanlyvanbanden.apps.QuanlyvanbandenConfig',
     # 'apps.hosovanban.apps.HosovanbanConfig',
     # 'apps.quanlycongviec.apps.QuanlycongviecConfig',
 ]
+# Khai bao custom user
+AUTH_USER_MODEL = "accounts.Customer"
+
+# Cau hinh login/logout
+LOGIN_URL = "accounts:login"
+LOGIN_REDIRECT_URL = "core:dashboard"
+LOGOUT_REDIRECT_URL = "accounts:login"
+
+# Static files
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [BASE_DIR / "apps" / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+#Email Backend
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "noreply@example.com"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -59,7 +77,6 @@ ROOT_URLCONF = 'he_thong_quan_ly_van_ban.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -107,8 +124,10 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
+LANGUAGE_CODE = 'vi'
 LANGUAGE_CODE = 'en-us'
 
+TIME_ZONE = 'Asia/Ho_Chi_Minh'
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
@@ -116,6 +135,7 @@ USE_I18N = True
 USE_TZ = True
 
 
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 

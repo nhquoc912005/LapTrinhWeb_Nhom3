@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -6,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Đăng nhập - Hệ Thống Quản Lý Văn Bản và Điều Hành</title>
   <meta name="description" content="Đăng nhập vào Hệ Thống Quản Lý Văn Bản và Điều Hành">
-  <link rel="stylesheet" href="../static/assets/css/style.css">
+  <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
 </head>
 
 <body class="login-page">
@@ -25,11 +26,16 @@
   <div class="login-card">
     <h2 class="login-title">Đăng nhập</h2>
 
-    <!-- Error message area -->
-    <div class="login-error" id="loginError" role="alert"></div>
+    <div class="login-error{% if form.non_field_errors %} show{% endif %}" id="loginError" role="alert">
+      {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+    </div>
 
-    <!-- Login Form -->
-    <form id="loginForm" novalidate>
+    <form id="loginForm" novalidate action="{% url 'accounts:login' %}" method="post">
+      {% csrf_token %}
+      {% if next_url %}
+      <input type="hidden" name="next" value="{{ next_url }}">
+      {% endif %}
+
       <div class="form-group" style="margin-bottom: 20px;">
         <label class="form-label" for="username">
           Tên đăng nhập <span class="required">*</span>
@@ -41,9 +47,11 @@
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
           <input type="text" id="username" name="username" class="form-control" placeholder="Nhập tên đăng nhập"
-            autocomplete="username" autofocus>
+            autocomplete="username" autofocus value="{{ form.username.value|default_if_none:'' }}">
         </div>
-        <span class="form-error-text" id="usernameError">Vui lòng nhập tên đăng nhập</span>
+        <span class="form-error-text{% if form.username.errors %} show{% endif %}" id="usernameError">
+          {% if form.username.errors %}{{ form.username.errors.0 }}{% else %}Vui lòng nhập tên đăng nhập{% endif %}
+        </span>
       </div>
 
       <div class="form-group" style="margin-bottom: 20px;">
@@ -66,7 +74,9 @@
             </svg>
           </button>
         </div>
-        <span class="form-error-text" id="passwordError">Vui lòng nhập mật khẩu</span>
+        <span class="form-error-text{% if form.password.errors %} show{% endif %}" id="passwordError">
+          {% if form.password.errors %}{{ form.password.errors.0 }}{% else %}Vui lòng nhập mật khẩu{% endif %}
+        </span>
       </div>
 
       <div class="form-actions">
@@ -83,8 +93,8 @@
 
   </div><!-- /.login-card -->
 
-  <script src="assets/js/auth.js"></script>
-  <script src="assets/js/login.js"></script>
+  <script src="{% static 'assets/js/auth.js' %}"></script>
+  <script src="{% static 'assets/js/login.js' %}"></script>
 </body>
 
 </html>
