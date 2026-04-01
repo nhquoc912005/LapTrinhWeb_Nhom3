@@ -48,9 +48,9 @@ Hệ thống được phát triển từ giao diện frontend tĩnh và đang đ
 
 ## Công nghệ sử dụng
 
-- **Backend:** Django
-- **Frontend:** HTML, CSS, Bootstrap
-- **Database:** SQLite / MySQL
+- **Backend:** Django 4.2.8
+- **Frontend:** HTML, CSS
+- **Database:** SQLite
 - **Template Engine:** Django Templates
 - **Quản lý file tĩnh:** Django Static Files
 - **Quản lý media:** Django Media Files
