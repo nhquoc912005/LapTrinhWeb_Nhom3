@@ -38,22 +38,18 @@ Hệ thống được xây dựng để:
 - Xem chi tiết văn bản đến
 - Chuyển tiếp văn bản
 - Hoàn trả văn bản
-- Theo dõi trạng thái xử lý
 
 ### 3. Hồ sơ văn bản
 - Tạo hồ sơ văn bản
 - Quản lý danh sách hồ sơ
 - Xem chi tiết hồ sơ
-- Liên kết văn bản với hồ sơ
-- Xử lý hồ sơ văn bản
+- Thêm/Xóa văn bản vào hồ sơ
 
 ### 4. Quản lý công việc
 - Tạo công việc
 - Phân công công việc
-- Theo dõi tiến độ xử lý
 - Phê duyệt công việc
 - Hoàn trả công việc
-- Quản lý file liên quan đến công việc
 
 ---
 
