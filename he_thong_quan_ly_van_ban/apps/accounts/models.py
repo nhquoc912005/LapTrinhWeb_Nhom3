@@ -1,5 +1,9 @@
+from django.apps import apps
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
+
+from .role_groups import sync_user_role_group
 
 class Customer(AbstractUser):
     class Role(models.TextChoices):
@@ -13,6 +17,12 @@ class Customer(AbstractUser):
         Role.LANH_DAO: "access_lanh_dao_area",
         Role.VAN_THU: "access_van_thu_area",
         Role.CHUYEN_VIEN: "access_chuyen_vien_area",
+    }
+    ROLE_CORE_CHUC_VU_MAP = {
+        Role.ADMIN: "Quản Trị Hệ Thống",
+        Role.LANH_DAO: "Lãnh Đạo",
+        Role.VAN_THU: "Văn Thư",
+        Role.CHUYEN_VIEN: "Chuyên Viên",
     }
 
     email = models.EmailField("Email",unique=True)
@@ -103,3 +113,56 @@ class Customer(AbstractUser):
 
     def has_role(self, *roles):
         return self.is_superuser or self.role in roles
+
+    def get_core_chuc_vu(self):
+        nguoi_dung_model = apps.get_model("core", "NguoiDung")
+        valid_chuc_vu_values = {
+            value for value, _ in nguoi_dung_model.CHUC_VU_CHOICES
+        }
+        normalized_chuc_vu = (self.chuc_vu or "").strip()
+        if normalized_chuc_vu in valid_chuc_vu_values:
+            return normalized_chuc_vu
+        return self.ROLE_CORE_CHUC_VU_MAP.get(
+            self.role,
+            nguoi_dung_model.ChucVu.CHUYEN_VIEN,
+        )
+
+    def sync_core_profile(self):
+        nguoi_dung_model = apps.get_model("core", "NguoiDung")
+
+        try:
+            core_profile = self.nguoi_dung_core
+        except ObjectDoesNotExist:
+            core_profile = None
+
+        if core_profile is None and self.email:
+            email_match = nguoi_dung_model.objects.filter(email__iexact=self.email).first()
+            if email_match and email_match.tai_khoan_id in (None, self.pk):
+                core_profile = email_match
+
+        if core_profile is None:
+            core_profile = nguoi_dung_model()
+
+        core_profile.tai_khoan = self
+        core_profile.ho_va_ten = (self.ho_va_ten or self.get_full_name() or self.username).strip()
+        core_profile.email = self.email
+        core_profile.sdt = self.sdt
+        core_profile.chuc_vu = self.get_core_chuc_vu()
+        if self.phong_ban_id:
+            core_profile.phong_ban = self.phong_ban
+        core_profile.save()
+        return core_profile
+
+    def sync_permission_group(self):
+        return sync_user_role_group(self)
+
+    def sync_access_context(self):
+        self.sync_permission_group()
+        return self.sync_core_profile()
+
+    @property
+    def core_profile(self):
+        try:
+            return self.nguoi_dung_core
+        except ObjectDoesNotExist:
+            return self.sync_core_profile()

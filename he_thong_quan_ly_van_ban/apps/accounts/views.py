@@ -27,7 +27,9 @@ def login_view(request):
     form = CustomerLoginForm(request=request, data=request.POST or None)
 
     if request.method == "POST" and form.is_valid():
-        login(request, form.get_user())
+        user = form.get_user()
+        user.sync_access_context()
+        login(request, user)
         return redirect(_get_safe_redirect_url(request))
 
     next_url = request.POST.get("next") or request.GET.get("next") or ""

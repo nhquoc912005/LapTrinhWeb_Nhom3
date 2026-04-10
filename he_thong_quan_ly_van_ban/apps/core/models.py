@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -52,18 +53,29 @@ class PhongBan(models.Model):
 
 
 class NguoiDung(models.Model):
-    CHUC_VU_CHOICES = (
-        ("Lãnh Đạo", "Lãnh Đạo"),
-        ("Chuyên Viên", "Chuyên Viên"),
-        ("Văn Thư", "Văn Thư"),
-    )
+    class ChucVu(models.TextChoices):
+        QUAN_TRI = "Quản Trị Hệ Thống", "Quản Trị Hệ Thống"
+        LANH_DAO = "Lãnh Đạo", "Lãnh Đạo"
+        CHUYEN_VIEN = "Chuyên Viên", "Chuyên Viên"
+        VAN_THU = "Văn Thư", "Văn Thư"
+
+    CHUC_VU_CHOICES = ChucVu.choices
 
     nguoi_dung_id = models.AutoField(primary_key=True)
+    tai_khoan = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        db_column="tai_khoan_id",
+        null=True,
+        blank=True,
+        related_name="nguoi_dung_core",
+    )
     phong_ban = models.ForeignKey(
         "core.PhongBan",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         db_column="phong_ban_id",
-        null=False,
+        null=True,
+        blank=True,
     )
     ho_va_ten = models.CharField(max_length=255, null=False)
     chuc_vu = models.CharField(
