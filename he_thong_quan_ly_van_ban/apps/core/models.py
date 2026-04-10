@@ -231,6 +231,15 @@ class VanBan(models.Model):
         ("Văn bản đi", "Văn bản đi"),
         ("Văn bản đến", "Văn bản đến"),
     )
+    
+    DON_VI_SOAN_THAO_CHOICES = (
+        ("Ban Giám Đốc", "Ban Giám Đốc"),
+        ("Phòng Kế Toán", "Phòng Kế Toán"),
+        ("Phòng Kiểm Toán", "Phòng Kiểm Toán"),
+        ("Phòng Tư Vấn Thuế", "Phòng Tư Vấn Thuế"),
+        ("Phòng Hành Chính/Nhân sự", "Phòng Hành Chính/Nhân sự"),
+        ("Phòng Đào Tạo Chất Lượng", "Phòng Đào Tạo Chất Lượng"),
+    )
 
     van_ban_id = models.AutoField(primary_key=True)
     lanh_dao_duyet = models.ForeignKey(
@@ -265,7 +274,11 @@ class VanBan(models.Model):
         choices=LOAI_VAN_BAN_CHOICES,
     )
     don_vi_ban_hanh = models.CharField(max_length=255, null=False)
-    don_vi_soan_thao = models.CharField(max_length=255, null=False)
+    don_vi_soan_thao = models.CharField(
+        max_length=255,
+        null=False,
+        choices=DON_VI_SOAN_THAO_CHOICES,
+    )
     ngay_van_ban = models.DateField(null=False, auto_now_add=True)
     ngay_den = models.DateField(null=False)
     han_xu_ly = models.DateField(null=True, blank=True)
