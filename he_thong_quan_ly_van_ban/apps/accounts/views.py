@@ -22,7 +22,7 @@ def _get_safe_redirect_url(request):
 @require_http_methods(["GET", "POST"])
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect(settings.LOGIN_REDIRECT_URL)
+        return redirect(_get_safe_redirect_url(request))
 
     form = CustomerLoginForm(request=request, data=request.POST or None)
 
