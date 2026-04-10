@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hệ thống quản lý văn bản{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <style>
+        .header-nav-link.is-disabled,
+        .sidebar-nav-link.is-disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .header-nav-link.is-disabled:hover {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .sidebar-nav-link.is-disabled:hover {
+            background: transparent;
+            color: var(--sidebar-text);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+<div class="app-layout">
+    <header class="app-header">
+        <div class="header-brand">
+            <div class="header-brand-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z"/>
+                </svg>
+            </div>
+            <div class="header-brand-text">
+                <h1>HỆ THỐNG QUẢN LÝ VĂN BẢN VÀ ĐIỀU HÀNH</h1>
+                <p>Công ty TNHH Kiểm toán và Tư vấn Thuế ATAX</p>
+            </div>
+        </div>
+
+        <div class="header-user" id="headerUserBtn">
+            <div class="header-avatar" id="headerAvatar">
+                {{ shell_user.initials|default:"ND" }}
+            </div>
+            <div class="header-user-info">
+                <div class="user-name" id="headerUserName">
+                    {{ shell_user.display_name|default:"Người dùng" }}
+                </div>
+                <div class="user-role" id="headerUserRole">
+                    {{ shell_user.role_display|default:"Vai trò" }}
+                </div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="rgba(255,255,255,0.7)">
+                <path d="M7 10l5 5 5-5H7z"/>
+            </svg>
+            <div class="user-dropdown" id="userDropdown">
+                <a href="#" onclick="return false;" aria-disabled="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                    Hồ sơ cá nhân
+                </a>
+                <hr class="dropdown-divider">
+                <a href="{% url 'accounts:logout' %}" style="color:#EF4444;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#EF4444">
+                        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                    </svg>
+                    Đăng xuất
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <nav class="header-nav">
+        <div class="header-nav-list">
+            {% for item in top_menu_items %}
+                <a
+                    href="{{ item.href }}"
+                    class="header-nav-link{% if item.active %} active{% endif %}{% if not item.is_enabled %} is-disabled{% endif %}"
+                    {% if not item.is_enabled %}onclick="return false;" aria-disabled="true" title="{{ item.help_text }}"{% endif %}
+                >
+                    <svg width="15" height="15" viewBox="0 0 24 24">
+                        <path d="{{ item.icon_path }}"/>
+                    </svg>
+                    {{ item.label }}
+                </a>
+            {% endfor %}
+        </div>
+    </nav>
+
+    <div class="app-body">
+        <aside class="app-sidebar">
+            <nav class="sidebar-nav">
+                {% for item in sidebar_menu_items %}
+                    <div class="sidebar-nav-item">
+                        <a
+                            href="{{ item.href }}"
+                            class="sidebar-nav-link{% if item.active %} active{% endif %}{% if not item.is_enabled %} is-disabled{% endif %}"
+                            {% if not item.is_enabled %}onclick="return false;" aria-disabled="true" title="{{ item.help_text }}"{% endif %}
+                        >
+                            <svg width="18" height="18" viewBox="0 0 24 24">
+                                <path d="{{ item.icon_path }}"/>
+                            </svg>
+                            {{ item.label }}
+                        </a>
+                    </div>
+                {% endfor %}
+            </nav>
+        </aside>
+
+        <main class="app-content">
+            <div class="breadcrumb-bar">
+                {% block breadcrumb %}
+                    <a href="{% url 'core:dashboard' %}">
+                        <svg width="14" height="14" viewBox="0 0 24 24">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        </svg>
+                        Trang chủ
+                    </a>
+                {% endblock %}
+            </div>
+
+            {% block page_wrapper %}
+                <div class="page-main">
+                    {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                                <div class="message">{{ message }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% block content %}{% endblock %}
+                </div>
+            {% endblock %}
+        </main>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const userBtn = document.getElementById("headerUserBtn");
+        const userDropdown = document.getElementById("userDropdown");
+
+        if (!userBtn || !userDropdown) {
+            return;
+        }
+
+        userBtn.addEventListener("click", function (event) {
+            event.stopPropagation();
+            userDropdown.classList.toggle("open");
+        });
+
+        document.addEventListener("click", function (event) {
+            if (!userBtn.contains(event.target) && !userDropdown.contains(event.target)) {
+                userDropdown.classList.remove("open");
+            }
+        });
+    });
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

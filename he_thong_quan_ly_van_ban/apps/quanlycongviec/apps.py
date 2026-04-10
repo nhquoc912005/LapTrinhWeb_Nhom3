@@ -3,4 +3,4 @@ from django.apps import AppConfig
 
 class QuanlycongviecConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'quanlycongviec'
+    name = 'apps.quanlycongviec'

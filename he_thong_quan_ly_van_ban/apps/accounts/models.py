@@ -8,6 +8,13 @@ class Customer(AbstractUser):
         VAN_THU = "VAN_THU", "Văn thư"
         CHUYEN_VIEN = "CHUYEN_VIEN", "Chuyên viên"
 
+    ROLE_PERMISSION_MAP = {
+        Role.ADMIN: "access_admin_area",
+        Role.LANH_DAO: "access_lanh_dao_area",
+        Role.VAN_THU: "access_van_thu_area",
+        Role.CHUYEN_VIEN: "access_chuyen_vien_area",
+    }
+
     email = models.EmailField("Email",unique=True)
     ho_va_ten = models.CharField("Họ và tên",max_length=255)
     chuc_vu = models.CharField("Chức vụ",max_length=255,blank=True)
@@ -72,3 +79,27 @@ class Customer(AbstractUser):
     @property
     def is_chuyen_vien(self):
         return self.role == self.Role.CHUYEN_VIEN
+
+    @property
+    def display_name(self):
+        return (self.ho_va_ten or self.get_full_name() or self.username).strip()
+
+    @property
+    def display_role(self):
+        return (self.chuc_vu or self.get_role_display()).strip()
+
+    @property
+    def initials(self):
+        parts = [part for part in self.display_name.split() if part]
+        if len(parts) >= 2:
+            return f"{parts[0][0]}{parts[-1][0]}".upper()
+        if parts:
+            return parts[0][:2].upper()
+        return self.username[:2].upper()
+
+    @property
+    def access_permission_codename(self):
+        return self.ROLE_PERMISSION_MAP.get(self.role, "")
+
+    def has_role(self, *roles):
+        return self.is_superuser or self.role in roles
