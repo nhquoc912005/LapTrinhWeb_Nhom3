@@ -28,10 +28,10 @@ INSTALLED_APPS = [
 
     'apps.core.apps.CoreConfig',
     'apps.accounts.apps.AccountsConfig',
-    # 'apps.quanlyvanbandi.apps.QuanlyvanbandiConfig',
-    # 'apps.quanlyvanbanden.apps.QuanlyvanbandenConfig',
-    # 'apps.hosovanban.apps.HosovanbanConfig',
-    # 'apps.quanlycongviec.apps.QuanlycongviecConfig',
+    'apps.quanlyvanbandi.apps.QuanlyvanbandiConfig',
+    'apps.quanlyvanbanden.apps.QuanlyvanbandenConfig',
+    'apps.hosovanban.apps.HosovanbanConfig',
+    'apps.quanlycongviec.apps.QuanlycongviecConfig',
 ]
 AUTH_USER_MODEL = "accounts.Customer"
 
