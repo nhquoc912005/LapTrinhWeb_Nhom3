@@ -201,9 +201,15 @@ def return_task(request, task_id):
         task.save()
         HoanTraCongViec.objects.create(cong_viec=task, noi_dung=noi_dung)
         messages.warning(request, "Đã hoàn trả công việc.")
-    if request.user.is_chuyen_vien:
-        return redirect('quanlycongviec:xu_ly_cong_viec')
-    return redirect('quanlycongviec:giao_viec')
+        if request.user.is_chuyen_vien:
+            return redirect('quanlycongviec:xu_ly_cong_viec')
+        return redirect('quanlycongviec:giao_viec')
+    
+    # Handle GET
+    context = {
+        'task': task,
+    }
+    return render(request, "quanlycongviec/hoan-tra-cong-viec.html", context)
 
 @login_required
 def get_task_detail(request, task_id):
@@ -244,12 +250,20 @@ def get_task_detail(request, task_id):
 @login_required
 def start_task(request, task_id):
     task = get_object_or_404(CongViec, pk=task_id)
-    if task.nguoi_thuc_hien != request.user.core_profile:
+    # Cho phép bất kỳ chuyên viên nào cũng có thể nhận việc (Pick up)
+    if not request.user.is_chuyen_vien:
         messages.error(request, "Bạn không có quyền thực hiện công việc này.")
         return redirect('quanlycongviec:xu_ly_cong_viec')
+    
+    # Nếu người thực hiện hiện tại khác với người đang click, cập nhật lại người thực hiện
+    if task.nguoi_thuc_hien != request.user.core_profile:
+        task.nguoi_thuc_hien = request.user.core_profile
+        messages.info(request, f"Bạn đã tiếp nhận công việc này từ {task.nguoi_thuc_hien.ho_va_ten if task.nguoi_thuc_hien else 'người khác'}.")
+    else:
+        messages.info(request, "Đã tiếp nhận công việc. Bắt đầu xử lý.")
+        
     task.trang_thai = "Đang xử lý"
     task.save()
-    messages.info(request, "Đã tiếp nhận công việc. Bắt đầu xử lý.")
     return redirect('quanlycongviec:task_detail', task_id=task.pk)
 
 @login_required
@@ -272,7 +286,7 @@ def task_detail(request, task_id):
         'attachments': attachments,
         'first_pdf': first_pdf,
         'can_approve': request.user.is_lanh_dao and task.trang_thai == "Chờ duyệt",
-        'can_start': task.nguoi_thuc_hien == request.user.core_profile and task.trang_thai == "Chờ xử lý",
+        'can_start': (request.user.is_chuyen_vien or task.nguoi_thuc_hien == request.user.core_profile) and task.trang_thai in ["Chờ xử lý", "Đang xử lý"],
         'can_edit': request.user.is_lanh_dao,
         'can_delete': request.user.is_lanh_dao and task.trang_thai == "Chờ xử lý",
     }

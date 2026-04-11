@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Hoàn trả công việc - Hệ thống quản lý văn bản{% endblock %}
+
+{% block extra_css %}
+<style>
+    .return-card {
+        background: #fff;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-top: 16px;
+        min-height: 400px;
+    }
+
+    .return-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #0284C7;
+        margin-bottom: 32px;
+    }
+
+    .info-section {
+        margin-bottom: 24px;
+    }
+
+    .info-label {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 12px;
+        display: block;
+    }
+
+    .reason-textarea {
+        width: 100%;
+        border: 1px solid #E2E8F0;
+        border-radius: 6px;
+        padding: 16px;
+        font-size: 14px;
+        color: #334155;
+        outline: none;
+        transition: border-color 0.2s;
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .reason-textarea:focus {
+        border-color: #0284C7;
+    }
+
+    .return-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 32px;
+    }
+
+    .btn-return-cancel {
+        background: #F1F5F9;
+        color: #475569;
+        padding: 10px 32px;
+        border-radius: 6px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-return-cancel:hover {
+        background: #E2E8F0;
+    }
+
+    .btn-return-save {
+        background: #0284C7;
+        color: white;
+        padding: 10px 32px;
+        border-radius: 6px;
+        font-weight: 600;
+        transition: background 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-return-save:hover {
+        background: #0369A1;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'core:dashboard' %}">
+        <svg width="14" height="14" viewBox="0 0 24 24">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+        </svg>
+        Trang chủ
+    </a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="{% url 'quanlycongviec:giao_viec' %}">Quản lý công việc</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="{% url 'quanlycongviec:task_detail' task.pk %}">Thông tin chi tiết công việc</a>
+    <span class="breadcrumb-sep">›</span>
+    <span>Hoàn trả công việc</span>
+{% endblock %}
+
+{% block content %}
+<div class="return-card">
+    <h1 class="return-title">Hoàn trả công việc</h1>
+
+    <div class="info-section">
+        <span class="info-label">Lãnh đạo : {{ task.nguoi_giao.ho_va_ten }}</span>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="info-section">
+            <label class="info-label">Lý do hoàn trả</label>
+            <textarea 
+                name="noi_dung" 
+                class="reason-textarea" 
+                placeholder="Nhập chi tiết lý do, nội dung sai sót hoặc đề xuất chỉnh sửa để Lãnh đạo nắm thông tin..."
+                required
+            ></textarea>
+        </div>
+
+        <div class="return-actions">
+            <a href="{% url 'quanlycongviec:task_detail' task.pk %}" class="btn-return-cancel">Hủy</a>
+            <button type="submit" class="btn-return-save">Lưu</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
