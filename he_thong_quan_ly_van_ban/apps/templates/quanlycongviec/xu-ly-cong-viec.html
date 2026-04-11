@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Xử lý Công việc - Hệ thống quản lý văn bản{% endblock %}
+
+{% block extra_css %}
+<style>
+    .badge-cho-xu-ly { background: #FEF3C7; color: #92400E; } /* Yellow */
+    .badge-dang-xu-ly { background: #DBEAFE; color: #1E40AF; } /* Blue */
+    .badge-cho-duyet { background: #F3E8FF; color: #6B21A8; } /* Purple */
+    .badge-hoan-tra { background: #FEE2E2; color: #991B1B; } /* Red */
+    .badge-da-hoan-thanh { background: #D1FAE5; color: #065F46; } /* Green */
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'core:dashboard' %}">
+        <svg width="14" height="14" viewBox="0 0 24 24">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+        </svg>
+        Trang chủ
+    </a>
+    <span class="breadcrumb-sep">›</span>
+    <span>Quản lý công việc</span>
+    <span class="breadcrumb-sep">›</span>
+    <span>Xử lý công việc</span>
+{% endblock %}
+
+{% block content %}
+<h1 class="page-title">XỬ LÝ CÔNG VIỆC</h1>
+
+<!-- Filter Card -->
+<div class="filter-card">
+    <div class="filter-row" style="align-items:flex-end;">
+        <div class="filter-input-group filter-search">
+            <label>Từ khóa</label>
+            <div class="search-input-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24">
+                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                </svg>
+                <input type="text" id="searchKeyword" class="form-control" placeholder="Tìm theo tên công việc, người giao...">
+            </div>
+        </div>
+        <div class="filter-input-group">
+            <label>Trạng thái</label>
+            <select id="filterStatus" class="form-control">
+                <option value="">-- Tất cả --</option>
+                <option value="Chờ xử lý">Chờ xử lý</option>
+                <option value="Đang xử lý">Đang xử lý</option>
+                <option value="Chờ duyệt">Chờ duyệt</option>
+                <option value="Hoàn trả">Hoàn trả</option>
+                <option value="Đã hoàn thành">Đã hoàn thành</option>
+            </select>
+        </div>
+        <div class="filter-actions">
+            <button class="btn btn-primary btn-sm" id="btnSearch">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                </svg>
+                Tìm kiếm
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="table-container">
+    <div style="overflow-x:auto;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="text-center" style="width:60px;">STT</th>
+                    <th style="min-width:200px;">Tên công việc</th>
+                    <th style="min-width:140px;">Người giao</th>
+                    <th style="min-width:120px;">Ngày bắt đầu</th>
+                    <th style="min-width:100px;">Hạn xử lý</th>
+                    <th style="min-width:110px;">Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody id="xuLyCVBody">
+                {% for task in tasks %}
+                <tr data-id="{{ task.pk }}">
+                    <td class="text-center">{{ forloop.counter }}</td>
+                    <td><strong>{{ task.ten_cong_viec }}</strong></td>
+                    <td>{{ task.nguoi_giao.ho_va_ten }}</td>
+                    <td>{{ task.ngay_bat_dau|date:"d/m/Y" }}</td>
+                    <td>{{ task.han_xu_ly|date:"d/m/Y" }}</td>
+                    <td>
+                        {% if task.trang_thai == "Chờ xử lý" %}
+                            <span class="badge badge-cho-xu-ly">{{ task.trang_thai }}</span>
+                        {% elif task.trang_thai == "Đang xử lý" %}
+                            <span class="badge badge-dang-xu-ly">{{ task.trang_thai }}</span>
+                        {% elif task.trang_thai == "Chờ duyệt" %}
+                            <span class="badge badge-cho-duyet">{{ task.trang_thai }}</span>
+                        {% elif task.trang_thai == "Hoàn trả" %}
+                            <span class="badge badge-hoan-tra">{{ task.trang_thai }}</span>
+                        {% elif task.trang_thai == "Đã hoàn thành" %}
+                            <span class="badge badge-da-hoan-thanh">{{ task.trang_thai }}</span>
+                        {% else %}
+                            <span class="badge">{{ task.trang_thai }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">Bạn chưa có công việc nào cần xử lý.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Task Details Logic
+    document.addEventListener('DOMContentLoaded', function() {
+        const tableBody = document.getElementById('xuLyCVBody');
+        tableBody.addEventListener('click', function(e) {
+            const tr = e.target.closest('tr');
+            if (tr && tr.hasAttribute('data-id')) {
+                const taskId = tr.getAttribute('data-id');
+                window.location.href = `/task/${taskId}/`;
+            }
+        });
+
+        // Search logic
+        const btnSearch = document.getElementById('btnSearch');
+        if (btnSearch) {
+            btnSearch.addEventListener('click', function() {
+                const keyword = document.getElementById('searchKeyword').value;
+                const status = document.getElementById('filterStatus').value;
+                // Basic filtering logic could go here or via reload
+                location.href = `?keyword=${keyword}&status=${status}`;
+            });
+        }
+    });
+</script>
+{% endblock %}
