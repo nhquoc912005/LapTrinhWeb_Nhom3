@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Thông tin chi tiết công việc - Hệ thống quản lý văn bản{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-card {
+        background: #fff;
+        padding: 32px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-top: 16px;
+    }
+
+    .detail-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #E2E8F0;
+    }
+
+    .detail-title-group {
+        display: flex;
+        align-items: center;
+    }
+
+    .detail-title-bar {
+        width: 4px;
+        height: 24px;
+        background: #0284C7;
+        margin-right: 12px;
+    }
+
+    .detail-title-text {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1E293B;
+        text-transform: uppercase;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 12px;
+    }
+
+    .status-badge-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 24px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px 48px;
+        margin-bottom: 32px;
+    }
+
+    .info-item {
+        margin-bottom: 16px;
+    }
+
+    .info-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748B;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .info-value {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1E293B;
+    }
+
+    .section-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748B;
+        margin-bottom: 12px;
+        display: block;
+    }
+
+    .section-content {
+        font-size: 14px;
+        line-height: 1.6;
+        color: #334155;
+        background: #F8FAFC;
+        padding: 16px;
+        border-radius: 6px;
+        margin-bottom: 24px;
+    }
+
+    .file-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 32px;
+    }
+
+    .file-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        background: #F1F5F9;
+        border-radius: 4px;
+        text-decoration: none;
+        color: #0284C7;
+        font-size: 14px;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+
+    .file-item:hover {
+        background: #E2E8F0;
+    }
+
+    .preview-container {
+        margin-top: 32px;
+        border-top: 2px solid #E2E8F0;
+        padding-top: 24px;
+    }
+
+    .preview-header {
+        font-weight: 700;
+        font-size: 14px;
+        color: #64748B;
+        margin-bottom: 16px;
+        text-transform: uppercase;
+    }
+
+    .pdf-viewer {
+        width: 100%;
+        height: 800px;
+        border: 1px solid #CBD5E1;
+        border-radius: 4px;
+        background: #525659;
+    }
+
+    /* Standardized Badges */
+    .badge-cho-xu-ly { background: #FEF3C7; color: #92400E; } /* Yellow */
+    .badge-dang-xu-ly { background: #DBEAFE; color: #1E40AF; } /* Blue */
+    .badge-cho-duyet { background: #F3E8FF; color: #6B21A8; } /* Purple */
+    .badge-hoan-tra { background: #FEE2E2; color: #991B1B; } /* Red */
+    .badge-da-hoan-thanh { background: #D1FAE5; color: #065F46; } /* Green */
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'core:dashboard' %}">
+        <svg width="14" height="14" viewBox="0 0 24 24">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+        </svg>
+        Trang chủ
+    </a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="{% url 'quanlycongviec:giao_viec' %}">Quản lý công việc</a>
+    <span class="breadcrumb-sep">›</span>
+    <span>Thông tin chi tiết công việc</span>
+{% endblock %}
+
+{% block content %}
+<div class="detail-card">
+    <div class="detail-header-row">
+        <div class="detail-title-group">
+            <div class="detail-title-bar"></div>
+            <div class="detail-title-text">THÔNG TIN CHI TIẾT CÔNG VIỆC</div>
+        </div>
+        <div class="action-buttons">
+            {% if can_approve %}
+            <form action="{% url 'quanlycongviec:approve_task' task.pk %}" method="POST" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary" style="background:#10B981; border:none;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px; vertical-align:middle;"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    Phê duyệt
+                </button>
+            </form>
+            {% endif %}
+
+            {% if can_start %}
+            <a href="{% url 'quanlycongviec:start_task' task.pk %}" class="btn btn-primary" style="background:#3B82F6; border:none;">
+                Tiếp nhận công việc
+            </a>
+            {% endif %}
+
+            {% if can_edit %}
+            <a href="{% url 'quanlycongviec:giao_viec' %}?edit={{ task.pk }}" class="btn btn-primary" style="background:#0284C7; border:none; color:white; display:inline-flex; align-items:center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px;"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                Chỉnh sửa
+            </a>
+            {% endif %}
+
+            {% if can_delete %}
+            <button type="button" class="btn btn-danger" id="btnDeleteDetail">
+                <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px; vertical-align:middle;"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                Xoá công việc
+            </button>
+            <form id="deleteDetailForm" action="{% url 'quanlycongviec:delete_task' task.pk %}" method="POST" style="display:none;">
+                {% csrf_token %}
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="status-badge-container">
+        {% if task.trang_thai == "Chờ xử lý" %}
+            <span class="badge badge-cho-xu-ly">{{ task.trang_thai }}</span>
+        {% elif task.trang_thai == "Đang xử lý" %}
+            <span class="badge badge-dang-xu-ly">{{ task.trang_thai }}</span>
+        {% elif task.trang_thai == "Chờ duyệt" %}
+            <span class="badge badge-cho-duyet">{{ task.trang_thai }}</span>
+        {% elif task.trang_thai == "Hoàn trả" %}
+            <span class="badge badge-hoan-tra">{{ task.trang_thai }}</span>
+        {% elif task.trang_thai == "Đã hoàn thành" %}
+            <span class="badge badge-da-hoan-thanh">{{ task.trang_thai }}</span>
+        {% else %}
+            <span class="badge">{{ task.trang_thai }}</span>
+        {% endif %}
+    </div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <span class="info-label">Lãnh đạo giao việc</span>
+            <div class="info-value">{{ task.nguoi_giao.ho_va_ten }}</div>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Mã giao việc</span>
+            <div class="info-value">{{ task_code }}</div>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Nguồn giao</span>
+            <div class="info-value">{{ task.nguon_giao|default:"Không có" }}</div>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Tên công việc</span>
+            <div class="info-value">{{ task.ten_cong_viec }}</div>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Chuyên viên thực hiện</span>
+            <div class="info-value">{{ task.nguoi_thuc_hien.ho_va_ten }}</div>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Người phối hợp</span>
+            <div class="info-value">
+                {% for c in collaborators %}
+                    {{ c.nguoi_phoi_hop.ho_va_ten }}{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                    Không có
+                {% endfor %}
+            </div>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Ngày bắt đầu</span>
+            <div class="info-value">{{ task.ngay_bat_dau|date:"d/m/Y" }}</div>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Hạn xử lý</span>
+            <div class="info-value" style="color:#EF4444;">{{ task.han_xu_ly|date:"d/m/Y" }}</div>
+        </div>
+    </div>
+
+    <div class="info-wrapper">
+        <span class="section-title">Nội dung công việc</span>
+        <div class="section-content">
+            {{ task.noi_dung_cong_viec|linebreaks }}
+        </div>
+
+        <span class="section-title">Kết quả xử lý</span>
+        <div class="section-content" style="color:#0284C7; font-weight:600;">
+            {{ task.ket_qua_xu_ly|default:"Chưa có kết quả" }}
+        </div>
+
+        <span class="section-title">File đính kèm</span>
+        <div class="file-list">
+            {% for f in attachments %}
+                <a href="{{ f.file_van_ban.url }}" class="file-item" target="_blank">
+                    <svg width="20" height="20" viewBox="0 0 24 24" style="margin-right:8px;"><path fill="currentColor" d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                    {{ f.file_van_ban.name }}
+                </a>
+            {% empty %}
+                <div style="color:#94A3B8; font-size:14px; font-style:italic;">Không có file đính kèm</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if first_pdf %}
+    <div class="preview-container">
+        <div class="preview-header">XEM TRƯỚC</div>
+        <iframe class="pdf-viewer" src="{{ first_pdf.file_van_ban.url }}#toolbar=0" frameborder="0" style="width:100%; height:800px;"></iframe>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnDelete = document.getElementById('btnDeleteDetail');
+        if (btnDelete) {
+            btnDelete.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.confirmAction(
+                    'Xác nhận xóa công việc',
+                    'Bạn có chắc chắn muốn xóa công việc này không? Hành động này không thể hoàn tác.',
+                    () => {
+                        document.getElementById('deleteDetailForm').submit();
+                    }
+                );
+            });
+        }
+    });
+</script>
+{% endblock %}
