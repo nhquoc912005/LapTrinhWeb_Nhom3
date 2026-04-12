@@ -558,6 +558,12 @@ class FileCVLienQuan(models.Model):
     )
     file_van_ban = models.FileField(upload_to="file_cv_lien_quan/", null=False)
     kich_thuoc = models.IntegerField(null=True, blank=True)
+    loai_file = models.CharField(
+        max_length=20,
+        choices=(('CHINH', 'Chính'), ('LIEN_QUAN', 'Liên quan')),
+        default='LIEN_QUAN',
+        null=False
+    )
 
     class Meta:
         db_table = "FileCVLienQuan"

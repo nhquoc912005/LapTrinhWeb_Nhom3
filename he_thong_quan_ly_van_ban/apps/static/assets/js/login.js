@@ -6,9 +6,11 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    toggleButton.addEventListener("click", function () {
-        const isPassword = passwordInput.getAttribute("type") === "password";
-        passwordInput.setAttribute("type", isPassword ? "text" : "password");
-        toggleButton.setAttribute("aria-pressed", String(isPassword));
-    });
+    if (toggleButton && passwordInput) {
+        toggleButton.addEventListener("click", function () {
+            const isPassword = passwordInput.getAttribute("type") === "password";
+            passwordInput.setAttribute("type", isPassword ? "text" : "password");
+            toggleButton.setAttribute("aria-pressed", String(isPassword));
+        });
+    }
 });

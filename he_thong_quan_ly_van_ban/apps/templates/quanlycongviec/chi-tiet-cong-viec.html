@@ -139,21 +139,24 @@
 
     /* Redesigned Document List */
     .doc-list-section {
-        margin-top: 32px;
+        margin-top: 40px;
         margin-bottom: 32px;
+        border: 1px solid #E5E7EB;
     }
 
     .doc-list-header {
         display: flex;
         align-items: center;
-        margin-bottom: 20px;
+        padding: 12px 16px;
+        background: #F8FAFC;
+        border-bottom: 1px solid #E5E7EB;
     }
 
     .doc-header-bar {
         width: 3px;
         height: 18px;
         background: #0284C7;
-        margin-right: 10px;
+        margin-right: 12px;
     }
 
     .doc-header-text {
@@ -164,52 +167,69 @@
         letter-spacing: 0.5px;
     }
 
+    .doc-list-body {
+        padding: 24px;
+    }
+
+    .file-group-label {
+        font-size: 14px;
+        color: #64748B;
+        margin-bottom: 12px;
+    }
+
     .file-cards-container {
         display: flex;
-        flex-direction: column;
-        gap: 12px;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
     }
 
     .file-card {
         display: flex;
         align-items: center;
-        padding: 16px;
-        background: #FFFFFF;
-        border: 1px solid #E2E8F0;
+        padding: 12px;
+        background: #F3F4F6;
+        border: 1px solid transparent;
         text-decoration: none;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.2s ease;
         cursor: pointer;
+        width: 280px;
         position: relative;
     }
 
     .file-card:hover {
-        border-color: #0284C7;
-        background: #F8FAFC;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        background: #E5E7EB;
     }
 
     .file-card.active {
-        border: 2px solid #3B82F6;
-        background: #F0F7FF;
+        border: 1px dotted #3B82F6;
+        background: #F3F4F6;
+        outline: 2px solid rgba(59, 130, 246, 0.1);
     }
 
-    .file-type-icon {
-        width: 48px;
+    .file-card-icon {
+        width: 44px;
         height: 48px;
+        background: white;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
-        font-weight: 800;
-        font-size: 13px;
-        margin-right: 16px;
+        margin-right: 12px;
         flex-shrink: 0;
+        border: 1px solid #E5E7EB;
     }
 
-    .icon-pdf { color: #EF4444; }
-    .icon-docx { color: #3B82F6; }
-    .icon-xlsx { color: #10B981; }
-    .icon-generic { color: #64748B; }
+    .file-badge {
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .badge-pdf { color: #EF4444; }
+    .badge-doc { color: #3B82F6; }
+    .badge-xls { color: #10B981; }
+    .badge-file { color: #64748B; }
 
     .file-info {
         flex: 1;
@@ -218,7 +238,7 @@
 
     .file-name {
         display: block;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 700;
         color: #1E293B;
         margin-bottom: 2px;
@@ -227,63 +247,62 @@
         text-overflow: ellipsis;
     }
 
-    .file-meta {
+    .file-type-desc {
         display: block;
-        font-size: 12px;
+        font-size: 11px;
         color: #94A3B8;
         font-weight: 500;
     }
 
     /* Preview Section Enhancements */
     .preview-container {
-        margin-top: 32px;
-        background: #F1F5F9;
-        padding: 24px;
-        border: 1px solid #E2E8F0;
+        margin-bottom: 24px;
+        background: white;
+        padding: 0;
+        border: 1px solid #E5E7EB;
     }
 
     .preview-top-bar {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 16px;
+        padding: 8px 16px;
+        background: #333;
+        color: white;
     }
 
     .preview-label {
-        font-size: 13px;
-        font-weight: 600;
-        color: #64748B;
+        font-size: 12px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.8);
     }
 
     .preview-actions {
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 12px;
     }
 
-    .btn-icon {
-        background: white;
-        border: 1px solid #E2E8F0;
-        padding: 6px 12px;
-        font-size: 12px;
-        font-weight: 600;
-        color: #1E293B;
-        display: flex;
-        align-items: center;
-        gap: 6px;
+    .preview-btn-icon {
+        background: transparent;
+        border: none;
+        color: white;
         cursor: pointer;
-        transition: all 0.2s;
+        padding: 4px;
+        opacity: 0.8;
+        transition: opacity 0.2s;
     }
 
-    .btn-icon:hover {
-        background: #F8FAFC;
-        border-color: #CBD5E1;
+    .preview-btn-icon:hover {
+        opacity: 1;
     }
 
     .viewer-wrapper {
-        background: #FFFFFF;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        background: #525659;
         min-height: 800px;
+        display: flex;
+        justify-content: center;
+        overflow: auto;
     }
 
     /* Standardized Badges */
@@ -394,7 +413,7 @@
                     <path fill="currentColor"
                         d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z" />
                 </svg>
-                Hoàn trả giao việc
+                Hoàn trả
             </a>
 
             <button type="button" class="btn btn-primary" id="btnProcessTask"
@@ -495,6 +514,29 @@
             {{ task.noi_dung_cong_viec|linebreaks }}
         </div>
 
+        {% with return_records=task.hoantracongviec_set.all %}
+        {% if return_records %}
+        <span class="section-title" style="color:#EF4444;">Lý do hoàn trả</span>
+        <div class="section-content" style="border-left: 4px solid #EF4444; background: #FEF2F2; margin-bottom: 24px;">
+            {% for record in return_records %}
+                <div style="margin-bottom: {% if not forloop.last %}16px{% else %}0{% endif %};">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <span style="font-size: 12px; font-weight: 700; color: #991B1B; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Lần hoàn trả #{{ forloop.revcounter }}
+                        </span>
+                        <span style="font-size: 12px; font-weight: 600; color: #B91C1C;">
+                            {{ record.ngay_hoan_tra|date:"d/m/Y" }}
+                        </span>
+                    </div>
+                    <div style="font-size: 14px; color: #7F1D1D; line-height: 1.5;">
+                        {{ record.noi_dung|linebreaks }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
         <div class="note-section">
             <span class="note-label">Ghi chú:</span>
             <span class="note-value">{% if task.van_ban and task.van_ban.do_khan %}{{ task.van_ban.do_khan }}{% else
@@ -514,61 +556,101 @@
                 <div class="doc-header-text">DANH SÁCH VĂN BẢN</div>
             </div>
             
-            <div style="font-size: 13px; color: #64748B; margin-bottom: 12px;">File đính kèm:</div>
-            
-            <div class="file-cards-container" id="fileCardsContainer">
-                {% for f in attachments %}
-                <div class="file-card {% if forloop.first %}active{% endif %}" 
-                     data-url="{{ f.file_van_ban.url }}" 
-                     data-name="{{ f.file_van_ban.name }}"
-                     onclick="previewFile(this)">
-                    <div class="file-type-icon 
-                        {% if f.file_van_ban.name|lower|slice:'-4:' == '.pdf' %}icon-pdf
-                        {% elif f.file_van_ban.name|lower|slice:'-5:' == '.docx' or f.file_van_ban.name|lower|slice:'-4:' == '.doc' %}icon-docx
-                        {% elif f.file_van_ban.name|lower|slice:'-5:' == '.xlsx' or f.file_van_ban.name|lower|slice:'-4:' == '.xls' %}icon-xlsx
-                        {% else %}icon-generic{% endif %}">
-                        {% if f.file_van_ban.name|lower|slice:'-4:' == '.pdf' %}PDF
-                        {% elif f.file_van_ban.name|lower|slice:'-5:' == '.docx' or f.file_van_ban.name|lower|slice:'-4:' == '.doc' %}DOCX
-                        {% elif f.file_van_ban.name|lower|slice:'-5:' == '.xlsx' or f.file_van_ban.name|lower|slice:'-4:' == '.xls' %}XLSX
-                        {% else %}FILE{% endif %}
-                    </div>
-                    <div class="file-info">
-                        <span class="file-name">{{ f.file_van_ban.name }}</span>
-                        <span class="file-meta">
-                            {% if f.file_van_ban.name|lower|slice:'-4:' == '.pdf' %}PDF Document
-                            {% elif f.file_van_ban.name|lower|slice:'-5:' == '.docx' or f.file_van_ban.name|lower|slice:'-4:' == '.doc' %}Word Document
-                            {% elif f.file_van_ban.name|lower|slice:'-5:' == '.xlsx' or f.file_van_ban.name|lower|slice:'-4:' == '.xls' %}Excel Spreadsheet
-                            {% else %}Document Attachment{% endif %}
-                        </span>
+            <div class="doc-list-body">
+                {% if main_attachment %}
+                <div class="file-group-label">File đính kèm:</div>
+                <div class="file-cards-container">
+                    <div class="file-card {% if first_pdf == main_attachment %}active{% endif %}" 
+                         data-url="{{ main_attachment.file_van_ban.url }}" 
+                         data-name="{{ main_attachment.file_van_ban.name }}"
+                         onclick="previewFile(this)">
+                        <div class="file-card-icon">
+                            {% with ext=main_attachment.file_van_ban.name|lower %}
+                            {% if ".pdf" in ext %}
+                                <span class="file-badge badge-pdf">PDF</span>
+                            {% elif ".doc" in ext or ".docx" in ext %}
+                                <span class="file-badge badge-doc">DOCX</span>
+                            {% elif ".xls" in ext or ".xlsx" in ext %}
+                                <span class="file-badge badge-xls">XLSX</span>
+                            {% else %}
+                                <span class="file-badge badge-file">FILE</span>
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+                        <div class="file-info">
+                            <div class="file-name">{{ main_attachment.file_van_ban.name }}</div>
+                            <div class="file-type-desc">
+                                {% with ext=main_attachment.file_van_ban.name|lower %}
+                                {% if ".pdf" in ext %}PDF Document{% elif ".doc" in ext or ".docx" in ext %}Word Document{% elif ".xls" in ext or ".xlsx" in ext %}Excel Spreadsheet{% else %}File{% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
                     </div>
                 </div>
-                {% empty %}
-                <div style="color:#94A3B8; font-size:14px; font-style:italic; padding: 16px; background: #F8FAFC; border: 1px dashed #E2E8F0;">
-                    Không có file đính kèm
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
+                {% endif %}
 
-    <div class="preview-container" id="previewContainer" {% if not attachments %}style="display:none;"{% endif %}>
-        <div class="preview-top-bar">
-            <div class="preview-label">Xem trước</div>
-            <div class="preview-actions">
-                <button class="btn-icon" onclick="openInNewTab()">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                        <polyline points="15 3 21 3 21 9"></polyline>
-                        <line x1="10" y1="14" x2="21" y2="3"></line>
-                    </svg>
-                    Mở tab mới
-                </button>
+                <!-- Preview Container in the middle -->
+                <div class="preview-container" id="previewContainer" {% if not attachments %}style="display:none;"{% endif %}>
+                    <div class="preview-top-bar">
+                        <div class="preview-label" id="previewFilename">
+                            {% if first_pdf %}{{ first_pdf.file_van_ban.name }}{% elif attachments %}{{ attachments.0.file_van_ban.name }}{% endif %}
+                        </div>
+                        <div class="preview-actions">
+                            <button class="preview-btn-icon" onclick="openInNewTab()" title="Mở tab mới">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                    <polyline points="15 3 21 3 21 9"></polyline>
+                                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="viewer-wrapper">
+                        <iframe id="mainViewer" class="pdf-viewer" src="{% if first_pdf %}{{ first_pdf.file_van_ban.url }}#toolbar=0{% elif attachments %}{{ attachments.0.file_van_ban.url }}{% endif %}" frameborder="0"></iframe>
+                    </div>
+                </div>
+
+                {% if related_files %}
+                <div class="file-group-label" style="margin-top: 16px;">Tài liệu liên quan:</div>
+                <div class="file-cards-container" id="fileCardsContainer">
+                    {% for f in related_files %}
+                    <div class="file-card {% if first_pdf == f %}active{% endif %}" 
+                         data-url="{{ f.file_van_ban.url }}" 
+                         data-name="{{ f.file_van_ban.name }}"
+                         onclick="previewFile(this)">
+                        <div class="file-card-icon">
+                            {% with ext=f.file_van_ban.name|lower %}
+                            {% if ".pdf" in ext %}
+                                <span class="file-badge badge-pdf">PDF</span>
+                            {% elif ".doc" in ext or ".docx" in ext %}
+                                <span class="file-badge badge-doc">DOCX</span>
+                            {% elif ".xls" in ext or ".xlsx" in ext %}
+                                <span class="file-badge badge-xls">XLSX</span>
+                            {% else %}
+                                <span class="file-badge badge-file">FILE</span>
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+                        <div class="file-info">
+                            <div class="file-name">{{ f.file_van_ban.name }}</div>
+                            <div class="file-type-desc">
+                                {% with ext=f.file_van_ban.name|lower %}
+                                {% if ".pdf" in ext %}PDF Document{% elif ".doc" in ext or ".docx" in ext %}Word Document{% elif ".xls" in ext or ".xlsx" in ext %}Excel Spreadsheet{% else %}File{% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if not main_attachment and not related_files %}
+                <div style="padding: 24px; text-align: center; color: #94A3B8; font-style: italic;">
+                    Không có văn bản hoặc tài liệu nào được đính kèm.
+                </div>
+                {% endif %}
             </div>
         </div>
-        <div class="viewer-wrapper">
-            <iframe id="mainViewer" class="pdf-viewer" src="{% if first_pdf %}{{ first_pdf.file_van_ban.url }}#toolbar=0{% elif attachments %}{{ attachments.0.file_van_ban.url }}{% endif %}" frameborder="0"></iframe>
-        </div>
-    </div>
 
     <!-- Process/Result Task Modal -->
     <div id="processTaskOverlay" class="modal-overlay"
@@ -666,14 +748,17 @@
 
         // Update viewer
         const url = element.getAttribute('data-url');
+        const name = element.getAttribute('data-name');
         const viewer = document.getElementById('mainViewer');
+        const filenameDisplay = document.getElementById('previewFilename');
         
+        if (filenameDisplay) {
+            filenameDisplay.innerText = name;
+        }
+
         // Append #toolbar=0 for PDFs to match screenshot style
         const finalUrl = url.toLowerCase().endsWith('.pdf') ? url + '#toolbar=0' : url;
         viewer.src = finalUrl;
-        
-        // Scroll to preview if mobile?
-        // document.getElementById('previewContainer').scrollIntoView({ behavior: 'smooth' });
     }
 
     function openInNewTab() {
