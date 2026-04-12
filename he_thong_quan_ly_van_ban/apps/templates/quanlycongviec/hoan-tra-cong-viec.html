@@ -1,134 +1,173 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Hoàn trả công việc - Hệ thống quản lý văn bản{% endblock %}
+{% block title %}Hoàn trả văn bản - Hệ thống quản lý văn bản{% endblock %}
 
 {% block extra_css %}
 <style>
+    /* Premium Centered Form Styles */
+    .return-page-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 20px;
+    }
+
     .return-card {
-        background: #fff;
-        padding: 40px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        margin-top: 16px;
-        min-height: 400px;
+        background: white;
+        width: 100%;
+        max-width: 650px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        flex-direction: column;
+        animation: cardAppear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes cardAppear {
+        from { opacity: 0; transform: translateY(20px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .return-header {
+        padding: 40px 48px 24px;
     }
 
     .return-title {
         font-size: 24px;
-        font-weight: 700;
+        font-weight: 800;
         color: #0284C7;
-        margin-bottom: 32px;
+        margin-bottom: 24px;
+        letter-spacing: -0.02em;
     }
 
-    .info-section {
+    .return-info-item {
         margin-bottom: 24px;
     }
 
-    .info-label {
-        font-size: 16px;
+    .return-label {
+        font-size: 15px;
         font-weight: 700;
         color: #1E293B;
         margin-bottom: 12px;
         display: block;
     }
 
-    .reason-textarea {
+    .specialist-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: #334155;
+        padding-left: 4px;
+    }
+
+    .return-textarea {
         width: 100%;
+        min-height: 180px;
+        background: #F8FAFC;
         border: 1px solid #E2E8F0;
         padding: 16px;
-        font-size: 14px;
-        color: #334155;
-        outline: none;
-        transition: border-color 0.2s;
-        min-height: 120px;
+        font-size: 15px;
+        color: #1E293B;
+        line-height: 1.6;
+        transition: all 0.2s;
         resize: vertical;
     }
 
-    .reason-textarea:focus {
+    .return-textarea:focus {
+        background: white;
         border-color: #0284C7;
+        box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.1);
+        outline: none;
     }
 
-    .return-actions {
+    .return-textarea::placeholder {
+        color: #94A3B8;
+    }
+
+    .return-footer {
+        padding: 24px 48px 48px;
         display: flex;
         justify-content: flex-end;
-        gap: 12px;
-        margin-top: 32px;
+        gap: 16px;
+    }
+
+    .btn-return {
+        padding: 12px 40px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 120px;
     }
 
     .btn-return-cancel {
         background: #F1F5F9;
         color: #475569;
-        padding: 10px 32px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: background 0.2s;
-        border: none;
-        cursor: pointer;
     }
 
     .btn-return-cancel:hover {
         background: #E2E8F0;
+        color: #1E293B;
     }
 
     .btn-return-save {
-        background: #0284C7;
+        background: #94A3B8; /* Generic gray-blue from screenshot */
         color: white;
-        padding: 10px 32px;
-        font-weight: 600;
-        transition: background 0.2s;
-        border: none;
-        cursor: pointer;
     }
 
     .btn-return-save:hover {
-        background: #0369A1;
+        background: #0284C7; /* Switch to primary blue on hover */
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
     }
-    /* Global square transformation for this module only */
+
+    /* Global square transformation */
     *:not(.badge):not([class*="badge-"]) {
         border-radius: 0 !important;
     }
 </style>
 {% endblock %}
 
-{% block breadcrumb %}
-    <a href="{% url 'core:dashboard' %}">
-        <svg width="14" height="14" viewBox="0 0 24 24">
-            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-        </svg>
-        Trang chủ
-    </a>
-    <span class="breadcrumb-sep">›</span>
-    <a href="{% url 'quanlycongviec:giao_viec' %}">Quản lý công việc</a>
-    <span class="breadcrumb-sep">›</span>
-    <a href="{% url 'quanlycongviec:task_detail' task.pk %}">Thông tin chi tiết công việc</a>
-    <span class="breadcrumb-sep">›</span>
-    <span>Hoàn trả công việc</span>
-{% endblock %}
+{% block page_wrapper %}
+<div class="return-page-wrapper">
+    <div class="return-card">
+        <div class="return-header">
+            <h1 class="return-title">Hoàn trả văn bản</h1>
+            
+            <div class="return-info-item">
+                <span class="return-label">Chuyên viên : <span class="specialist-name">{{ user.core_profile.ho_va_ten }}</span></span>
+            </div>
 
-{% block content %}
-<div class="return-card">
-    <h1 class="return-title">Hoàn trả công việc</h1>
+            <form action="{% url 'quanlycongviec:return_task' task.pk %}" method="POST">
+                {% csrf_token %}
+                <div class="return-info-item">
+                    <label class="return-label" for="noi_dung">Lý do / Yêu cầu chỉnh sửa</label>
+                    <textarea 
+                        id="noi_dung" 
+                        name="noi_dung" 
+                        class="return-textarea" 
+                        placeholder="Nhập lý do / Yêu cầu chỉnh sửa cho văn thư..."
+                        required
+                    ></textarea>
+                </div>
 
-    <div class="info-section">
-        <span class="info-label">Lãnh đạo : {{ task.nguoi_giao.ho_va_ten }}</span>
+                <div class="return-footer">
+                    <a href="{% url 'quanlycongviec:task_detail' task.pk %}" class="btn-return btn-return-cancel">Hủy</a>
+                    <button type="submit" class="btn-return btn-return-save">Lưu</button>
+                </div>
+            </form>
+        </div>
     </div>
-
-    <form method="POST">
-        {% csrf_token %}
-        <div class="info-section">
-            <label class="info-label">Lý do hoàn trả</label>
-            <textarea 
-                name="noi_dung" 
-                class="reason-textarea" 
-                placeholder="Nhập chi tiết lý do, nội dung sai sót hoặc đề xuất chỉnh sửa để Lãnh đạo nắm thông tin..."
-                required
-            ></textarea>
-        </div>
-
-        <div class="return-actions">
-            <a href="{% url 'quanlycongviec:task_detail' task.pk %}" class="btn-return-cancel">Hủy</a>
-            <button type="submit" class="btn-return-save">Lưu</button>
-        </div>
-    </form>
 </div>
 {% endblock %}

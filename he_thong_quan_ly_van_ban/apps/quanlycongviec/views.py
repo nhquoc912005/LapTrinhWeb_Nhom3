@@ -82,6 +82,20 @@ def add_task(request):
                 messages.error(request, "Định dạng ngày tháng không hợp lệ.")
                 return redirect('quanlycongviec:giao_viec')
 
+            # Kiểm tra ngày bắt đầu không được trong quá khứ
+            today = timezone.now().date()
+            if ngay_bat_dau < today:
+                messages.error(request, "Ngày bắt đầu không được nhỏ hơn ngày hiện tại.")
+                return redirect('quanlycongviec:giao_viec')
+            
+            if han_xu_ly.date() < today:
+                messages.error(request, "Hạn xử lý không được nhỏ hơn ngày hiện tại.")
+                return redirect('quanlycongviec:giao_viec')
+                
+            if han_xu_ly.date() < ngay_bat_dau:
+                messages.error(request, "Hạn xử lý không được nhỏ hơn ngày bắt đầu.")
+                return redirect('quanlycongviec:giao_viec')
+
             # Tạo công việc
             task = CongViec.objects.create(
                 ten_cong_viec=ten_cv,
@@ -94,10 +108,16 @@ def add_task(request):
                 han_xu_ly=han_xu_ly
             )
 
-            # Xử lý file đính kèm
-            files = request.FILES.getlist('file_dinh_kem') + request.FILES.getlist('tai_lieu_lien_quan')
-            for f in files:
-                FileCVLienQuan.objects.create(cong_viec=task, file_van_ban=f, kich_thuoc=f.size)
+            # Xử lý file đính kèm chính
+            main_files = request.FILES.getlist('file_dinh_kem')
+            for f in main_files:
+                # Mặc dù input không có multiple, getlist/for loop vẫn an toàn
+                FileCVLienQuan.objects.create(cong_viec=task, file_van_ban=f, kich_thuoc=f.size, loai_file='CHINH')
+            
+            # Xử lý tài liệu liên quan
+            ref_files = request.FILES.getlist('tai_lieu_lien_quan')
+            for f in ref_files:
+                FileCVLienQuan.objects.create(cong_viec=task, file_van_ban=f, kich_thuoc=f.size, loai_file='LIEN_QUAN')
 
             # Người phối hợp
             if nguoi_phoi_hop_id:
@@ -129,6 +149,11 @@ def delete_task(request, task_id):
 @role_required(Customer.Role.LANH_DAO)
 def edit_task(request, task_id):
     task = get_object_or_404(CongViec, pk=task_id)
+    
+    if task.trang_thai not in ["Chờ xử lý", "Hoàn trả"]:
+        messages.error(request, "Công việc này hiện không thể chỉnh sửa (chỉ cho phép chỉnh sửa ở trạng thái Chờ xử lý hoặc Hoàn trả).")
+        return redirect('quanlycongviec:task_detail', task_id=task.pk)
+
     if request.method == "POST":
         try:
             task.ten_cong_viec = request.POST.get('ten_cv')
@@ -148,6 +173,20 @@ def edit_task(request, task_id):
                 naive_han_xu_ly = datetime.strptime(han_xu_ly_str, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
                 task.han_xu_ly = make_aware(naive_han_xu_ly)
 
+            # Kiểm tra logic ngày tháng sau khi cập nhật
+            today = timezone.now().date()
+            if task.ngay_bat_dau < today:
+                messages.error(request, "Ngày bắt đầu không được nhỏ hơn ngày hiện tại.")
+                return redirect('quanlycongviec:giao_viec')
+            
+            if task.han_xu_ly.date() < today:
+                messages.error(request, "Hạn xử lý không được nhỏ hơn ngày hiện tại.")
+                return redirect('quanlycongviec:giao_viec')
+
+            if task.han_xu_ly.date() < task.ngay_bat_dau:
+                messages.error(request, "Hạn xử lý không được nhỏ hơn ngày bắt đầu.")
+                return redirect('quanlycongviec:giao_viec')
+
             task.save()
             
             # Cập nhật người phối hợp
@@ -156,10 +195,27 @@ def edit_task(request, task_id):
                 nguoi_phoi_hop = get_object_or_404(NguoiDung, pk=nguoi_phoi_hop_id)
                 PhanCongCongViec.objects.create(cong_viec=task, nguoi_phoi_hop=nguoi_phoi_hop)
 
-            # Thêm file mới
-            files = request.FILES.getlist('file_dinh_kem') + request.FILES.getlist('tai_lieu_lien_quan')
-            for f in files:
-                FileCVLienQuan.objects.create(cong_viec=task, file_van_ban=f, kich_thuoc=f.size)
+            # Xử lý xóa file cũ theo đánh dấu từ UI
+            deleted_ids = request.POST.get('delete_files', '').split(',')
+            for fid in deleted_ids:
+                if fid.strip():
+                    try:
+                        FileCVLienQuan.objects.filter(pk=fid, cong_viec=task).delete()
+                    except (ValueError, FileCVLienQuan.DoesNotExist):
+                        pass
+
+            # Xử lý file đính kèm chính (Thay thế nếu có file mới)
+            main_files = request.FILES.getlist('file_dinh_kem')
+            if main_files:
+                # Xóa file chính cũ trước khi lưu file mới (Đảm bảo chỉ có 1)
+                FileCVLienQuan.objects.filter(cong_viec=task, loai_file='CHINH').delete()
+                for f in main_files:
+                    FileCVLienQuan.objects.create(cong_viec=task, file_van_ban=f, kich_thuoc=f.size, loai_file='CHINH')
+
+            # Xử lý tài liệu liên quan (Thêm mới)
+            ref_files = request.FILES.getlist('tai_lieu_lien_quan')
+            for f in ref_files:
+                FileCVLienQuan.objects.create(cong_viec=task, file_van_ban=f, kich_thuoc=f.size, loai_file='LIEN_QUAN')
 
             messages.success(request, f"Đã cập nhật công việc '{task.ten_cong_viec}' thành công.")
             return redirect('quanlycongviec:task_detail', task_id=task.pk)
@@ -222,9 +278,11 @@ def get_task_detail(request, task_id):
     file_list = []
     for f in attachments:
         file_list.append({
+            'id': f.pk,
             'name': f.file_van_ban.name.split('/')[-1],
             'url': f.file_van_ban.url,
-            'size': f"{f.kich_thuoc / 1024:.1f} KB" if f.kich_thuoc else "N/A"
+            'size': f"{f.kich_thuoc / 1024:.1f} KB" if f.kich_thuoc else "N/A",
+            'loai_file': f.loai_file
         })
 
     data = {
@@ -270,24 +328,37 @@ def start_task(request, task_id):
 def task_detail(request, task_id):
     task = get_object_or_404(CongViec, pk=task_id)
     collaborators = PhanCongCongViec.objects.filter(cong_viec=task)
+    
+    # Tách biệt file chính và tài liệu liên quan
+    main_attachment = FileCVLienQuan.objects.filter(cong_viec=task, loai_file='CHINH').first()
+    related_files = FileCVLienQuan.objects.filter(cong_viec=task, loai_file='LIEN_QUAN')
+    
     attachments = FileCVLienQuan.objects.filter(cong_viec=task)
     task_code = f"GV-{task.pk:03d}"
     
     first_pdf = None
-    for att in attachments:
-        if att.file_van_ban.name.lower().endswith('.pdf'):
-            first_pdf = att
-            break
+    # Ưu tiên xem trước file chính nếu là PDF
+    if main_attachment and main_attachment.file_van_ban.name.lower().endswith('.pdf'):
+        first_pdf = main_attachment
+    else:
+        for att in attachments:
+            if att.file_van_ban.name.lower().endswith('.pdf'):
+                first_pdf = att
+                break
 
     context = {
         'task': task,
         'task_code': task_code,
         'collaborators': collaborators,
+        'main_attachment': main_attachment,
+        'related_files': related_files,
         'attachments': attachments,
         'first_pdf': first_pdf,
         'can_approve': request.user.is_lanh_dao and task.trang_thai == "Chờ duyệt",
-        'can_start': (request.user.is_chuyen_vien or task.nguoi_thuc_hien == request.user.core_profile) and task.trang_thai in ["Chờ xử lý", "Hoàn trả"],
-        'can_edit': request.user.is_lanh_dao,
+        'can_return': (request.user.is_lanh_dao and task.trang_thai in ["Chờ duyệt", "Hoàn trả"]) or \
+                      (request.user.is_chuyen_vien and task.trang_thai in ["Chờ xử lý", "Hoàn trả"]),
+        'can_start': request.user.is_chuyen_vien and task.trang_thai in ["Chờ xử lý", "Hoàn trả"],
+        'can_edit': request.user.is_lanh_dao and task.trang_thai in ["Chờ xử lý", "Hoàn trả"],
         'can_delete': request.user.is_lanh_dao and task.trang_thai == "Chờ xử lý",
     }
     return render(request, "quanlycongviec/chi-tiet-cong-viec.html", context)
