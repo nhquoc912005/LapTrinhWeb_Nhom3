@@ -8,7 +8,6 @@
     .detail-card {
         background: #fff;
         padding: 32px;
-        border-radius: 8px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         margin-top: 16px;
     }
@@ -91,7 +90,6 @@
         color: #334155;
         background: #F8FAFC;
         padding: 16px;
-        border-radius: 6px;
         margin-bottom: 24px;
     }
 
@@ -107,7 +105,6 @@
         align-items: center;
         padding: 8px 12px;
         background: #F1F5F9;
-        border-radius: 4px;
         text-decoration: none;
         color: #0284C7;
         font-size: 14px;
@@ -137,16 +134,46 @@
         width: 100%;
         height: 800px;
         border: 1px solid #CBD5E1;
-        border-radius: 4px;
         background: #525659;
     }
 
     /* Standardized Badges */
-    .badge-cho-xu-ly { background: #FEF3C7; color: #D97706; padding: 6px 16px; border-radius: 20px; font-weight: 600; font-size: 13px; } /* Improved yellow */
-    .badge-dang-xu-ly { background: #DBEAFE; color: #1E40AF; padding: 6px 16px; border-radius: 20px; font-weight: 600; font-size: 13px; }
-    .badge-cho-duyet { background: #F3E8FF; color: #6B21A8; padding: 6px 16px; border-radius: 20px; font-weight: 600; font-size: 13px; }
-    .badge-hoan-tra { background: #FEE2E2; color: #991B1B; padding: 6px 16px; border-radius: 20px; font-weight: 600; font-size: 13px; }
-    .badge-da-hoan-thanh { background: #D1FAE5; color: #065F46; padding: 6px 16px; border-radius: 20px; font-weight: 600; font-size: 13px; }
+    .badge-cho-xu-ly {
+        background: #FEF3C7;
+        color: #D97706;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    /* Improved yellow */
+    .badge-cho-duyet {
+        background: #F3E8FF;
+        color: #6B21A8;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    .badge-hoan-tra {
+        background: #FEE2E2;
+        color: #991B1B;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    .badge-da-hoan-thanh {
+        background: #D1FAE5;
+        color: #065F46;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 13px;
+    }
 
     .info-wrapper {
         margin-top: 24px;
@@ -167,20 +194,28 @@
         font-weight: 700;
         color: #1E293B;
     }
+    /* Global square transformation */
+    *:not(.badge):not([class*="badge-"]) {
+        border-radius: 0 !important;
+    }
+    
+    .badge-cho-xu-ly, .badge-cho-duyet, .badge-hoan-tra, .badge-da-hoan-thanh {
+        border-radius: 20px !important;
+    }
 </style>
 {% endblock %}
 
 {% block breadcrumb %}
-    <a href="{% url 'core:dashboard' %}">
-        <svg width="14" height="14" viewBox="0 0 24 24">
-            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-        </svg>
-        Trang chủ
-    </a>
-    <span class="breadcrumb-sep">›</span>
-    <a href="{% url 'quanlycongviec:giao_viec' %}">Quản lý công việc</a>
-    <span class="breadcrumb-sep">›</span>
-    <span>Thông tin chi tiết công việc</span>
+<a href="{% url 'core:dashboard' %}">
+    <svg width="14" height="14" viewBox="0 0 24 24">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+    </svg>
+    Trang chủ
+</a>
+<span class="breadcrumb-sep">›</span>
+<a href="{% url 'quanlycongviec:giao_viec' %}">Quản lý công việc</a>
+<span class="breadcrumb-sep">›</span>
+<span>Thông tin chi tiết công việc</span>
 {% endblock %}
 
 {% block content %}
@@ -195,44 +230,55 @@
             <form action="{% url 'quanlycongviec:approve_task' task.pk %}" method="POST" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-primary" style="background:#10B981; border:none;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px; vertical-align:middle;"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px; vertical-align:middle;">
+                        <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                    </svg>
                     Phê duyệt
                 </button>
             </form>
             {% endif %}
 
             {% if can_start %}
-            <a href="{% url 'quanlycongviec:return_task' task.pk %}" class="btn btn-danger" style="background:#EF4444; border:none; color:white; display:inline-flex; align-items:center;">
-                <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px;"><path fill="currentColor" d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
+            <a href="{% url 'quanlycongviec:return_task' task.pk %}" class="btn btn-danger"
+                style="background:#EF4444; border:none; color:white; display:inline-flex; align-items:center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px;">
+                    <path fill="currentColor"
+                        d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z" />
+                </svg>
                 Hoàn trả giao việc
             </a>
 
-            {% if task.trang_thai == "Chờ xử lý" %}
-            <a href="{% url 'quanlycongviec:start_task' task.pk %}" class="btn btn-primary" style="background:#0284C7; border:none; color:white; display:inline-flex; align-items:center;">
-                <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px;"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                Xử lý
-            </a>
-            {% else %}
-            <button type="button" class="btn btn-primary" id="btnProcessTask" style="background:#0284C7; border:none; color:white; display:inline-flex; align-items:center;">
-                <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px;"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+            <button type="button" class="btn btn-primary" id="btnProcessTask"
+                style="background:#0284C7; border:none; color:white; display:inline-flex; align-items:center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px;">
+                    <path fill="currentColor"
+                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                </svg>
                 Xử lý
             </button>
             {% endif %}
-            {% endif %}
 
             {% if can_edit %}
-            <a href="{% url 'quanlycongviec:giao_viec' %}?edit={{ task.pk }}" class="btn btn-primary" style="background:#0284C7; border:none; color:white; display:inline-flex; align-items:center;">
-                <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px;"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+            <a href="{% url 'quanlycongviec:giao_viec' %}?edit={{ task.pk }}" class="btn btn-primary"
+                style="background:#0284C7; border:none; color:white; display:inline-flex; align-items:center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px;">
+                    <path fill="currentColor"
+                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                </svg>
                 Chỉnh sửa
             </a>
             {% endif %}
 
             {% if can_delete %}
             <button type="button" class="btn btn-danger" id="btnDeleteDetail">
-                <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px; vertical-align:middle;"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px; vertical-align:middle;">
+                    <path fill="currentColor"
+                        d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                </svg>
                 Xoá công việc
             </button>
-            <form id="deleteDetailForm" action="{% url 'quanlycongviec:delete_task' task.pk %}" method="POST" style="display:none;">
+            <form id="deleteDetailForm" action="{% url 'quanlycongviec:delete_task' task.pk %}" method="POST"
+                style="display:none;">
                 {% csrf_token %}
             </form>
             {% endif %}
@@ -241,17 +287,15 @@
 
     <div class="status-badge-container">
         {% if task.trang_thai == "Chờ xử lý" %}
-            <span class="badge badge-cho-xu-ly">{{ task.trang_thai }}</span>
-        {% elif task.trang_thai == "Đang xử lý" %}
-            <span class="badge badge-dang-xu-ly">{{ task.trang_thai }}</span>
+        <span class="badge badge-cho-xu-ly">{{ task.trang_thai }}</span>
         {% elif task.trang_thai == "Chờ duyệt" %}
-            <span class="badge badge-cho-duyet">{{ task.trang_thai }}</span>
+        <span class="badge badge-cho-duyet">{{ task.trang_thai }}</span>
         {% elif task.trang_thai == "Hoàn trả" %}
-            <span class="badge badge-hoan-tra">{{ task.trang_thai }}</span>
+        <span class="badge badge-hoan-tra">{{ task.trang_thai }}</span>
         {% elif task.trang_thai == "Đã hoàn thành" %}
-            <span class="badge badge-da-hoan-thanh">{{ task.trang_thai }}</span>
+        <span class="badge badge-da-hoan-thanh">{{ task.trang_thai }}</span>
         {% else %}
-            <span class="badge">{{ task.trang_thai }}</span>
+        <span class="badge">{{ task.trang_thai }}</span>
         {% endif %}
     </div>
 
@@ -280,9 +324,9 @@
             <span class="info-label">Người phối hợp</span>
             <div class="info-value">
                 {% for c in collaborators %}
-                    {{ c.nguoi_phoi_hop.ho_va_ten }}{% if not forloop.last %}, {% endif %}
+                {{ c.nguoi_phoi_hop.ho_va_ten }}{% if not forloop.last %}, {% endif %}
                 {% empty %}
-                    Không có
+                Không có
                 {% endfor %}
             </div>
         </div>
@@ -304,7 +348,8 @@
 
         <div class="note-section">
             <span class="note-label">Ghi chú:</span>
-            <span class="note-value">{% if task.van_ban and task.van_ban.do_khan %}{{ task.van_ban.do_khan }}{% else %}Bình thường{% endif %}</span>
+            <span class="note-value">{% if task.van_ban and task.van_ban.do_khan %}{{ task.van_ban.do_khan }}{% else
+                %}Bình thường{% endif %}</span>
         </div>
 
         {% if task.ket_qua_xu_ly %}
@@ -317,12 +362,15 @@
         <span class="section-title">File đính kèm</span>
         <div class="file-list">
             {% for f in attachments %}
-                <a href="{{ f.file_van_ban.url }}" class="file-item" target="_blank">
-                    <svg width="20" height="20" viewBox="0 0 24 24" style="margin-right:8px;"><path fill="currentColor" d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-                    {{ f.file_van_ban.name }}
-                </a>
+            <a href="{{ f.file_van_ban.url }}" class="file-item" target="_blank">
+                <svg width="20" height="20" viewBox="0 0 24 24" style="margin-right:8px;">
+                    <path fill="currentColor"
+                        d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+                </svg>
+                {{ f.file_van_ban.name }}
+            </a>
             {% empty %}
-                <div style="color:#94A3B8; font-size:14px; font-style:italic;">Không có file đính kèm</div>
+            <div style="color:#94A3B8; font-size:14px; font-style:italic;">Không có file đính kèm</div>
             {% endfor %}
         </div>
     </div>
@@ -330,16 +378,24 @@
     {% if first_pdf %}
     <div class="preview-container">
         <div class="preview-header">XEM TRƯỚC</div>
-        <iframe class="pdf-viewer" src="{{ first_pdf.file_van_ban.url }}#toolbar=0" frameborder="0" style="width:100%; height:800px;"></iframe>
+        <iframe class="pdf-viewer" src="{{ first_pdf.file_van_ban.url }}#toolbar=0" frameborder="0"
+            style="width:100%; height:800px;"></iframe>
     </div>
     {% endif %}
 
     <!-- Process/Result Task Modal -->
-    <div id="processTaskOverlay" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); backdrop-filter:blur(4px); z-index:2000; align-items:center; justify-content:center;">
-        <div class="premium-modal" style="background:white; width:600px; max-width:90%; border-radius:12px; transform:scale(0.9); transition:transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+    <div id="processTaskOverlay" class="modal-overlay"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); backdrop-filter:blur(4px); z-index:2000; align-items:center; justify-content:center;">
+        <div class="premium-modal"
+            style="background:white; width:600px; max-width:90%; border-radius:12px; transform:scale(0.9); transition:transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
             <div class="modal-header" style="padding:24px 24px 12px; text-align:center;">
-                <div class="modal-icon-container" style="width:56px; height:56px; background:#DBEAFE; color:#1E40AF; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                <div class="modal-icon-container"
+                    style="width:56px; height:56px; background:#DBEAFE; color:#1E40AF; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
                 </div>
                 <h3 class="modal-title">CẬP NHẬT KẾT QUẢ XỬ LÝ</h3>
             </div>
@@ -347,12 +403,18 @@
                 {% csrf_token %}
                 <div class="modal-body" style="padding:0 24px 24px; text-align:left;">
                     <label class="section-title" style="margin-bottom:8px;">Kết quả công việc</label>
-                    <textarea name="ket_qua" class="form-control" rows="6" placeholder="Nhập chi tiết kết quả xử lý công việc..." required style="width:100%; border:1px solid #E2E8F0; border-radius:6px; padding:12px; font-size:14px; outline:none; transition:border-color 0.2s;"></textarea>
-                    <p style="font-size:12px; color:#64748B; margin-top:8px; font-style:italic;">* Sau khi gửi kết quả, trạng thái sẽ chuyển sang 'Chờ duyệt'.</p>
+                    <textarea name="ket_qua" class="form-control" rows="6"
+                        placeholder="Nhập chi tiết kết quả xử lý công việc..." required
+                        style="width:100%; border:1px solid #E2E8F0; border-radius:6px; padding:12px; font-size:14px; outline:none; transition:border-color 0.2s;"></textarea>
+                    <p style="font-size:12px; color:#64748B; margin-top:8px; font-style:italic;">* Sau khi gửi kết quả,
+                        trạng thái sẽ chuyển sang 'Chờ duyệt'.</p>
                 </div>
                 <div class="modal-footer" style="padding:16px 24px 24px; display:flex; gap:12px;">
-                    <button type="button" class="modal-btn btn-cancel-modal" id="btnCancelProcess" style="flex:1; padding:10px; border-radius:6px; font-weight:600; font-size:14px; cursor:pointer; background:#F8FAFC; color:#475569; border:1px solid #E2E8F0;">Hủy</button>
-                    <button type="submit" class="modal-btn btn-confirm-modal" style="flex:1; padding:10px; border-radius:6px; font-weight:600; font-size:14px; cursor:pointer; background:#0284C7; color:white; border:none; outline:none;">Gửi kết quả</button>
+                    <button type="button" class="modal-btn btn-cancel-modal" id="btnCancelProcess"
+                        style="flex:1; padding:10px; border-radius:6px; font-weight:600; font-size:14px; cursor:pointer; background:#F8FAFC; color:#475569; border:1px solid #E2E8F0;">Hủy</button>
+                    <button type="submit" class="modal-btn btn-confirm-modal"
+                        style="flex:1; padding:10px; border-radius:6px; font-weight:600; font-size:14px; cursor:pointer; background:#0284C7; color:white; border:none; outline:none;">Gửi
+                        kết quả</button>
                 </div>
             </form>
         </div>
@@ -362,10 +424,10 @@
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const btnDelete = document.getElementById('btnDeleteDetail');
         if (btnDelete) {
-            btnDelete.addEventListener('click', function(e) {
+            btnDelete.addEventListener('click', function (e) {
                 e.preventDefault();
                 window.confirmAction(
                     'Xác nhận xóa công việc',
@@ -383,7 +445,7 @@
         const btnCancelProcess = document.getElementById('btnCancelProcess');
 
         if (btnProcess) {
-            btnProcess.addEventListener('click', function() {
+            btnProcess.addEventListener('click', function () {
                 overlayProcess.style.display = 'flex';
                 setTimeout(() => {
                     overlayProcess.querySelector('.premium-modal').style.transform = 'scale(1)';
@@ -392,7 +454,7 @@
         }
 
         if (btnCancelProcess) {
-            btnCancelProcess.addEventListener('click', function() {
+            btnCancelProcess.addEventListener('click', function () {
                 overlayProcess.querySelector('.premium-modal').style.transform = 'scale(0.9)';
                 setTimeout(() => {
                     overlayProcess.style.display = 'none';
@@ -401,7 +463,7 @@
         }
 
         if (overlayProcess) {
-            overlayProcess.addEventListener('click', function(e) {
+            overlayProcess.addEventListener('click', function (e) {
                 if (e.target === overlayProcess) {
                     btnCancelProcess.click();
                 }
