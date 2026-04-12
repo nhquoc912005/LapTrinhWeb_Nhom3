@@ -99,7 +99,7 @@ table { border-collapse: collapse; width: 100%; }
   width: 80px;
   height: 80px;
   background: white;
-  border-radius: 50%;
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -154,7 +154,7 @@ table { border-collapse: collapse; width: 100%; }
 .login-error {
   background: #FEE2E2;
   border: 1px solid #FECACA;
-  border-radius: var(--radius);
+  border-radius: 0;
   color: #991B1B;
   padding: 10px 14px;
   font-size: 13px;
@@ -263,7 +263,7 @@ table { border-collapse: collapse; width: 100%; }
 .otp-input {
   width: 52px; height: 56px;
   border: 2px solid var(--border-color);
-  border-radius: var(--radius);
+  border-radius: 0;
   font-size: 24px;
   font-weight: 700;
   text-align: center;
@@ -342,7 +342,7 @@ table { border-collapse: collapse; width: 100%; }
 .header-brand-icon {
   width: 36px; height: 36px;
   background: rgba(255,255,255,0.2);
-  border-radius: 8px;
+  border-radius: 0;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
@@ -377,7 +377,7 @@ table { border-collapse: collapse; width: 100%; }
   gap: 10px;
   cursor: pointer;
   padding: 6px 10px;
-  border-radius: var(--radius);
+  border-radius: 0;
   transition: background var(--transition);
   position: relative;
 }
@@ -387,7 +387,7 @@ table { border-collapse: collapse; width: 100%; }
 .header-avatar {
   width: 34px; height: 34px;
   background: rgba(255,255,255,0.25);
-  border-radius: 50%;
+  border-radius: 0;
   display: flex; align-items: center; justify-content: center;
   font-size: 15px;
   font-weight: 700;
@@ -415,7 +415,7 @@ table { border-collapse: collapse; width: 100%; }
   right: 0;
   background: white;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius);
+  border-radius: 0;
   box-shadow: var(--shadow-md);
   min-width: 180px;
   z-index: 200;
@@ -461,7 +461,7 @@ table { border-collapse: collapse; width: 100%; }
 
 .header-nav::-webkit-scrollbar-thumb {
   background: rgba(255,255,255,0.2);
-  border-radius: 999px;
+  border-radius: 0;
 }
 
 .header-nav-list {
@@ -647,7 +647,7 @@ table { border-collapse: collapse; width: 100%; }
   content: '';
   width: 4px; height: 22px;
   background: var(--primary);
-  border-radius: 2px;
+  border-radius: 0;
   flex-shrink: 0;
 }
 
@@ -671,7 +671,7 @@ table { border-collapse: collapse; width: 100%; }
 .form-control {
   padding: 9px 12px;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius);
+  border-radius: 0;
   font-size: 14px;
   font-family: var(--font);
   color: var(--text-main);
@@ -713,7 +713,7 @@ textarea.form-control { resize: vertical; min-height: 90px; }
 /* File Upload */
 .file-upload-area {
   border: 2px dashed var(--border-color);
-  border-radius: var(--radius);
+  border-radius: 0;
   padding: 24px;
   text-align: center;
   cursor: pointer;
@@ -738,7 +738,7 @@ textarea.form-control { resize: vertical; min-height: 90px; }
   font-size: 14px;
   font-weight: 600;
   font-family: var(--font);
-  border-radius: var(--radius);
+  border-radius: 0;
   border: 1px solid transparent;
   cursor: pointer;
   transition: all var(--transition);
@@ -776,7 +776,7 @@ textarea.form-control { resize: vertical; min-height: 90px; }
   pointer-events: none;
 }
 
-.btn-icon { padding: 7px; border-radius: var(--radius); }
+.btn-icon { padding: 7px; border-radius: 0; }
 
 /* ------------------------------------------------------------
    8. CARD COMPONENT
@@ -784,7 +784,7 @@ textarea.form-control { resize: vertical; min-height: 90px; }
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius);
+  border-radius: 0;
   box-shadow: var(--shadow);
 }
 
@@ -810,11 +810,11 @@ textarea.form-control { resize: vertical; min-height: 90px; }
   content: '';
   width: 3px; height: 16px;
   background: var(--primary);
-  border-radius: 2px;
+  border-radius: 0;
 }
 
 .card-body { padding: 20px; }
-.card-footer { padding: 14px 20px; border-top: 1px solid var(--border-color); background: #fafbfc; border-radius: 0 0 var(--radius) var(--radius); }
+.card-footer { padding: 14px 20px; border-top: 1px solid var(--border-color); background: #fafbfc; border-radius: 0; }
 
 /* ------------------------------------------------------------
    9. FILTER BAR
@@ -822,7 +822,7 @@ textarea.form-control { resize: vertical; min-height: 90px; }
 .filter-card {
   background: white;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius);
+  border-radius: 0;
   padding: 18px 20px;
   margin-bottom: 16px;
   box-shadow: var(--shadow);
@@ -924,7 +924,7 @@ textarea.form-control { resize: vertical; min-height: 90px; }
 .table-container {
   overflow-x: auto;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius);
+  border-radius: 0;
   background: white;
   box-shadow: var(--shadow);
 }
@@ -1003,7 +1003,7 @@ td.td-truncate {
   padding: 12px 16px;
   border-top: 1px solid var(--border-color);
   background: white;
-  border-radius: 0 0 var(--radius) var(--radius);
+  border-radius: 0;
 }
 
 .pagination-info { font-size: 13px; color: var(--text-secondary); }
@@ -1017,7 +1017,7 @@ td.td-truncate {
   width: 32px; height: 32px;
   display: flex; align-items: center; justify-content: center;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 0;
   background: white;
   font-size: 13px;
   color: var(--text-secondary);
@@ -1037,7 +1037,7 @@ td.td-truncate {
   align-items: center;
   gap: 4px;
   padding: 3px 10px;
-  border-radius: 20px;
+  border-radius: 0;
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
@@ -1062,7 +1062,7 @@ td.td-truncate {
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: 0;
   font-size: 11.5px;
   font-weight: 700;
 }
@@ -1087,7 +1087,7 @@ td.td-truncate {
 
 .modal {
   background: white;
-  border-radius: 10px;
+  border-radius: 0;
   box-shadow: 0 20px 60px rgba(0,0,0,0.2);
   width: 100%;
   max-width: 800px;
@@ -1124,14 +1124,14 @@ td.td-truncate {
   content: '';
   width: 4px; height: 18px;
   background: var(--primary);
-  border-radius: 2px;
+  border-radius: 0;
 }
 
 .modal-close {
   width: 32px; height: 32px;
   border: none;
   background: #f3f4f6;
-  border-radius: var(--radius);
+  border-radius: 0;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   transition: background var(--transition);
@@ -1150,7 +1150,7 @@ td.td-truncate {
   justify-content: flex-end;
   gap: 10px;
   background: #fafbfc;
-  border-radius: 0 0 10px 10px;
+  border-radius: 0;
 }
 
 /* Section heading inside modal/form */
@@ -1178,7 +1178,7 @@ td.td-truncate {
 .stat-card {
   background: white;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius);
+  border-radius: 0;
   padding: 18px 20px;
   box-shadow: var(--shadow);
   display: flex;
@@ -1191,7 +1191,7 @@ td.td-truncate {
 
 .stat-icon {
   width: 44px; height: 44px;
-  border-radius: 10px;
+  border-radius: 0;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
@@ -1330,7 +1330,7 @@ td.td-truncate {
   background: var(--primary-light);
   border-left: 4px solid var(--primary);
   padding: 12px 16px;
-  border-radius: 0 var(--radius) var(--radius) 0;
+  border-radius: 0;
   font-size: 14px;
   color: var(--text-main);
   margin: 12px 0;
@@ -1345,11 +1345,11 @@ td.td-truncate {
   padding: 10px 14px;
   background: #f8fafc;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius);
+  border-radius: 0;
 }
 .file-item-icon {
   width: 34px; height: 34px;
-  border-radius: 6px;
+  border-radius: 0;
   display: flex; align-items: center; justify-content: center;
   font-size: 10px;
   font-weight: 800;
@@ -1382,7 +1382,7 @@ td.td-truncate {
 .toast {
   background: white;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius);
+  border-radius: 0;
   box-shadow: var(--shadow-md);
   padding: 12px 16px;
   display: flex;
@@ -1428,7 +1428,7 @@ td.td-truncate {
 
 .confirm-dialog {
   background: white;
-  border-radius: 10px;
+  border-radius: 0;
   box-shadow: 0 20px 60px rgba(0,0,0,0.2);
   padding: 28px 32px;
   max-width: 420px;
@@ -1439,7 +1439,7 @@ td.td-truncate {
 .confirm-icon {
   width: 56px; height: 56px;
   background: #FEE2E2;
-  border-radius: 50%;
+  border-radius: 0;
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 16px;
 }
@@ -1531,7 +1531,7 @@ td.td-truncate {
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s;
-  border-radius: 4px;
+  border-radius: 0;
   font-size: 14px;
 }
 .filter-tab.active {
