@@ -467,8 +467,8 @@ class VanBanHoanTra(models.Model):
 
 class CongViec(models.Model):
     NGUON_GIAO_CHOICES = (
-        ("Văn Bản đi", "Văn Bản đi"),
-        ("Văn Bản Đến", "Văn Bản Đến"),
+        ("Văn bản đến", "Văn bản đến"),
+        ("Văn bản đi", "Văn bản đi"),
     )
 
     cong_viec_id = models.AutoField(primary_key=True)
@@ -488,7 +488,6 @@ class CongViec(models.Model):
     )
     TRANG_THAI_CHOICES = (
         ("Chờ xử lý", "Chờ xử lý"),
-        ("Đang xử lý", "Đang xử lý"),
         ("Chờ duyệt", "Chờ duyệt"),
         ("Hoàn trả", "Hoàn trả"),
         ("Đã hoàn thành", "Đã hoàn thành"),

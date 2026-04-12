@@ -262,7 +262,7 @@ def start_task(request, task_id):
     else:
         messages.info(request, "Đã tiếp nhận công việc. Bắt đầu xử lý.")
         
-    task.trang_thai = "Đang xử lý"
+    # task.trang_thai = "Đang xử lý" # Removed
     task.save()
     return redirect('quanlycongviec:task_detail', task_id=task.pk)
 
@@ -286,7 +286,7 @@ def task_detail(request, task_id):
         'attachments': attachments,
         'first_pdf': first_pdf,
         'can_approve': request.user.is_lanh_dao and task.trang_thai == "Chờ duyệt",
-        'can_start': (request.user.is_chuyen_vien or task.nguoi_thuc_hien == request.user.core_profile) and task.trang_thai in ["Chờ xử lý", "Đang xử lý"],
+        'can_start': (request.user.is_chuyen_vien or task.nguoi_thuc_hien == request.user.core_profile) and task.trang_thai in ["Chờ xử lý", "Hoàn trả"],
         'can_edit': request.user.is_lanh_dao,
         'can_delete': request.user.is_lanh_dao and task.trang_thai == "Chờ xử lý",
     }
