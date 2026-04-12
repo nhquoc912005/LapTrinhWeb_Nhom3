@@ -467,8 +467,8 @@ class VanBanHoanTra(models.Model):
 
 class CongViec(models.Model):
     NGUON_GIAO_CHOICES = (
-        ("Văn Bản đi", "Văn Bản đi"),
-        ("Văn Bản Đến", "Văn Bản Đến"),
+        ("Văn bản đến", "Văn bản đến"),
+        ("Văn bản đi", "Văn bản đi"),
     )
 
     cong_viec_id = models.AutoField(primary_key=True)
@@ -476,7 +476,7 @@ class CongViec(models.Model):
         "core.VanBan",
         on_delete=models.CASCADE,
         db_column="van_ban_id",
-        null=False,
+        null=True, blank=True,
     )
     ten_cong_viec = models.CharField(max_length=255, null=False)
     noi_dung_cong_viec = models.TextField(null=False)
@@ -486,7 +486,19 @@ class CongViec(models.Model):
         blank=True,
         choices=NGUON_GIAO_CHOICES,
     )
-    trang_thai = models.CharField(max_length=255, null=False)
+    TRANG_THAI_CHOICES = (
+        ("Chờ xử lý", "Chờ xử lý"),
+        ("Chờ duyệt", "Chờ duyệt"),
+        ("Hoàn trả", "Hoàn trả"),
+        ("Đã hoàn thành", "Đã hoàn thành"),
+    )
+
+    trang_thai = models.CharField(
+        max_length=255, 
+        null=False,
+        choices=TRANG_THAI_CHOICES,
+        default="Chờ xử lý"
+    )
     ngay_bat_dau = models.DateField(null=False)
     han_xu_ly = models.DateTimeField(null=False)
     ngay_cap_nhat_giao_viec = models.DateField(default=timezone.now)

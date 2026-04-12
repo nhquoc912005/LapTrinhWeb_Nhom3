@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Xử lý Công việc - Hệ thống quản lý văn bản{% endblock %}
+
+{% block extra_css %}
+<style>
+    .badge-cho-xu-ly { background: #FEF3C7; color: #92400E; border-radius: 20px !important; } 
+    .badge-cho-duyet { background: #F3E8FF; color: #6B21A8; border-radius: 20px !important; } 
+    .badge-hoan-tra { background: #FEE2E2; color: #991B1B; border-radius: 20px !important; }
+    .badge-da-hoan-thanh { background: #D1FAE5; color: #065F46; border-radius: 20px !important; } 
+
+    /* Global square transformation */
+    *:not(.badge):not([class*="badge-"]) {
+        border-radius: 0 !important;
+    }
+
+    /* Filter Tabs Styling */
+    .filter-tabs {
+        display: flex;
+        background: #F1F5F9;
+        padding: 4px;
+        margin-bottom: 24px;
+        width: max-content;
+        border-radius: 0;
+    }
+
+    .filter-tab {
+        padding: 8px 20px;
+        border: none;
+        background: transparent;
+        color: #64748B;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        border-radius: 0;
+        white-space: nowrap;
+    }
+
+    .filter-tab:hover {
+        color: #0284C7;
+        background: rgba(2, 132, 199, 0.05);
+    }
+
+    .filter-tab.active {
+        background: white;
+        color: #0284C7;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'core:dashboard' %}">
+    <svg width="14" height="14" viewBox="0 0 24 24">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+    </svg>
+    Trang chủ
+</a>
+<span class="breadcrumb-sep">›</span>
+<span>Quản lý công việc</span>
+<span class="breadcrumb-sep">›</span>
+<span>Xử lý công việc</span>
+{% endblock %}
+
+{% block content %}
+<h1 class="page-title">XỬ LÝ CÔNG VIỆC</h1>
+
+<!-- Filter Section -->
+<div class="filter-card" style="margin-bottom: 24px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <div class="filter-tabs" id="filterTabs">
+            <button class="filter-tab active" data-tab="all">Tất cả</button>
+            <button class="filter-tab" data-tab="Chờ xử lý">Chờ xử lý</button>
+            <button class="filter-tab" data-tab="Chờ duyệt">Chờ duyệt</button>
+            <button class="filter-tab" data-tab="Hoàn trả">Hoàn trả</button>
+            <button class="filter-tab" data-tab="Đã hoàn thành">Đã hoàn thành</button>
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr; gap:24px;">
+        <div class="search-input-wrap" style="position:relative;">
+            <svg width="18" height="18" viewBox="0 0 24 24" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted);">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+            </svg>
+            <input type="text" id="searchKeyword" class="form-control" placeholder="Tìm kiếm theo tên công việc, người giao..." style="padding-left:40px; width:100%; font-size:14px; padding-top:10px; padding-bottom:10px;">
+        </div>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="table-container">
+    <div style="overflow-x:auto;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="text-center" style="width:60px;">STT</th>
+                    <th style="min-width:200px;">Tên công việc</th>
+                    <th style="min-width:140px;">Người giao</th>
+                    <th style="min-width:120px;">Ngày bắt đầu</th>
+                    <th style="min-width:100px;">Hạn xử lý</th>
+                    <th style="min-width:110px;">Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody id="xuLyCVBody">
+                {% for task in tasks %}
+                <tr data-id="{{ task.pk }}">
+                    <td class="text-center">{{ forloop.counter }}</td>
+                    <td><strong>{{ task.ten_cong_viec }}</strong></td>
+                    <td>{{ task.nguoi_giao.ho_va_ten }}</td>
+                    <td>{{ task.ngay_bat_dau|date:"d/m/Y" }}</td>
+                    <td>{{ task.han_xu_ly|date:"d/m/Y" }}</td>
+                    <td>
+                        {% if task.trang_thai == "Chờ xử lý" %}
+                        <span class="badge badge-cho-xu-ly">{{ task.trang_thai }}</span>
+                        {% elif task.trang_thai == "Chờ duyệt" %}
+                        <span class="badge badge-cho-duyet">{{ task.trang_thai }}</span>
+                        {% elif task.trang_thai == "Hoàn trả" %}
+                        <span class="badge badge-hoan-tra">{{ task.trang_thai }}</span>
+                        {% elif task.trang_thai == "Đã hoàn thành" %}
+                        <span class="badge badge-da-hoan-thanh">{{ task.trang_thai }}</span>
+                        {% else %}
+                        <span class="badge">{{ task.trang_thai }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">Bạn chưa có công việc nào cần xử lý.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Filtering Logic
+    document.addEventListener('DOMContentLoaded', function () {
+        const tabs = document.querySelectorAll('.filter-tab');
+        const rows = document.querySelectorAll('#xuLyCVBody tr');
+        const searchInput = document.getElementById('searchKeyword');
+
+        function filterTasks() {
+            const activeTab = document.querySelector('.filter-tab.active').getAttribute('data-tab');
+            const keyword = searchInput.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                if (row.cells.length < 2) return; // Skip empty row
+
+                const taskName = row.cells[1].innerText.toLowerCase();
+                const userName = row.cells[2].innerText.toLowerCase();
+                const taskStatus = row.cells[5].innerText.trim();
+
+                const matchesTab = (activeTab === 'all' || taskStatus === activeTab);
+                const matchesKeyword = taskName.includes(keyword) || userName.includes(keyword);
+
+                if (matchesTab && matchesKeyword) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Handle empty state
+            let emptyMsg = document.getElementById('emptyFilterMsg');
+            if (visibleCount === 0) {
+                if (!emptyMsg) {
+                    emptyMsg = document.createElement('tr');
+                    emptyMsg.id = 'emptyFilterMsg';
+                    emptyMsg.innerHTML = `<td colspan="7" class="text-center" style="padding: 40px; color: #64748B;">Không tìm thấy công việc phù hợp với tiêu chí lọc.</td>`;
+                    document.getElementById('xuLyCVBody').appendChild(emptyMsg);
+                }
+            } else if (emptyMsg) {
+                emptyMsg.remove();
+            }
+        }
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                tabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                filterTasks();
+            });
+        });
+
+        if (searchInput) {
+            searchInput.addEventListener('input', filterTasks);
+        }
+
+        // Task Details Logic
+        const tableBody = document.getElementById('xuLyCVBody');
+        if (tableBody) {
+            tableBody.addEventListener('click', function (e) {
+                const tr = e.target.closest('tr');
+                if (tr && tr.hasAttribute('data-id')) {
+                    const taskId = tr.getAttribute('data-id');
+                    window.location.href = `/task/${taskId}/`;
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
