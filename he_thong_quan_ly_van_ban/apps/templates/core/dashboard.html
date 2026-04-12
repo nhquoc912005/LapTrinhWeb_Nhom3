@@ -1,0 +1,570 @@
+{% extends "core/base.html" %}
+
+{% block title %}Trang chủ điều hành{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-home {
+        display: grid;
+        gap: 24px;
+    }
+
+    .dashboard-home__section {
+        display: grid;
+        gap: 24px;
+    }
+
+    .dashboard-home__stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .summary-card,
+    .surface-card {
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid #d9e3ee;
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.06);
+    }
+
+    .summary-card {
+        padding: 18px 18px 16px;
+        display: grid;
+        gap: 14px;
+    }
+
+    .summary-card__head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .summary-card__icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .summary-card__trend {
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .summary-card__trend.up {
+        color: #16a34a;
+    }
+
+    .summary-card__trend.down {
+        color: #dc2626;
+    }
+
+    .summary-card__label {
+        margin: 0 0 6px;
+        font-size: 15px;
+        font-weight: 500;
+        color: #475569;
+    }
+
+    .summary-card__value {
+        margin: 0;
+        font-size: 54px;
+        line-height: 1;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        color: #0f172a;
+    }
+
+    .summary-card__subtitle {
+        margin: 8px 0 0;
+        font-size: 14px;
+        color: #64748b;
+    }
+
+    .dashboard-home__analytics {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(320px, 0.95fr);
+        gap: 24px;
+    }
+
+    .surface-card__header {
+        padding: 22px 24px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .surface-card__title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .surface-card__link {
+        font-size: 14px;
+        font-weight: 600;
+        color: #0284c7;
+    }
+
+    .surface-card__link:hover {
+        text-decoration: underline;
+    }
+
+    .surface-card__body {
+        padding: 0 24px 24px;
+    }
+
+    .week-chart {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 16px;
+        min-height: 320px;
+        padding: 24px 18px 12px;
+        border-radius: 16px;
+        background:
+            linear-gradient(to top, rgba(148, 163, 184, 0.15) 1px, transparent 1px) 0 0 / 100% calc(100% / 4),
+            linear-gradient(to right, rgba(148, 163, 184, 0.14) 1px, transparent 1px) 0 0 / calc(100% / 7) 100%,
+            #ffffff;
+        border: 1px solid #e2e8f0;
+        align-items: end;
+    }
+
+    .week-chart__group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        height: 100%;
+    }
+
+    .week-chart__bars {
+        height: 240px;
+        width: 100%;
+        display: flex;
+        align-items: end;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .week-chart__bar {
+        width: 20px;
+        min-height: 10px;
+        border-radius: 10px 10px 0 0;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32);
+    }
+
+    .week-chart__bar.incoming {
+        background: #0f80a9;
+    }
+
+    .week-chart__bar.outgoing {
+        background: #5ab85e;
+    }
+
+    .week-chart__bar.tasks {
+        background: #f6b10a;
+    }
+
+    .week-chart__label {
+        font-size: 14px;
+        font-weight: 700;
+        color: #475569;
+    }
+
+    .chart-legend {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 18px;
+        padding-top: 16px;
+        color: #475569;
+        font-size: 14px;
+    }
+
+    .chart-legend__item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .chart-legend__swatch {
+        width: 14px;
+        height: 14px;
+        border-radius: 4px;
+    }
+
+    .status-chart {
+        display: grid;
+        justify-items: center;
+        gap: 22px;
+        padding-top: 8px;
+    }
+
+    .status-chart__ring {
+        position: relative;
+        width: min(100%, 240px);
+        aspect-ratio: 1;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+    }
+
+    .status-chart__ring::after {
+        content: "";
+        width: 48%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: #ffffff;
+        box-shadow: inset 0 0 0 1px #e2e8f0;
+    }
+
+    .status-chart__center {
+        position: absolute;
+        text-align: center;
+        z-index: 1;
+    }
+
+    .status-chart__center strong {
+        display: block;
+        font-size: 32px;
+        line-height: 1;
+        color: #0f172a;
+    }
+
+    .status-chart__center span {
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    .status-chart__legend {
+        width: 100%;
+        display: grid;
+        gap: 12px;
+    }
+
+    .status-chart__row {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        color: #334155;
+    }
+
+    .status-chart__dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 4px;
+        background: var(--dot-color);
+    }
+
+    .status-chart__meta {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        color: #64748b;
+    }
+
+    .dashboard-home__lists {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+    }
+
+    .document-list,
+    .task-list {
+        display: grid;
+    }
+
+    .document-list__item,
+    .task-list__item {
+        display: grid;
+        gap: 10px;
+        padding: 18px 24px;
+        border-top: 1px solid #edf2f7;
+    }
+
+    .document-list__item:first-child,
+    .task-list__item:first-child {
+        border-top: none;
+    }
+
+    .document-list__head,
+    .task-list__head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+    }
+
+    .document-list__code,
+    .task-list__title {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .document-list__title,
+    .task-list__assignee,
+    .task-list__deadline {
+        margin: 0;
+        font-size: 14px;
+        color: #64748b;
+        line-height: 1.7;
+    }
+
+    .task-list__deadline {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .priority-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 88px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .priority-high {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .priority-medium {
+        background: #fef3c7;
+        color: #a16207;
+    }
+
+    @media (max-width: 1280px) {
+        .dashboard-home__stats {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 1100px) {
+        .dashboard-home__stats,
+        .dashboard-home__analytics,
+        .dashboard-home__lists {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-home__stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .surface-card__header,
+        .surface-card__body,
+        .document-list__item,
+        .task-list__item {
+            padding-left: 18px;
+            padding-right: 18px;
+        }
+
+        .surface-card__header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .week-chart {
+            gap: 10px;
+            padding: 20px 10px 10px;
+        }
+
+        .week-chart__bars {
+            gap: 3px;
+        }
+
+        .week-chart__bar {
+            width: 12px;
+        }
+    }
+
+    @media (max-width: 520px) {
+        .dashboard-home__stats {
+            grid-template-columns: 1fr;
+        }
+
+        .document-list__head,
+        .task-list__head {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'core:dashboard' %}">
+        <svg width="14" height="14" viewBox="0 0 24 24">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+        </svg>
+        Trang chủ
+    </a>
+{% endblock %}
+
+{% block page_wrapper %}
+    <div class="page-main">
+        {% if messages %}
+            <div class="messages" style="margin-bottom: 18px;">
+                {% for message in messages %}
+                    <div class="message">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="dashboard-home">
+            <section class="dashboard-home__section">
+                <div class="dashboard-home__stats">
+                    {% for card in dashboard_metrics %}
+                        <article class="summary-card">
+                            <div class="summary-card__head">
+                                <div class="summary-card__icon" style="background: {{ card.accent }};">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                        <path d="{{ card.icon_path }}"/>
+                                    </svg>
+                                </div>
+                                <div class="summary-card__trend {{ card.trend_direction }}">{{ card.trend }}</div>
+                            </div>
+                            <div>
+                                <p class="summary-card__label">{{ card.label }}</p>
+                                <p class="summary-card__value">{{ card.value }}</p>
+                                <p class="summary-card__subtitle">{{ card.subtitle }}</p>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+
+                <div class="dashboard-home__analytics">
+                    <article class="surface-card">
+                        <div class="surface-card__header">
+                            <h2 class="surface-card__title">Thống kê theo tuần</h2>
+                        </div>
+                        <div class="surface-card__body">
+                            <div class="week-chart">
+                                {% for item in weekly_chart %}
+                                    <div class="week-chart__group">
+                                        <div class="week-chart__bars">
+                                            <span class="week-chart__bar incoming" style="height: {{ item.incoming_height }}%;"></span>
+                                            <span class="week-chart__bar outgoing" style="height: {{ item.outgoing_height }}%;"></span>
+                                            <span class="week-chart__bar tasks" style="height: {{ item.tasks_height }}%;"></span>
+                                        </div>
+                                        <span class="week-chart__label">{{ item.label }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="chart-legend">
+                                <span class="chart-legend__item">
+                                    <span class="chart-legend__swatch" style="background:#f6b10a;"></span>
+                                    Công việc
+                                </span>
+                                <span class="chart-legend__item">
+                                    <span class="chart-legend__swatch" style="background:#5ab85e;"></span>
+                                    Văn bản đi
+                                </span>
+                                <span class="chart-legend__item">
+                                    <span class="chart-legend__swatch" style="background:#0f80a9;"></span>
+                                    Văn bản đến
+                                </span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="surface-card">
+                        <div class="surface-card__header">
+                            <h2 class="surface-card__title">Phân bố trạng thái</h2>
+                        </div>
+                        <div class="surface-card__body">
+                            <div class="status-chart">
+                                <div class="status-chart__ring" style="background: {{ status_gradient }};">
+                                    <div class="status-chart__center">
+                                        <strong>740</strong>
+                                        <span>hồ sơ</span>
+                                    </div>
+                                </div>
+
+                                <div class="status-chart__legend">
+                                    {% for item in status_breakdown %}
+                                        <div class="status-chart__row">
+                                            <span class="status-chart__dot" style="--dot-color: {{ item.color }};"></span>
+                                            <span>{{ item.label }}</span>
+                                            <span class="status-chart__meta">
+                                                <span>{{ item.percentage }}%</span>
+                                                <strong>{{ item.count }}</strong>
+                                            </span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="dashboard-home__lists">
+                    <article class="surface-card">
+                        <div class="surface-card__header">
+                            <h2 class="surface-card__title">Văn bản gần đây</h2>
+                            <a class="surface-card__link" href="{% url 'quanlyvanbanden:danh_sach' %}">Xem tất cả</a>
+                        </div>
+                        <div class="document-list">
+                            {% for item in recent_documents %}
+                                <div class="document-list__item">
+                                    <div class="document-list__head">
+                                        <div>
+                                            <p class="document-list__code">{{ item.code }}</p>
+                                            <p class="document-list__title">{{ item.title }}</p>
+                                        </div>
+                                        <span class="badge {{ item.status_class }}">{{ item.status_label }}</span>
+                                    </div>
+                                    <p class="document-list__title">{{ item.date }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </article>
+
+                    <article class="surface-card">
+                        <div class="surface-card__header">
+                            <h2 class="surface-card__title">Công việc cần xử lý gấp</h2>
+                            <a class="surface-card__link" href="{% url 'quanlycongviec:giao_viec' %}">Xem tất cả</a>
+                        </div>
+                        <div class="task-list">
+                            {% for item in urgent_tasks %}
+                                <div class="task-list__item">
+                                    <div class="task-list__head">
+                                        <div>
+                                            <p class="task-list__title">{{ item.title }}</p>
+                                            <p class="task-list__assignee">Người thực hiện: {{ item.assignee }}</p>
+                                        </div>
+                                        <span class="priority-pill {{ item.priority_class }}">{{ item.priority_label }}</span>
+                                    </div>
+                                    <p class="task-list__deadline">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="#94a3b8" aria-hidden="true">
+                                            <path d="M12 1a11 11 0 1 0 11 11A11 11 0 0 0 12 1m1 11.41 3.29 3.3-1.41 1.41L11 13V6h2z"/>
+                                        </svg>
+                                        Hạn: {{ item.deadline }}
+                                    </p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </div>
+    </div>
+{% endblock %}

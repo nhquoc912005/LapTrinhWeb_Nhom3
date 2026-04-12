@@ -21,7 +21,7 @@ TOP_MENU_DEFINITIONS = (
         "help_text": "Chuc nang dang cho tich hop.",
     },
     {
-        "label": "Báo công cơ quan lý",
+        "label": "Bộ công cụ quản lý",
         "url_name": "core:bao_cao_thong_ke",
         "roles": (Customer.Role.ADMIN, Customer.Role.LANH_DAO),
         "icon_path": "M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z",

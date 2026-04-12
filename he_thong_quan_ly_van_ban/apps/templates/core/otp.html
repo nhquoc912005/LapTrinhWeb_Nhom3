@@ -1,0 +1,299 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác thực OTP - Hệ thống quản lý văn bản và điều hành</title>
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <style>
+        .core-otp {
+            min-height: 100vh;
+            padding: 24px;
+            display: grid;
+            place-items: center;
+            background:
+                radial-gradient(circle at top right, rgba(125, 211, 252, 0.26), transparent 28%),
+                linear-gradient(160deg, #0b6585 0%, #0f7aa1 48%, #0b5b78 100%);
+        }
+
+        .core-otp__card {
+            width: min(480px, 100%);
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            box-shadow: 0 30px 90px rgba(15, 23, 42, 0.28);
+            padding: 34px 30px 28px;
+        }
+
+        .core-otp__top {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .core-otp__logo {
+            width: 76px;
+            height: 76px;
+            margin: 0 auto 16px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #dff5ff 0%, #ecfeff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0f7aa1;
+        }
+
+        .core-otp__title {
+            margin: 0 0 8px;
+            font-size: 28px;
+            color: #0f172a;
+        }
+
+        .core-otp__subtitle {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.7;
+            color: #475569;
+        }
+
+        .core-otp__hint {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .core-otp__error,
+        .core-otp__success {
+            display: none;
+            margin-bottom: 16px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            font-size: 13px;
+        }
+
+        .core-otp__error.show {
+            display: block;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+        }
+
+        .core-otp__success.show {
+            display: block;
+            background: #dcfce7;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+
+        .core-otp__timer {
+            margin-bottom: 18px;
+            text-align: center;
+            font-size: 14px;
+            color: #475569;
+        }
+
+        .core-otp__timer strong {
+            color: #0f7aa1;
+        }
+
+        .core-otp__footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-top: 18px;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .core-otp__footer a,
+        .core-otp__resend {
+            color: #0f7aa1;
+            font-weight: 700;
+        }
+
+        .core-otp__resend[aria-disabled="true"] {
+            color: #94a3b8;
+            pointer-events: none;
+        }
+
+        @media (max-width: 520px) {
+            .core-otp {
+                padding: 16px;
+            }
+
+            .core-otp__card {
+                padding: 28px 20px 24px;
+                border-radius: 22px;
+            }
+
+            .core-otp__footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .otp-inputs {
+                gap: 8px;
+            }
+
+            .otp-input {
+                width: 46px;
+                height: 52px;
+            }
+        }
+    </style>
+</head>
+<body class="core-otp">
+    <div class="core-otp__card">
+        <div class="core-otp__top">
+            <div class="core-otp__logo">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5zm0 2.19 7 3.11V11h-7zM5 11V6.3l7-3.11V11zm7 9.94c-3.72-1.15-6.47-4.82-7-8.94h14c-.53 4.12-3.28 7.79-7 8.94"/>
+                </svg>
+            </div>
+            <h1 class="core-otp__title">Xác thực OTP</h1>
+            <p class="core-otp__subtitle">Nhập mã OTP gồm 6 chữ số đã được gửi đến thiết bị của bạn để hoàn tất đăng nhập.</p>
+            <p class="core-otp__hint">Mã demo: <strong>123456</strong></p>
+        </div>
+
+        <div id="otpError" class="core-otp__error" role="alert"></div>
+        <div id="otpSuccess" class="core-otp__success" role="status">Xác thực thành công. Hệ thống đang chuyển hướng đến trang chủ.</div>
+
+        <div class="otp-inputs" id="otpInputs">
+            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        </div>
+
+        <div class="core-otp__timer">
+            Mã OTP hết hạn sau <strong><span id="otpTimer">30</span> giây</strong>
+        </div>
+
+        <button class="btn btn-primary btn-lg w-full" id="verifyBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+                <path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            Xác thực
+        </button>
+
+        <div class="core-otp__footer">
+            <a href="{% url 'accounts:login' %}">← Quay lại đăng nhập</a>
+            <a href="#" id="resendBtn" class="core-otp__resend" aria-disabled="true" onclick="return false;">Gửi lại OTP</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const inputs = Array.from(document.querySelectorAll(".otp-input"));
+            const timerNode = document.getElementById("otpTimer");
+            const verifyBtn = document.getElementById("verifyBtn");
+            const resendBtn = document.getElementById("resendBtn");
+            const errorBox = document.getElementById("otpError");
+            const successBox = document.getElementById("otpSuccess");
+            let secondsLeft = 30;
+            let timerId = null;
+
+            function showError(message) {
+                errorBox.textContent = message;
+                errorBox.classList.add("show");
+                successBox.classList.remove("show");
+            }
+
+            function clearError() {
+                errorBox.textContent = "";
+                errorBox.classList.remove("show");
+            }
+
+            function getCode() {
+                return inputs.map(function (input) {
+                    return input.value;
+                }).join("");
+            }
+
+            function startTimer() {
+                clearInterval(timerId);
+                secondsLeft = 30;
+                timerNode.textContent = String(secondsLeft);
+                resendBtn.setAttribute("aria-disabled", "true");
+
+                timerId = window.setInterval(function () {
+                    secondsLeft -= 1;
+                    timerNode.textContent = String(secondsLeft);
+
+                    if (secondsLeft <= 0) {
+                        clearInterval(timerId);
+                        resendBtn.setAttribute("aria-disabled", "false");
+                    }
+                }, 1000);
+            }
+
+            inputs.forEach(function (input, index) {
+                input.addEventListener("input", function () {
+                    input.value = input.value.replace(/[^0-9]/g, "").slice(0, 1);
+                    clearError();
+                    input.classList.remove("error");
+                    if (input.value && inputs[index + 1]) {
+                        inputs[index + 1].focus();
+                    }
+                });
+
+                input.addEventListener("keydown", function (event) {
+                    if (event.key === "Backspace" && !input.value && inputs[index - 1]) {
+                        inputs[index - 1].focus();
+                    }
+                });
+            });
+
+            verifyBtn.addEventListener("click", function () {
+                const code = getCode();
+
+                if (code.length !== 6) {
+                    showError("Vui lòng nhập đầy đủ 6 chữ số OTP.");
+                    return;
+                }
+
+                if (code !== "123456") {
+                    showError("Mã OTP không chính xác. Vui lòng kiểm tra lại.");
+                    inputs.forEach(function (input) {
+                        input.classList.add("error");
+                    });
+                    return;
+                }
+
+                clearError();
+                inputs.forEach(function (input) {
+                    input.classList.remove("error");
+                    input.classList.add("filled");
+                    input.disabled = true;
+                });
+                successBox.classList.add("show");
+                verifyBtn.disabled = true;
+            });
+
+            resendBtn.addEventListener("click", function (event) {
+                if (resendBtn.getAttribute("aria-disabled") === "true") {
+                    event.preventDefault();
+                    return;
+                }
+
+                inputs.forEach(function (input) {
+                    input.value = "";
+                    input.disabled = false;
+                    input.classList.remove("error", "filled");
+                });
+                inputs[0].focus();
+                clearError();
+                successBox.classList.remove("show");
+                verifyBtn.disabled = false;
+                startTimer();
+            });
+
+            startTimer();
+            inputs[0].focus();
+        });
+    </script>
+</body>
+</html>

@@ -1,7 +1,5 @@
 from django.urls import path
-
 from .views import danh_sach
-
 
 app_name = "hosovanban"
 
