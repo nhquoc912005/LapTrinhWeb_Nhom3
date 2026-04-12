@@ -12,6 +12,7 @@ urlpatterns = [
     path("", include(("apps.quanlyvanbandi.urls", "quanlyvanbandi"), namespace="quanlyvanbandi")),
     path("", include(("apps.quanlycongviec.urls", "quanlycongviec"), namespace="quanlycongviec")),
     path("", include(("apps.hosovanban.urls", "hosovanban"), namespace="hosovanban")),
+
 ]
 
 if settings.DEBUG:

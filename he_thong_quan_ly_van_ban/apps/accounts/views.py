@@ -33,7 +33,7 @@ def login_view(request):
         return redirect(_get_safe_redirect_url(request))
 
     next_url = request.POST.get("next") or request.GET.get("next") or ""
-    return render(request, "index.html", {"form": form, "next_url": next_url})
+    return render(request, "core/index.html", {"form": form, "next_url": next_url})
 
 
 @login_required
