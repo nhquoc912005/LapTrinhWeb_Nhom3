@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block title %}Chi tiết văn bản - QLVB{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'core:dashboard' %}">
+        <svg width="14" height="14" viewBox="0 0 24 24">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+        </svg>Trang chủ
+    </a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="{% url 'hosovanban:danh_sach' %}">Hồ sơ văn bản</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="{% url 'hosovanban:chi_tiet' ho_so.pk %}">{{ ho_so.tieu_de_ho_so|truncatechars:30 }}</a>
+    <span class="breadcrumb-sep">›</span>
+    <span>Chi tiết văn bản</span>
+{% endblock %}
+
+{% block page_wrapper %}
+<div class="page-main" >
+    <!-- Messages -->
+    {% if messages %}
+        <div class="messages" style="margin-bottom:12px;">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}" style="padding:8px; background:#d1fae5; color:#065f46; border-radius:4px;">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Profile Header -->
+    <div style="background:#fff; padding:20px; border-bottom:1px solid #e5e7eb; margin-bottom: 0px">
+        <h2 style="margin:0 0 8px 0; font-size:20px; font-weight:700; color:#0f172a;">Hồ sơ văn bản</h2>
+        <div style="color:#64748b; font-size:14px;">{{ ho_so.tieu_de_ho_so }}</div>
+    </div>
+
+    <!-- THÔNG TIN VĂN BẢN -->
+    <div class="filter-card" style="background:#fff; border:1px solid #e5e7eb; margin-bottom:15px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 8px; border-bottom:1px solid #e5e7eb;">
+            <h3 style="color:#0284C7; font-size:16px; font-weight:700; border-left:4px solid #0284C7; padding-left:12px; margin:0; text-transform:uppercase;">
+                THÔNG TIN VĂN BẢN
+            </h3>
+            
+            {% if request.user.is_van_thu and ho_so.trang_thai == 1 %}
+            <form method="post" action="{% url 'hosovanban:xoa_van_ban_khoi_ho_so' ho_so.pk van_ban.pk %}" onsubmit="return confirm('Bạn có chắc chắn muốn gỡ văn bản này khỏi hồ sơ không?');" style="margin:0;">
+                {% csrf_token %}
+                <button type="submit" class="btn" style="display:inline-flex; align-items:center; gap:6px; padding:6px 16px; background:#ef4444; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:600; font-size:13px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    Xoá văn bản
+                </button>
+            </form>
+            {% endif %}
+        </div>
+
+        <div style="padding:16px 8px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:24px; margin-bottom:32px;">
+                <!-- Column 1 -->
+                <div>
+                    <div style="margin-bottom:16px;">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Trích yếu:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500; line-height:1.5;">{{ van_ban.trich_yeu }}</div>
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Đơn vị ban hành:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">{{ van_ban.don_vi_ban_hanh|default:"--" }}</div>
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Hình thức:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">{{ van_ban.hinh_thuc|default:"--" }}</div>
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Ngày đến:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">{{ van_ban.ngay_den|date:"d/m/Y"|default:"--" }}</div>
+                    </div>
+                    <div>
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Độ mật:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">
+                            {% if van_ban.do_mat == 1 %}Bình thường{% elif van_ban.do_mat == 2 %}Mật{% elif van_ban.do_mat == 3 %}Tối mật{% elif van_ban.do_mat == 4 %}Tuyệt mật{% else %}Bình thường{% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Column 2 -->
+                <div>
+                    <div style="margin-bottom:16px;">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Số ký hiệu:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">{{ van_ban.so_ky_hieu }}</div>
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Loại văn bản:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">{{ van_ban.loai_van_ban.ten_loai_van_ban|default:van_ban.loai_van_ban|default:"--" }}</div>
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Ngày văn bản:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">{{ van_ban.ngay_van_ban|date:"d/m/Y"|default:"--" }}</div>
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Hạn xử lý:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">{{ van_ban.han_xu_ly|date:"d/m/Y"|default:"--" }}</div>
+                    </div>
+                    <div>
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Độ khẩn:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">
+                            {% if van_ban.do_khan == 1 %}Bình thường{% elif van_ban.do_khan == 2 %}Khẩn{% elif van_ban.do_khan == 3 %}Thượng khẩn{% elif van_ban.do_khan == 4 %}Hỏa tốc{% else %}Bình thường{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 3 -->
+                <div>
+                    <div style="margin-bottom:16px;">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Lãnh đạo tiếp nhận:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">{{ van_ban.lanh_dao_duyet.ho_va_ten|default:"--" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nội dung trình -->
+            <div style="background:#f8fafc; border-left:4px solid #0284C7; padding:16px; border-radius:0 4px 4px 0;">
+                <div style="color:#0284C7; font-size:14px; font-weight:700; margin-bottom:4px;">Nội dung trình lãnh đạo:</div>
+                <div style="color:#0f172a; font-size:14px; line-height:1.5;">{{ van_ban.noi_dung|default:"--" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DANH SÁCH VĂN BẢN (File Preview) -->
+   <div class="filter-card" style="background:#fff; border:1px solid #e5e7eb; border-radius:8px;">
+    <div style="padding:12px 8px; border-bottom:1px solid #e5e7eb;">
+        <h3 style="color:#0284C7; font-size:16px; font-weight:700; border-left:4px solid #0284C7; padding-left:12px; margin:0; text-transform:uppercase;">
+            DANH SÁCH VĂN BẢN
+        </h3>
+    </div>
+
+    <div style="padding:16px 8px;">
+        <div style="color:#64748b; font-size:13px; margin-bottom:12px;">File đính kèm:</div>
+
+        <div id="fileListWrap" style="display:flex; flex-direction:column; gap:12px; margin-bottom:18px;">
+            {% if van_ban.file_dinh_kem %}
+            <button
+                type="button"
+                class="file-item-btn active"
+                data-file-url="{{ van_ban.file_dinh_kem.url }}"
+                data-file-name="{{ van_ban.file_dinh_kem.name }}"
+                data-file-type="{% if van_ban.file_dinh_kem.name|lower|slice:'-4:' == '.pdf' %}pdf{% elif van_ban.file_dinh_kem.name|lower|slice:'-5:' == '.docx' %}docx{% else %}other{% endif %}"
+                style="display:flex; align-items:center; gap:12px; padding:12px 16px; border:1px solid #0284C7; border-radius:6px; background:#eff6ff; cursor:pointer; text-align:left;">
+                <div style="color:{% if van_ban.file_dinh_kem.name|lower|slice:'-4:' == '.pdf' %}#ef4444{% else %}#2563eb{% endif %}; font-weight:bold; font-size:12px; border:1px solid #cbd5e1; padding:4px 6px; border-radius:4px; min-width:42px; text-align:center;">
+                    {% if van_ban.file_dinh_kem.name|lower|slice:'-4:' == '.pdf' %}PDF{% elif van_ban.file_dinh_kem.name|lower|slice:'-5:' == '.docx' %}DOCX{% else %}FILE{% endif %}
+                </div>
+                <div>
+                    <div style="color:#0f172a; font-weight:600; font-size:14px;">{{ van_ban.file_dinh_kem.name }}</div>
+                    <div style="color:#94a3b8; font-size:12px;">
+                        {% if van_ban.file_dinh_kem.name|lower|slice:'-4:' == '.pdf' %}PDF Document{% elif van_ban.file_dinh_kem.name|lower|slice:'-5:' == '.docx' %}Word Document{% else %}Tệp đính kèm{% endif %}
+                    </div>
+                </div>
+            </button>
+            {% endif %}
+
+            {% for file in ds_van_ban_lien_quan %}
+            <button
+                type="button"
+                class="file-item-btn"
+                data-file-url="{{ file.file_van_ban.url }}"
+                data-file-name="{{ file.file_van_ban.name }}"
+                data-file-type="{% if file.file_van_ban.name|lower|slice:'-4:' == '.pdf' %}pdf{% elif file.file_van_ban.name|lower|slice:'-5:' == '.docx' %}docx{% else %}other{% endif %}"
+                style="display:flex; align-items:center; gap:12px; padding:12px 16px; border:1px solid #e5e7eb; border-radius:6px; background:#fff; cursor:pointer; text-align:left;">
+                <div style="color:{% if file.file_van_ban.name|lower|slice:'-4:' == '.pdf' %}#ef4444{% else %}#2563eb{% endif %}; font-weight:bold; font-size:12px; border:1px solid #cbd5e1; padding:4px 6px; border-radius:4px; min-width:42px; text-align:center;">
+                    {% if file.file_van_ban.name|lower|slice:'-4:' == '.pdf' %}PDF{% elif file.file_van_ban.name|lower|slice:'-5:' == '.docx' %}DOCX{% else %}FILE{% endif %}
+                </div>
+                <div>
+                    <div style="color:#0f172a; font-weight:600; font-size:14px;">{{ file.file_van_ban.name }}</div>
+                    <div style="color:#94a3b8; font-size:12px;">
+                        {% if file.file_van_ban.name|lower|slice:'-4:' == '.pdf' %}PDF Document{% elif file.file_van_ban.name|lower|slice:'-5:' == '.docx' %}Word Document{% else %}Tệp đính kèm{% endif %}
+                    </div>
+                </div>
+            </button>
+            {% endfor %}
+        </div>
+
+        <div style="margin-bottom:12px; color:#64748b; font-size:13px;">Xem trước</div>
+
+        <div style="background:#d1d5db; padding:16px; border-radius:6px;">
+            <div style="display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-bottom:12px;">
+                <button type="button" id="prevPageBtn" style="padding:6px 10px; border:1px solid #cbd5e1; background:#fff; border-radius:4px; cursor:pointer;">◀</button>
+                <span id="pageInfo" style="font-size:14px; font-weight:600; color:#1e3a8a;">Trang 1 / 1</span>
+                <button type="button" id="nextPageBtn" style="padding:6px 10px; border:1px solid #cbd5e1; background:#fff; border-radius:4px; cursor:pointer;">▶</button>
+                <a id="openNewTabBtn" href="#" target="_blank" style="padding:6px 12px; border:1px solid #cbd5e1; background:#fff; border-radius:4px; text-decoration:none; color:#0f172a; font-size:14px;">Mở tab mới</a>
+            </div>
+
+            <div id="previewWrap" style="background:#4b5563; padding:16px; border-radius:4px; min-height:600px; overflow:auto;">
+                <iframe
+                    id="pdfPreviewFrame"
+                    src="{% if van_ban.file_dinh_kem %}{{ van_ban.file_dinh_kem.url }}#page=1&zoom=page-width{% endif %}"
+                    width="100%"
+                    height="800"
+                    style="border:none; border-radius:4px; background:#fff; display:block;">
+                </iframe>
+
+                <div id="docPreviewFallback" style="display:none; background:#fff; min-height:400px; padding:32px; border-radius:4px; text-align:center;">
+                    <div style="font-size:16px; font-weight:700; color:#0f172a; margin-bottom:10px;">Không hỗ trợ xem trực tiếp tệp này</div>
+                    <div id="docPreviewText" style="color:#64748b; font-size:14px; margin-bottom:16px;">
+                        Tệp Word/định dạng khác nên mở ở tab mới hoặc tải xuống để xem đầy đủ.
+                    </div>
+                    <a id="docOpenLink" href="#" target="_blank" style="display:inline-block; padding:10px 16px; background:#0284C7; color:#fff; border-radius:4px; text-decoration:none;">
+                        Mở tệp
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

@@ -43,7 +43,7 @@
     border: 1px solid #d1d5db;
     padding: 10px 12px;
     font-size: 14px;
-    border-radius: 2px;
+    border-radius: 0px;
     outline: none;
     background: #fff;
     box-sizing: border-box;
@@ -181,8 +181,9 @@ select::-ms-expand {
 
 .popup-box {
     background: #fff;
-    border-radius: 4px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+    border-radius: 0px;
+
+    box-shadow: none;
     overflow: hidden;
 }
 
@@ -326,7 +327,7 @@ select::-ms-expand {
     border: 1px solid #d1d5db;
     padding: 10px 12px;
     font-size: 14px;
-    border-radius: 2px;
+    border-radius: 0px;
     background: #fff;
     cursor: pointer;
     display: flex;
@@ -352,7 +353,7 @@ select::-ms-expand {
     max-height: 200px;
     overflow-y: auto;
     z-index: 1000;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: none;
 }
 
 .custom-dropdown.open .dropdown-menu {
