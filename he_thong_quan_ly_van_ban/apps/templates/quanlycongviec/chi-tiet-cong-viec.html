@@ -407,15 +407,6 @@
             {% endif %}
 
             {% if can_start %}
-            <a href="{% url 'quanlycongviec:return_task' task.pk %}" class="btn btn-danger"
-                style="background:#EF4444; border:none; color:white; display:inline-flex; align-items:center;">
-                <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px;">
-                    <path fill="currentColor"
-                        d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z" />
-                </svg>
-                Hoàn trả
-            </a>
-
             <button type="button" class="btn btn-primary" id="btnProcessTask"
                 style="background:#0284C7; border:none; color:white; display:inline-flex; align-items:center;">
                 <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px;">
@@ -424,6 +415,17 @@
                 </svg>
                 Xử lý
             </button>
+            {% endif %}
+
+            {% if can_return %}
+            <a href="{% url 'quanlycongviec:return_task' task.pk %}" class="btn btn-danger"
+                style="background:#EF4444; border:none; color:white; display:inline-flex; align-items:center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px;">
+                    <path fill="currentColor"
+                        d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z" />
+                </svg>
+                Hoàn trả
+            </a>
             {% endif %}
 
             {% if can_edit %}
@@ -438,8 +440,9 @@
             {% endif %}
 
             {% if can_delete %}
-            <button type="button" class="btn btn-danger" id="btnDeleteDetail">
-                <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px; vertical-align:middle;">
+            <button type="button" class="btn btn-danger" id="btnDeleteDetail"
+                style="background:#EF4444; border:none; color:white; display:inline-flex; align-items:center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px;">
                     <path fill="currentColor"
                         d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
                 </svg>

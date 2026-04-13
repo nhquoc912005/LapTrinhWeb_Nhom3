@@ -359,6 +359,6 @@ def task_detail(request, task_id):
                       (request.user.is_chuyen_vien and task.trang_thai in ["Chờ xử lý", "Hoàn trả"]),
         'can_start': request.user.is_chuyen_vien and task.trang_thai in ["Chờ xử lý", "Hoàn trả"],
         'can_edit': request.user.is_lanh_dao and task.trang_thai in ["Chờ xử lý", "Hoàn trả"],
-        'can_delete': request.user.is_lanh_dao and task.trang_thai == "Chờ xử lý",
+        'can_delete': request.user.is_lanh_dao and task.trang_thai in ["Chờ xử lý", "Hoàn trả"],
     }
     return render(request, "quanlycongviec/chi-tiet-cong-viec.html", context)

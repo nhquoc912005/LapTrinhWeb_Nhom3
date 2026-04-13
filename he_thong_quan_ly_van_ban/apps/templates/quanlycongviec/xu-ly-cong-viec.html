@@ -79,12 +79,21 @@
         </div>
     </div>
 
-    <div style="display:grid; grid-template-columns: 1fr; gap:24px;">
+    <div style="display:grid; grid-template-columns: 1fr 250px; gap:24px; align-items:end;">
         <div class="search-input-wrap" style="position:relative;">
             <svg width="18" height="18" viewBox="0 0 24 24" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted);">
                 <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
             </svg>
             <input type="text" id="searchKeyword" class="form-control" placeholder="Tìm kiếm theo tên công việc, người giao..." style="padding-left:40px; width:100%; font-size:14px; padding-top:10px; padding-bottom:10px;">
+        </div>
+
+        <div>
+            <label style="font-weight:600; font-size:13px; margin-bottom:6px; display:block;">Nguồn công việc</label>
+            <select id="filterNguonCV" class="form-control" style="font-size:14px; padding:10px;">
+                <option value="">-- Tất cả nguồn --</option>
+                <option value="Văn bản đến">Văn bản đến</option>
+                <option value="Văn bản đi">Văn bản đi</option>
+            </select>
         </div>
     </div>
 </div>
@@ -100,6 +109,7 @@
                     <th style="min-width:140px;">Người giao</th>
                     <th style="min-width:120px;">Ngày bắt đầu</th>
                     <th style="min-width:100px;">Hạn xử lý</th>
+                    <th style="min-width:140px;">Nguồn</th>
                     <th style="min-width:110px;">Trạng thái</th>
                 </tr>
             </thead>
@@ -111,6 +121,7 @@
                     <td>{{ task.nguoi_giao.ho_va_ten }}</td>
                     <td>{{ task.ngay_bat_dau|date:"d/m/Y" }}</td>
                     <td>{{ task.han_xu_ly|date:"d/m/Y" }}</td>
+                    <td>{{ task.nguon_giao|default:"Không có" }}</td>
                     <td>
                         {% if task.trang_thai == "Chờ xử lý" %}
                         <span class="badge badge-cho-xu-ly">{{ task.trang_thai }}</span>
@@ -148,6 +159,7 @@
         function filterTasks() {
             const activeTab = document.querySelector('.filter-tab.active').getAttribute('data-tab');
             const keyword = searchInput.value.toLowerCase().trim();
+            const source = sourceSelect.value;
             let visibleCount = 0;
 
             rows.forEach(row => {
@@ -155,12 +167,14 @@
 
                 const taskName = row.cells[1].innerText.toLowerCase();
                 const userName = row.cells[2].innerText.toLowerCase();
-                const taskStatus = row.cells[5].innerText.trim();
+                const taskStatus = row.cells[6].innerText.trim();
+                const taskSource = row.cells[5].innerText.trim();
 
                 const matchesTab = (activeTab === 'all' || taskStatus === activeTab);
                 const matchesKeyword = taskName.includes(keyword) || userName.includes(keyword);
+                const matchesSource = (source === '' || taskSource === source);
 
-                if (matchesTab && matchesKeyword) {
+                if (matchesTab && matchesKeyword && matchesSource) {
                     row.style.display = '';
                     visibleCount++;
                 } else {
@@ -192,6 +206,11 @@
 
         if (searchInput) {
             searchInput.addEventListener('input', filterTasks);
+        }
+
+        const sourceSelect = document.getElementById('filterNguonCV');
+        if (sourceSelect) {
+            sourceSelect.addEventListener('change', filterTasks);
         }
 
         // Task Details Logic
