@@ -1,0 +1,1443 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Chi tiết văn bản đến{% endblock %}
+{% block nav_van_ban_den_active %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ===== RESET: KHÔNG BO GÓC TOÀN BỘ ===== */
+    .card,
+    .file-item,
+    .preview-box,
+    .preview-inner,
+    .preview-placeholder,
+    .doc-box,
+    .docx-rendered-content,
+    .doc-box-link,
+    .pdf-toolbar button,
+    .pdf-toolbar a,
+    .btn-local,
+    .modal-box,
+    .btn-modal-cancel,
+    .btn-modal-save,
+    .btn-modal-danger,
+    .staff-receive-item,
+    .selected-staff-empty,
+    .staff-chip,
+    .staff-table-wrap,
+    .staff-search,
+    .staff-branch,
+    .return-textarea {
+        border-radius: 0 !important;
+    }
+
+    .vbd-card-title{
+        border-left:4px solid #0076A8;
+        padding-left:12px;
+        font-size:16px;
+        font-weight:700;
+        color:#0076A8;
+        margin:0;
+        line-height:1.2;
+        flex:1;
+        min-width:0;
+        text-transform:uppercase;
+    }
+
+    .top-actions{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:16px;
+        flex-wrap:wrap;
+        padding-bottom:16px;
+        border-bottom:1px solid var(--border-color);
+        margin-bottom:20px;
+    }
+
+    .action-btns{
+        display:flex;
+        gap:10px;
+        flex-wrap:wrap;
+        justify-content:flex-end;
+        flex-shrink:0;
+    }
+
+    .btn-local{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        gap:6px;
+        height:36px;
+        padding:0 12px;
+        text-decoration:none;
+        font-weight:600;
+        border:none;
+        cursor:pointer;
+        font-family:'Arimo', sans-serif;
+        font-size:14px;
+        white-space:nowrap;
+        line-height:1;
+    }
+
+    .btn-blue{
+        background:#0076A8;
+        color:#fff;
+    }
+
+    .btn-gray{
+        background:#8B8B8B;
+        color:#fff;
+    }
+
+    .btn-red{
+        background:#E1524A;
+        color:#fff;
+    }
+
+    .btn-local[disabled]{
+        opacity:.7;
+        cursor:not-allowed;
+    }
+
+    .info-grid{
+        display:grid;
+        grid-template-columns:1.5fr 1.2fr 1fr;
+        gap:34px;
+        margin-top:20px;
+    }
+
+    .field{
+        margin-bottom:22px;
+    }
+
+    .label{
+        font-size:14px;
+        color:var(--text-secondary);
+        margin-bottom:8px;
+    }
+
+    .value{
+        font-size:15px;
+        font-weight:700;
+        color:var(--text-main);
+        word-break:break-word;
+        line-height:1.45;
+    }
+
+    /* ===== CHỈ BO GÓC TRẠNG THÁI ===== */
+    .badge{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        padding:7px 14px;
+        border-radius:10px !important;
+        font-weight:700;
+        font-size:13px;
+        white-space:nowrap;
+    }
+
+    .badge-cho-xu-ly{
+        background:#FEF3C7;
+        color:#B45309;
+    }
+
+    .badge-da-xu-ly{
+        background:#DBEAFE;
+        color:#1D4ED8;
+    }
+
+    .badge-hoan-tra{
+        background:#FEE2E2;
+        color:#B91C1C;
+    }
+
+    .badge-xem-de-biet{
+        background:#DCFCE7;
+        color:#15803D;
+    }
+
+    /* ===== NỘI DUNG TRÌNH LÃNH ĐẠO ===== */
+    .note-box{
+        background:#F1F5F9;
+        border-left:8px solid #0076A8;
+        padding:16px 18px 16px 28px;
+        margin-top:18px;
+        line-height:1.7;
+    }
+
+    .note-label{
+        font-weight:800;
+        margin-bottom:8px;
+        font-size:18px;
+        line-height:1.3;
+    }
+
+    .note-content{
+        font-size:16px;
+        color:#111827;
+        line-height:1.7;
+    }
+
+    .note-box--process .note-label{
+        color:#000080;
+    }
+
+    /* ===== Ý KIẾN XỬ LÝ / HOÀN TRẢ ===== */
+    .note-box--return{
+        background:#F9F1F3;
+        border:1px solid #F2A4B8;
+        border-left:8px solid #0076A8;
+    }
+
+    .note-box--return .note-label{
+        color:#9F0736;
+    }
+
+    /* ===== DANH SÁCH CHUYÊN VIÊN TIẾP NHẬN ===== */
+    .staff-receive-wrap{
+        padding:18px 20px 20px 20px;
+    }
+
+    .staff-receive-grid{
+        display:grid;
+        grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+        gap:14px;
+        margin-top:14px;
+    }
+
+    .staff-receive-item{
+        border:1px solid #D9E2EC;
+        background:#FFFFFF;
+        padding:14px 16px;
+        display:flex;
+        align-items:flex-start;
+        gap:12px;
+        box-shadow:0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+
+    .staff-avatar{
+        width:42px;
+        height:42px;
+        background:#E0F2FE;
+        color:#0369A1;
+        font-weight:700;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:14px;
+        flex-shrink:0;
+        text-transform:uppercase;
+        border-radius:50%;
+    }
+
+    .staff-info{
+        min-width:0;
+        flex:1;
+    }
+
+    .staff-name{
+        font-size:15px;
+        font-weight:700;
+        color:#1E293B;
+        margin-bottom:4px;
+        line-height:1.4;
+    }
+
+    .staff-role{
+        font-size:13px;
+        color:#64748B;
+        margin-bottom:6px;
+    }
+
+    .staff-meta{
+        display:flex;
+        flex-wrap:wrap;
+        gap:8px;
+    }
+
+    .staff-chip{
+        display:inline-flex;
+        align-items:center;
+        padding:5px 10px;
+        font-size:12px;
+        font-weight:600;
+        background:#EFF6FF;
+        color:#2563EB;
+    }
+
+    .selected-staff-empty{
+        border:1px dashed #CBD5E1;
+        background:#FAFCFF;
+        padding:20px;
+        color:#64748B;
+        font-style:italic;
+        margin-top:14px;
+    }
+
+    .preview-title{
+        font-size:14px;
+        color:var(--text-secondary);
+        margin-bottom:10px;
+        font-weight:600;
+    }
+
+    .preview-box{
+        background:#F8FAFC;
+        border:1px solid var(--border-color);
+        min-height:540px;
+        overflow:hidden;
+        margin-top:8px;
+    }
+
+    .preview-inner{
+        background:#E5E7EB;
+        min-height:540px;
+        overflow:auto;
+        padding:20px;
+    }
+
+    .preview-placeholder{
+        background:#fff;
+        border:1px solid #D1D5DC;
+        min-height:320px;
+        padding:24px;
+        color:#111827;
+    }
+
+    .file-list{
+        display:flex;
+        gap:16px;
+        flex-wrap:wrap;
+        margin-top:10px;
+        margin-bottom:18px;
+    }
+
+    .file-item{
+        border:1px solid var(--border-color);
+        padding:10px 14px;
+        display:flex;
+        align-items:center;
+        gap:10px;
+        background:#fff;
+        text-decoration:none;
+        color:#0F172A;
+        cursor:pointer;
+        min-width:240px;
+    }
+
+    .file-item:hover{
+        border-color:#94A3B8;
+        background:#F8FAFC;
+    }
+
+    .file-item.active{
+        border-color:#0284C7;
+        background:#EFF6FF;
+    }
+
+    .file-type-pdf{color:#DC2626;font-weight:700}
+    .file-type-doc{color:#2563EB;font-weight:700}
+    .file-type-img{color:#7C3AED;font-weight:700}
+    .file-type-xls{color:#16A34A;font-weight:700}
+    .file-type-other{color:#475569;font-weight:700}
+
+    .file-subtext{
+        display:block;
+        color:#94A3B8;
+        font-size:13px;
+        margin-top:2px;
+    }
+
+    .pdf-toolbar{
+        display:flex;
+        align-items:center;
+        justify-content:flex-end;
+        gap:10px;
+        margin-bottom:12px;
+        flex-wrap:wrap;
+    }
+
+    .pdf-toolbar button,
+    .pdf-toolbar a{
+        border:1px solid #CBD5E1;
+        background:#fff;
+        color:#0F172A;
+        padding:8px 12px;
+        cursor:pointer;
+        font-size:14px;
+        font-weight:700;
+        text-decoration:none;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+    }
+
+    .pdf-page-info{
+        color:#334155;
+        font-weight:700;
+        font-size:14px;
+    }
+
+    .pdf-canvas-wrap{
+        display:flex;
+        justify-content:center;
+    }
+
+    .pdf-canvas{
+        background:#fff;
+        box-shadow:0 2px 8px rgba(0,0,0,.15);
+        max-width:100%;
+        height:auto;
+    }
+
+    .docx-rendered-content{
+        background:#fff;
+        color:#111827;
+        line-height:1.7;
+        word-break:break-word;
+        border:1px solid #D1D5DC;
+        padding:24px;
+    }
+
+    .docx-rendered-content p{
+        margin:0 0 12px 0;
+    }
+
+    .docx-rendered-content table{
+        width:100%;
+        border-collapse:collapse;
+        margin:12px 0;
+    }
+
+    .docx-rendered-content table,
+    .docx-rendered-content th,
+    .docx-rendered-content td{
+        border:1px solid #CBD5E1;
+    }
+
+    .docx-rendered-content th,
+    .docx-rendered-content td{
+        padding:8px 10px;
+        vertical-align:top;
+    }
+
+    .docx-rendered-content img{
+        max-width:100%;
+        height:auto;
+    }
+
+    .doc-box{
+        background:#fff;
+        border:1px solid #D1D5DC;
+        min-height:320px;
+        padding:28px;
+        text-align:center;
+        color:#111827;
+    }
+
+    .doc-box-title{
+        font-size:18px;
+        font-weight:700;
+        margin-bottom:10px;
+    }
+
+    .doc-box-name{
+        font-size:14px;
+        color:#64748B;
+        margin-bottom:18px;
+        word-break:break-all;
+    }
+
+    .doc-box-link{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        padding:10px 16px;
+        background:#0076A2;
+        color:#fff;
+        text-decoration:none;
+        font-weight:700;
+    }
+
+    /* ===== MODAL ===== */
+    .modal-overlay{
+        position:fixed;
+        inset:0;
+        background:rgba(15,23,42,.45);
+        display:none;
+        align-items:center;
+        justify-content:center;
+        z-index:9999;
+        padding:20px;
+    }
+
+    .modal-box{
+        width:100%;
+        max-width:760px;
+        background:#fff;
+        box-shadow:0 15px 35px rgba(0,0,0,.18);
+        overflow:hidden;
+        border:1px solid #D1D5DC;
+    }
+
+    .modal-box.modal-sm{
+        max-width:520px;
+    }
+
+    .modal-header{
+        padding:18px 20px;
+        border-bottom:1px solid #D1D5DC;
+        background:#fff;
+    }
+
+    .modal-title{
+        margin:0;
+        font-size:18px;
+        font-weight:700;
+        color:#0076A2;
+    }
+
+    .modal-title-return{
+        margin:0;
+        font-size:24px;
+        font-weight:800;
+        color:#0076A2;
+        letter-spacing:.2px;
+        line-height:1.2;
+    }
+
+    .modal-body{
+        padding:18px 20px;
+    }
+
+    .modal-footer{
+        display:flex;
+        justify-content:flex-end;
+        gap:10px;
+        padding:16px 20px;
+        border-top:1px solid #D1D5DC;
+        background:#fff;
+    }
+
+    .btn-modal-cancel{
+        border:none;
+        background:#E5E7EB;
+        color:#374151;
+        padding:10px 20px;
+        font-size:14px;
+        font-weight:700;
+        cursor:pointer;
+    }
+
+    .btn-modal-save{
+        border:none;
+        background:#0076A2;
+        color:#fff;
+        padding:10px 24px;
+        font-size:14px;
+        font-weight:700;
+        cursor:pointer;
+    }
+
+    .btn-modal-danger{
+        border:none;
+        background:#E1524A;
+        color:#fff;
+        padding:10px 24px;
+        font-size:14px;
+        font-weight:700;
+        cursor:pointer;
+    }
+
+    /* ===== POPUP CHUYỂN TIẾP ===== */
+    .staff-toolbar{
+        display:grid;
+        grid-template-columns:160px 1fr;
+        gap:12px;
+        margin-bottom:14px;
+    }
+
+    .staff-branch{
+        height:40px;
+        border:1px solid #D1D5DC;
+        background:#F8FAFC;
+        padding:0 12px;
+        display:flex;
+        align-items:center;
+        font-size:14px;
+        color:#334155;
+    }
+
+    .staff-search{
+        width:100%;
+        height:40px;
+        border:1px solid #D1D5DC;
+        padding:0 12px;
+        font-size:14px;
+        outline:none;
+    }
+
+    .staff-table-wrap{
+        border:1px solid #D1D5DC;
+        overflow:hidden;
+    }
+
+    .staff-table{
+        width:100%;
+        border-collapse:collapse;
+    }
+
+    .staff-table th{
+        background:#0076A2;
+        color:#fff;
+        font-size:14px;
+        padding:11px 12px;
+        text-align:left;
+        border-right:1px solid rgba(255,255,255,.18);
+    }
+
+    .staff-table th:last-child{
+        border-right:none;
+    }
+
+    .dept-row{
+        background:#F8FAFC;
+        font-weight:700;
+        color:#334155;
+    }
+
+    .dept-row td{
+        padding:10px 12px;
+        border-top:1px solid #E5E7EB;
+        border-bottom:1px solid #E5E7EB;
+    }
+
+    .dept-toggle{
+        width:20px;
+        height:20px;
+        border:1px solid #CBD5E1;
+        background:#fff;
+        color:#334155;
+        font-weight:700;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        margin-right:8px;
+        cursor:pointer;
+        font-size:12px;
+    }
+
+    .staff-row td{
+        padding:10px 12px;
+        border-bottom:1px solid #E5E7EB;
+        font-size:14px;
+        color:#334155;
+        vertical-align:middle;
+    }
+
+    .staff-row:hover{
+        background:#FAFCFF;
+    }
+
+    .staff-checkbox{
+        width:16px;
+        height:16px;
+        cursor:pointer;
+    }
+
+    .selected-count{
+        margin-top:12px;
+        color:#64748B;
+        font-size:13px;
+    }
+
+    .return-note{
+        margin-top:10px;
+        color:#475569;
+        line-height:1.6;
+        font-size:14px;
+    }
+
+    .return-textarea{
+        width:100%;
+        min-height:120px;
+        border:1px solid #D1D5DC;
+        padding:12px 14px;
+        resize:vertical;
+        outline:none;
+        font-size:14px;
+        margin-top:10px;
+    }
+
+    .save-confirm-box{
+        border:1px solid #D1D5DC;
+        background:#F8FAFC;
+        padding:14px 16px;
+        line-height:1.7;
+        color:#334155;
+        margin-top:8px;
+    }
+
+    @media (max-width: 1000px){
+        .info-grid{
+            grid-template-columns:1fr;
+        }
+
+        .preview-inner{
+            min-height:420px;
+        }
+
+        .preview-box{
+            min-height:420px;
+        }
+
+        .staff-toolbar{
+            grid-template-columns:1fr;
+        }
+    }
+
+    @media (max-width: 900px){
+        .top-actions{
+            flex-direction:column;
+            align-items:flex-start;
+        }
+
+        .action-btns{
+            width:100%;
+            justify-content:flex-start;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'core:dashboard' %}">
+    <svg width="14" height="14" viewBox="0 0 24 24">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+    </svg>
+    Trang chủ
+</a>
+<span class="breadcrumb-sep">›</span>
+<a href="{% url 'quanlyvanbanden:danh_sach' %}">Văn bản đến</a>
+<span class="breadcrumb-sep">›</span>
+<span>Chi tiết văn bản</span>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="padding:24px; overflow:hidden;">
+    <div class="top-actions">
+        <div class="vbd-card-title">
+            THÔNG TIN VĂN BẢN ĐẾN
+        </div>
+
+        <div class="action-btns">
+            <!-- # GIAO VIỆC: CHỈ HIỂN THỊ -->
+            <button type="button" class="btn-local btn-blue">+ Giao việc</button>
+
+            <!-- # CHUYỂN TIẾP -->
+            <button type="button" class="btn-local btn-blue" onclick="openModal('transferModal')">✈ Chuyển tiếp</button>
+
+            <!-- # LƯU -->
+            <button type="button" class="btn-local btn-gray" onclick="openModal('saveModal')">💾 Lưu</button>
+
+            <!-- # HOÀN TRẢ -->
+            <button type="button" class="btn-local btn-red" onclick="openModal('returnModal')">↩ Hoàn trả</button>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div>
+            <div class="field">
+                <div class="label">Trích yếu</div>
+                <div class="value">{{ vb.trich_yeu }}</div>
+            </div>
+
+            <div class="field">
+                <div class="label">Đơn vị ban hành</div>
+                <div class="value">{{ vb.don_vi_ban_hanh }}</div>
+            </div>
+
+            <div class="field">
+                <div class="label">Ngày đến</div>
+                <div class="value">{{ vb.ngay_den|date:"d/m/Y" }}</div>
+            </div>
+
+            <div class="field">
+                <div class="label">Độ mật</div>
+                <div class="value">{{ vb.get_do_mat_display }}</div>
+            </div>
+        </div>
+
+        <div>
+            <div class="field">
+                <div class="label">Số ký hiệu</div>
+                <div class="value">{{ vb.so_ky_hieu }}</div>
+            </div>
+
+            <div class="field">
+                <div class="label">Loại văn bản</div>
+                <div class="value">{{ vb.get_loai_van_ban_display|default:vb.loai_van_ban }}</div>
+            </div>
+
+            <div class="field">
+                <div class="label">Hình thức văn bản</div>
+                <div class="value">{{ vb.get_hinh_thuc_van_ban_display|default:vb.hinh_thuc_van_ban }}</div>
+            </div>
+
+            <div class="field">
+                <div class="label">Hạn xử lý</div>
+                <div class="value">
+                    {% if vb.han_xu_ly %}{{ vb.han_xu_ly|date:"d/m/Y" }}{% else %}-{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="field">
+                <div class="label">Người gửi</div>
+                <div class="value">{{ vb.nguoi_tao.ho_va_ten|default:vb.nguoi_tao.username }}</div>
+            </div>
+
+            <div class="field">
+                <div class="label">Trạng thái</div>
+                <div class="value">
+                    {% if vb.trang_thai == 'CHO_XU_LY' %}
+                        <span class="badge badge-cho-xu-ly">Chờ xử lý</span>
+                    {% elif vb.trang_thai == 'DA_XU_LY' %}
+                        <span class="badge badge-da-xu-ly">Đã xử lý</span>
+                    {% elif vb.trang_thai == 'HOAN_TRA' %}
+                        <span class="badge badge-hoan-tra">Hoàn trả</span>
+                    {% elif vb.trang_thai == 'XEM_DE_BIET' %}
+                        <span class="badge badge-xem-de-biet">Xem để biết</span>
+                    {% else %}
+                        <span class="badge">{{ vb.get_trang_thai_display }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="label">Độ khẩn</div>
+                <div class="value">{{ vb.get_do_khan_display }}</div>
+            </div>
+
+            {% if vb.ngay_hoan_tra %}
+            <div class="field">
+                <div class="label">Ngày hoàn trả</div>
+                <div class="value">{{ vb.ngay_hoan_tra|date:"d/m/Y" }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="note-box note-box--process">
+        <div class="note-label">Nội dung trình lãnh đạo:</div>
+        <div class="note-content">{{ vb.noi_dung_xu_ly|default:"Không có nội dung." }}</div>
+    </div>
+
+    {% if vb.ly_do_hoan_tra %}
+    <div class="note-box note-box--return" style="margin-top:12px;">
+        <div class="note-label">Ý kiến xử lý/hoàn trả</div>
+        <div class="note-content">{{ vb.ly_do_hoan_tra }}</div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="card" style="padding:0; margin-top:18px;">
+    <div class="staff-receive-wrap">
+        <div class="vbd-card-title">DANH SÁCH CHUYÊN VIÊN TIẾP NHẬN</div>
+
+        {% if ds_chuyen_tiep %}
+            <div class="staff-receive-grid">
+                {% for item in ds_chuyen_tiep %}
+                    <div class="staff-receive-item">
+                        <div class="staff-avatar">
+                            {{ item.chuyen_vien.ho_va_ten|default:item.chuyen_vien.username|slice:":1" }}
+                        </div>
+
+                        <div class="staff-info">
+                            <div class="staff-name">
+                                {{ item.chuyen_vien.ho_va_ten|default:item.chuyen_vien.username }}
+                            </div>
+
+                            <div class="staff-role">
+                                {{ item.chuyen_vien.chuc_vu|default:"Chuyên viên" }}
+                            </div>
+
+                            <div class="staff-meta">
+                                {% if item.chuyen_vien.email %}
+                                    <span class="staff-chip">{{ item.chuyen_vien.email }}</span>
+                                {% endif %}
+                                {% if item.chuyen_vien.sdt %}
+                                    <span class="staff-chip">{{ item.chuyen_vien.sdt }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="selected-staff-empty">
+                Chưa có chuyên viên nào được chuyển tiếp.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card" style="padding:24px; margin-top:18px;">
+    <div class="vbd-card-title" style="margin-bottom:20px;">DANH SÁCH VĂN BẢN</div>
+
+    <div class="preview-title">File đính kèm:</div>
+
+    {% if file_dinh_kem_list %}
+        <div class="file-list">
+            {% for f in file_dinh_kem_list %}
+                <a href="javascript:void(0);"
+                   class="file-item {% if forloop.first %}active{% endif %}"
+                   data-file-url="{{ f.tep.url }}"
+                   data-file-name="{{ f.ten_file|escapejs }}"
+                   onclick="selectPreviewFile(this)">
+                    {% if ".pdf" in f.ten_file|lower %}
+                        <div><span class="file-type-pdf">PDF</span></div>
+                    {% elif ".doc" in f.ten_file|lower or ".docx" in f.ten_file|lower %}
+                        <div><span class="file-type-doc">DOCX</span></div>
+                    {% elif ".xls" in f.ten_file|lower or ".xlsx" in f.ten_file|lower %}
+                        <div><span class="file-type-xls">XLSX</span></div>
+                    {% elif ".png" in f.ten_file|lower or ".jpg" in f.ten_file|lower or ".jpeg" in f.ten_file|lower or ".webp" in f.ten_file|lower %}
+                        <div><span class="file-type-img">IMG</span></div>
+                    {% else %}
+                        <div><span class="file-type-other">FILE</span></div>
+                    {% endif %}
+                    <div>
+                        <div style="font-weight:700;">{{ f.ten_file }}</div>
+                        {% if ".pdf" in f.ten_file|lower %}
+                            <span class="file-subtext">PDF Document</span>
+                        {% elif ".docx" in f.ten_file|lower or ".doc" in f.ten_file|lower %}
+                            <span class="file-subtext">Word Document</span>
+                        {% elif ".xls" in f.ten_file|lower or ".xlsx" in f.ten_file|lower %}
+                            <span class="file-subtext">Excel File</span>
+                        {% elif ".png" in f.ten_file|lower or ".jpg" in f.ten_file|lower or ".jpeg" in f.ten_file|lower or ".webp" in f.ten_file|lower %}
+                            <span class="file-subtext">Image File</span>
+                        {% else %}
+                            <span class="file-subtext">Nhấn để xem trước</span>
+                        {% endif %}
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="preview-placeholder">
+            Chưa có file đính kèm.
+        </div>
+    {% endif %}
+
+    <div class="preview-title" style="margin-top:18px;">Xem trước</div>
+    <div class="preview-box">
+        <div class="preview-inner" id="previewArea">
+            {% if file_dinh_kem_list %}
+                <div class="doc-box">
+                    <div class="doc-box-title">Đang tải xem trước...</div>
+                </div>
+            {% else %}
+                <div class="preview-placeholder">
+                    Không có file để xem trước.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="preview-title" style="margin-top:20px;">Tài liệu liên quan:</div>
+    <div class="file-list">
+        {% for tl in tai_lieu_lien_quan_list %}
+            <a href="{{ tl.tep.url }}" target="_blank" class="file-item">
+                {% if ".doc" in tl.ten_file|lower or ".docx" in tl.ten_file|lower %}
+                    <span class="file-type-doc">DOCX</span>
+                {% elif ".pdf" in tl.ten_file|lower %}
+                    <span class="file-type-pdf">PDF</span>
+                {% elif ".xls" in tl.ten_file|lower or ".xlsx" in tl.ten_file|lower %}
+                    <span class="file-type-xls">XLSX</span>
+                {% elif ".png" in tl.ten_file|lower or ".jpg" in tl.ten_file|lower or ".jpeg" in tl.ten_file|lower or ".webp" in tl.ten_file|lower %}
+                    <span class="file-type-img">IMG</span>
+                {% else %}
+                    <span class="file-type-other">FILE</span>
+                {% endif %}
+                <span>{{ tl.ten_file }}</span>
+            </a>
+        {% empty %}
+            <div>Không có tài liệu liên quan.</div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ===== MODAL LƯU ===== -->
+<div class="modal-overlay" id="saveModal">
+    <div class="modal-box modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title">Lưu văn bản</h3>
+        </div>
+
+        <div class="modal-body">
+            <div class="save-confirm-box">
+                Sau khi bấm lưu, văn bản sẽ được cập nhật trạng thái thành
+                <strong>"Xem để biết"</strong>.
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn-modal-cancel" onclick="closeModal('saveModal')">Hủy</button>
+
+            <form method="post" action="{% url 'quanlyvanbanden:lanh_dao_luu' vb.pk %}" style="margin:0;">
+                {% csrf_token %}
+                <button type="submit" class="btn-modal-save">Lưu</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL CHUYỂN TIẾP ===== -->
+<div class="modal-overlay" id="transferModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 class="modal-title">Chuyển tiếp văn bản</h3>
+        </div>
+
+        <form method="post" action="{% url 'quanlyvanbanden:lanh_dao_chuyen_tiep' vb.pk %}">
+            {% csrf_token %}
+
+            <div class="modal-body">
+                <div class="staff-toolbar">
+                    <div class="staff-branch">VNPT Đà Nẵng</div>
+                    <input type="text"
+                           class="staff-search"
+                           id="staffSearchInput"
+                           placeholder="Tìm nhanh nhân viên, email hoặc số điện thoại...">
+                </div>
+
+                <div class="staff-table-wrap">
+                    <table class="staff-table">
+                        <thead>
+                            <tr>
+                                <th style="width:38%;">Đơn vị / Thành viên</th>
+                                <th style="width:24%;">Chức vụ</th>
+                                <th style="width:18%;">Số điện thoại</th>
+                                <th>Email</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% regroup chuyen_viens by phong_ban as phong_ban_groups %}
+
+                            {% for group in phong_ban_groups %}
+                                <tbody class="department-group" data-dept-index="{{ forloop.counter }}">
+                                    <tr class="dept-row">
+                                        <td colspan="4">
+                                            <button type="button"
+                                                    class="dept-toggle"
+                                                    onclick="toggleDepartment('{{ forloop.counter }}', this)">−</button>
+                                            {{ group.grouper.ten_phong_ban|default:"Chưa phân phòng" }}
+                                            ({{ group.list|length }})
+                                        </td>
+                                    </tr>
+
+                                    {% for cv in group.list %}
+                                        <tr class="staff-row dept-{{ forloop.parentloop.counter }}">
+                                            <td>
+                                                <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                                                    <input type="checkbox"
+                                                           class="staff-checkbox"
+                                                           name="chuyen_vien_ids"
+                                                           value="{{ cv.id }}"
+                                                           onchange="updateSelectedCount()">
+                                                    <span>{{ cv.ho_va_ten|default:cv.username }}</span>
+                                                </label>
+                                            </td>
+                                            <td>{{ cv.chuc_vu|default:"-" }}</td>
+                                            <td>{{ cv.sdt|default:"-" }}</td>
+                                            <td>{{ cv.email|default:"-" }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" style="padding:18px 12px; color:#64748B;">
+                                        Không có chuyên viên để chuyển tiếp.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="selected-count">
+                    Đang chọn: <strong id="selectedCountText">0</strong> nhân viên
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-modal-cancel" onclick="closeModal('transferModal')">Hủy bỏ</button>
+                <button type="submit" class="btn-modal-save">Lưu lại</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== MODAL HOÀN TRẢ ===== -->
+<div class="modal-overlay" id="returnModal">
+    <div class="modal-box modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title-return">Hoàn trả văn bản</h3>
+        </div>
+
+        <form method="post" action="{% url 'quanlyvanbanden:lanh_dao_hoan_tra' vb.pk %}">
+            {% csrf_token %}
+
+            <div class="modal-body">
+                <div class="return-note">
+                    <strong>Văn thư:</strong> {{ vb.nguoi_tao.ho_va_ten|default:vb.nguoi_tao.username }}
+                </div>
+
+                <div class="return-note" style="margin-top:14px; font-weight:700; color:#0F172A;">
+                    Ý kiến xử lý/hoàn trả
+                </div>
+
+                <textarea name="ly_do_hoan_tra"
+                          class="return-textarea"
+                          placeholder="Nhập ý kiến xử lý / hoàn trả cho văn thư..."></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-modal-cancel" onclick="closeModal('returnModal')">Hủy</button>
+                <button type="submit" class="btn-modal-danger">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+
+<script>
+    // ===== DỮ LIỆU CHUYÊN VIÊN ĐÃ CHỌN =====
+    const selectedChuyenVienIds = [
+        {% for item in ds_chuyen_tiep %}
+            {{ item.chuyen_vien_id }}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    // ===== MODAL =====
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) modal.style.display = 'flex';
+    }
+
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) modal.style.display = 'none';
+    }
+
+    document.querySelectorAll('.modal-overlay').forEach(function(modal){
+        modal.addEventListener('click', function(e){
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
+
+    // ===== CHUYỂN TIẾP =====
+    function updateSelectedCount() {
+        const checked = document.querySelectorAll('input[name="chuyen_vien_ids"]:checked').length;
+        const countText = document.getElementById('selectedCountText');
+        if (countText) countText.textContent = checked;
+    }
+
+    function toggleDepartment(index, btn) {
+        const rows = document.querySelectorAll('.dept-' + index);
+        const isClosing = btn.textContent.trim() === '−';
+
+        rows.forEach(function(row){
+            row.style.display = isClosing ? 'none' : 'table-row';
+        });
+
+        btn.textContent = isClosing ? '+' : '−';
+    }
+
+    function normalizeText(text) {
+        return (text || '')
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function filterStaffRows() {
+        const keyword = normalizeText(document.getElementById('staffSearchInput')?.value || '');
+        const rows = document.querySelectorAll('.staff-row');
+        const groups = document.querySelectorAll('.department-group');
+
+        rows.forEach(function(row){
+            const fullText = normalizeText(row.innerText);
+            row.style.display = fullText.includes(keyword) ? 'table-row' : 'none';
+        });
+
+        groups.forEach(function(group){
+            const staffRows = group.querySelectorAll('.staff-row');
+            let visibleCount = 0;
+
+            staffRows.forEach(function(row){
+                if (row.style.display !== 'none') visibleCount++;
+            });
+
+            const deptRow = group.querySelector('.dept-row');
+            if (deptRow) {
+                deptRow.style.display = visibleCount > 0 ? 'table-row' : 'none';
+            }
+        });
+    }
+
+    function markSelectedStaffFromServer() {
+        if (!selectedChuyenVienIds.length) {
+            updateSelectedCount();
+            return;
+        }
+
+        document.querySelectorAll('input[name="chuyen_vien_ids"]').forEach(function(checkbox){
+            const value = parseInt(checkbox.value, 10);
+            if (selectedChuyenVienIds.includes(value)) {
+                checkbox.checked = true;
+            }
+        });
+
+        updateSelectedCount();
+    }
+
+    // ===== XEM TRƯỚC FILE: GIỮ NGUYÊN LOGIC =====
+    if (window.pdfjsLib) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    }
+
+    let pdfDoc = null;
+    let pdfPageNum = 1;
+    let pdfPageRendering = false;
+    let pdfPageNumPending = null;
+    let pdfCurrentUrl = null;
+    let pdfCanvas = null;
+    let pdfCtx = null;
+
+    function updatePdfPageInfo() {
+        const pageNumEl = document.getElementById("pdf-page-num");
+        const pageCountEl = document.getElementById("pdf-page-count");
+        if (pageNumEl) pageNumEl.textContent = pdfPageNum;
+        if (pageCountEl) pageCountEl.textContent = pdfDoc ? pdfDoc.numPages : 1;
+    }
+
+    function renderPage(num) {
+        if (!pdfDoc || !pdfCanvas || !pdfCtx) return;
+
+        pdfPageRendering = true;
+
+        pdfDoc.getPage(num).then(function(page) {
+            const baseViewport = page.getViewport({ scale: 1 });
+            const previewArea = document.getElementById("previewArea");
+            const availableWidth = Math.max(previewArea.clientWidth - 60, 300);
+            const scale = availableWidth / baseViewport.width;
+            const viewport = page.getViewport({ scale: scale });
+
+            pdfCanvas.height = viewport.height;
+            pdfCanvas.width = viewport.width;
+
+            const renderContext = {
+                canvasContext: pdfCtx,
+                viewport: viewport
+            };
+
+            const renderTask = page.render(renderContext);
+
+            renderTask.promise.then(function() {
+                pdfPageRendering = false;
+                updatePdfPageInfo();
+
+                if (pdfPageNumPending !== null) {
+                    renderPage(pdfPageNumPending);
+                    pdfPageNumPending = null;
+                }
+            });
+        }).catch(function(error) {
+            renderOtherViewer(pdfCurrentUrl, error.message || "Không tải được PDF", "Không tải được PDF");
+        });
+    }
+
+    function queueRenderPage(num) {
+        if (pdfPageRendering) {
+            pdfPageNumPending = num;
+        } else {
+            renderPage(num);
+        }
+    }
+
+    function prevPdfPage() {
+        if (!pdfDoc || pdfPageNum <= 1) return;
+        pdfPageNum--;
+        queueRenderPage(pdfPageNum);
+    }
+
+    function nextPdfPage() {
+        if (!pdfDoc || pdfPageNum >= pdfDoc.numPages) return;
+        pdfPageNum++;
+        queueRenderPage(pdfPageNum);
+    }
+
+    function renderPdfViewer(url) {
+        const previewArea = document.getElementById("previewArea");
+        previewArea.innerHTML = `
+            <div class="pdf-toolbar">
+                <button type="button" onclick="prevPdfPage()">◀</button>
+                <span class="pdf-page-info">
+                    Trang <span id="pdf-page-num">1</span> / <span id="pdf-page-count">1</span>
+                </span>
+                <button type="button" onclick="nextPdfPage()">▶</button>
+                <a href="${url}" target="_blank">Mở tab mới</a>
+            </div>
+            <div class="pdf-canvas-wrap">
+                <canvas id="pdf-canvas" class="pdf-canvas"></canvas>
+            </div>
+        `;
+
+        pdfCanvas = document.getElementById("pdf-canvas");
+        pdfCtx = pdfCanvas.getContext("2d");
+        pdfCurrentUrl = url;
+        pdfPageNum = 1;
+        pdfPageRendering = false;
+        pdfPageNumPending = null;
+
+        pdfjsLib.getDocument(url).promise.then(function(doc) {
+            pdfDoc = doc;
+            updatePdfPageInfo();
+            renderPage(pdfPageNum);
+        }).catch(function(error) {
+            renderOtherViewer(url, error.message || "Không tải được PDF", "Không tải được PDF");
+        });
+    }
+
+    async function renderDocxViewer(url) {
+        const previewArea = document.getElementById("previewArea");
+        previewArea.innerHTML = `
+            <div class="pdf-toolbar">
+                <a href="${url}" target="_blank">Mở tab mới</a>
+            </div>
+            <div class="doc-box">
+                <div class="doc-box-title">Đang tải nội dung DOCX...</div>
+            </div>
+        `;
+
+        try {
+            if (typeof mammoth === "undefined") {
+                throw new Error("Mammoth chưa được tải");
+            }
+
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("Không tải được file DOCX");
+
+            const arrayBuffer = await response.arrayBuffer();
+            const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
+
+            previewArea.innerHTML = `
+                <div class="pdf-toolbar">
+                    <a href="${url}" target="_blank">Mở tab mới</a>
+                </div>
+                <div class="docx-rendered-content">
+                    ${result.value || "<p>Không có nội dung để hiển thị.</p>"}
+                </div>
+            `;
+        } catch (error) {
+            renderOtherViewer(url, error.message || "Không thể hiển thị DOCX", "Không thể hiển thị DOCX");
+        }
+    }
+
+    function renderImageViewer(url, filename) {
+        const previewArea = document.getElementById("previewArea");
+        previewArea.innerHTML = `
+            <div style="width:100%; min-height:420px; display:flex; align-items:center; justify-content:center; background:#fff; border:1px solid #D1D5DC;">
+                <img src="${url}" alt="${filename}" style="max-width:100%; max-height:700px; object-fit:contain;">
+            </div>
+        `;
+    }
+
+    function renderOtherViewer(url, filename, titleText) {
+        const previewArea = document.getElementById("previewArea");
+        previewArea.innerHTML = `
+            <div class="doc-box">
+                <div class="doc-box-title">${titleText}</div>
+                <div class="doc-box-name">${filename}</div>
+                <a href="${url}" target="_blank" class="doc-box-link">Mở file ở tab mới</a>
+            </div>
+        `;
+    }
+
+    function renderPreview(url, filename) {
+        const lower = filename.toLowerCase();
+
+        if (lower.endsWith(".pdf")) {
+            renderPdfViewer(url);
+            return;
+        }
+
+        if (lower.endsWith(".doc") || lower.endsWith(".docx")) {
+            renderDocxViewer(url);
+            return;
+        }
+
+        if (
+            lower.endsWith(".png") ||
+            lower.endsWith(".jpg") ||
+            lower.endsWith(".jpeg") ||
+            lower.endsWith(".webp")
+        ) {
+            renderImageViewer(url, filename);
+            return;
+        }
+
+        if (lower.endsWith(".xls") || lower.endsWith(".xlsx")) {
+            renderOtherViewer(url, filename, "Không hỗ trợ xem trực tiếp file Excel trên local");
+            return;
+        }
+
+        renderOtherViewer(url, filename, "Không hỗ trợ xem trước định dạng này");
+    }
+
+    function selectPreviewFile(el) {
+        document.querySelectorAll('.file-item[data-file-url]').forEach(item => {
+            item.classList.remove('active');
+        });
+        el.classList.add('active');
+
+        const url = el.getAttribute('data-file-url');
+        const filename = el.getAttribute('data-file-name') || '';
+
+        renderPreview(url, filename);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        markSelectedStaffFromServer();
+
+        const searchInput = document.getElementById('staffSearchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', filterStaffRows);
+        }
+
+        const firstActive = document.querySelector('.file-item.active[data-file-url]');
+        if (firstActive) {
+            const url = firstActive.getAttribute('data-file-url');
+            const filename = firstActive.getAttribute('data-file-name') || '';
+            renderPreview(url, filename);
+        }
+    });
+
+    window.addEventListener("resize", function() {
+        if (pdfDoc && pdfCurrentUrl) {
+            queueRenderPage(pdfPageNum);
+        }
+    });
+</script>
+{% endblock %}
