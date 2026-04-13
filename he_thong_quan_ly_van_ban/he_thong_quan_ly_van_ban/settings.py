@@ -120,3 +120,7 @@ USE_TZ = True
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Thêm vào file vào thư mục media
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"

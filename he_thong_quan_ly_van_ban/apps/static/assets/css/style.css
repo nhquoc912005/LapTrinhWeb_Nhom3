@@ -977,7 +977,7 @@ table.data-table tbody tr:last-child { border-bottom: none; }
 
 table.data-table tbody td {
   padding: 10px 12px;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-main);
   vertical-align: middle;
 }
@@ -1556,4 +1556,8 @@ td.td-truncate {
 }
 .breadcrumb-link:hover {
   text-decoration: underline;
+}
+
+#vanBanDiBody td {
+    font-size: 15px !important;
 }
