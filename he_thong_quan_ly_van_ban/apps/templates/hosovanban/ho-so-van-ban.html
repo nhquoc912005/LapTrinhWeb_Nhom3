@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}Hồ sơ Văn bản - QLVB{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'core:dashboard' %}">
+        <svg width="14" height="14" viewBox="0 0 24 24">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+        </svg>Trang chủ
+    </a>
+    <span class="breadcrumb-sep">›</span>
+    <span>Hồ sơ văn bản</span>
+{% endblock %}
+
+{% block page_wrapper %}
+    <div class="page-main" id="hoSoListView">
+        <div class="filter-card">
+            <div style="margin-bottom: 24px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:16px;">
+                    <h3 style="color:var(--primary); font-size:16px; font-weight:700; border-left:4px solid var(--primary); padding-left:12px; margin:0; text-transform:uppercase;">
+                        TRA CỨU THÔNG TIN
+                    </h3>
+                    
+                    {% if request.user.is_van_thu %}
+                    <a href="{% url 'hosovanban:them_ho_so_van_ban' %}" class="btn btn-primary" data-roles="vanthu" style="display:inline-flex; align-items:center; gap:8px; padding:10px 22px; font-weight:600; text-decoration:none; background:#0284C7;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                        </svg>
+                        Thêm mới
+                    </a>
+                    {% endif %}
+                </div>
+                <hr style="border:none; border-top:1px solid var(--border-color); margin:0 0 24px 0;">
+
+                <form method="GET" id="filterForm">
+                    <input type="hidden" name="tab" id="tabInput" value="{{ current_tab|default:'all' }}">
+                    <div class="filter-tabs" style="display:flex; background:#F1F5F9; border-radius:4px; width:fit-content; margin-bottom:24px;">
+                        <button type="button" class="filter-tab {% if current_tab == 'all' or not current_tab %}active{% endif %}" onclick="document.getElementById('tabInput').value='all'; document.getElementById('filterForm').submit();" style="padding:8px 32px; border:none; {% if current_tab == 'all' or not current_tab %}background:#fff; color:var(--primary); box-shadow:0 1px 3px rgba(0,0,0,0.1);{% else %}background:transparent; color:var(--text-muted);{% endif %} font-weight:600; cursor:pointer;">Tất cả</button>
+                        <button type="button" class="filter-tab {% if current_tab == 'hien-hanh' %}active{% endif %}" onclick="document.getElementById('tabInput').value='hien-hanh'; document.getElementById('filterForm').submit();" style="padding:8px 32px; border:none; {% if current_tab == 'hien-hanh' %}background:#fff; color:var(--primary); box-shadow:0 1px 3px rgba(0,0,0,0.1);{% else %}background:transparent; color:var(--text-muted);{% endif %} font-weight:500; cursor:pointer;">Hiện hành</button>
+                        <button type="button" class="filter-tab {% if current_tab == 'luu-tru' %}active{% endif %}" onclick="document.getElementById('tabInput').value='luu-tru'; document.getElementById('filterForm').submit();" style="padding:8px 32px; border:none; {% if current_tab == 'luu-tru' %}background:#fff; color:var(--primary); box-shadow:0 1px 3px rgba(0,0,0,0.1);{% else %}background:transparent; color:var(--text-muted);{% endif %} font-weight:500; cursor:pointer;">Lưu trữ</button>
+                    </div>
+
+                    <div class="search-input-wrap" style="position:relative; margin-bottom:16px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted);">
+                            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                        </svg>
+                        <input type="text" name="q" value="{{ current_q }}" class="form-control" placeholder="Tìm theo tiêu đề hoặc ký hiệu hồ sơ..." style="padding-left:40px; width:100%; font-size:14px; padding-top:10px; padding-bottom:10px;" onkeypress="if(event.key === 'Enter') this.form.submit();">
+                    </div>
+
+                    <div class="form-row cols-3" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;">
+                        <div>
+                            <label style="font-weight:600; font-size:13px; margin-bottom:6px; display:block;">Trạng thái</label>
+                            <select name="status" class="form-control" style="font-size:14px; padding:10px;" onchange="this.form.submit()">
+                                <option value="">-- Tất cả trạng thái --</option>
+                                <option value="Hiện hành" {% if current_status == 'Hiện hành' %}selected{% endif %}>Hiện hành</option>
+                                <option value="Lưu trữ" {% if current_status == 'Lưu trữ' %}selected{% endif %}>Lưu trữ</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-weight:600; font-size:13px; margin-bottom:6px; display:block;">Đơn vị</label>
+                            <select name="don_vi" class="form-control" style="font-size:14px; padding:10px;" onchange="this.form.submit()">
+                                <option value="">-- Tất cả đơn vị --</option>
+                                {% for pb in ds_phong_ban %}
+                                <option value="{{ pb.ten_phong_ban }}" {% if current_don_vi == pb.ten_phong_ban %}selected{% endif %}>{{ pb.ten_phong_ban }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-weight:600; font-size:13px; margin-bottom:6px; display:block;">Ngày tạo hồ sơ</label>
+                            <select name="nam" class="form-control" style="font-size:14px; padding:10px;" onchange="this.form.submit()">
+                                <option value="">-- Tất cả năm hình thành --</option>
+                                {% for year in nam_choices %}
+                                <option value="{{ year }}" {% if current_nam == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </form>
+
+                {% if current_status or current_don_vi or current_nam or current_q %}
+                <div style="display:flex; align-items:center; gap:8px; margin-top:24px; flex-wrap:wrap;">
+                    <span style="color:#64748b; font-size:14px; margin-right:4px;">Đang lọc:</span>
+                    
+                    {% if current_status %}
+                    <a href="?tab={{ current_tab }}&status=&don_vi={{ current_don_vi|urlencode }}&nam={{ current_nam }}&q={{ current_q|urlencode }}" style="display:inline-flex; align-items:center; background:#e0f2fe; color:#0284c7; padding:4px 8px; border-radius:4px; font-size:13px; text-decoration:none;">
+                        Trạng thái: {{ current_status }} <span style="margin-left:6px; font-weight:bold; font-size:12px;">X</span>
+                    </a>
+                    {% endif %}
+                    
+                    {% if current_don_vi %}
+                    <a href="?tab={{ current_tab }}&status={{ current_status|urlencode }}&don_vi=&nam={{ current_nam }}&q={{ current_q|urlencode }}" style="display:inline-flex; align-items:center; background:#e0f2fe; color:#0284c7; padding:4px 8px; border-radius:4px; font-size:13px; text-decoration:none;">
+                        Đơn vị: {{ current_don_vi }} <span style="margin-left:6px; font-weight:bold; font-size:12px;">X</span>
+                    </a>
+                    {% endif %}
+
+                    {% if current_nam %}
+                    <a href="?tab={{ current_tab }}&status={{ current_status|urlencode }}&don_vi={{ current_don_vi|urlencode }}&nam=&q={{ current_q|urlencode }}" style="display:inline-flex; align-items:center; background:#e0f2fe; color:#0284c7; padding:4px 8px; border-radius:4px; font-size:13px; text-decoration:none;">
+                        Năm hình thành: {{ current_nam }} <span style="margin-left:6px; font-weight:bold; font-size:12px;">X</span>
+                    </a>
+                    {% endif %}
+                    
+                    {% if current_q %}
+                    <a href="?tab={{ current_tab }}&status={{ current_status|urlencode }}&don_vi={{ current_don_vi|urlencode }}&nam={{ current_nam }}&q=" style="display:inline-flex; align-items:center; background:#e0f2fe; color:#0284c7; padding:4px 8px; border-radius:4px; font-size:13px; text-decoration:none;">
+                        Từ khóa: {{ current_q }} <span style="margin-left:6px; font-weight:bold; font-size:12px;">X</span>
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead style="background:#F8FAFC;">
+                        <tr>
+                            <th style="min-width:250px;">Tiêu đề hồ sơ</th>
+                            <th style="min-width:120px;">Ký hiệu hồ sơ</th>
+                            <th style="min-width:140px;">Năm hình thành</th>
+                            <th style="min-width:180px;">Thời gian bảo quản</th>
+                            <th style="min-width:150px;">Đơn vị</th>
+                            <th style="min-width:100px;">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hoSoBody">
+                        {% for hs in ds_ho_so %}
+                        <tr style="cursor: pointer;" onclick="window.location.href='{% url 'hosovanban:chi_tiet' hs.pk %}';">
+                            <td>
+                                <a href="{% url 'hosovanban:chi_tiet' hs.pk %}" style="text-decoration:none; color:var(--primary); font-weight:600;" onclick="event.stopPropagation();">
+                                    {{ hs.tieu_de_ho_so }}
+                                </a>
+                            </td>
+                            <td>{{ hs.ky_hieu_ho_so }}</td>
+                            <td>{{ hs.ngay_tao_ho_so|date:'Y' }}</td>
+                            <td>{{ hs.thoi_gian_bao_quan }}</td>
+                            <td>
+                                {% for ph in hs.phongxemhoso_set.all %}
+                                    {{ ph.phong_ban.ten_phong_ban }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    --
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% if hs.trang_thai == 1 %}
+                                <span style="background-color: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 9999px; font-size: 12px; font-weight: 500;">Hiện hành</span>
+                                {% else %}
+                                <span style="background-color: #f1f5f9; color: #475569; padding: 4px 8px; border-radius: 9999px; font-size: 12px; font-weight: 500;">Lưu trữ</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #6b7280; padding: 16px;">Không có hồ sơ nào.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" style="display:flex; justify-content:space-between; align-items:center; padding:16px; border-top:1px solid var(--border-color);">
+                <span class="pagination-info" id="paginationInfo" style="color:var(--text-muted); font-size:13px;">
+                    Hiển thị {% if page_obj.paginator.count > 0 %}{{ page_obj.start_index }} - {{ page_obj.end_index }}{% else %}0{% endif %} văn bản của tổng {{ page_obj.paginator.count }} văn bản
+                </span>
+                
+                {% if page_obj.paginator.num_pages > 1 %}
+                <div class="pagination-btns" id="paginationBtns" style="display:flex; align-items:stretch; border:1px solid var(--border-color); border-radius:4px; overflow:hidden;">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}&tab={{ current_tab }}&status={{ current_status|urlencode }}&don_vi={{ current_don_vi|urlencode }}&nam={{ current_nam }}&q={{ current_q|urlencode }}" style="display:flex; align-items:center; justify-content:center; padding:6px 12px; border:none; background:#fff; border-right:1px solid var(--border-color); cursor:pointer; text-decoration:none; color:#0f172a;">Trước</a>
+                    {% else %}
+                    <div style="display:flex; align-items:center; justify-content:center; padding:6px 12px; border:none; background:#f8fafc; border-right:1px solid var(--border-color); color:#94a3b8; cursor:not-allowed;">Trước</div>
+                    {% endif %}
+                    
+                    <div style="display:flex; align-items:center; justify-content:center; padding:6px 16px; border:none; background:#0284C7; color:white; font-weight:600;">{{ page_obj.number }}</div>
+                    
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}&tab={{ current_tab }}&status={{ current_status|urlencode }}&don_vi={{ current_don_vi|urlencode }}&nam={{ current_nam }}&q={{ current_q|urlencode }}" style="display:flex; align-items:center; justify-content:center; padding:6px 12px; border:none; background:#fff; border-left:1px solid var(--border-color); cursor:pointer; text-decoration:none; color:#0f172a;">Sau</a>
+                    {% else %}
+                    <div style="display:flex; align-items:center; justify-content:center; padding:6px 12px; border:none; background:#f8fafc; border-left:1px solid var(--border-color); color:#94a3b8; cursor:not-allowed;">Sau</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
