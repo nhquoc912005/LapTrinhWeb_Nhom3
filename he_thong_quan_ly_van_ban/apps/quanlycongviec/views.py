@@ -21,7 +21,7 @@ def giao_viec(request):
     is_van_thu = request.user.is_van_thu
     
     # Hiển thị tất cả công việc cho tất cả các role
-    tasks = CongViec.objects.all().order_by('-ngay_cap_nhat_giao_viec')
+    tasks = CongViec.objects.all().order_by('-pk')
     
     # Lấy danh sách chuyên viên và tất cả người dùng
     chuyen_vien_list = NguoiDung.objects.filter(chuc_vu=NguoiDung.ChucVu.CHUYEN_VIEN)
@@ -47,7 +47,7 @@ def xu_ly_cong_viec(request):
     """
     user_core = request.user.core_profile
     # Hiển thị tất cả công việc thay vì chỉ lọc những việc được giao
-    tasks = CongViec.objects.all().order_by('-han_xu_ly')
+    tasks = CongViec.objects.all().order_by('-pk')
     
     context = {
         'tasks': tasks,
