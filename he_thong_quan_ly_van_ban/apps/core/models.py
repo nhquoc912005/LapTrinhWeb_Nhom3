@@ -502,6 +502,8 @@ class CongViec(models.Model):
     ngay_bat_dau = models.DateField(null=False)
     han_xu_ly = models.DateTimeField(null=False)
     ngay_cap_nhat_giao_viec = models.DateField(default=timezone.now)
+    last_activity = models.DateTimeField(auto_now=True)
+    ghi_chu = models.TextField(null=True, blank=True)
     ket_qua_xu_ly = models.TextField(null=True, blank=True)
     ngay_xu_ly = models.DateField(default=timezone.now)
     nguoi_giao = models.ForeignKey(
