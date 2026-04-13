@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Xóa văn bản đến{% endblock %}
+{% block nav_van_ban_den_active %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+:root{
+            --primary:#0076A2;
+            --border:#D1D5DC;
+            --bg:#F5F7FA;
+            --text:#334155;
+        }
+
+        body{
+            margin:0;
+            font-family:'Arimo', sans-serif;
+            font-size:15px;
+            background:var(--bg);
+            color:var(--text);
+        }
+
+        .wrap{
+            max-width:800px;
+            margin:60px auto;
+            background:#fff;
+            border:1px solid var(--border);
+            border-radius:10px;
+            padding:28px;
+        }
+
+        h2{
+            margin-top:0;
+            color:#DC2626;
+            font-size:24px;
+        }
+
+        .box{
+            border:1px solid var(--border);
+            border-radius:8px;
+            padding:18px;
+            background:#F8FAFC;
+            margin:20px 0;
+        }
+
+        .row{
+            margin-bottom:12px;
+        }
+
+        .label{
+            font-weight:700;
+            color:#64748B;
+            margin-bottom:4px;
+        }
+
+        .value{
+            font-size:16px;
+            font-weight:600;
+            color:#0F172A;
+        }
+
+        .actions{
+            display:flex;
+            justify-content:flex-end;
+            gap:10px;
+            margin-top:20px;
+        }
+
+        .btn{
+            border:none;
+            border-radius:6px;
+            padding:10px 18px;
+            font-size:15px;
+            font-weight:700;
+            cursor:pointer;
+            font-family:'Arimo', sans-serif;
+            text-decoration:none;
+        }
+
+        .btn-cancel{
+            background:#E2E8F0;
+            color:#334155;
+        }
+
+        .btn-delete{
+            background:#EF4444;
+            color:#fff;
+        }
+.page-main { max-width: 100% !important; }
+.wrap { max-width: 800px; margin: 20px auto; }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'core:dashboard' %}">
+    <svg width="14" height="14" viewBox="0 0 24 24">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+    </svg>
+    Trang chủ
+</a>
+<span class="breadcrumb-sep">›</span>
+<a href="{% url 'quanlyvanbanden:danh_sach' %}">Văn bản đến</a>
+<span class="breadcrumb-sep">›</span>
+<span>Xóa văn bản đến</span>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+    <h2>Xóa văn bản đến</h2>
+    <p>Bạn có chắc muốn xóa văn bản này không?</p>
+
+    <div class="box">
+        <div class="row">
+            <div class="label">Số ký hiệu</div>
+            <div class="value">{{ vb.so_ky_hieu }}</div>
+        </div>
+
+        <div class="row">
+            <div class="label">Trích yếu</div>
+            <div class="value">{{ vb.trich_yeu }}</div>
+        </div>
+
+        <div class="row">
+            <div class="label">Đơn vị ban hành</div>
+            <div class="value">{{ vb.don_vi_ban_hanh }}</div>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="actions">
+            <a href="{% url 'quanlyvanbanden:chi_tiet' vb.pk %}" class="btn btn-cancel">Hủy</a>
+            <button type="submit" class="btn btn-delete">Xóa văn bản</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

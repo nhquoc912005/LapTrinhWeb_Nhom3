@@ -1,0 +1,86 @@
+<!-- # MODAL CHUYỂN TIẾP -->
+<div class="modal-overlay" id="transferModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 class="modal-title">Chuyển tiếp văn bản</h3>
+        </div>
+
+        <form method="post" action="{% url 'quanlyvanbanden:lanh_dao_chuyen_tiep' vb.pk %}">
+            {% csrf_token %}
+
+            <div class="modal-body">
+                <div class="staff-toolbar">
+                    <div class="staff-branch">VNPT Đà Nẵng</div>
+                    <input type="text"
+                           class="staff-search"
+                           id="staffSearchInput"
+                           placeholder="Tìm nhanh nhân viên, email hoặc số điện thoại...">
+                </div>
+
+                <div class="staff-table-wrap">
+                    <table class="staff-table">
+                        <thead>
+                            <tr>
+                                <th style="width:38%;">Đơn vị / Thành viên</th>
+                                <th style="width:24%;">Chức vụ</th>
+                                <th style="width:18%;">Số điện thoại</th>
+                                <th>Email</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% regroup chuyen_viens by phong_ban as phong_ban_groups %}
+
+                            {% for group in phong_ban_groups %}
+                                <tbody class="department-group" data-dept-index="{{ forloop.counter }}">
+                                    <tr class="dept-row">
+                                        <td colspan="4">
+                                            <button type="button"
+                                                    class="dept-toggle"
+                                                    onclick="toggleDepartment('{{ forloop.counter }}', this)">−</button>
+
+                                            {{ group.grouper.ten_phong_ban|default:"Chưa phân phòng" }}
+                                            ({{ group.list|length }})
+                                        </td>
+                                    </tr>
+
+                                    {% for cv in group.list %}
+                                        <tr class="staff-row dept-{{ forloop.parentloop.counter }}">
+                                            <td>
+                                                <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                                                    <input type="checkbox"
+                                                           class="staff-checkbox"
+                                                           name="chuyen_vien_ids"
+                                                           value="{{ cv.id }}"
+                                                           onchange="updateSelectedCount()">
+                                                    <span>{{ cv.ho_va_ten|default:cv.username }}</span>
+                                                </label>
+                                            </td>
+                                            <td>{{ cv.chuc_vu|default:"-" }}</td>
+                                            <td>{{ cv.sdt|default:"-" }}</td>
+                                            <td>{{ cv.email|default:"-" }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" style="padding:18px 12px; color:#64748B;">
+                                        Không có chuyên viên để chuyển tiếp.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="selected-count">
+                    Đang chọn: <strong id="selectedCountText">0</strong> nhân viên
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-modal-cancel" onclick="closeModal('transferModal')">Hủy bỏ</button>
+                <button type="submit" class="btn-modal-save">Lưu lại</button>
+            </div>
+        </form>
+    </div>
+</div>
