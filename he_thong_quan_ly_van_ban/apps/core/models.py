@@ -259,9 +259,10 @@ class VanBan(models.Model):
     )
     ho_so_van_ban = models.ForeignKey(
         "core.HoSoVanBan",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         db_column="ho_so_van_ban_id",
-        null=False,
+        null=True,
+        blank=True,
     )
     so_ky_hieu = models.CharField(max_length=255, null=False)
     trich_yeu = models.CharField(max_length=255, null=False)

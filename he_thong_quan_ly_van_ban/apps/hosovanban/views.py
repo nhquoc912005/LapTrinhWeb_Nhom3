@@ -12,6 +12,8 @@ from apps.core.models import (
     NguoiXuLyHoSo,
     PhongBan,
     NguoiDung,
+    VanBan,
+    VanBanLienQuan,
 )
 
 from .forms import HoSoVanBanCreateForm, HoSoVanBanUpdateForm
@@ -242,3 +244,30 @@ def xoa_ho_so_van_ban(request, pk):
             messages.success(request, "Xóa hồ sơ văn bản thành công!")
             
     return redirect("hosovanban:danh_sach")
+
+
+@role_required(*Customer.Role.values)
+def chi_tiet_van_ban_trong_ho_so(request, ho_so_id, vb_id):
+    ho_so = get_object_or_404(HoSoVanBan, pk=ho_so_id)
+    van_ban = get_object_or_404(VanBan, pk=vb_id, ho_so_van_ban=ho_so)
+    ds_van_ban_lien_quan = van_ban.vanbanlienquan_set.all()
+    
+    context = {
+        "ho_so": ho_so,
+        "van_ban": van_ban,
+        "ds_van_ban_lien_quan": ds_van_ban_lien_quan,
+    }
+    return render(request, "hosovanban/chi-tiet-van-ban.html", context)
+
+
+@role_required("vanthu")
+def xoa_van_ban_khoi_ho_so(request, ho_so_id, vb_id):
+    if request.method == "POST":
+        ho_so = get_object_or_404(HoSoVanBan, pk=ho_so_id)
+        van_ban = get_object_or_404(VanBan, pk=vb_id, ho_so_van_ban=ho_so)
+        
+        van_ban.ho_so_van_ban = None
+        van_ban.save()
+        
+        messages.success(request, f"Đã gỡ văn bản [{van_ban.so_ky_hieu}] khỏi hồ sơ.")
+    return redirect("hosovanban:chi_tiet", pk=ho_so_id)

@@ -141,16 +141,21 @@
                     </thead>
                     <tbody>
                         {% for vb in ds_van_ban %}
-                        <tr style="border-bottom:1px solid #f1f5f9;">
+                        <tr style="border-bottom:1px solid #f1f5f9; cursor: pointer;" onclick="window.location.href='{% url 'hosovanban:chi_tiet_van_ban' ho_so.pk vb.pk %}';">
                             <td style="padding:16px; font-size:14px; color:#333;">{{ forloop.counter }}</td>
-                            <td style="padding:16px; font-size:14px;"><a href="#" style="color:#0284C7; text-decoration:none;">{{ vb.so_ky_hieu }}</a></td>
+                            <td style="padding:16px; font-size:14px;"><a href="{% url 'hosovanban:chi_tiet_van_ban' ho_so.pk vb.pk %}" style="color:#0284C7; text-decoration:none; font-weight:500;" onclick="event.stopPropagation();">{{ vb.so_ky_hieu }}</a></td>
                             <td style="padding:16px; font-size:14px; color:#333;">{{ vb.trich_yeu }}</td>
                             <td style="padding:16px; font-size:14px; color:#333;">{{ vb.don_vi_ban_hanh }}</td>
                             <td style="padding:16px; font-size:14px; color:#333;">{{ vb.ngay_van_ban|date:"d/m/Y" }}</td>
                             <td style="padding:16px; font-size:14px;">
-                                <a href="#" style="color:#ef4444;" title="Xóa văn bản khỏi hồ sơ (demo)">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                                </a>
+                                {% if request.user.is_van_thu and ho_so.trang_thai == 1 %}
+                                <form method="post" action="{% url 'hosovanban:xoa_van_ban_khoi_ho_so' ho_so.pk vb.pk %}" style="margin:0;" onsubmit="event.stopPropagation(); return confirm('Bạn có chắc chắn muốn gỡ văn bản này khỏi hồ sơ không?');">
+                                    {% csrf_token %}
+                                    <button type="submit" style="color:#ef4444; background:none; border:none; cursor:pointer; padding:0; display:flex;" title="Gỡ văn bản khỏi hồ sơ" onclick="event.stopPropagation();">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                                    </button>
+                                </form>
+                                {% endif %}
                             </td>
                         </tr>
                         {% empty %}
