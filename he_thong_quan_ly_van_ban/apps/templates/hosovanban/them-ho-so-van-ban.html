@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Thêm hồ sơ văn bản{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'core:dashboard' %}">
+    <svg width="14" height="14" viewBox="0 0 24 24">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+    </svg>
+    Trang chủ
+</a>
+<span class="breadcrumb-sep">›</span>
+<a href="{% url 'hosovanban:danh_sach' %}">Hồ sơ văn bản</a>
+<span class="breadcrumb-sep">›</span>
+<span>Thêm mới hồ sơ văn bản</span>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/css/them-ho-so-van-ban.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="hoso-form-page">
+    {% if messages %}
+    <div class="messages" style="margin-bottom:16px;">
+        {% for message in messages %}
+        <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" id="hoSoForm">
+        {% csrf_token %}
+
+        <div class="form-card">
+            <div class="section-title">THÔNG TIN CƠ BẢN</div>
+
+            <div class="form-group">
+                <label>Tiêu đề hồ sơ <span class="required">*</span></label>
+                <input type="text" name="tieu_de_ho_so" id="tieu_de_ho_so"
+                    value="{{ form.tieu_de_ho_so.value|default:'' }}"
+                    placeholder="Nhập tiêu đề (Ví dụ: Hồ sơ quản lý văn bản quý I/2026)">
+                {% if form.tieu_de_ho_so.errors %}
+                <div class="field-error">{{ form.tieu_de_ho_so.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Ký hiệu hồ sơ <span class="required">*</span></label>
+                    <input type="text" name="ky_hieu_ho_so" id="ky_hieu_ho_so"
+                        value="{{ form.ky_hieu_ho_so.value|default:'' }}" placeholder="Số ký hiệu (Ví dụ: 01/2026-VP)">
+                    {% if form.ky_hieu_ho_so.errors %}
+                    <div class="field-error">{{ form.ky_hieu_ho_so.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label>Ngày tạo hồ sơ</label>
+                    <input type="date" id="ngay_tao_ho_so" value="{{ today|date:'Y-m-d' }}" readonly>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="section-title">BẢO QUẢN VÀ PHÂN QUYỀN</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Thời gian bảo quản <span class="required">*</span></label>
+                    <select name="thoi_gian_bao_quan" id="thoi_gian_bao_quan">
+                        <option value="">-- Chọn khung thời gian --</option>
+                        <option value="Tạm thời" {% if form.thoi_gian_bao_quan.value == "Tạm thời" %}selected{% endif %}>
+                            Tạm thời</option>
+                        <option value="Theo quy định - 2 năm" {% if form.thoi_gian_bao_quan.value == "Theo quy định - 2 năm" %}selected{% endif %}>Theo quy định -
+                            2 năm</option>
+                        <option value="Theo quy định - 5 năm" {% if form.thoi_gian_bao_quan.value == "Theo quy định - 5 năm" %}selected{% endif %}>Theo quy định -
+                            5 năm</option>
+                        <option value="Theo quy định - 10 năm" {% if form.thoi_gian_bao_quan.value == "Theo quy định - 10 năm" %}selected{% endif %}>Theo quy định
+                            - 10 năm</option>
+                        <option value="Vĩnh viễn" {% if form.thoi_gian_bao_quan.value == "Vĩnh viễn" %}selected{% endif %}>Vĩnh viễn</option>
+                    </select>
+                    {% if form.thoi_gian_bao_quan.errors %}
+                    <div class="field-error">{{ form.thoi_gian_bao_quan.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label>Số năm lưu trữ <span class="required">*</span></label>
+                    <input type="number" name="so_nam_luu_tru" id="so_nam_luu_tru"
+                        value="{{ form.so_nam_luu_tru.value|default:'' }}">
+                    {% if form.so_nam_luu_tru.errors %}
+                    <div class="field-error">{{ form.so_nam_luu_tru.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-row form-row-2col-top">
+                <div class="form-group">
+                    <label>Phòng ban <span class="required">*</span></label>
+                    <div class="custom-dropdown" id="phongBanDropdown">
+                        <div class="dropdown-header">
+                            <span id="phongBanDisplay">-- Chọn phòng ban--</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </div>
+                        <div class="dropdown-menu">
+                            <label class="check-item check-all">
+                                <input type="checkbox" id="checkAllPhongBan">
+                                <span style="font-weight: 600;">Chọn tất cả</span>
+                            </label>
+                            {% for pb in ds_phong_ban %}
+                            <label class="check-item">
+                                <input type="checkbox" name="phong_ban" class="pb-checkbox"
+                                    value="{{ pb.phong_ban_id }}" {% if form.phong_ban.value %} {% for selected_pb in form.phong_ban.value %} {% if selected_pb|stringformat:"s" == pb.phong_ban_id|stringformat:"s" %}checked{% endif %}
+                                    {% endfor %} {% endif %}>
+                                <span>{{ pb.ten_phong_ban }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% if form.phong_ban.errors %}
+                    <div class="field-error">{{ form.phong_ban.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label>Quyền xử lý văn bản <span class="required">*</span></label>
+
+                    <div id="nguoi_xu_ly_hidden_container" style="display: none;">
+                        {% if form.nguoi_xu_ly.value %}
+                        {% for nd_id in form.nguoi_xu_ly.value %}
+                        <input type="hidden" name="nguoi_xu_ly" value="{{ nd_id }}">
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="user-picker form-control" id="openNguoiXuLyPopup"
+                        style="cursor: pointer; position: relative; min-height: 42px; border: 1px solid #d1d5db; border-radius: 2px; background: #fff; padding: 6px 32px 6px 12px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+                        <span id="nguoi_xu_ly_placeholder" style="color: #6b7280; font-size: 14px;">-- Chọn quyền xử lý
+                            --</span>
+                        <div id="selectedNguoiXuLyChips" class="selected-user-chips"
+                            style="margin-top: 0; gap: 6px; display: flex; flex-wrap: wrap; width: 100%;"></div>
+                        <span class="dropdown-arrow"
+                            style="position: absolute; right: 12px; top: 16px; font-size: 10px; color: #6b7280; pointer-events: none;">▼</span>
+                    </div>
+
+                    {% if form.nguoi_xu_ly.errors %}
+                    <div class="field-error">{{ form.nguoi_xu_ly.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="retention-box">
+                <div class="retention-title">THỜI HẠN LƯU TRỮ DỰ KIẾN</div>
+                <div class="retention-text" id="duKienLuuTruText">
+                    Hệ thống tự động tính dựa trên năm hiện tại
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="section-title">MÔ TẢ</div>
+
+            <div class="form-group">
+                <label>Mô tả hồ sơ</label>
+                <textarea name="mo_ta" rows="5"
+                    placeholder="Ghi chú chi tiết về nội dung, mục đích hoặc phạm vi của hồ sơ...">{{ form.mo_ta.value|default:'' }}</textarea>
+                {% if form.mo_ta.errors %}
+                <div class="field-error">{{ form.mo_ta.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'hosovanban:danh_sach' %}" class="btn btn-cancel">Hủy</a>
+            <button type="submit" id="btnLuu" class="btn btn-save" disabled>Lưu</button>
+        </div>
+    </form>
+</div>
+
+<!-- POPUP CHỌN NGƯỜI XỬ LÝ -->
+<div class="popup-overlay" id="nguoiXuLyPopup">
+    <div class="popup-box popup-large">
+        <div class="popup-header">
+            <h3>Chọn người xử lý</h3>
+            <button type="button" id="closeNguoiXuLyPopup" class="popup-close">×</button>
+        </div>
+
+        <div class="popup-toolbar">
+            <div class="popup-toolbar-left">
+                <input type="text" readonly value="Danh sách người dùng">
+            </div>
+            <div class="popup-toolbar-right">
+                <input type="text" id="searchNguoiXuLy" placeholder="Tìm nhanh nhân viên, email hoặc số điện thoại...">
+            </div>
+        </div>
+
+        <div class="popup-table-wrap">
+            <table class="popup-table">
+                <thead>
+                    <tr>
+                        <th style="width: 42%;">Đơn vị / Thành viên</th>
+                        <th style="width: 18%;">Chức vụ</th>
+                        <th style="width: 18%;">Số điện thoại</th>
+                        <th style="width: 22%;">Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% regroup ds_nguoi_dung by phong_ban as phong_ban_list %}
+                    {% for pb_group in phong_ban_list %}
+                    <tr class="department-group-row" style="background: #f1f5f9; font-weight: 600; cursor: pointer;">
+                        <td colspan="4" style="color: #374151;">
+                            <span class="toggle-icon dept-toggle-{{ forloop.counter }}"
+                                style="display:inline-block; width:16px; text-align:center; border:1px solid #9ca3af; line-height:14px; font-size:14px; background:#fff; margin-right:8px;">-</span>
+                            <label class="popup-user-label" style="display: inline-flex; width: auto;"
+                                onclick="event.stopPropagation();">
+                                <input type="checkbox" class="popup-dept-checkbox"
+                                    data-target="dept-{{ forloop.counter }}">
+                                <span>{{ pb_group.grouper.ten_phong_ban|default:"Chưa phân ban" }} ({{ pb_group.list|length|stringformat:"02d" }})</span>
+                            </label>
+                        </td>
+                    </tr>
+                    {% for nd in pb_group.list %}
+                    <tr class="popup-user-row dept-{{ forloop.parentloop.counter }}"
+                        data-user-id="{{ nd.nguoi_dung_id }}" data-display-name="{{ nd.ho_va_ten }}"
+                        data-user-name="{{ nd.ho_va_ten|lower }}" data-chuc-vu="{{ nd.chuc_vu|default:''|lower }}"
+                        data-sdt="{{ nd.sdt|default:'' }}" data-email="{{ nd.email|default:''|lower }}"
+                        data-phong-ban-name="{{ nd.phong_ban.ten_phong_ban|default:''|lower }}"
+                        style="padding-left: 20px;">
+                        <td style="padding-left: 32px;">
+                            <label class="popup-user-label">
+                                <input type="checkbox"
+                                    class="popup-user-checkbox user-of-dept-{{ forloop.parentloop.counter }}"
+                                    value="{{ nd.nguoi_dung_id }}" {% if form.nguoi_xu_ly.value %} {% for selected_nd in form.nguoi_xu_ly.value %} {% if selected_nd|stringformat:"s" == nd.nguoi_dung_id|stringformat:"s" %}checked{% endif %}
+                                    {% endfor %} {% endif %}>
+                                <span>{{ nd.ho_va_ten }}</span>
+                            </label>
+                        </td>
+                        <td>{{ nd.chuc_vu|default:"--" }}</td>
+                        <td>{{ nd.sdt|default:"--" }}</td>
+                        <td>{{ nd.email|default:"--" }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #6b7280;">Không có người dùng nào.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="popup-footer">
+            <div class="popup-selected-info">
+                Đang chọn: <strong id="selectedNguoiXuLyCount">0 người</strong>
+            </div>
+            <div class="popup-footer-actions">
+                <button type="button" id="saveNguoiXuLyPopup" class="btn-popup-save">LƯU LẠI</button>
+                <button type="button" id="cancelNguoiXuLyPopup" class="btn-popup-cancel">HỦY BỎ</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'assets/js/them-ho-so-van-ban.js' %}"></script>
+{% endblock %}
