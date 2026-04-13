@@ -20,8 +20,8 @@ def giao_viec(request):
     is_lanh_dao = request.user.is_lanh_dao
     is_van_thu = request.user.is_van_thu
     
-    # Hiển thị tất cả công việc cho tất cả các role
-    tasks = CongViec.objects.all().order_by('-pk')
+    # Hiển thị tất cả công việc cho tất cả các role, ưu tiên hoạt động mới nhất
+    tasks = CongViec.objects.all().order_by('-last_activity')
     
     # Lấy danh sách chuyên viên và tất cả người dùng
     chuyen_vien_list = NguoiDung.objects.filter(chuc_vu=NguoiDung.ChucVu.CHUYEN_VIEN)
@@ -46,8 +46,8 @@ def xu_ly_cong_viec(request):
     Trang dành riêng cho Chuyên viên để xử lý công việc (Hiển thị tất cả công việc)
     """
     user_core = request.user.core_profile
-    # Hiển thị tất cả công việc thay vì chỉ lọc những việc được giao
-    tasks = CongViec.objects.all().order_by('-pk')
+    # Hiển thị tất cả công việc, ưu tiên hoạt động mới nhất
+    tasks = CongViec.objects.all().order_by('-last_activity')
     
     context = {
         'tasks': tasks,
@@ -66,6 +66,7 @@ def add_task(request):
             ngay_bat_dau_str = request.POST.get('ngay_bat_dau')
             han_xu_ly_str = request.POST.get('han_xu_ly')
             noi_dung = request.POST.get('noi_dung')
+            ghi_chu = request.POST.get('ghi_chu')
             
             if not all([ten_cv, nguoi_thuc_hien_id, ngay_bat_dau_str, han_xu_ly_str]):
                 messages.error(request, "Vui lòng nhập đầy đủ các trường bắt buộc.")
@@ -105,7 +106,8 @@ def add_task(request):
                 nguon_giao=nguon_giao,
                 trang_thai="Chờ xử lý",
                 ngay_bat_dau=ngay_bat_dau,
-                han_xu_ly=han_xu_ly
+                han_xu_ly=han_xu_ly,
+                ghi_chu=ghi_chu
             )
 
             # Xử lý file đính kèm chính
@@ -159,6 +161,7 @@ def edit_task(request, task_id):
             task.ten_cong_viec = request.POST.get('ten_cv')
             task.nguon_giao = request.POST.get('nguon_giao')
             task.noi_dung_cong_viec = request.POST.get('noi_dung')
+            task.ghi_chu = request.POST.get('ghi_chu')
             
             nguoi_thuc_hien_id = request.POST.get('nguoi_thuc_hien')
             nguoi_phoi_hop_id = request.POST.get('nguoi_phoi_hop')
@@ -173,12 +176,11 @@ def edit_task(request, task_id):
                 naive_han_xu_ly = datetime.strptime(han_xu_ly_str, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
                 task.han_xu_ly = make_aware(naive_han_xu_ly)
 
-            # Kiểm tra logic ngày tháng sau khi cập nhật
-            today = timezone.now().date()
-            if task.ngay_bat_dau < today:
-                messages.error(request, "Ngày bắt đầu không được nhỏ hơn ngày hiện tại.")
-                return redirect('quanlycongviec:giao_viec')
+            # Khi chỉnh sửa, không bắt buộc ngày bắt đầu phải >= hôm nay 
+            # (vì công việc có thể đã bắt đầu từ trước đó)
+            # Chỉ cần đảm bảo logic: Hạn xử lý >= Ngày bắt đầu
             
+            today = timezone.now().date()
             if task.han_xu_ly.date() < today:
                 messages.error(request, "Hạn xử lý không được nhỏ hơn ngày hiện tại.")
                 return redirect('quanlycongviec:giao_viec')
@@ -299,6 +301,7 @@ def get_task_detail(request, task_id):
         'collaborator_id': collab_first.nguoi_phoi_hop.pk if collab_first else "",
         'collaborators': collab_list,
         'attachments': file_list,
+        'ghi_chu': task.ghi_chu or "",
         'can_approve': request.user.is_lanh_dao and task.trang_thai == "Chờ duyệt",
         'can_delete': request.user.is_lanh_dao and task.trang_thai == "Chờ xử lý",
         'can_edit': request.user.is_lanh_dao,

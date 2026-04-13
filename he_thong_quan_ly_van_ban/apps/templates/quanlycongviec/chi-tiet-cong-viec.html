@@ -540,10 +540,15 @@
         {% endif %}
         {% endwith %}
 
-        <div class="note-section">
-            <span class="note-label">Ghi chú:</span>
-            <span class="note-value">{% if task.van_ban and task.van_ban.do_khan %}{{ task.van_ban.do_khan }}{% else
-                %}Bình thường{% endif %}</span>
+        <div class="note-section" style="background: #F8FAFC; padding: 16px; border-radius: 0; border-left: 4px solid #94A3B8; margin-bottom: 24px;">
+            <span class="note-label" style="font-size: 13px; font-weight: 700; color: #64748B; display: block; margin-bottom: 4px; text-transform: uppercase;">Ghi chú:</span>
+            <div class="note-value" style="font-size: 14px; color: #334155; line-height: 1.5;">
+                {% if task.ghi_chu %}
+                    {{ task.ghi_chu|linebreaks }}
+                {% else %}
+                    <span style="color: #94A3B8; font-style: italic;">Không có ghi chú nào được thêm.</span>
+                {% endif %}
+            </div>
         </div>
 
         {% if task.ket_qua_xu_ly %}

@@ -605,11 +605,11 @@
                 form.elements['nguoi_thuc_hien'].value = data.assignee_id;
                 form.elements['nguoi_phoi_hop'].value = data.collaborator_id || '';
                 form.elements['noi_dung'].value = data.content;
+                form.elements['ghi_chu'].value = data.ghi_chu || '';
 
-                // Luôn luôn yêu cầu ngày mới (>= hôm nay) theo yêu cầu nghiệp vụ
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('ngayBatDau').min = today;
-                document.getElementById('hanXuLy').min = today;
+                // Cho phép ngày bắt đầu là ngày cũ nếu đang chỉnh sửa công việc đã có
+                document.getElementById('ngayBatDau').min = data.start_date;
+                document.getElementById('hanXuLy').min = data.start_date;
 
                 // Hiển thị file hiện có
                 const mainFileList = document.getElementById('file-list-main');
