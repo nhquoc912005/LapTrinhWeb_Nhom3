@@ -224,6 +224,7 @@ class VanBan(models.Model):
         ("Đã Xử Lý", "Đã Xử Lý"),
         ("Hoàn Trả", "Hoàn Trả"),
         ("Xem Để Biết", "Xem Để Biết"),
+        ("Chờ ban hành", "Chờ ban hành"),
         ("Đã ban hành", "Đã ban hành"),
     )
 
@@ -260,7 +261,7 @@ class VanBan(models.Model):
         "core.HoSoVanBan",
         on_delete=models.CASCADE,
         db_column="ho_so_van_ban_id",
-        null=False,
+        null=True,
     )
     so_ky_hieu = models.CharField(max_length=255, null=False)
     trich_yeu = models.CharField(max_length=255, null=False)
@@ -273,14 +274,13 @@ class VanBan(models.Model):
         null=False,
         choices=LOAI_VAN_BAN_CHOICES,
     )
-    don_vi_ban_hanh = models.CharField(max_length=255, null=False)
     don_vi_soan_thao = models.CharField(
         max_length=255,
         null=False,
         choices=DON_VI_SOAN_THAO_CHOICES,
     )
-    ngay_van_ban = models.DateField(null=False, auto_now_add=True)
-    ngay_den = models.DateField(null=False)
+    ngay_van_ban = models.DateField(null=False,auto_now_add=True)
+    ngay_den = models.DateField(null=True)
     han_xu_ly = models.DateField(null=True, blank=True)
     ngay_cap_nhat = models.DateField(default=timezone.now)
     do_khan = models.CharField(
@@ -302,7 +302,7 @@ class VanBan(models.Model):
         null=False,
         choices=TRANG_THAI_CHOICES,
     )
-    noi_dung = models.TextField(null=False)
+    noi_dung = models.TextField(null=True)
     phan_loai = models.CharField(
         max_length=255,
         null=False,
@@ -322,7 +322,7 @@ class VanBanLienQuan(models.Model):
         "core.VanBan",
         on_delete=models.CASCADE,
         db_column="van_ban_id",
-        null=False,
+        null=True,
     )
     file_van_ban = models.FileField(upload_to="van_ban_lien_quan/")
     kich_thuoc = models.IntegerField()

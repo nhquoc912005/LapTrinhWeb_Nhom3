@@ -1,0 +1,330 @@
+{% load static %}
+
+<div class="approval-modal-overlay" id="approvalModal" style="display:none;">  <div class="approval-modal">
+    <div class="approval-modal__header">
+      <h2>Phê duyệt văn bản đi</h2>
+    </div>
+
+    <form method="post" action="{{ approve_action_url|default:'#' }}">
+      {% csrf_token %}
+
+      <div class="approval-modal__top">
+        <div class="approval-file-block">
+          <label class="approval-label">
+            File đính kèm <span>*</span>
+          </label>
+
+          <div class="approval-file-list">
+            {% if vb.file_dinh_kem %}
+              <div class="approval-file-card">
+                <div class="approval-file-icon">
+                  {{ vb.file_dinh_kem.name|slice:"-3:"|upper }}
+                </div>
+                <div class="approval-file-info">
+                  <div class="approval-file-name">
+                    {{ vb.file_dinh_kem.name|cut:"uploads/" }}
+                  </div>
+                  <div class="approval-file-type">
+                    Tệp đính kèm
+                  </div>
+                </div>
+
+                {% if allow_remove_main_file %}
+                  <button type="button" class="approval-file-remove" data-remove="main-file">×</button>
+                {% endif %}
+              </div>
+            {% else %}
+              <div class="approval-empty-text">Không có file đính kèm</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="approval-file-block">
+          <label class="approval-label">Tài liệu liên quan</label>
+
+          <div class="approval-file-list">
+            {% if ds_lien_quan %}
+              {% for item in ds_lien_quan %}
+                <div class="approval-file-card">
+                  <div class="approval-file-icon">
+                    {{ item.file_van_ban.name|slice:"-3:"|upper }}
+                  </div>
+                  <div class="approval-file-info">
+                    <div class="approval-file-name">
+                      {{ item.file_van_ban.name|cut:"uploads/" }}
+                    </div>
+                    <div class="approval-file-type">
+                      Tài liệu liên quan
+                    </div>
+                  </div>
+
+                  {% if allow_remove_related_file %}
+                    <button
+                      type="button"
+                      class="approval-file-remove"
+                      data-related-id="{{ item.van_ban_lien_quan_id }}"
+                    >
+                      ×
+                    </button>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="approval-empty-text">Không có tài liệu liên quan</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="approval-section">
+        <label class="approval-label">
+          Chọn Văn thư <span>*</span>
+        </label>
+
+        <div class="approval-user-box">
+          {% if ds_van_thu %}
+            {% for user in ds_van_thu %}
+              <label class="approval-user-item">
+                <input
+                  type="radio"
+                  name="van_thu_id"
+                  value="{{ user.nguoi_dung_id }}"
+                  {% if selected_van_thu_id == user.nguoi_dung_id %}checked{% endif %}
+                  required
+                >
+                <span>
+                  {{ user.ho_va_ten }}
+                  {% if user.chuc_vu %}
+                    ({{ user.chuc_vu }})
+                  {% else %}
+                    (Văn Thư)
+                  {% endif %}
+                </span>
+              </label>
+            {% endfor %}
+          {% else %}
+            <div class="approval-empty-text">Không có người dùng văn thư phù hợp</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="approval-section">
+        <label class="approval-label">Ghi chú / Chỉ đạo</label>
+        <textarea
+          name="ghi_chu"
+          class="approval-textarea"
+          placeholder="Nhập ghi chú cho chuyên viên..."
+        >{{ ghi_chu_mac_dinh|default:'' }}</textarea>
+      </div>
+
+      <div class="approval-modal__footer">
+        <button type="button" class="approval-btn approval-btn--cancel" id="closeApprovalModal">
+          Hủy
+        </button>
+        <button type="submit" class="approval-btn approval-btn--submit">
+          Lưu
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  .approval-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.25);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 60px 16px;
+    z-index: 9999;
+    overflow-y: auto;
+  }
+
+  .approval-modal {
+    width: 100%;
+    max-width: 760px;
+    background: #ffffff;
+    border-radius: 0;
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.14);
+    padding: 26px 26px 24px;
+  }
+
+  .approval-modal__header h2 {
+    margin: 0 0 18px;
+    color: #0077b6;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .approval-modal__top {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin-bottom: 20px;
+  }
+
+  .approval-label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #2f2f2f;
+  }
+
+  .approval-label span {
+    color: #dc2626;
+  }
+
+  .approval-file-list {
+    min-height: 78px;
+  }
+
+  .approval-file-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .approval-file-icon {
+    width: 44px;
+    height: 48px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ef4444;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  }
+
+  .approval-file-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .approval-file-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #222;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+
+  .approval-file-type {
+    font-size: 14px;
+    color: #9ca3af;
+    line-height: 1.3;
+  }
+
+  .approval-file-remove {
+    border: none;
+    background: transparent;
+    color: #0077b6;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+  }
+
+  .approval-empty-text {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    color: #94a3b8;
+    font-size: 14px;
+  }
+
+  .approval-section {
+    margin-bottom: 20px;
+  }
+
+  .approval-user-box {
+    border: 1px solid #d1d5db;
+    background: #fff;
+    padding: 12px 14px;
+    max-height: 180px;
+    overflow-y: auto;
+  }
+
+  .approval-user-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    color: #3a3a3a;
+  }
+
+  .approval-user-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .approval-user-item input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    accent-color: #0ea5e9;
+    cursor: pointer;
+  }
+
+  .approval-textarea {
+    width: 100%;
+    min-height: 130px;
+    border: 1px solid #d1d5db;
+    padding: 14px 12px;
+    resize: vertical;
+    outline: none;
+    font-size: 15px;
+    color: #374151;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+
+  .approval-textarea:focus {
+    border-color: #38bdf8;
+  }
+
+  .approval-modal__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .approval-btn {
+    min-width: 86px;
+    height: 42px;
+    border: none;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0 18px;
+  }
+
+  .approval-btn--cancel {
+    background: #f3f4f6;
+    color: #444;
+  }
+
+  .approval-btn--submit {
+    background: #9ca3af;
+    color: #fff;
+  }
+
+  @media (max-width: 768px) {
+    .approval-modal {
+      padding: 20px 16px;
+    }
+
+    .approval-modal__top {
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+  }
+</style>
