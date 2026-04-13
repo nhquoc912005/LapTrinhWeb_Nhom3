@@ -1,6 +1,11 @@
 from django.urls import path
 
 from .views import danh_sach
+from .views import them_ho_so_van_ban
+from .views import chi_tiet_ho_so_van_ban
+from .views import sua_ho_so_van_ban
+from .views import xoa_ho_so_van_ban
+
 
 
 app_name = "hosovanban"
