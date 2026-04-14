@@ -1,0 +1,460 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Quản lý Văn bản đi - QLVB{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+<style>
+  .page-main {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .filter-title {
+    border-left: 4px solid var(--primary);
+    padding-left: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+    text-transform: uppercase;
+  }
+
+  .tab-filter-group .tab-filter-btn {
+    color: #64748B;
+    background: transparent;
+    padding: 8px 18px;
+    border: none;
+    margin: 0;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .tab-filter-group .tab-filter-btn.active {
+    background: #fff !important;
+    font-weight: 600;
+    color: var(--primary) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+    border-radius: 3px !important;
+  }
+
+  .custom-search-wrap {
+    position: relative;
+  }
+
+  .custom-search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 11px;
+  }
+
+  .custom-search-input,
+  .custom-select {
+    width: 100%;
+    border: 1px solid #D7DEE7;
+    font-size: 13px;
+    outline: none;
+    height: 34px;
+    background: #fff;
+    color: #64748B;
+  }
+
+  .custom-search-input {
+    padding: 8px 12px 8px 36px;
+  }
+
+  .custom-select {
+    padding: 6px 10px;
+  }
+
+  .custom-search-input:focus,
+  .custom-select:focus {
+    border-color: #0284C7;
+  }
+
+  .filter-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .btn-compose {
+    padding: 9px 16px !important;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 12px;
+    box-shadow: none !important;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .data-table thead th {
+    background: #F8FAFC;
+    color: #4B5563;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 10px 14px;
+    border-bottom: 1px solid #E5E7EB;
+    white-space: nowrap;
+  }
+
+  .data-table tbody td {
+    font-size: 12px;
+    color: #374151;
+    padding: 10px 14px;
+    border-bottom: 1px solid #E5E7EB;
+    vertical-align: middle;
+  }
+
+  .data-table tbody tr:hover {
+    background: #FAFCFF;
+    cursor: pointer;
+  }
+
+  .vb-link {
+    color: #0284C7;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .vb-link:hover {
+    text-decoration: underline;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 86px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+
+  .badge-cho-xu-ly {
+    background: #FEF9C3;
+    color: #854D0E;
+  }
+
+  .badge-da-xu-ly {
+    background: #DBEAFE;
+    color: #1E40AF;
+  }
+
+  .badge-cho-ban-hanh {
+    background: #FFF9C4;
+    color: #78670a;
+  }
+
+  .badge-da-ban-hanh,
+  .badge-da-phat-hanh {
+    background: #DCFCE7;
+    color: #166534;
+  }
+
+  .badge-hoan-tra {
+    background: #FEE2E2;
+    color: #991B1B;
+  }
+
+  .urgency-normal {
+    color: #374151;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .urgency-khan {
+    color: #FF0000;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .urgency-hoa-toc {
+    color: #8B0000;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .pagination {
+    padding: 12px 14px !important;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #6B7280;
+  }
+
+  .pagination-info {
+    font-size: 12px;
+    color: #6B7280;
+  }
+
+  .active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .active-filters-label {
+    font-size: 12px;
+    color: #6B7280;
+    font-weight: 600;
+  }
+
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #DCEBFA;
+    color: #0F5F8F;
+    padding: 6px 10px;
+    border-radius: 2px;
+    font-size: 12px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .filter-chip button {
+    border: none;
+    background: transparent;
+    color: #0F5F8F;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+  }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'core:dashboard' %}">
+  <svg width="14" height="14" viewBox="0 0 24 24">
+    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+  </svg>
+  Trang chủ
+</a>
+<span class="breadcrumb-sep">›</span>
+<span>Văn bản đi</span>
+{% endblock %}
+
+{% block page_wrapper %}
+<div id="vbdiPageWrapper">
+  <div id="vbdiListView" class="page-main">
+    <h1 class="page-title" style="display: none;">QUẢN LÝ VĂN BẢN ĐI</h1>
+
+    <div class="card" style="padding: 16px 16px 18px; border: 1px solid var(--border-color); box-shadow: none; margin-bottom: 18px;">
+      <div class="filter-title">
+        TRA CỨU THÔNG TIN
+      </div>
+
+      <form id="filterForm" method="get">
+        <div class="tab-filter-container" style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="tab-filter-group" id="tabFilter" style="background: #F1F5F9; border-radius: 2px; padding: 4px; border: 1px solid #E2E8F0;">
+            {% for value, label in filter_trang_thai_choices %}
+              <a
+                href="javascript:void(0)"
+                class="tab-filter-btn {% if selected_trang_thai == value %}active{% elif not selected_trang_thai and not value %}active{% endif %}"
+                style="display:inline-block; text-decoration:none;"
+                onclick="setTrangThaiAndSubmit('{{ value|escapejs }}')"
+              >
+                {{ label }}
+              </a>
+            {% endfor %}
+          </div>
+
+          {% if user.is_chuyen_vien %}
+            <a
+              href="{% url 'quanlyvanbandi:them_van_ban_di' %}"
+              class="btn btn-primary btn-compose"
+              id="btnAddVanBanDi"
+            >
+              + Soạn thảo văn bản đi
+            </a>
+          {% endif %}
+        </div>
+
+        <input type="hidden" name="trang_thai" id="hiddenTrangThai" value="{{ selected_trang_thai }}">
+
+        <div class="custom-filter-row" style="margin-top: 14px;">
+          <div class="custom-search-wrap" style="margin-bottom: 12px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#94A3B8">
+              <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+            </svg>
+            <input
+              type="text"
+              id="searchKeyword"
+              name="keyword"
+              class="custom-search-input"
+              placeholder="Tìm theo số ký hiệu, trích yếu văn bản..."
+              value="{{ keyword|default:'' }}"
+            >
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+            <div class="custom-select-wrap">
+              <label class="filter-label">Đơn vị soạn thảo</label>
+              <select id="filterDonVi" name="don_vi_soan_thao" class="custom-select">
+                <option value="">-- Đơn vị soạn thảo --</option>
+                {% for value, label in filter_don_vi_choices %}
+                  <option value="{{ value }}" {% if selected_don_vi == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="custom-select-wrap">
+              <label class="filter-label">Loại văn bản</label>
+              <select id="filterLoaiVB" name="loai_van_ban" class="custom-select">
+                <option value="">-- Loại văn bản --</option>
+                {% for value, label in filter_loai_choices %}
+                  <option value="{{ value }}" {% if selected_loai_vb == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="custom-select-wrap">
+              <label class="filter-label">Hình thức văn bản</label>
+              <select id="filterHinhThuc" name="hinh_thuc" class="custom-select">
+                <option value="">-- Hình thức văn bản --</option>
+                {% for value, label in filter_hinh_thuc_choices %}
+                  <option value="{{ value }}" {% if selected_hinh_thuc == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="custom-select-wrap">
+              <label class="filter-label">Độ khẩn</label>
+              <select id="filterDoKhan" name="do_khan" class="custom-select">
+                <option value="">-- Độ khẩn --</option>
+                {% for value, label in filter_do_khan_choices %}
+                  <option value="{{ value }}" {% if selected_do_khan == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div id="activeFilters" class="active-filters" style="margin-top: 12px; display: none;"></div>
+        </div>
+      </form>
+    </div>
+
+    <div class="card" style="padding: 0; border: 1px solid var(--border-color); box-shadow: none;">
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="text-center" style="width:60px;">STT</th>
+              <th style="min-width:120px;">Số ký hiệu</th>
+              <th style="min-width:280px;">Trích yếu</th>
+              <th style="min-width:140px;">Ngày văn bản</th>
+              <th style="min-width:180px;">Đơn vị soạn thảo</th>
+              <th style="min-width:120px;">Độ khẩn</th>
+              <th style="min-width:140px;">Trạng thái</th>
+            </tr>
+          </thead>
+
+          <tbody id="vanBanDiBody">
+            {% for vb in ds_van_ban_di %}
+              <tr onclick="window.location='{% url 'quanlyvanbandi:chi_tiet_van_ban_di' vb.van_ban_id %}';">
+                <td class="text-center">{{ forloop.counter }}</td>
+
+                <td>
+                  <a href="javascript:void(0)" class="vb-link">{{ vb.so_ky_hieu }}</a>
+                </td>
+
+                <td>{{ vb.trich_yeu }}</td>
+                <td>{{ vb.ngay_van_ban|date:"d/m/Y" }}</td>
+                <td>{{ vb.don_vi_soan_thao }}</td>
+
+                <td>
+                  {% if vb.do_khan %}
+                    {% if vb.do_khan|lower == 'hỏa tốc' or vb.do_khan|lower == 'hoa toc' or vb.do_khan|lower == 'hoa_toc' %}
+                      <span class="urgency-hoa-toc">{{ vb.do_khan }}</span>
+                    {% elif vb.do_khan|lower == 'khẩn' or vb.do_khan|lower == 'khan' %}
+                      <span class="urgency-khan">{{ vb.do_khan }}</span>
+                    {% else %}
+                      <span class="urgency-normal">{{ vb.do_khan }}</span>
+                    {% endif %}
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+
+                <td>
+                  {% if not request.user.is_van_thu and vb.trang_thai == "Chờ ban hành" %}
+                    {# CV và LĐ thấy "Đã Xử Lý" khi Lãnh đạo đã duyệt (status = Chờ ban hành) #}
+                    <span class="status-badge badge-da-xu-ly">Đã Xử Lý</span>
+                  {% elif not request.user.is_van_thu and vb.trang_thai == "Đã ban hành" %}
+                    {# CV và LĐ thấy "Đã Xử Lý" khi đã ban hành xong #}
+                    <span class="status-badge badge-da-xu-ly">Đã Xử Lý</span>
+                  {% elif vb.trang_thai|lower == "chờ xử lý" %}
+                    <span class="status-badge badge-cho-xu-ly">{{ vb.trang_thai }}</span>
+                  {% elif vb.trang_thai|lower == "đã xử lý" %}
+                    <span class="status-badge badge-da-xu-ly">{{ vb.trang_thai }}</span>
+                  {% elif vb.trang_thai|lower == "chờ ban hành" %}
+                    <span class="status-badge badge-cho-ban-hanh">{{ vb.trang_thai }}</span>
+                  {% elif vb.trang_thai|lower == "đã ban hành" %}
+                    <span class="status-badge badge-da-ban-hanh">{{ vb.trang_thai }}</span>
+                  {% elif vb.trang_thai|lower == "hoàn trả" %}
+                    <span class="status-badge badge-hoan-tra">{{ vb.trang_thai }}</span>
+                  {% else %}
+                    <span class="status-badge">{{ vb.trang_thai }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="7" class="text-center">Không có văn bản đi phù hợp.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <span class="pagination-info">
+          Hiển thị {{ ds_van_ban_di.start_index }} - {{ ds_van_ban_di.end_index }} của {{ ds_van_ban_di.paginator.count }} văn bản
+        </span>
+        <div class="pagination-btns">
+          {% if ds_van_ban_di.has_previous %}
+            <a href="?page=1{% if selected_trang_thai %}&trang_thai={{ selected_trang_thai|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if selected_don_vi %}&don_vi_soan_thao={{ selected_don_vi|urlencode }}{% endif %}{% if selected_loai_vb %}&loai_van_ban={{ selected_loai_vb|urlencode }}{% endif %}{% if selected_hinh_thuc %}&hinh_thuc={{ selected_hinh_thuc|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}" class="page-btn">&laquo;</a>
+            <a href="?page={{ ds_van_ban_di.previous_page_number }}{% if selected_trang_thai %}&trang_thai={{ selected_trang_thai|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if selected_don_vi %}&don_vi_soan_thao={{ selected_don_vi|urlencode }}{% endif %}{% if selected_loai_vb %}&loai_van_ban={{ selected_loai_vb|urlencode }}{% endif %}{% if selected_hinh_thuc %}&hinh_thuc={{ selected_hinh_thuc|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}" class="page-btn">‹</a>
+          {% endif %}
+
+          {% for i in ds_van_ban_di.paginator.page_range %}
+            {% if ds_van_ban_di.number == i %}
+              <span class="page-btn active">{{ i }}</span>
+            {% else %}
+              <a href="?page={{ i }}{% if selected_trang_thai %}&trang_thai={{ selected_trang_thai|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if selected_don_vi %}&don_vi_soan_thao={{ selected_don_vi|urlencode }}{% endif %}{% if selected_loai_vb %}&loai_van_ban={{ selected_loai_vb|urlencode }}{% endif %}{% if selected_hinh_thuc %}&hinh_thuc={{ selected_hinh_thuc|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}" class="page-btn">{{ i }}</a>
+            {% endif %}
+          {% endfor %}
+
+          {% if ds_van_ban_di.has_next %}
+            <a href="?page={{ ds_van_ban_di.next_page_number }}{% if selected_trang_thai %}&trang_thai={{ selected_trang_thai|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if selected_don_vi %}&don_vi_soan_thao={{ selected_don_vi|urlencode }}{% endif %}{% if selected_loai_vb %}&loai_van_ban={{ selected_loai_vb|urlencode }}{% endif %}{% if selected_hinh_thuc %}&hinh_thuc={{ selected_hinh_thuc|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}" class="page-btn">›</a>
+            <a href="?page={{ ds_van_ban_di.paginator.num_pages }}{% if selected_trang_thai %}&trang_thai={{ selected_trang_thai|urlencode }}{% endif %}{% if keyword %}&keyword={{ keyword|urlencode }}{% endif %}{% if selected_don_vi %}&don_vi_soan_thao={{ selected_don_vi|urlencode }}{% endif %}{% if selected_loai_vb %}&loai_van_ban={{ selected_loai_vb|urlencode }}{% endif %}{% if selected_hinh_thuc %}&hinh_thuc={{ selected_hinh_thuc|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}" class="page-btn">&raquo;</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'assets/js/auth.js' %}"></script>
+<script src="{% static 'assets/js/vanbandi.js' %}"></script>
+{% endblock %}

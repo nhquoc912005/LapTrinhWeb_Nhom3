@@ -12,8 +12,7 @@ urlpatterns = [
     path("", include(("apps.quanlyvanbandi.urls", "quanlyvanbandi"), namespace="quanlyvanbandi")),
     path("", include(("apps.quanlycongviec.urls", "quanlycongviec"), namespace="quanlycongviec")),
     path("", include(("apps.hosovanban.urls", "hosovanban"), namespace="hosovanban")),
-
+    path("", include("apps.quanlyvanbandi.urls")),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

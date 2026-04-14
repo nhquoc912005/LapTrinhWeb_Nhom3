@@ -1,0 +1,857 @@
+{% load static %}
+<!-- popup-ban-hanh.html -->
+
+<style>
+/* ── Overlay chung ── */
+.bh-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,0.45);
+  z-index: 9000;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  overflow-y: auto;
+}
+.bh-overlay.active { display: flex; }
+
+/* ── Modal chính ── */
+.bh-modal {
+  width: 100%;
+  max-width: 820px;
+  background: #fff;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+/* ── Filter row ── */
+.bh-filter-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 16px 20px 12px;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+}
+.bh-filter-row select {
+  min-width: 180px;
+  max-width: 210px;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  font-size: 13px;
+  outline: none;
+  background: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-family: inherit;
+}
+.bh-filter-row select:focus { border-color: #0076A2; }
+.bh-filter-row input[type="text"] {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  font-size: 13px;
+  outline: none;
+  min-width: 0;
+  font-family: inherit;
+}
+.bh-filter-row input[type="text"]:focus { border-color: #0076A2; }
+.bh-btn-them-ngoai {
+  padding: 8px 14px;
+  background: #0076A2;
+  color: #fff;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: none;
+  font-family: inherit;
+}
+.bh-btn-them-ngoai:hover { background: #005d80; }
+
+/* ── Table wrap ── */
+.bh-table-wrap {
+  overflow-y: auto;
+  max-height: 280px;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  margin: 0 20px;
+}
+.bh-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.bh-table th {
+  background: #0076A2;
+  color: #fff;
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.bh-table th input[type="checkbox"] {
+  width: 15px; height: 15px; accent-color: #fff; cursor: pointer;
+}
+.bh-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  color: #374151;
+}
+.bh-table td input[type="checkbox"] {
+  width: 15px; height: 15px; accent-color: #0076A2; cursor: pointer;
+}
+.bh-table tr:last-child td { border-bottom: none; }
+.bh-table tbody tr:hover td { background: #f0f9ff; }
+.bh-table-empty {
+  text-align: center;
+  color: #94a3b8;
+  padding: 24px;
+  font-style: italic;
+}
+
+/* Icon buttons */
+.bh-icon-btn {
+  background: none; border: none; cursor: pointer;
+  padding: 4px 5px; color: #64748b; line-height: 1;
+}
+.bh-icon-btn:hover { background: #f1f5f9; color: #0076A2; }
+
+/* ── Đang chọn ── */
+.bh-count-row {
+  padding: 8px 20px;
+  font-size: 13px;
+  color: #475569;
+  flex-shrink: 0;
+}
+.bh-count-row strong { color: #0076A2; }
+
+/* ── Danh sách ban hành ── */
+.bh-selected-section {
+  margin: 0 20px 16px;
+  border: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+.bh-selected-header {
+  background: #0076A2;
+  color: #fff;
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.bh-selected-body {
+  min-height: 64px;
+  padding: 10px 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-content: flex-start;
+}
+.bh-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: #e0f2fe;
+  color: #0369a1;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.bh-tag.ngoai { background: #fef3c7; color: #92400e; }
+.bh-tag-remove {
+  background: none; border: none; cursor: pointer;
+  color: inherit; font-size: 14px; line-height: 1; padding: 0 2px; opacity: 0.7;
+}
+.bh-tag-remove:hover { opacity: 1; }
+
+/* ── Footer ── */
+.bh-footer {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding: 14px 20px 20px;
+  flex-shrink: 0;
+}
+.bh-btn-luu {
+  min-width: 110px;
+  padding: 10px 28px;
+  background: #0076A2;
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.4px;
+  font-family: inherit;
+}
+.bh-btn-luu:hover { background: #005d80; }
+.bh-btn-huy {
+  min-width: 110px;
+  padding: 10px 28px;
+  background: #9ca3af;
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.4px;
+  font-family: inherit;
+}
+.bh-btn-huy:hover { background: #6b7280; }
+
+/* ── Sub-overlay: Thêm đơn vị ngoài ── */
+.bh-sub-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,0.55);
+  z-index: 9500;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+}
+.bh-sub-overlay.active { display: flex; }
+
+.bh-sub-modal {
+  width: 100%;
+  max-width: 680px;
+  background: #fff;
+  border-radius: 2px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+  padding: 28px 32px 24px;
+}
+.bh-sub-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0076A2;
+  margin: 0 0 22px;
+  border: 2px solid #0076A2;
+  padding: 8px 14px;
+}
+.bh-form-row-1 { margin-bottom: 16px; }
+.bh-form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.bh-form-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 6px;
+}
+.bh-form-field label .req { color: #dc2626; margin-left: 2px; }
+.bh-form-field input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #d1d5db;
+  font-size: 13px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+  font-family: inherit;
+}
+.bh-form-field input:focus { border-color: #0076A2; }
+.bh-field-err {
+  display: none;
+  font-size: 11px;
+  color: #dc2626;
+  margin-top: 4px;
+}
+.bh-form-field.has-error .bh-field-err { display: block; }
+.bh-form-field.has-error input { border-color: #dc2626; }
+
+.bh-sub-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+.bh-sub-btn-huy {
+  padding: 9px 22px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.bh-sub-btn-luu {
+  padding: 9px 22px;
+  background: #9ca3af;
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: not-allowed;
+  font-family: inherit;
+}
+.bh-sub-btn-luu.ready { background: #0076A2; cursor: pointer; }
+.bh-sub-btn-luu.ready:hover { background: #005d80; }
+
+/* Toast */
+.bh-toast {
+  position: fixed;
+  top: 24px; left: 50%;
+  transform: translateX(-50%);
+  background: #16a34a;
+  color: #fff;
+  padding: 14px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 4px;
+  z-index: 99999;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  display: none;
+}
+
+/* Spinner */
+.bh-spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid #cbd5e1;
+  border-top-color: #0076A2;
+  border-radius: 50%;
+  animation: bh-spin 0.6s linear infinite;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+@keyframes bh-spin { to { transform: rotate(360deg); } }
+</style>
+
+<!-- POPUP CHÍNH: BAN HÀNH -->
+<div id="banHanhOverlay" class="bh-overlay">
+  <div class="bh-modal">
+
+    <!-- Hàng lọc: dropdown + tìm kiếm + nút thêm đơn vị ngoài -->
+    <div class="bh-filter-row">
+      <select id="bhDropdown">
+        <option value="">-- Chọn đơn vị --</option>
+        {% for cn in ds_chi_nhanh %}
+          <option value="{{ cn.chi_nhanh_id }}">{{ cn.ten_chi_nhanh }}</option>
+        {% endfor %}
+        <option value="ngoai">Đơn vị ngoài</option>
+      </select>
+      <input type="text" id="bhSearch" placeholder="Tìm nhanh tên phòng ban, đơn vị...">
+      <button type="button" id="btnThemNgoai" class="bh-btn-them-ngoai">+ Thêm đơn vị</button>
+    </div>
+
+    <!-- Bảng danh sách (thay đổi theo lựa chọn dropdown) -->
+    <div class="bh-table-wrap">
+      <table class="bh-table" id="bhTable">
+        <thead id="bhTableHead">
+          <tr>
+            <th style="width:40px;"><input type="checkbox" id="bhCheckAll"></th>
+            <th>Đơn vị / Thành viên</th>
+          </tr>
+        </thead>
+        <tbody id="bhTableBody">
+          <tr><td colspan="2" class="bh-table-empty">Chọn chi nhánh hoặc đơn vị ngoài để tải danh sách.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Đang chọn -->
+    <div class="bh-count-row">Đang chọn: <strong id="bhCount">0</strong> đơn vị</div>
+
+    <!-- Danh sách ban hành -->
+    <div class="bh-selected-section">
+      <div class="bh-selected-header">Danh sách ban hành</div>
+      <div class="bh-selected-body" id="bhSelectedBody"></div>
+    </div>
+
+    <!-- Nút hành động -->
+    <div class="bh-footer">
+      <button type="button" id="btnBhLuu" class="bh-btn-luu">LƯU LẠI</button>
+      <button type="button" id="btnBhHuy" class="bh-btn-huy">HỦY BỎ</button>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP PHỤ: THÊM ĐƠN VỊ NGOÀI -->
+<div id="addNgoaiOverlay" class="bh-sub-overlay">
+  <div class="bh-sub-modal">
+    <div class="bh-sub-title">Thêm đơn vị ngoại bộ</div>
+
+    <div class="bh-form-row-1 bh-form-field" id="field-ten">
+      <label>Tên đơn vị <span class="req">*</span></label>
+      <input type="text" id="addTen" placeholder="Nhập tên đơn vị ngoại bộ">
+      <div class="bh-field-err">Vui lòng nhập tên đơn vị.</div>
+    </div>
+
+    <div class="bh-form-row-2">
+      <div class="bh-form-field" id="field-daidien">
+        <label>Đại diện <span class="req">*</span></label>
+        <input type="text" id="addDaiDien" placeholder="Nhập tên người đại diện">
+        <div class="bh-field-err">Vui lòng nhập tên đại diện.</div>
+      </div>
+      <div class="bh-form-field" id="field-sdt">
+        <label>Số điện thoại <span class="req">*</span></label>
+        <input type="text" id="addSdt" placeholder="Nhập số điện thoại" maxlength="10">
+        <div class="bh-field-err" id="sdtErrMsg">Vui lòng nhập số điện thoại.</div>
+      </div>
+    </div>
+
+    <div class="bh-form-row-1 bh-form-field" id="field-email">
+      <label>Email <span class="req">*</span></label>
+      <input type="email" id="addEmail" placeholder="Nhập email">
+      <div class="bh-field-err">Vui lòng nhập email hợp lệ.</div>
+    </div>
+
+    <div class="bh-sub-footer">
+      <button type="button" id="btnAddHuy" class="bh-sub-btn-huy">Hủy</button>
+      <button type="button" id="btnAddLuu" class="bh-sub-btn-luu" disabled>Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast thông báo -->
+<div id="bhToast" class="bh-toast">Ban hành văn bản đi thành công!</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var CSRF          = "{{ csrf_token }}";
+  var BAN_HANH_URL  = "{{ ban_hanh_url }}";
+  var API_PHONG_BAN = "{% url 'quanlyvanbandi:api_chi_nhanh_phong_ban' %}";
+  var API_NGOAI     = "{% url 'quanlyvanbandi:api_don_vi_ngoai' %}";
+
+  /* ── Trạng thái ── */
+  var selectedItems = [];   // { id, ten, loai: 'pb' | 'ngoai' }
+  var currentMode   = "";   // "" | "pb" | "ngoai"
+  var pbList        = [];
+  var ngoaiList     = [];
+  var editingId     = null; // null = thêm mới, string = đang sửa
+
+  /* ── DOM ── */
+  var overlay      = document.getElementById("banHanhOverlay");
+  var openBtn      = document.getElementById("openBanHanhModal");
+  var dropdown     = document.getElementById("bhDropdown");
+  var searchInput  = document.getElementById("bhSearch");
+  var thead        = document.getElementById("bhTableHead");
+  var tbody        = document.getElementById("bhTableBody");
+  var countEl      = document.getElementById("bhCount");
+  var selectedBody = document.getElementById("bhSelectedBody");
+  var btnLuu       = document.getElementById("btnBhLuu");
+  var btnHuy       = document.getElementById("btnBhHuy");
+  var btnThem      = document.getElementById("btnThemNgoai");
+  var checkAll;
+
+  function str(v) { return String(v); }
+
+  function openOverlay(id) {
+    var el = document.getElementById(id);
+    if (el) { el.classList.add("active"); document.body.style.overflow = "hidden"; }
+  }
+  function closeOverlay(id) {
+    var el = document.getElementById(id);
+    if (el) { el.classList.remove("active"); document.body.style.overflow = ""; }
+  }
+
+  /* ── Render tags đã chọn ── */
+  function renderTags() {
+    countEl.textContent = String(selectedItems.length);
+    if (selectedItems.length === 0) { selectedBody.innerHTML = ""; return; }
+    selectedBody.innerHTML = selectedItems.map(function(item) {
+      return (
+        '<span class="bh-tag ' + (item.loai === "ngoai" ? "ngoai" : "") + '">' +
+        escHtml(item.ten) +
+        '<button type="button" class="bh-tag-remove" data-id="' + item.id + '" data-loai="' + item.loai + '">×</button>' +
+        '</span>'
+      );
+    }).join("");
+    selectedBody.querySelectorAll(".bh-tag-remove").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        removeItem(this.dataset.id, this.dataset.loai);
+      });
+    });
+  }
+
+  function removeItem(id, loai) {
+    selectedItems = selectedItems.filter(function(x) {
+      return !(str(x.id) === str(id) && x.loai === loai);
+    });
+    renderTags();
+    if (currentMode === "pb")    renderPbTable(searchInput.value);
+    if (currentMode === "ngoai") renderNgoaiTable(searchInput.value);
+  }
+
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;");
+  }
+
+  /* ─────────────────────────────────────
+     CHẾ ĐỘ PHÒNG BAN
+  ───────────────────────────────────── */
+  function switchToPbHeader() {
+    thead.innerHTML = (
+      "<tr>" +
+      '<th style="width:40px;"><input type="checkbox" id="bhCheckAll"></th>' +
+      "<th>Đơn vị / Thành viên</th>" +
+      "</tr>"
+    );
+    bindCheckAll();
+    btnThem.style.display = "none";
+  }
+
+  function renderPbTable(q) {
+    var ft = (q || "").toLowerCase();
+    var rows = pbList.filter(function(i) { return i.ten.toLowerCase().indexOf(ft) >= 0; });
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="2" class="bh-table-empty">Không tìm thấy phòng ban.</td></tr>';
+      syncCheckAll(); return;
+    }
+    tbody.innerHTML = rows.map(function(item) {
+      var isChecked = selectedItems.some(function(s) { return str(s.id) === str(item.id) && s.loai === "pb"; });
+      var soTv = String(item.so_thanh_vien || 0).padStart(2, "0");
+      return (
+        "<tr>" +
+        '<td><input type="checkbox" class="bh-cb" data-id="' + item.id + '" data-ten="' + escHtml(item.ten) + '" data-loai="pb"' + (isChecked ? " checked" : "") + '></td>' +
+        "<td>" + escHtml(item.ten) + ' <span style="color:#94a3b8;font-size:12px;">(' + soTv + ')</span></td>' +
+        "</tr>"
+      );
+    }).join("");
+    bindCheckboxes();
+    syncCheckAll();
+  }
+
+  function loadPhongBan(cnId) {
+    tbody.innerHTML = '<tr><td colspan="2" class="bh-table-empty"><span class="bh-spinner"></span> Đang tải...</td></tr>';
+    pbList = [];
+    fetch(API_PHONG_BAN + "?chi_nhanh_id=" + encodeURIComponent(cnId), { credentials: "same-origin" })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        pbList = (data.phong_ban || []).map(function(pb) {
+          return { id: pb.id, ten: pb.ten, so_thanh_vien: pb.so_thanh_vien || 0 };
+        });
+        renderPbTable(searchInput.value);
+      })
+      .catch(function() {
+        tbody.innerHTML = '<tr><td colspan="2" class="bh-table-empty" style="color:#b91c1c;">Lỗi tải dữ liệu.</td></tr>';
+      });
+  }
+
+  /* ─────────────────────────────────────
+     CHẾ ĐỘ ĐƠN VỊ NGOÀI
+  ───────────────────────────────────── */
+  function switchToNgoaiHeader() {
+    thead.innerHTML = (
+      "<tr>" +
+      '<th style="width:40px;"><input type="checkbox" id="bhCheckAll"></th>' +
+      "<th>Đơn vị / Thành viên</th>" +
+      "<th style='width:150px;'>Đại diện</th>" +
+      "<th style='width:120px;'>Số điện thoại</th>" +
+      "<th style='width:170px;'>Email</th>" +
+      "<th style='width:70px;text-align:center;'>Thao tác</th>" +
+      "</tr>"
+    );
+    bindCheckAll();
+    btnThem.style.display = "inline-block";
+  }
+
+  function renderNgoaiTable(q) {
+    var ft = (q || "").toLowerCase();
+    var rows = ngoaiList.filter(function(i) {
+      return i.ten.toLowerCase().indexOf(ft) >= 0 ||
+             (i.email || "").toLowerCase().indexOf(ft) >= 0 ||
+             (i.sdt || "").indexOf(ft) >= 0;
+    });
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="bh-table-empty">Không tìm thấy đơn vị ngoài. Nhấn "+ Thêm đơn vị" để thêm mới.</td></tr>';
+      syncCheckAll(); return;
+    }
+    tbody.innerHTML = rows.map(function(item) {
+      var isChecked = selectedItems.some(function(s) { return str(s.id) === str(item.id) && s.loai === "ngoai"; });
+      return (
+        "<tr>" +
+        '<td><input type="checkbox" class="bh-cb" data-id="' + escHtml(str(item.id)) + '" data-ten="' + escHtml(item.ten) + '" data-loai="ngoai"' + (isChecked ? " checked" : "") + '></td>' +
+        "<td>" + escHtml(item.ten) + "</td>" +
+        "<td>" + escHtml(item.daiDien || "-") + "</td>" +
+        "<td>" + escHtml(item.sdt || "-") + "</td>" +
+        "<td>" + escHtml(item.email || "-") + "</td>" +
+        '<td style="text-align:center;">' +
+        '<button type="button" class="bh-icon-btn bh-edit-btn" data-id="' + escHtml(str(item.id)) + '" title="Sửa">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+        '</button></td>' +
+        "</tr>"
+      );
+    }).join("");
+    bindCheckboxes();
+    bindEditBtns();
+    syncCheckAll();
+  }
+
+  function loadNgoai(q) {
+    tbody.innerHTML = '<tr><td colspan="6" class="bh-table-empty"><span class="bh-spinner"></span> Đang tải...</td></tr>';
+    var url = API_NGOAI + (q ? "?q=" + encodeURIComponent(q) : "");
+    fetch(url, { credentials: "same-origin" })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        ngoaiList = (data.don_vi_ngoai || []).map(function(dv) {
+          return { id: str(dv.id), ten: dv.ten, daiDien: dv.dia_chi || "", sdt: dv.sdt || "", email: dv.email || "" };
+        });
+        renderNgoaiTable(searchInput.value);
+      })
+      .catch(function() {
+        tbody.innerHTML = '<tr><td colspan="6" class="bh-table-empty" style="color:#b91c1c;">Lỗi tải dữ liệu.</td></tr>';
+      });
+  }
+
+  function bindEditBtns() {
+    tbody.querySelectorAll(".bh-edit-btn").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var id   = this.dataset.id;
+        var item = ngoaiList.find(function(x) { return str(x.id) === str(id); });
+        if (!item) return;
+        document.getElementById("addTen").value     = item.ten;
+        document.getElementById("addDaiDien").value = item.daiDien;
+        document.getElementById("addSdt").value      = item.sdt;
+        document.getElementById("addEmail").value    = item.email;
+        editingId = str(item.id);
+        clearFormErrors();
+        validateForm();
+        openOverlay("addNgoaiOverlay");
+      });
+    });
+  }
+
+  /* ── Checkbox chung ── */
+  function bindCheckboxes() {
+    tbody.querySelectorAll(".bh-cb").forEach(function(cb) {
+      cb.addEventListener("change", function() {
+        var id = str(this.dataset.id), ten = this.dataset.ten, loai = this.dataset.loai;
+        if (this.checked) {
+          if (!selectedItems.some(function(s) { return str(s.id)===id && s.loai===loai; }))
+            selectedItems.push({ id: id, ten: ten, loai: loai });
+        } else {
+          selectedItems = selectedItems.filter(function(s) { return !(str(s.id)===id && s.loai===loai); });
+        }
+        renderTags(); syncCheckAll();
+      });
+    });
+  }
+
+  function bindCheckAll() {
+    checkAll = document.getElementById("bhCheckAll");
+    if (!checkAll) return;
+    checkAll.addEventListener("change", function() {
+      tbody.querySelectorAll(".bh-cb").forEach(function(cb) {
+        cb.checked = checkAll.checked;
+        var id = str(cb.dataset.id), ten = cb.dataset.ten, loai = cb.dataset.loai;
+        if (checkAll.checked) {
+          if (!selectedItems.some(function(s) { return str(s.id)===id && s.loai===loai; }))
+            selectedItems.push({ id: id, ten: ten, loai: loai });
+        } else {
+          selectedItems = selectedItems.filter(function(s) { return !(str(s.id)===id && s.loai===loai); });
+        }
+      });
+      renderTags();
+    });
+  }
+
+  function syncCheckAll() {
+    checkAll = document.getElementById("bhCheckAll");
+    if (!checkAll) return;
+    var cbs = tbody.querySelectorAll(".bh-cb");
+    checkAll.checked = cbs.length > 0 && Array.from(cbs).every(function(cb) { return cb.checked; });
+    checkAll.indeterminate = !checkAll.checked && Array.from(cbs).some(function(cb) { return cb.checked; });
+  }
+
+  /* ── Dropdown ── */
+  dropdown.addEventListener("change", function() {
+    var val = this.value;
+    searchInput.value = "";
+    if (!val) {
+      currentMode = ""; btnThem.style.display = "none";
+      thead.innerHTML = '<tr><th style="width:40px;"><input type="checkbox" id="bhCheckAll"></th><th>Đơn vị / Thành viên</th></tr>';
+      bindCheckAll();
+      tbody.innerHTML = '<tr><td colspan="2" class="bh-table-empty">Chọn chi nhánh hoặc đơn vị ngoài để tải danh sách.</td></tr>';
+      return;
+    }
+    if (val === "ngoai") {
+      currentMode = "ngoai"; switchToNgoaiHeader(); loadNgoai("");
+    } else {
+      currentMode = "pb"; switchToPbHeader(); loadPhongBan(val);
+    }
+  });
+
+  /* ── Tìm kiếm ── */
+  var searchTimer = null;
+  searchInput.addEventListener("input", function() {
+    clearTimeout(searchTimer);
+    var q = this.value;
+    searchTimer = setTimeout(function() {
+      if (currentMode === "pb")    renderPbTable(q);
+      if (currentMode === "ngoai") { if (q.length === 0 || q.length >= 2) loadNgoai(q); else renderNgoaiTable(q); }
+    }, 250);
+  });
+
+  /* ── Mở / Đóng popup chính ── */
+  function openMain() {
+    selectedItems = []; dropdown.value = ""; searchInput.value = ""; currentMode = "";
+    btnThem.style.display = "none";
+    thead.innerHTML = '<tr><th style="width:40px;"><input type="checkbox" id="bhCheckAll"></th><th>Đơn vị / Thành viên</th></tr>';
+    bindCheckAll();
+    tbody.innerHTML = '<tr><td colspan="2" class="bh-table-empty">Chọn chi nhánh hoặc đơn vị ngoài để tải danh sách.</td></tr>';
+    renderTags();
+    openOverlay("banHanhOverlay");
+  }
+  if (openBtn) openBtn.addEventListener("click", openMain);
+  btnHuy.addEventListener("click", function() { closeOverlay("banHanhOverlay"); });
+  overlay.addEventListener("click", function(e) { if (e.target === overlay) closeOverlay("banHanhOverlay"); });
+
+  /* ── LƯU LẠI - ban hành ── */
+  btnLuu.addEventListener("click", function() {
+    var pbIds    = selectedItems.filter(function(s) { return s.loai === "pb";    }).map(function(s) { return s.id; });
+    var ngoaiIds = selectedItems.filter(function(s) { return s.loai === "ngoai"; }).map(function(s) { return s.id; });
+    if (pbIds.length === 0 && ngoaiIds.length === 0) {
+      alert("Vui lòng chọn ít nhất 1 đơn vị để ban hành.");
+      return;
+    }
+    var fd = new FormData();
+    fd.append("csrfmiddlewaretoken", CSRF);
+    pbIds.forEach(function(id)    { fd.append("phong_ban_ids[]",    id); });
+    ngoaiIds.forEach(function(id) { fd.append("don_vi_ngoai_ids[]", id); });
+
+    btnLuu.textContent = "Đang lưu...";
+    btnLuu.disabled = true;
+
+    fetch(BAN_HANH_URL, { method: "POST", body: fd, credentials: "same-origin" })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.ok) {
+          closeOverlay("banHanhOverlay");
+          var toast = document.getElementById("bhToast");
+          if (toast) { toast.style.display = "block"; setTimeout(function() { toast.style.display = "none"; }, 3500); }
+          document.querySelectorAll(".status-badge-detail").forEach(function(el) { el.textContent = "Đã ban hành"; });
+          if (openBtn) openBtn.style.display = "none";
+        } else {
+          alert(data.error || "Có lỗi xảy ra.");
+          btnLuu.textContent = "LƯU LẠI"; btnLuu.disabled = false;
+        }
+      })
+      .catch(function() {
+        alert("Lỗi kết nối. Vui lòng thử lại.");
+        btnLuu.textContent = "LƯU LẠI"; btnLuu.disabled = false;
+      });
+  });
+
+  /* ─────────────────────────────────────
+     POPUP PHỤ: THÊM / SỬA ĐƠN VỊ NGOÀI
+  ───────────────────────────────────── */
+  var addTen     = document.getElementById("addTen");
+  var addDaiDien = document.getElementById("addDaiDien");
+  var addSdt     = document.getElementById("addSdt");
+  var addEmail   = document.getElementById("addEmail");
+  var btnAddLuu  = document.getElementById("btnAddLuu");
+  var btnAddHuy  = document.getElementById("btnAddHuy");
+
+  function isValidPhone(v) { return /^0\d{9}$/.test(v.trim()); }
+  function isValidEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()); }
+
+  function clearFormErrors() {
+    ["field-ten","field-daidien","field-sdt","field-email"].forEach(function(id) {
+      document.getElementById(id).classList.remove("has-error");
+    });
+  }
+
+  function validateForm() {
+    var ok = addTen.value.trim().length > 0 &&
+             addDaiDien.value.trim().length > 0 &&
+             isValidPhone(addSdt.value) &&
+             isValidEmail(addEmail.value);
+    if (ok) { btnAddLuu.classList.add("ready"); btnAddLuu.disabled = false; }
+    else    { btnAddLuu.classList.remove("ready"); btnAddLuu.disabled = true; }
+    return ok;
+  }
+
+  addSdt.addEventListener("input", function() {
+    var v = this.value.trim();
+    var field = document.getElementById("field-sdt");
+    var errMsg = document.getElementById("sdtErrMsg");
+    if (v.length > 0 && !isValidPhone(v)) {
+      field.classList.add("has-error");
+      errMsg.textContent = "Số điện thoại không hợp lệ (phải đủ 10 số và bắt đầu từ 0).";
+    } else {
+      field.classList.remove("has-error");
+      errMsg.textContent = "Vui lòng nhập số điện thoại.";
+    }
+    validateForm();
+  });
+
+  addEmail.addEventListener("input", function() {
+    var v = this.value.trim();
+    var field = document.getElementById("field-email");
+    if (v.length > 0 && !isValidEmail(v)) field.classList.add("has-error");
+    else field.classList.remove("has-error");
+    validateForm();
+  });
+
+  [addTen, addDaiDien].forEach(function(inp) {
+    inp.addEventListener("input", function() { validateForm(); });
+  });
+
+  /* Mở popup thêm đơn vị */
+  btnThem.addEventListener("click", function() {
+    editingId = null;
+    addTen.value = ""; addDaiDien.value = ""; addSdt.value = ""; addEmail.value = "";
+    clearFormErrors();
+    btnAddLuu.classList.remove("ready"); btnAddLuu.disabled = true;
+    openOverlay("addNgoaiOverlay");
+  });
+
+  btnAddHuy.addEventListener("click", function() { closeOverlay("addNgoaiOverlay"); });
+  document.getElementById("addNgoaiOverlay").addEventListener("click", function(e) {
+    if (e.target === this) closeOverlay("addNgoaiOverlay");
+  });
+
+  /* Lưu đơn vị ngoài (chỉ local — chưa POST lên server) */
+  btnAddLuu.addEventListener("click", function() {
+    if (!validateForm()) return;
+    var payload = {
+      ten:     addTen.value.trim(),
+      daiDien: addDaiDien.value.trim(),
+      sdt:     addSdt.value.trim(),
+      email:   addEmail.value.trim(),
+    };
+    if (editingId) {
+      var idx = ngoaiList.findIndex(function(x) { return str(x.id) === str(editingId); });
+      if (idx >= 0) {
+        ngoaiList[idx].ten     = payload.ten;
+        ngoaiList[idx].daiDien = payload.daiDien;
+        ngoaiList[idx].sdt     = payload.sdt;
+        ngoaiList[idx].email   = payload.email;
+        selectedItems.forEach(function(s) {
+          if (str(s.id) === str(editingId) && s.loai === "ngoai") s.ten = payload.ten;
+        });
+      }
+    } else {
+      var tmpId = "local_" + Date.now();
+      ngoaiList.push({ id: tmpId, ten: payload.ten, daiDien: payload.daiDien, sdt: payload.sdt, email: payload.email });
+    }
+    closeOverlay("addNgoaiOverlay");
+    renderNgoaiTable(searchInput.value);
+    renderTags();
+  });
+
+})();
+</script>

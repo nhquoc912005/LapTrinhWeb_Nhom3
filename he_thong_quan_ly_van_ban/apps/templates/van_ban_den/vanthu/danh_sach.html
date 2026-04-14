@@ -1,0 +1,411 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Văn bản đến{% endblock %}
+{% block nav_van_ban_den_active %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+    .tab-filter-container{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:24px;
+        gap:16px;
+        flex-wrap:wrap;
+    }
+
+    .tab-filter-group{
+        display:flex;
+        background:#F1F5F9;
+        border-radius:4px;
+        overflow:hidden;
+        border:1px solid var(--border-color);
+        padding:1px;
+    }
+
+    .tab-filter-group .tab-filter-btn{
+        border:none;
+        background:transparent;
+        padding:8px 24px;
+        font-size:14px;
+        font-weight:500;
+        color:var(--text-secondary);
+        cursor:pointer;
+        text-decoration:none;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+    }
+
+    .tab-filter-group .tab-filter-btn.active{
+        background:#fff;
+        font-weight:600;
+        color:var(--primary);
+        box-shadow:0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .custom-filter-row{
+        display:flex;
+        gap:16px;
+        margin-bottom:16px;
+        flex-wrap:wrap;
+    }
+
+    .custom-search-wrap{
+        position:relative;
+        flex:1;
+        min-width:260px;
+    }
+
+    .custom-search-wrap svg{
+        position:absolute;
+        left:14px;
+        top:50%;
+        transform:translateY(-50%);
+        fill:var(--text-muted);
+    }
+
+    .custom-search-wrap input{
+        width:100%;
+        padding:10px 14px 10px 40px;
+        border:1px solid var(--border-color);
+        border-radius:4px;
+        font-size:14px;
+        outline:none;
+        transition:border-color .2s;
+        height:42px;
+        background:#fff;
+    }
+
+    .custom-search-wrap input:focus{
+        border-color:var(--primary);
+    }
+
+    .custom-select-wrap{
+        flex:1;
+        min-width:180px;
+    }
+
+    .custom-select-wrap select{
+        width:100%;
+        padding:10px 14px;
+        border:1px solid var(--border-color);
+        border-radius:4px;
+        font-size:14px;
+        outline:none;
+        appearance:none;
+        background:#fff url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 14px center;
+        cursor:pointer;
+        height:42px;
+    }
+
+    .section-title{
+        border-left:4px solid var(--primary);
+        padding-left:12px;
+        font-size:15px;
+        color:var(--text-main);
+        margin:0 0 24px 0;
+        padding-bottom:20px;
+        border-bottom:1px solid var(--border-color);
+        font-weight:700;
+        text-transform:uppercase;
+        line-height:1.2;
+    }
+
+    .btn-present{
+        background:#0076A2;
+        color:white;
+        padding:8px 20px;
+        border-radius:4px;
+        font-weight:600;
+        font-size:14px;
+        border:none;
+        cursor:pointer;
+        text-decoration:none;
+        white-space:nowrap;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+    }
+
+    .vanban-table{
+        width:100%;
+        border-collapse:collapse;
+    }
+
+    .vanban-table th{
+        padding:12px;
+        font-weight:600;
+        color:var(--text-secondary);
+        border-bottom:1px solid var(--border-color);
+        text-align:left;
+        background:#fff;
+        white-space:nowrap;
+    }
+
+    .vanban-table td{
+        border-bottom:1px solid var(--border-color);
+        vertical-align:middle;
+        padding:14px 12px;
+        font-size:14px;
+        color:var(--text-main);
+    }
+
+    .vanban-table .text-center{
+        text-align:center;
+    }
+
+    .so-ky-hieu-link{
+        color:var(--primary);
+        font-weight:700;
+        text-decoration:none;
+    }
+
+    .so-ky-hieu-link:hover{
+        text-decoration:underline;
+    }
+
+    .do-khan-text{
+        color:#DC2626;
+        font-weight:700;
+    }
+
+    .badge{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        padding:4px 12px;
+        border-radius:9999px;
+        font-size:13px;
+        font-weight:500;
+        white-space:nowrap;
+    }
+
+    .badge-cho-xu-ly{
+        background:#FEF9C3;
+        color:#B45309;
+    }
+
+    .badge-da-xu-ly{
+        background:#DBEAFE;
+        color:#1E40AF;
+    }
+
+    .badge-hoan-tra{
+        background:#FCE7F3;
+        color:#BE185D;
+    }
+
+    .badge-xem-de-biet{
+        background:#DCFCE7;
+        color:#166534;
+    }
+
+    .pagination-custom{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:16px 0;
+        gap:16px;
+        flex-wrap:wrap;
+    }
+
+    .pagination-controls{
+        display:flex;
+        gap:4px;
+        align-items:center;
+    }
+
+    .page-btn-text{
+        padding:6px 12px;
+        border:1px solid var(--border-color);
+        background:white;
+        border-radius:4px;
+        color:var(--text-secondary);
+        cursor:pointer;
+    }
+
+    .page-btn-num{
+        width:32px;
+        height:32px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        border-radius:4px;
+        border:1px solid var(--border-color);
+        background:white;
+        color:var(--text-secondary);
+        cursor:pointer;
+    }
+
+    .page-btn-num.active{
+        background:var(--primary);
+        color:white;
+        border-color:var(--primary);
+        font-weight:600;
+    }
+
+    .empty-state{
+        padding:24px;
+        text-align:center;
+        color:var(--text-secondary);
+    }
+
+    @media (max-width: 1200px){
+        .custom-filter-row{
+            flex-direction:column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'core:dashboard' %}">
+    <svg width="14" height="14" viewBox="0 0 24 24">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+    </svg>
+    Trang chủ
+</a>
+<span class="breadcrumb-sep">›</span>
+<span>Văn bản đến</span>
+{% endblock %}
+
+{% block content %}
+<div class="filter-card" style="margin-top:8px; padding:24px;">
+    <div class="section-title">TRA CỨU THÔNG TIN</div>
+
+    <div class="tab-filter-container">
+        <div class="tab-filter-group">
+            <a href="#" class="tab-filter-btn active">Tất cả</a>
+            <a href="#" class="tab-filter-btn">Chờ xử lý</a>
+            <a href="#" class="tab-filter-btn">Đã xử lý</a>
+            <a href="#" class="tab-filter-btn">Hoàn trả</a>
+            <a href="#" class="tab-filter-btn">Xem để biết</a>
+        </div>
+
+        <a href="{% url 'quanlyvanbanden:them' %}" class="btn-present">
+            + Trình văn bản đến
+        </a>
+    </div>
+
+    <form method="get" id="filterForm">
+        <div class="custom-filter-row">
+            <div class="custom-search-wrap">
+                <svg width="18" height="18" viewBox="0 0 24 24">
+                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ q }}"
+                    placeholder="Tìm theo số ký hiệu, trích yếu văn bản..."
+                >
+            </div>
+        </div>
+
+        <div class="custom-filter-row" style="margin-bottom:0;">
+            <div class="custom-select-wrap">
+                <select name="loai_van_ban" onchange="document.getElementById('filterForm').submit()">
+                    <option value="">-- Loại văn bản --</option>
+                    {% for value, label in loai_van_ban_choices %}
+                        <option value="{{ value }}" {% if selected_loai_van_ban == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="custom-select-wrap">
+                <select name="hinh_thuc_van_ban" onchange="document.getElementById('filterForm').submit()">
+                    <option value="">-- Hình thức văn bản --</option>
+                    {% for value, label in hinh_thuc_van_ban_choices %}
+                        <option value="{{ value }}" {% if selected_hinh_thuc_van_ban == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="custom-select-wrap">
+                <select name="do_mat" onchange="document.getElementById('filterForm').submit()">
+                    <option value="">-- Độ mật --</option>
+                    {% for value, label in do_mat_choices %}
+                        <option value="{{ value }}" {% if selected_do_mat == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="custom-select-wrap">
+                <select name="do_khan" onchange="document.getElementById('filterForm').submit()">
+                    <option value="">-- Độ khẩn --</option>
+                    {% for value, label in do_khan_choices %}
+                        <option value="{{ value }}" {% if selected_do_khan == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="table-container" style="background:white; border:1px solid var(--border-color); border-radius:4px; padding:0 24px;">
+    <div style="overflow-x:auto;">
+        <table class="vanban-table">
+            <thead>
+                <tr>
+                    <th class="text-center" style="width:60px;">STT</th>
+                    <th style="min-width:120px;">Số ký hiệu</th>
+                    <th style="min-width:280px;">Trích yếu</th>
+                    <th style="min-width:140px;">Ngày văn bản</th>
+                    <th style="min-width:180px;">Đơn vị ban hành</th>
+                    <th style="min-width:160px;">Độ mật / Độ khẩn</th>
+                    <th style="min-width:140px;">Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vb in ds %}
+                <tr>
+                    <td class="text-center">{{ forloop.counter }}</td>
+                    <td>
+                        <a href="{% url 'quanlyvanbanden:chi_tiet' vb.pk %}" class="so-ky-hieu-link">
+                            {{ vb.so_ky_hieu }}
+                        </a>
+                    </td>
+                    <td>{{ vb.trich_yeu }}</td>
+                    <td>{{ vb.ngay_van_ban|date:"d/m/Y" }}</td>
+                    <td>{{ vb.don_vi_ban_hanh }}</td>
+                    <td>
+                        {{ vb.get_do_mat_display }} /
+                        <span class="do-khan-text">{{ vb.get_do_khan_display|upper }}</span>
+                    </td>
+                    <td>
+                        {% if vb.trang_thai == 'CHO_XU_LY' %}
+                            <span class="badge badge-cho-xu-ly">Chờ xử lý</span>
+                        {% elif vb.trang_thai == 'HOAN_TRA' %}
+                            <span class="badge badge-hoan-tra">Hoàn trả</span>
+                        {% elif vb.trang_thai == 'XEM_DE_BIET' %}
+                            <span class="badge badge-xem-de-biet">Xem để biết</span>
+                        {% else %}
+                            <span class="badge badge-da-xu-ly">Đã xử lý</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-state">Không có dữ liệu</div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination-custom">
+        <span style="color: var(--text-secondary); font-size: 14px;">
+            Hiển thị {{ ds|length }} văn bản
+        </span>
+        <div class="pagination-controls">
+            <button type="button" class="page-btn-text">Trước</button>
+            <button type="button" class="page-btn-num active">1</button>
+            <button type="button" class="page-btn-text">Sau</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
