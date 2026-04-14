@@ -1,0 +1,721 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Soạn thảo văn bản đi{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+
+<style>
+/* ===== Trang soạn thảo văn bản đi ===== */
+.vbdi-create-page {
+  padding: 20px 24px 28px;
+  background: #f3f4f6;
+}
+.required{
+  color:red;
+}
+.vbdi-create-card {
+  max-width: 100%;
+  margin: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  padding: 22px 24px 18px;
+}
+
+/* ===== Tiêu đề ===== */
+.vbdi-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a2332;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+
+  border-bottom: 1px solid #E2E8F0;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.vbdi-section-title::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: #0076A2;
+}
+
+/* ===== Form spacing ===== */
+.vbdi-create-card form > div {
+  margin-bottom: 16px;
+}
+
+.vbdi-create-card label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  line-height: 1.45;
+}
+.vbdi-create-card input[type="text"],
+.vbdi-create-card input[type="date"],
+.vbdi-create-card input[type="number"],
+.vbdi-create-card input[type="email"],
+.vbdi-create-card select,
+.vbdi-create-card textarea {
+  width: 100%;
+  font-family: inherit;
+  font-size: 13px;
+  color: #111827;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vbdi-create-card input[type="text"],
+.vbdi-create-card input[type="date"],
+.vbdi-create-card input[type="number"],
+.vbdi-create-card input[type="email"],
+.vbdi-create-card select {
+  height: 36px;
+  padding: 0 10px;
+}
+.vbdi-create-card textarea {
+  min-height: 76px;
+  padding: 10px;
+  resize: vertical;
+}
+.vbdi-create-card input:focus,
+.vbdi-create-card select:focus,
+.vbdi-create-card textarea:focus {
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px rgba(14,165,233,0.08);
+}
+.vbdi-create-card input::placeholder,
+.vbdi-create-card textarea::placeholder {
+  color: #9ca3af;
+}
+
+/* Ẩn input file gốc */
+#id_file_dinh_kem {
+  display: none;
+}
+#related-file-preview-list .file-preview-item + .file-preview-item {
+  margin-top: 10px;
+}
+
+/* ===== Grid ===== */
+.vbdi-form-grid-4,
+.vbdi-form-grid-3 {
+  display: grid;
+  gap: 14px;
+  align-items: start;
+}
+
+.vbdi-form-grid-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.vbdi-form-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* ===== Upload box ===== */
+.vbdi-upload-box {
+  border: 1px dashed #d1d5db;
+  background: #ffffff;
+  min-height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 14px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.vbdi-upload-box:hover {
+  border-color: #7dd3fc;
+  background: #f8fcff;
+}
+
+.vbdi-upload-main {
+  font-size: 13px;
+  color: #4b5563;
+  margin-bottom: 4px;
+}
+
+.vbdi-upload-link {
+  color: #0284c7;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vbdi-upload-link:hover {
+  text-decoration: underline;
+}
+
+.vbdi-upload-sub {
+  font-size: 11px;
+  color: #9ca3af;
+  line-height: 1.4;
+}
+
+.vbdi-selected-file {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #475569;
+  word-break: break-word;
+}
+
+.vbdi-error {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 5px;
+}
+/* ===== FILE PREVIEW ===== */
+.file-preview-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border: 1px dashed #d1d5db;
+  margin-top: 8px;
+  background: #fafafa;
+  min-height: 56px;
+}
+.file-preview-item.existing-file {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+.file-icon {
+  width: 40px;
+  height: 40px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.file-icon.pdf { color: #ef4444; }
+.file-icon.docx, .file-icon.doc { color: #2563eb; }
+.file-icon.xlsx { color: #16a34a; }
+.file-info { flex: 1; min-width: 0; }
+.file-name { font-size: 14px; font-weight: 700; color: #111827; line-height: 1.4; word-break: break-word; }
+.file-type { font-size: 12px; color: #9ca3af; line-height: 1.4; }
+.file-existing-badge {
+  font-size: 11px;
+  color: #1d4ed8;
+  background: #dbeafe;
+  padding: 2px 7px;
+  display: inline-block;
+  margin-top: 4px;
+}
+.file-remove {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #0284c7;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.file-remove:hover { color: #ef4444; }
+
+/* ===== RELATED FILE PREVIEW ===== */
+.related-file-preview-list .file-type {
+  font-size: 13px;
+  color: #9ca3af;
+  line-height: 1.2;
+}
+
+.related-file-preview-list .file-remove {
+  width: 28px;
+  height: 28px;
+  font-size: 24px;
+  color: #0284c7;
+  margin-left: 8px;
+}
+/* ===== Error list của Django ===== */
+.vbdi-create-card .errorlist {
+  margin: 6px 0 0;
+  padding-left: 16px;
+  color: #dc2626;
+  font-size: 12px;
+}
+.vbdi-create-card .errorlist li { margin: 0; }
+/* ===== Alert ===== */
+.alert.alert-danger {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 10px 12px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+/* ===== Action buttons ===== */
+.vbdi-action-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 6px;
+}
+.vbdi-action-row a,
+.vbdi-btn-save {
+  min-width: 68px;
+  height: 34px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+.vbdi-action-row a {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+.vbdi-action-row a:hover { background: #e5e7eb; }
+.vbdi-btn-save {
+  background: #aeb7c2;
+  color: #fff;
+  border: 1px solid #aeb7c2;
+  cursor: not-allowed;
+}
+.vbdi-btn-save:not(:disabled) {
+  background: #0076a2;
+  border-color: #0076a2;
+  cursor: pointer;
+}
+.vbdi-btn-save:hover:not(:disabled) { background: #005f85; border-color: #005f85; }
+#id_trich_yeu, #id_noi_dung { min-height: 78px; }
+
+@media (max-width: 1200px) {
+  .vbdi-form-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 768px) {
+  .vbdi-create-page { padding: 12px; }
+  .vbdi-create-card { padding: 16px; }
+  .vbdi-form-grid-4, .vbdi-form-grid-3 { grid-template-columns: 1fr; }
+  .vbdi-section-title { font-size: 20px; }
+  .vbdi-action-row { flex-wrap: wrap; }
+}
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'core:dashboard' %}">Trang chủ</a>
+<span>›</span>
+<a href="{% url 'quanlyvanbandi:van_ban_di' %}">Văn bản đi</a>
+<span>›</span>
+<span>{% if is_edit %}Chỉnh sửa văn bản đi{% else %}Soạn thảo văn bản đi{% endif %}</span>
+{% endblock %}
+
+{% block page_wrapper %}
+<div class="page-main vbdi-create-page">
+  <div class="vbdi-create-card">
+    <h2 class="vbdi-section-title">
+      {% if is_edit %}Chỉnh sửa văn bản đi{% else %}Soạn thảo văn bản đi{% endif %}
+    </h2>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="vbdi-form-grid-4">
+        <div>
+          <label>Số ký hiệu <span class="required">*</span></label>
+          {{ form.so_ky_hieu }}
+          {{ form.so_ky_hieu.errors }}
+        </div>
+        <div>
+          <label>Đơn vị soạn thảo</label>
+          {{ form.don_vi_soan_thao }}
+        </div>
+        <div>
+          <label>Loại văn bản <span class="required">*</span></label>
+          {{ form.loai_van_ban }}
+          {{ form.loai_van_ban.errors }}
+        </div>
+        <div>
+          <label>Hình thức văn bản <span class="required">*</span></label>
+          {{ form.hinh_thuc }}
+          {{ form.hinh_thuc.errors }}
+        </div>
+      </div>
+
+      <div>
+        <label>Trích yếu <span class="required">*</span></label>
+        {{ form.trich_yeu }}
+        {{ form.trich_yeu.errors }}
+      </div>
+
+      <div class="vbdi-form-grid-3">
+        <div>
+          <label>Độ khẩn <span class="required">*</span></label>
+          {{ form.do_khan }}
+          {{ form.do_khan.errors }}
+        </div>
+        <div>
+          <label>Ngày văn bản <span class="required">*</span></label>
+          {{ form.ngay_van_ban }}
+          {{ form.ngay_van_ban.errors }}
+        </div>
+        <div>
+          <label>Hạn xử lý</label>
+          {{ form.han_xu_ly }}
+          {{ form.han_xu_ly.errors }}
+        </div>
+      </div>
+
+      <div>
+        <label>
+          File đính kèm
+          {% if not is_edit %}<span class="required">*</span>{% endif %}
+        </label>
+
+        {{ form.file_dinh_kem }}
+
+        {% if is_edit and existing_file %}
+          <div id="existing-file-preview">
+            {% with existing_file.name|lower as fname %}
+              {% with fname|slice:"-4" as ext %}
+              <div class="file-preview-item existing-file">
+                <div class="file-icon {% if ext == '.pdf' %}pdf{% elif ext == 'docx' or ext == '.doc' %}docx{% endif %}">
+                  {{ ext|upper|slice:"1" }}
+                </div>
+                <div class="file-info">
+                  <div class="file-name">{{ existing_file.name|cut:"uploads/" }}</div>
+                  <div class="file-existing-badge">File hiện tại</div>
+                </div>
+              </div>
+              {% endwith %}
+            {% endwith %}
+          </div>
+          <p style="font-size:12px;color:#6b7280;margin:6px 0 4px;">
+            Chọn file mới bên dưới nếu muốn thay thế:
+          </p>
+        {% endif %}
+
+        <div class="vbdi-upload-box"
+             onclick="document.getElementById('id_file_dinh_kem').click()">
+          <div>
+            <div class="vbdi-upload-main">
+              Kéo thả file hoặc
+              <span class="vbdi-upload-link"
+                onclick="event.stopPropagation(); document.getElementById('id_file_dinh_kem').click();">
+                chọn file
+              </span>
+            </div>
+            <div class="vbdi-upload-sub">PDF, DOCX, XLSX (≤ 50MB) &mdash; 01 file duy nhất</div>
+            <div id="file_dinh_kem_name" class="vbdi-selected-file"></div>
+            {% if form.file_dinh_kem.errors %}
+              <div class="vbdi-error">{{ form.file_dinh_kem.errors|striptags }}</div>
+            {% endif %}
+          </div>
+        </div>
+        <div id="file-preview-list"></div>
+      </div>
+
+      <div>
+        <label>Tài liệu liên quan</label>
+
+        {% if is_edit and existing_lien_quan %}
+          <div id="existing-lien-quan-list">
+            <p style="font-size:12px;color:#6b7280;margin:0 0 6px;">File hiện có:</p>
+            {% for lq in existing_lien_quan %}
+              {% with lq.file_van_ban.name as fname %}
+              <div class="file-preview-item existing-file" id="existing-lq-{{ lq.pk }}">
+                <div class="file-icon
+                  {% with fname|lower as fl %}
+                    {% if '.pdf' in fl %}pdf{% elif '.docx' in fl %}docx{% elif '.xlsx' in fl %}xlsx{% endif %}
+                  {% endwith %}
+                ">
+                  {% with fname|lower as fl %}
+                    {% if '.pdf' in fl %}PDF{% elif '.docx' in fl %}DOCX{% elif '.xlsx' in fl %}XLSX{% else %}FILE{% endif %}
+                  {% endwith %}
+                </div>
+                <div class="file-info">
+                  <div class="file-name">{{ fname|cut:"van_ban_lien_quan/" }}</div>
+                  <div class="file-existing-badge">File hiện tại</div>
+                </div>
+                <input type="checkbox" name="xoa_lien_quan" value="{{ lq.pk }}"
+                       id="xoa-lq-{{ lq.pk }}" style="display:none;">
+                <button type="button" class="file-remove"
+                        onclick="toggleXoaLienQuan('{{ lq.pk }}')"
+                        id="btn-xoa-lq-{{ lq.pk }}"
+                        aria-label="Xóa">×</button>
+              </div>
+              {% endwith %}
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {# — Giao diện upload tài liệu liên quan — #}
+        <input type="file"
+               id="id_file_lien_quan"
+               name="file_lien_quan"
+               multiple
+               style="display:none"
+               accept=".pdf,.docx,.xlsx">
+
+        <div class="vbdi-upload-box"
+             onclick="document.getElementById('id_file_lien_quan').click()">
+          <div>
+            <div class="vbdi-upload-main">
+              Kéo thả file hoặc
+              <span class="vbdi-upload-link"
+                onclick="event.stopPropagation(); document.getElementById('id_file_lien_quan').click();">
+                chọn file
+              </span>
+            </div>
+            <div class="vbdi-upload-sub">PDF, DOCX, XLSX (≤ 50MB) — Chọn nhiều file</div>
+          </div>
+        </div>
+        <div id="related-file-preview-list"></div>
+      </div>
+
+      <div>
+        <label>Lãnh đạo xử lý <span class="required">*</span></label>
+        {{ form.lanh_dao_duyet }}
+        {{ form.lanh_dao_duyet.errors }}
+      </div>
+
+      <div>
+        <label>Nội dung xử lý</label>
+        {{ form.noi_dung }}
+      </div>
+
+      <div class="vbdi-action-row">
+        <a href="{% url 'quanlyvanbandi:van_ban_di' %}">Hủy</a>
+        <button type="submit" class="vbdi-btn-save" id="save-button" disabled>Lưu</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const IS_EDIT = {{ is_edit|yesno:"true,false" }};
+const ALLOWED_EXTS = ["pdf", "docx", "xlsx"];
+
+function getExt(fileName) { return (fileName.split(".").pop() || "").toLowerCase(); }
+
+function getFileIconClass(ext) {
+  if (ext === "pdf") return "pdf";
+  if (ext === "docx") return "docx";
+  if (ext === "xlsx") return "xlsx";
+  return "";
+}
+
+function getFileTypeLabel(ext) {
+  const map = { pdf:"PDF Document", docx:"DOCX Document", xlsx:"XLSX Document" };
+  return map[ext] || ext.toUpperCase();
+}
+
+// ===== FILE ĐÍNH KÈM CHÍNH =====
+function buildMainPreviewHTML(fileName, ext) {
+  return `
+    <div class="file-preview-item">
+      <div class="file-icon ${getFileIconClass(ext)}">${ext.toUpperCase()}</div>
+      <div class="file-info">
+        <div class="file-name">${fileName}</div>
+        <div class="file-type">${getFileTypeLabel(ext)}</div>
+      </div>
+      <button type="button" class="file-remove" onclick="removeMainFile()" aria-label="Xóa">×</button>
+    </div>`;
+}
+
+function renderMainFilePreview(file) {
+  const container = document.getElementById("file-preview-list");
+  if (!container) return;
+  container.innerHTML = file ? buildMainPreviewHTML(file.name, getExt(file.name)) : "";
+}
+
+function removeMainFile() {
+  const inp = document.getElementById("id_file_dinh_kem");
+  if (inp) inp.value = "";
+  const preview = document.getElementById("file-preview-list");
+  if (preview) preview.innerHTML = "";
+  const label = document.getElementById("file_dinh_kem_name");
+  if (label) label.innerText = "";
+  checkFormValidity();
+}
+
+function toggleXoaLienQuan(pk) {
+  const cb  = document.getElementById("xoa-lq-" + pk);
+  const row = document.getElementById("existing-lq-" + pk);
+  const btn = document.getElementById("btn-xoa-lq-" + pk);
+  if (!cb || !row) return;
+  cb.checked = !cb.checked;
+  if (cb.checked) {
+    row.style.opacity = "0.4";
+    row.style.textDecoration = "line-through";
+    if (btn) { btn.style.color = "#ef4444"; btn.title = "Hoàn tác"; }
+  } else {
+    row.style.opacity = "";
+    row.style.textDecoration = "";
+    if (btn) { btn.style.color = ""; btn.title = ""; }
+  }
+}
+
+function handleMainFileChange() {
+  const input = document.getElementById("id_file_dinh_kem");
+  const file  = input && input.files[0] ? input.files[0] : null;
+  const label = document.getElementById("file_dinh_kem_name");
+
+  if (file) {
+    const ext = getExt(file.name);
+    if (!ALLOWED_EXTS.includes(ext)) {
+      alert("Chỉ chấp nhận định dạng PDF, DOCX, XLSX.");
+      input.value = "";
+      if (label) label.innerText = "";
+      renderMainFilePreview(null);
+      checkFormValidity();
+      return;
+    }
+    if (label) label.innerText = "Đã chọn: " + file.name;
+  } else {
+    if (label) label.innerText = "";
+  }
+  renderMainFilePreview(file);
+  checkFormValidity();
+}
+
+// ===== TÀI LIỆU LIÊN QUAN — UPLOAD BOX =====
+// Danh sách file đã chọn (dùng DataTransfer quản lý)
+let relatedFiles = [];
+
+function buildRelatedPreviewHTML(idx, fileName, ext) {
+  return `
+    <div class="file-preview-item" id="related-item-${idx}">
+      <div class="file-icon ${getFileIconClass(ext)}">${ext.toUpperCase()}</div>
+      <div class="file-info">
+        <div class="file-name">${fileName}</div>
+        <div class="file-type">${getFileTypeLabel(ext)}</div>
+      </div>
+      <button type="button" class="file-remove" onclick="removeRelatedFile(${idx})" aria-label="Xóa">×</button>
+    </div>`;
+}
+
+function syncRelatedInput() {
+  const input = document.getElementById("id_file_lien_quan");
+  if (!input) return;
+  const dt = new DataTransfer();
+  relatedFiles.forEach(f => dt.items.add(f));
+  input.files = dt.files;
+}
+
+function renderRelatedPreviews() {
+  const container = document.getElementById("related-file-preview-list");
+  if (!container) return;
+  container.innerHTML = "";
+  relatedFiles.forEach((file, idx) => {
+    container.insertAdjacentHTML("beforeend", buildRelatedPreviewHTML(idx, file.name, getExt(file.name)));
+  });
+}
+
+function removeRelatedFile(idx) {
+  relatedFiles.splice(idx, 1);
+  syncRelatedInput();
+  renderRelatedPreviews();
+}
+
+function handleRelatedFileChange() {
+  const input = document.getElementById("id_file_lien_quan");
+  if (!input) return;
+  const invalid = [];
+  Array.from(input.files).forEach(file => {
+    const ext = getExt(file.name);
+    if (!ALLOWED_EXTS.includes(ext)) {
+      invalid.push(file.name);
+    } else {
+      relatedFiles.push(file);
+    }
+  });
+  if (invalid.length) {
+    alert("Các file sau không hợp lệ (chỉ PDF, DOCX, XLSX):\n" + invalid.join("\n"));
+  }
+  syncRelatedInput();
+  renderRelatedPreviews();
+}
+
+// ===== VALIDATION =====
+function validateDates() {
+  const ngayInput  = document.getElementById("id_ngay_van_ban");
+  const hanInput   = document.getElementById("id_han_xu_ly");
+  const errorBox   = document.getElementById("han-xu-ly-error");
+  if (!ngayInput || !hanInput || !errorBox) return true;
+  if (!ngayInput.value || !hanInput.value) {
+    errorBox.classList.remove("show");
+    return true;
+  }
+  const ngay = new Date(ngayInput.value);
+  const han  = new Date(hanInput.value);
+  if (han <= ngay) {
+    errorBox.classList.add("show");
+    hanInput.style.borderColor = "#ef4444";
+    return false;
+  }
+  errorBox.classList.remove("show");
+  hanInput.style.borderColor = "";
+  return true;
+}
+
+function checkFormValidity() {
+  const requiredIds = ["id_so_ky_hieu", "id_loai_van_ban", "id_hinh_thuc", "id_trich_yeu", "id_ngay_van_ban", "id_do_khan", "id_lanh_dao_duyet"];
+  let valid = true;
+  for (const id of requiredIds) {
+    const el = document.getElementById(id);
+    if (!el || !el.value.trim()) { valid = false; break; }
+  }
+  if (!IS_EDIT) {
+    const mainFile = document.getElementById("id_file_dinh_kem");
+    if (!mainFile || mainFile.files.length === 0) valid = false;
+  }
+  if (!validateDates()) valid = false;
+  const btn = document.getElementById("save-button");
+  if (btn) btn.disabled = !valid;
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const mainInput = document.getElementById("id_file_dinh_kem");
+  if (mainInput) mainInput.addEventListener("change", handleMainFileChange);
+
+  const relatedInput = document.getElementById("id_file_lien_quan");
+  if (relatedInput) relatedInput.addEventListener("change", handleRelatedFileChange);
+
+  const watchIds = ["id_so_ky_hieu", "id_loai_van_ban", "id_hinh_thuc", "id_trich_yeu", "id_ngay_van_ban", "id_do_khan", "id_lanh_dao_duyet", "id_han_xu_ly"];
+  watchIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("input", checkFormValidity);
+      el.addEventListener("change", checkFormValidity);
+    }
+  });
+  checkFormValidity();
+});
+</script>
+{% endblock %}
