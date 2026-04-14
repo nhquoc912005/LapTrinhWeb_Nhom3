@@ -133,7 +133,6 @@ table { border-collapse: collapse; width: 100%; }
 
 .login-card {
   background: #ffffff;
-  border-radius: 0;
   box-shadow: 0px 25px 50px 0px rgba(0,0,0,0.25);
   padding: 32px;
   width: 100%;
@@ -197,7 +196,6 @@ table { border-collapse: collapse; width: 100%; }
   padding-left: 40px;
   height: 49.6px;
   border: 0.8px solid #d1d5dc;
-  border-radius: 0;
   font-size: 16px;
   color: rgba(10, 10, 10, 0.8);
 }
@@ -263,7 +261,6 @@ table { border-collapse: collapse; width: 100%; }
 .otp-input {
   width: 52px; height: 56px;
   border: 2px solid var(--border-color);
-  border-radius: var(--radius);
   font-size: 24px;
   font-weight: 700;
   text-align: center;
@@ -342,7 +339,6 @@ table { border-collapse: collapse; width: 100%; }
 .header-brand-icon {
   width: 36px; height: 36px;
   background: rgba(255,255,255,0.2);
-  border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
@@ -415,7 +411,6 @@ table { border-collapse: collapse; width: 100%; }
   right: 0;
   background: white;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius);
   box-shadow: var(--shadow-md);
   min-width: 180px;
   z-index: 200;
@@ -462,6 +457,7 @@ table { border-collapse: collapse; width: 100%; }
 .header-nav::-webkit-scrollbar-thumb {
   background: rgba(255,255,255,0.2);
   border-radius: 999px;
+
 }
 
 .header-nav-list {
@@ -647,7 +643,6 @@ table { border-collapse: collapse; width: 100%; }
   content: '';
   width: 4px; height: 22px;
   background: var(--primary);
-  border-radius: 2px;
   flex-shrink: 0;
 }
 
@@ -671,7 +666,6 @@ table { border-collapse: collapse; width: 100%; }
 .form-control {
   padding: 9px 12px;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius);
   font-size: 14px;
   font-family: var(--font);
   color: var(--text-main);
@@ -713,7 +707,6 @@ textarea.form-control { resize: vertical; min-height: 90px; }
 /* File Upload */
 .file-upload-area {
   border: 2px dashed var(--border-color);
-  border-radius: var(--radius);
   padding: 24px;
   text-align: center;
   cursor: pointer;
@@ -738,7 +731,6 @@ textarea.form-control { resize: vertical; min-height: 90px; }
   font-size: 14px;
   font-weight: 600;
   font-family: var(--font);
-  border-radius: var(--radius);
   border: 1px solid transparent;
   cursor: pointer;
   transition: all var(--transition);
@@ -784,8 +776,8 @@ textarea.form-control { resize: vertical; min-height: 90px; }
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius);
   box-shadow: var(--shadow);
+  border-radius: var(--radius);
 }
 
 .card-header {
@@ -1378,7 +1370,6 @@ td.td-truncate {
 .toast {
   background: white;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius);
   box-shadow: var(--shadow-md);
   padding: 12px 16px;
   display: flex;
@@ -1424,7 +1415,6 @@ td.td-truncate {
 
 .confirm-dialog {
   background: white;
-  border-radius: 10px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.2);
   padding: 28px 32px;
   max-width: 420px;
@@ -1435,7 +1425,6 @@ td.td-truncate {
 .confirm-icon {
   width: 56px; height: 56px;
   background: #FEE2E2;
-  border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 16px;
 }
@@ -1527,7 +1516,6 @@ td.td-truncate {
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s;
-  border-radius: 4px;
   font-size: 14px;
 }
 .filter-tab.active {
