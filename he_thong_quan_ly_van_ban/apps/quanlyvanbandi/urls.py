@@ -12,6 +12,7 @@ urlpatterns = [
     path("van-ban-di/<int:vb_pk>/phe-duyet/", views.phe_duyet_van_ban_di, name="phe_duyet_van_ban_di"),
     path("van-ban-di/<int:vb_pk>/hoan-tra/", views.hoan_tra_van_ban_di, name="hoan_tra_van_ban_di"),
     path("van-ban-di/<int:vb_pk>/ban-hanh/", views.ban_hanh_van_ban, name="ban_hanh_van_ban"),
+    path("van-ban-di/<int:vb_pk>/xoa/", views.xoa_van_ban_di, name="xoa_van_ban_di"),
 
     # AJAX APIs
     path("api/chi-nhanh-phong-ban/", views.api_chi_nhanh_phong_ban, name="api_chi_nhanh_phong_ban"),

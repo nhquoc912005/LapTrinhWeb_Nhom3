@@ -257,7 +257,9 @@ def chi_tiet_van_ban_di(request, id):
         "duyet_record":        duyet_record,
         "ds_chi_nhanh":        ds_chi_nhanh,
         "ban_hanh_url":        reverse("quanlyvanbandi:ban_hanh_van_ban", args=[vb.pk]),
-        "hien_thi_trang_thai": hien_thi_trang_thai,
+        "hien_thi_trang_thai":      hien_thi_trang_thai,
+        "allow_remove_main_file":    False,
+        "allow_remove_related_file": False,
     })
 
 @require_POST
@@ -497,4 +499,32 @@ def ban_hanh_van_ban(request, vb_pk):
     vb.trang_thai = "Đã ban hành"
     vb.save(update_fields=["trang_thai"])
 
-    return JsonResponse({"ok": True, "message": "Ban hành văn bản đi thành công!"})
+    return JsonResponse({"ok": True, "message": "Ban hành văn bản đi thành công!"})
+
+
+# ─────────────────────────────────────────
+# ACTION: Xóa văn bản đi
+# POST /van-ban-di/<pk>/xoa/
+# ─────────────────────────────────────────
+@require_POST
+@role_required(Customer.Role.CHUYEN_VIEN)
+def xoa_van_ban_di(request, vb_pk):
+    """Chuyên viên xóa văn bản đi (chỉ khi Chờ Xử Lý)."""
+    vb = get_object_or_404(VanBan, pk=vb_pk, phan_loai="Văn bản đi")
+
+    # Chỉ người tạo mới được xóa
+    if vb.nguoi_tao != request.user.nguoi_dung_core:
+        raise PermissionDenied
+
+    # Chỉ xóa khi chưa được duyệt
+    if vb.trang_thai != "Chờ Xử Lý":
+        messages.error(request, "Không thể xóa văn bản đã được xử lý.")
+        return redirect("quanlyvanbandi:chi_tiet_van_ban_di", id=vb.pk)
+
+    # Xóa các bản ghi liên quan
+    vb.vanbanlienquan_set.all().delete()
+    vb.delete()
+
+    messages.success(request, "Xóa văn bản thành công.")
+    return redirect("quanlyvanbandi:van_ban_di")
+
