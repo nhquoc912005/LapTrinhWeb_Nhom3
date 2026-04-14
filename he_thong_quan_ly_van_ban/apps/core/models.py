@@ -466,17 +466,24 @@ class VanBanHoanTra(models.Model):
 
 
 class CongViec(models.Model):
-    NGUON_GIAO_CHOICES = (
-        ("Văn bản đến", "Văn bản đến"),
-        ("Văn bản đi", "Văn bản đi"),
-    )
+    class NguonGiao(models.TextChoices):
+        VAN_BAN_DEN = "Văn bản đến", "Văn bản đến"
+        VAN_BAN_DI = "Văn bản đi", "Văn bản đi"
+
+    class TrangThai(models.TextChoices):
+        CHO_XU_LY = "Chờ xử lý", "Chờ xử lý"
+        DA_HOAN_THANH = "Đã hoàn thành", "Đã hoàn thành"
+        HOAN_TRA_CV = "Hoàn trả_CV", "Hoàn trả CV"
+        HOAN_TRA_LD = "Hoàn trả_LĐ", "Hoàn trả LĐ"
+        CHO_DUYET = "Chờ duyệt", "Chờ duyệt"
 
     cong_viec_id = models.AutoField(primary_key=True)
     van_ban = models.ForeignKey(
         "core.VanBan",
         on_delete=models.CASCADE,
         db_column="van_ban_id",
-        null=True, blank=True,
+        null=True,
+        blank=True,
     )
     ten_cong_viec = models.CharField(max_length=255, null=False)
     noi_dung_cong_viec = models.TextField(null=False)
@@ -484,20 +491,13 @@ class CongViec(models.Model):
         max_length=255,
         null=True,
         blank=True,
-        choices=NGUON_GIAO_CHOICES,
+        choices=NguonGiao.choices,
     )
-    TRANG_THAI_CHOICES = (
-        ("Chờ xử lý", "Chờ xử lý"),
-        ("Chờ duyệt", "Chờ duyệt"),
-        ("Hoàn trả", "Hoàn trả"),
-        ("Đã hoàn thành", "Đã hoàn thành"),
-    )
-
     trang_thai = models.CharField(
-        max_length=255, 
+        max_length=255,
         null=False,
-        choices=TRANG_THAI_CHOICES,
-        default="Chờ xử lý"
+        choices=TrangThai.choices,
+        default=TrangThai.CHO_XU_LY,
     )
     ngay_bat_dau = models.DateField(null=False)
     han_xu_ly = models.DateTimeField(null=False)
@@ -506,6 +506,7 @@ class CongViec(models.Model):
     ghi_chu = models.TextField(null=True, blank=True)
     ket_qua_xu_ly = models.TextField(null=True, blank=True)
     ngay_xu_ly = models.DateField(default=timezone.now)
+    yeu_cau_phe_duyet = models.BooleanField(default=True)
     nguoi_giao = models.ForeignKey(
         "core.NguoiDung",
         on_delete=models.CASCADE,
@@ -526,6 +527,17 @@ class CongViec(models.Model):
 
     def __str__(self):
         return self.ten_cong_viec
+
+    @property
+    def cho_phep_chuyen_vien_xu_ly(self):
+        return self.trang_thai in {
+            self.TrangThai.CHO_XU_LY,
+            self.TrangThai.HOAN_TRA_CV,
+        }
+
+    @property
+    def dang_cho_lanh_dao_xu_ly(self):
+        return self.trang_thai == self.TrangThai.HOAN_TRA_LD
 
 
 class PhanCongCongViec(models.Model):
@@ -551,6 +563,14 @@ class PhanCongCongViec(models.Model):
 
 
 class FileCVLienQuan(models.Model):
+    class LoaiFile(models.TextChoices):
+        CHINH = "CHINH", "Chính"
+        LIEN_QUAN = "LIEN_QUAN", "Liên quan"
+
+    class NguonTaiLen(models.TextChoices):
+        GIAO_VIEC = "GIAO_VIEC", "File giao việc"
+        KET_QUA_XU_LY = "KET_QUA_XU_LY", "File kết quả xử lý"
+
     file_cv_lien_quan_id = models.AutoField(primary_key=True)
     cong_viec = models.ForeignKey(
         "core.CongViec",
@@ -562,9 +582,22 @@ class FileCVLienQuan(models.Model):
     kich_thuoc = models.IntegerField(null=True, blank=True)
     loai_file = models.CharField(
         max_length=20,
-        choices=(('CHINH', 'Chính'), ('LIEN_QUAN', 'Liên quan')),
-        default='LIEN_QUAN',
-        null=False
+        choices=LoaiFile.choices,
+        default=LoaiFile.LIEN_QUAN,
+        null=False,
+    )
+    nguon_tai_len = models.CharField(
+        max_length=30,
+        choices=NguonTaiLen.choices,
+        default=NguonTaiLen.GIAO_VIEC,
+    )
+    nguoi_tai_len = models.ForeignKey(
+        "core.NguoiDung",
+        on_delete=models.SET_NULL,
+        db_column="nguoi_tai_len_id",
+        null=True,
+        blank=True,
+        related_name="+",
     )
 
     class Meta:
@@ -572,6 +605,10 @@ class FileCVLienQuan(models.Model):
 
     def __str__(self):
         return f"File công việc {self.file_cv_lien_quan_id}"
+
+    @property
+    def la_file_ket_qua(self):
+        return self.nguon_tai_len == self.NguonTaiLen.KET_QUA_XU_LY
 
 
 class HoanTraCongViec(models.Model):
@@ -581,6 +618,14 @@ class HoanTraCongViec(models.Model):
         on_delete=models.CASCADE,
         db_column="cong_viec_id",
         null=False,
+    )
+    nguoi_hoan_tra = models.ForeignKey(
+        "core.NguoiDung",
+        on_delete=models.SET_NULL,
+        db_column="nguoi_hoan_tra_id",
+        null=True,
+        blank=True,
+        related_name="+",
     )
     ngay_hoan_tra = models.DateField(auto_now_add=True)
     noi_dung = models.TextField(null=False)

@@ -1,173 +1,101 @@
 {% extends "base.html" %}
-{% load static %}
 
-{% block title %}Hoàn trả văn bản - Hệ thống quản lý văn bản{% endblock %}
+{% block title %}Hoàn trả công việc - Hệ thống quản lý văn bản{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* Premium Centered Form Styles */
-    .return-page-wrapper {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(15, 23, 42, 0.4);
-        backdrop-filter: blur(8px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        padding: 20px;
-    }
-
     .return-card {
-        background: white;
-        width: 100%;
-        max-width: 650px;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        display: flex;
-        flex-direction: column;
-        animation: cardAppear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    @keyframes cardAppear {
-        from { opacity: 0; transform: translateY(20px) scale(0.95); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    .return-header {
-        padding: 40px 48px 24px;
+        background: #fff;
+        border: 1px solid #dce5ec;
+        padding: 32px;
+        margin-top: 16px;
+        max-width: 920px;
     }
 
     .return-title {
-        font-size: 24px;
-        font-weight: 800;
-        color: #0284C7;
-        margin-bottom: 24px;
-        letter-spacing: -0.02em;
-    }
-
-    .return-info-item {
-        margin-bottom: 24px;
-    }
-
-    .return-label {
-        font-size: 15px;
+        font-size: 18px;
         font-weight: 700;
-        color: #1E293B;
-        margin-bottom: 12px;
-        display: block;
-    }
-
-    .specialist-name {
-        font-size: 16px;
-        font-weight: 600;
-        color: #334155;
-        padding-left: 4px;
-    }
-
-    .return-textarea {
-        width: 100%;
-        min-height: 180px;
-        background: #F8FAFC;
-        border: 1px solid #E2E8F0;
-        padding: 16px;
-        font-size: 15px;
-        color: #1E293B;
-        line-height: 1.6;
-        transition: all 0.2s;
-        resize: vertical;
-    }
-
-    .return-textarea:focus {
-        background: white;
-        border-color: #0284C7;
-        box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.1);
-        outline: none;
-    }
-
-    .return-textarea::placeholder {
-        color: #94A3B8;
-    }
-
-    .return-footer {
-        padding: 24px 48px 48px;
-        display: flex;
-        justify-content: flex-end;
-        gap: 16px;
-    }
-
-    .btn-return {
-        padding: 12px 40px;
-        font-size: 15px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.2s;
-        border: none;
+        text-transform: uppercase;
+        color: #1f2d3d;
         display: flex;
         align-items: center;
-        justify-content: center;
-        min-width: 120px;
+        gap: 12px;
+        margin-bottom: 24px;
     }
 
-    .btn-return-cancel {
-        background: #F1F5F9;
-        color: #475569;
+    .return-title::before {
+        content: "";
+        width: 4px;
+        height: 24px;
+        background: #0d8dd6;
     }
 
-    .btn-return-cancel:hover {
-        background: #E2E8F0;
-        color: #1E293B;
+    .info-box {
+        padding: 18px 20px;
+        margin-bottom: 24px;
+        background: #f8fbfd;
+        border: 1px solid #dce5ec;
     }
 
-    .btn-return-save {
-        background: #94A3B8; /* Generic gray-blue from screenshot */
-        color: white;
+    .label {
+        margin-bottom: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #607385;
     }
 
-    .btn-return-save:hover {
-        background: #0284C7; /* Switch to primary blue on hover */
-        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+    .value {
+        font-size: 16px;
+        color: #22313f;
+        font-weight: 700;
     }
 
-    /* Global square transformation */
-    *:not(.badge):not([class*="badge-"]) {
-        border-radius: 0 !important;
+    .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding-top: 20px;
+        border-top: 1px solid #dce5ec;
+    }
+
+    .inline-errors {
+        margin-top: 8px;
+        color: #c0392b;
+        font-size: 13px;
     }
 </style>
 {% endblock %}
 
-{% block page_wrapper %}
-<div class="return-page-wrapper">
-    <div class="return-card">
-        <div class="return-header">
-            <h1 class="return-title">Hoàn trả văn bản</h1>
-            
-            <div class="return-info-item">
-                <span class="return-label">Chuyên viên : <span class="specialist-name">{{ user.core_profile.ho_va_ten }}</span></span>
-            </div>
+{% block breadcrumb %}
+<a href="{% url task_list_url %}">Quản lý công việc</a>
+<span class="breadcrumb-sep">›</span>
+<a href="{% url 'quanlycongviec:task_detail' task.pk %}">Thông tin chi tiết công việc</a>
+<span class="breadcrumb-sep">›</span>
+<span>Hoàn trả công việc</span>
+{% endblock %}
 
-            <form action="{% url 'quanlycongviec:return_task' task.pk %}" method="POST">
-                {% csrf_token %}
-                <div class="return-info-item">
-                    <label class="return-label" for="noi_dung">Lý do / Yêu cầu chỉnh sửa</label>
-                    <textarea 
-                        id="noi_dung" 
-                        name="noi_dung" 
-                        class="return-textarea" 
-                        placeholder="Nhập lý do / Yêu cầu chỉnh sửa cho văn thư..."
-                        required
-                    ></textarea>
-                </div>
+{% block content %}
+<div class="return-card">
+    <div class="return-title">Hoàn trả công việc</div>
 
-                <div class="return-footer">
-                    <a href="{% url 'quanlycongviec:task_detail' task.pk %}" class="btn-return btn-return-cancel">Hủy</a>
-                    <button type="submit" class="btn-return btn-return-save">Lưu</button>
-                </div>
-            </form>
-        </div>
+    <div class="info-box">
+        <div class="label">{{ receiver_label }}</div>
+        <div class="value">{{ receiver_name }}</div>
     </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="label">{{ form.noi_dung.label }} *</div>
+        {{ form.noi_dung }}
+        {% if form.noi_dung.errors %}
+        <div class="inline-errors">{{ form.noi_dung.errors|join:", " }}</div>
+        {% endif %}
+
+        <div class="actions">
+            <a href="{% url 'quanlycongviec:task_detail' task.pk %}" class="btn btn-secondary">Hủy</a>
+            <button type="submit" class="btn btn-primary">Lưu</button>
+        </div>
+    </form>
 </div>
 {% endblock %}

@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load static %}
 
 {% block title %}Thông tin chi tiết công việc - Hệ thống quản lý văn bản{% endblock %}
 
@@ -7,774 +6,391 @@
 <style>
     .detail-card {
         background: #fff;
-        padding: 32px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid #dce5ec;
+        padding: 28px;
         margin-top: 16px;
     }
 
-    .detail-header-row {
+    .detail-header {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        margin-bottom: 24px;
-        padding-bottom: 16px;
-        border-bottom: 1px solid #E2E8F0;
+        align-items: flex-start;
+        gap: 16px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #dce5ec;
     }
 
-    .detail-title-group {
+    .detail-title {
         display: flex;
         align-items: center;
-    }
-
-    .detail-title-bar {
-        width: 4px;
-        height: 24px;
-        background: #0284C7;
-        margin-right: 12px;
-    }
-
-    .detail-title-text {
+        gap: 12px;
         font-size: 18px;
         font-weight: 700;
-        color: #1E293B;
         text-transform: uppercase;
+        color: #1f2d3d;
     }
 
-    .action-buttons {
+    .detail-title::before {
+        content: "";
+        width: 4px;
+        height: 24px;
+        background: #0d8dd6;
+    }
+
+    .action-group {
         display: flex;
         gap: 12px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
     }
 
-    .status-badge-container {
-        display: flex;
-        justify-content: flex-end;
-        margin-bottom: 24px;
+    .status-badge {
+        display: inline-flex;
+        padding: 6px 14px;
+        margin-top: 16px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .status-cho-xu-ly {
+        background: #fff2cc;
+        color: #9c6b00;
+    }
+
+    .status-cho-duyet {
+        background: #e9ddff;
+        color: #5b2ca0;
+    }
+
+    .status-hoan-tra {
+        background: #fde2e2;
+        color: #b12f2f;
+    }
+
+    .status-da-hoan-thanh {
+        background: #d9f4e5;
+        color: #0d7a48;
     }
 
     .info-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 24px 48px;
-        margin-bottom: 32px;
-    }
-
-    .info-item {
-        margin-bottom: 16px;
+        gap: 24px 42px;
+        margin: 28px 0;
     }
 
     .info-label {
-        font-size: 13px;
+        margin-bottom: 6px;
+        font-size: 14px;
         font-weight: 600;
-        color: #64748B;
-        margin-bottom: 4px;
-        display: block;
+        color: #607385;
     }
 
     .info-value {
-        font-size: 14px;
-        font-weight: 700;
-        color: #1E293B;
-    }
-
-    .section-title {
-        font-size: 13px;
-        font-weight: 600;
-        color: #64748B;
-        margin-bottom: 12px;
-        display: block;
-    }
-
-    .section-content {
-        font-size: 14px;
+        font-size: 15px;
         line-height: 1.6;
-        color: #334155;
-        background: #F8FAFC;
-        padding: 16px;
-        margin-bottom: 24px;
+        color: #22313f;
+    }
+
+    .section {
+        margin-bottom: 28px;
+    }
+
+    .section h3 {
+        margin: 0 0 12px;
+        font-size: 16px;
+        color: #1f2d3d;
+    }
+
+    .content-box {
+        padding: 16px 18px;
+        border: 1px solid #dce5ec;
+        background: #f8fbfd;
+        line-height: 1.7;
+        color: #22313f;
     }
 
     .file-list {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        margin-bottom: 32px;
-    }
-
-    .file-item {
-        display: flex;
-        align-items: center;
-        padding: 8px 12px;
-        background: #F1F5F9;
-        text-decoration: none;
-        color: #0284C7;
-        font-size: 14px;
-        font-weight: 600;
-        transition: background 0.2s;
-    }
-
-    .file-item:hover {
-        background: #E2E8F0;
-    }
-
-    .preview-container {
-        margin-top: 32px;
-        border-top: 2px solid #E2E8F0;
-        padding-top: 24px;
-    }
-
-    .preview-header {
-        font-weight: 700;
-        font-size: 14px;
-        color: #64748B;
-        margin-bottom: 16px;
-        text-transform: uppercase;
-    }
-
-    .pdf-viewer {
-        width: 100%;
-        height: 800px;
-        border: 1px solid #CBD5E1;
-        background: #525659;
-    }
-
-    /* Redesigned Document List */
-    .doc-list-section {
-        margin-top: 40px;
-        margin-bottom: 32px;
-        border: 1px solid #E5E7EB;
-    }
-
-    .doc-list-header {
-        display: flex;
-        align-items: center;
-        padding: 12px 16px;
-        background: #F8FAFC;
-        border-bottom: 1px solid #E5E7EB;
-    }
-
-    .doc-header-bar {
-        width: 3px;
-        height: 18px;
-        background: #0284C7;
-        margin-right: 12px;
-    }
-
-    .doc-header-text {
-        font-size: 15px;
-        font-weight: 700;
-        color: #0284C7;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .doc-list-body {
-        padding: 24px;
-    }
-
-    .file-group-label {
-        font-size: 14px;
-        color: #64748B;
-        margin-bottom: 12px;
-    }
-
-    .file-cards-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 16px;
-        margin-bottom: 24px;
+        display: grid;
+        gap: 12px;
     }
 
     .file-card {
         display: flex;
         align-items: center;
-        padding: 12px;
-        background: #F3F4F6;
-        border: 1px solid transparent;
-        text-decoration: none;
-        transition: all 0.2s ease;
-        cursor: pointer;
-        width: 280px;
-        position: relative;
-    }
-
-    .file-card:hover {
-        background: #E5E7EB;
-    }
-
-    .file-card.active {
-        border: 1px dotted #3B82F6;
-        background: #F3F4F6;
-        outline: 2px solid rgba(59, 130, 246, 0.1);
-    }
-
-    .file-card-icon {
-        width: 44px;
-        height: 48px;
-        background: white;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        margin-right: 12px;
-        flex-shrink: 0;
-        border: 1px solid #E5E7EB;
-    }
-
-    .file-badge {
-        font-size: 10px;
-        font-weight: 800;
-        text-transform: uppercase;
-    }
-
-    .badge-pdf { color: #EF4444; }
-    .badge-doc { color: #3B82F6; }
-    .badge-xls { color: #10B981; }
-    .badge-file { color: #64748B; }
-
-    .file-info {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .file-name {
-        display: block;
-        font-size: 13px;
-        font-weight: 700;
-        color: #1E293B;
-        margin-bottom: 2px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .file-type-desc {
-        display: block;
-        font-size: 11px;
-        color: #94A3B8;
-        font-weight: 500;
-    }
-
-    /* Preview Section Enhancements */
-    .preview-container {
-        margin-bottom: 24px;
-        background: white;
-        padding: 0;
-        border: 1px solid #E5E7EB;
-    }
-
-    .preview-top-bar {
-        display: flex;
         justify-content: space-between;
-        align-items: center;
-        padding: 8px 16px;
-        background: #333;
-        color: white;
+        gap: 12px;
+        padding: 12px 14px;
+        border: 1px solid #dbe5ed;
+        background: #fff;
     }
 
-    .preview-label {
-        font-size: 12px;
-        font-weight: 500;
-        color: rgba(255, 255, 255, 0.8);
-    }
-
-    .preview-actions {
-        display: flex;
-        align-items: center;
+    .history-list {
+        display: grid;
         gap: 12px;
     }
 
-    .preview-btn-icon {
-        background: transparent;
-        border: none;
-        color: white;
-        cursor: pointer;
-        padding: 4px;
-        opacity: 0.8;
-        transition: opacity 0.2s;
+    .history-item {
+        padding: 14px 16px;
+        border-left: 4px solid #dd4d4d;
+        background: #fff5f5;
+        border-top: 1px solid #f0d7d7;
+        border-right: 1px solid #f0d7d7;
+        border-bottom: 1px solid #f0d7d7;
     }
 
-    .preview-btn-icon:hover {
-        opacity: 1;
+    .preview-frame {
+        width: 100%;
+        min-height: 720px;
+        border: 1px solid #dce5ec;
+        background: #4b5157;
     }
 
-    .viewer-wrapper {
-        background: #525659;
-        min-height: 800px;
-        display: flex;
-        justify-content: center;
-        overflow: auto;
-    }
+    @media (max-width: 900px) {
+        .detail-header {
+            flex-direction: column;
+        }
 
-    /* Standardized Badges */
-    .badge-cho-xu-ly {
-        background: #FEF3C7;
-        color: #D97706;
-        padding: 6px 16px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 13px;
-    }
+        .action-group {
+            justify-content: flex-start;
+        }
 
-    /* Improved yellow */
-    .badge-cho-duyet {
-        background: #F3E8FF;
-        color: #6B21A8;
-        padding: 6px 16px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 13px;
-    }
-
-    .badge-hoan-tra {
-        background: #FEE2E2;
-        color: #991B1B;
-        padding: 6px 16px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 13px;
-    }
-
-    .badge-da-hoan-thanh {
-        background: #D1FAE5;
-        color: #065F46;
-        padding: 6px 16px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 13px;
-    }
-
-    .info-wrapper {
-        margin-top: 24px;
-    }
-
-    .note-section {
-        margin-top: 16px;
-        margin-bottom: 24px;
-        font-size: 14px;
-    }
-
-    .note-label {
-        font-weight: 600;
-        color: #64748B;
-    }
-
-    .note-value {
-        font-weight: 700;
-        color: #1E293B;
-    }
-    /* Global square transformation */
-    *:not(.badge):not([class*="badge-"]) {
-        border-radius: 0 !important;
-    }
-    
-    .badge-cho-xu-ly, .badge-cho-duyet, .badge-hoan-tra, .badge-da-hoan-thanh {
-        border-radius: 20px !important;
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 {% endblock %}
 
 {% block breadcrumb %}
-<a href="{% url 'core:dashboard' %}">
-    <svg width="14" height="14" viewBox="0 0 24 24">
-        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-    </svg>
-    Trang chủ
-</a>
-<span class="breadcrumb-sep">›</span>
-<a href="{% url 'quanlycongviec:giao_viec' %}">Quản lý công việc</a>
+<a href="{% url task_list_url %}">Quản lý công việc</a>
 <span class="breadcrumb-sep">›</span>
 <span>Thông tin chi tiết công việc</span>
 {% endblock %}
 
 {% block content %}
 <div class="detail-card">
-    <div class="detail-header-row">
-        <div class="detail-title-group">
-            <div class="detail-title-bar"></div>
-            <div class="detail-title-text">THÔNG TIN CHI TIẾT CÔNG VIỆC</div>
+    <div class="detail-header">
+        <div>
+            <div class="detail-title">Thông tin chi tiết công việc</div>
+            {% if task.trang_thai == "Chờ xử lý" %}
+            <span class="status-badge status-cho-xu-ly">{{ task.get_trang_thai_display }}</span>
+            {% elif task.trang_thai == "Chờ duyệt" %}
+            <span class="status-badge status-cho-duyet">{{ task.get_trang_thai_display }}</span>
+            {% elif task.trang_thai == "Đã hoàn thành" %}
+            <span class="status-badge status-da-hoan-thanh">{{ task.get_trang_thai_display }}</span>
+            {% else %}
+            <span class="status-badge status-hoan-tra">{{ task.get_trang_thai_display }}</span>
+            {% endif %}
         </div>
-        <div class="action-buttons">
-            {% if can_approve %}
-            <form action="{% url 'quanlycongviec:approve_task' task.pk %}" method="POST" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary" style="background:#10B981; border:none;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px; vertical-align:middle;">
-                        <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                    </svg>
-                    Phê duyệt
-                </button>
-            </form>
+
+        <div class="action-group">
+            {% if can_edit %}
+            <a href="{% url 'quanlycongviec:giao_viec' %}?edit={{ task.pk }}" class="btn btn-primary">Chỉnh sửa</a>
             {% endif %}
 
-            {% if can_start %}
-            <button type="button" class="btn btn-primary" id="btnProcessTask"
-                style="background:#0284C7; border:none; color:white; display:inline-flex; align-items:center;">
-                <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px;">
-                    <path fill="currentColor"
-                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-                </svg>
-                Xử lý
-            </button>
+            {% if can_process %}
+            <a href="{% url 'quanlycongviec:process_task' task.pk %}" class="btn btn-primary">Xử lý</a>
+            {% endif %}
+
+            {% if can_update_result %}
+            <a href="{% url 'quanlycongviec:update_task_result' task.pk %}" class="btn btn-primary">Cập nhật xử lý</a>
+            {% endif %}
+
+            {% if can_approve %}
+            <form method="post" action="{% url 'quanlycongviec:approve_task' task.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">Phê duyệt</button>
+            </form>
             {% endif %}
 
             {% if can_return %}
-            <a href="{% url 'quanlycongviec:return_task' task.pk %}" class="btn btn-danger"
-                style="background:#EF4444; border:none; color:white; display:inline-flex; align-items:center;">
-                <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px;">
-                    <path fill="currentColor"
-                        d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z" />
-                </svg>
-                Hoàn trả
-            </a>
-            {% endif %}
-
-            {% if can_edit %}
-            <a href="{% url 'quanlycongviec:giao_viec' %}?edit={{ task.pk }}" class="btn btn-primary"
-                style="background:#0284C7; border:none; color:white; display:inline-flex; align-items:center;">
-                <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px;">
-                    <path fill="currentColor"
-                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-                </svg>
-                Chỉnh sửa
-            </a>
+            <a href="{% url 'quanlycongviec:return_task' task.pk %}" class="btn btn-danger">Hoàn trả công việc</a>
             {% endif %}
 
             {% if can_delete %}
-            <button type="button" class="btn btn-danger" id="btnDeleteDetail"
-                style="background:#EF4444; border:none; color:white; display:inline-flex; align-items:center;">
-                <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:6px;">
-                    <path fill="currentColor"
-                        d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
-                </svg>
-                Xoá công việc
-            </button>
-            <form id="deleteDetailForm" action="{% url 'quanlycongviec:delete_task' task.pk %}" method="POST"
-                style="display:none;">
+            <form method="post" id="deleteTaskForm" action="{% url 'quanlycongviec:delete_task' task.pk %}">
                 {% csrf_token %}
+                <button type="button" class="btn btn-danger" id="btnDeleteTask">Xóa công việc</button>
             </form>
             {% endif %}
         </div>
     </div>
 
-    <div class="status-badge-container">
-        {% if task.trang_thai == "Chờ xử lý" %}
-        <span class="badge badge-cho-xu-ly">{{ task.trang_thai }}</span>
-        {% elif task.trang_thai == "Chờ duyệt" %}
-        <span class="badge badge-cho-duyet">{{ task.trang_thai }}</span>
-        {% elif task.trang_thai == "Hoàn trả" %}
-        <span class="badge badge-hoan-tra">{{ task.trang_thai }}</span>
-        {% elif task.trang_thai == "Đã hoàn thành" %}
-        <span class="badge badge-da-hoan-thanh">{{ task.trang_thai }}</span>
-        {% else %}
-        <span class="badge">{{ task.trang_thai }}</span>
-        {% endif %}
-    </div>
-
     <div class="info-grid">
-        <div class="info-item">
-            <span class="info-label">Lãnh đạo giao việc</span>
+        <div>
+            <div class="info-label">Lãnh đạo giao việc</div>
             <div class="info-value">{{ task.nguoi_giao.ho_va_ten }}</div>
         </div>
-        <div class="info-item">
-            <span class="info-label">Mã giao việc</span>
+        <div>
+            <div class="info-label">Mã giao việc</div>
             <div class="info-value">{{ task_code }}</div>
         </div>
-        <div class="info-item">
-            <span class="info-label">Nguồn giao</span>
-            <div class="info-value">{{ task.nguon_giao|default:"Không có" }}</div>
+        <div>
+            <div class="info-label">Nguồn giao</div>
+            <div class="info-value">{{ task.nguon_giao|default:"-" }}</div>
         </div>
-        <div class="info-item">
-            <span class="info-label">Tên công việc</span>
+        <div>
+            <div class="info-label">Tên công việc</div>
             <div class="info-value">{{ task.ten_cong_viec }}</div>
         </div>
-        <div class="info-item">
-            <span class="info-label">Chuyên viên thực hiện</span>
+        <div>
+            <div class="info-label">Chuyên viên thực hiện</div>
             <div class="info-value">{{ task.nguoi_thuc_hien.ho_va_ten }}</div>
         </div>
-        <div class="info-item">
-            <span class="info-label">Người phối hợp</span>
+        <div>
+            <div class="info-label">Người phối hợp</div>
             <div class="info-value">
-                {% for c in collaborators %}
-                {{ c.nguoi_phoi_hop.ho_va_ten }}{% if not forloop.last %}, {% endif %}
+                {% for collaborator in collaborators %}
+                {{ collaborator.nguoi_phoi_hop.ho_va_ten }}{% if not forloop.last %}, {% endif %}
                 {% empty %}
-                Không có
+                -
                 {% endfor %}
             </div>
         </div>
-        <div class="info-item">
-            <span class="info-label">Ngày bắt đầu</span>
+        <div>
+            <div class="info-label">Ngày bắt đầu</div>
             <div class="info-value">{{ task.ngay_bat_dau|date:"d/m/Y" }}</div>
         </div>
-        <div class="info-item">
-            <span class="info-label">Hạn xử lý</span>
-            <div class="info-value" style="color:#EF4444;">{{ task.han_xu_ly|date:"d/m/Y" }}</div>
+        <div>
+            <div class="info-label">Hạn xử lý</div>
+            <div class="info-value">{{ task.han_xu_ly|date:"d/m/Y H:i" }}</div>
+        </div>
+        <div>
+            <div class="info-label">Yêu cầu phê duyệt kết quả</div>
+            <div class="info-value">{% if task.yeu_cau_phe_duyet %}Có{% else %}Không{% endif %}</div>
+        </div>
+        <div>
+            <div class="info-label">Ngày xử lý gần nhất</div>
+            <div class="info-value">{{ task.ngay_xu_ly|date:"d/m/Y" }}</div>
         </div>
     </div>
 
-    <div class="info-wrapper">
-        <span class="section-title">Nội dung công việc</span>
-        <div class="section-content" style="margin-bottom:12px;">
-            {{ task.noi_dung_cong_viec|linebreaks }}
-        </div>
+    <div class="section">
+        <h3>Nội dung công việc</h3>
+        <div class="content-box">{{ task.noi_dung_cong_viec|linebreaksbr }}</div>
+    </div>
 
-        {% with return_records=task.hoantracongviec_set.all %}
-        {% if return_records %}
-        <span class="section-title" style="color:#EF4444;">Lý do hoàn trả</span>
-        <div class="section-content" style="border-left: 4px solid #EF4444; background: #FEF2F2; margin-bottom: 24px;">
-            {% for record in return_records %}
-                <div style="margin-bottom: {% if not forloop.last %}16px{% else %}0{% endif %};">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                        <span style="font-size: 12px; font-weight: 700; color: #991B1B; text-transform: uppercase; letter-spacing: 0.5px;">
-                            Lần hoàn trả #{{ forloop.revcounter }}
-                        </span>
-                        <span style="font-size: 12px; font-weight: 600; color: #B91C1C;">
-                            {{ record.ngay_hoan_tra|date:"d/m/Y" }}
-                        </span>
-                    </div>
-                    <div style="font-size: 14px; color: #7F1D1D; line-height: 1.5;">
-                        {{ record.noi_dung|linebreaks }}
-                    </div>
+    <div class="section">
+        <h3>Ghi chú</h3>
+        <div class="content-box">{{ task.ghi_chu|default:"Không có ghi chú."|linebreaksbr }}</div>
+    </div>
+
+    {% if task.ket_qua_xu_ly %}
+    <div class="section">
+        <h3>Kết quả xử lý</h3>
+        <div class="content-box">{{ task.ket_qua_xu_ly|linebreaksbr }}</div>
+    </div>
+    {% endif %}
+
+    <div class="section">
+        <h3>File gốc lãnh đạo giao</h3>
+        <div class="file-list">
+            {% if main_attachment %}
+            <div class="file-card">
+                <div>
+                    <a href="{{ main_attachment.file_van_ban.url }}" target="_blank" style="font-weight:700; color:#006e9f;">
+                        {{ main_attachment.file_van_ban.name|cut:"file_cv_lien_quan/" }}
+                    </a>
+                    <div style="margin-top:4px; font-size:12px; color:#7f90a0;">File chính</div>
                 </div>
+            </div>
+            {% endif %}
+            {% for attachment in related_files %}
+            <div class="file-card">
+                <div>
+                    <a href="{{ attachment.file_van_ban.url }}" target="_blank" style="font-weight:700; color:#006e9f;">
+                        {{ attachment.file_van_ban.name|cut:"file_cv_lien_quan/" }}
+                    </a>
+                    <div style="margin-top:4px; font-size:12px; color:#7f90a0;">Tài liệu liên quan</div>
+                </div>
+            </div>
+            {% empty %}
+            {% if not main_attachment %}
+            <div class="content-box">Không có file gốc.</div>
+            {% endif %}
             {% endfor %}
         </div>
-        {% endif %}
-        {% endwith %}
+    </div>
 
-        <div class="note-section" style="background: #F8FAFC; padding: 16px; border-radius: 0; border-left: 4px solid #94A3B8; margin-bottom: 24px;">
-            <span class="note-label" style="font-size: 13px; font-weight: 700; color: #64748B; display: block; margin-bottom: 4px; text-transform: uppercase;">Ghi chú:</span>
-            <div class="note-value" style="font-size: 14px; color: #334155; line-height: 1.5;">
-                {% if task.ghi_chu %}
-                    {{ task.ghi_chu|linebreaks }}
-                {% else %}
-                    <span style="color: #94A3B8; font-style: italic;">Không có ghi chú nào được thêm.</span>
-                {% endif %}
-            </div>
-        </div>
-
-        {% if task.ket_qua_xu_ly %}
-        <span class="section-title">Kết quả xử lý</span>
-        <div class="section-content" style="color:#0284C7; font-weight:600;">
-            {{ task.ket_qua_xu_ly|linebreaks }}
-        </div>
-        {% endif %}
-
-        <div class="doc-list-section">
-            <div class="doc-list-header">
-                <div class="doc-header-bar"></div>
-                <div class="doc-header-text">DANH SÁCH VĂN BẢN</div>
-            </div>
-            
-            <div class="doc-list-body">
-                {% if main_attachment %}
-                <div class="file-group-label">File đính kèm:</div>
-                <div class="file-cards-container">
-                    <div class="file-card {% if first_pdf == main_attachment %}active{% endif %}" 
-                         data-url="{{ main_attachment.file_van_ban.url }}" 
-                         data-name="{{ main_attachment.file_van_ban.name }}"
-                         onclick="previewFile(this)">
-                        <div class="file-card-icon">
-                            {% with ext=main_attachment.file_van_ban.name|lower %}
-                            {% if ".pdf" in ext %}
-                                <span class="file-badge badge-pdf">PDF</span>
-                            {% elif ".doc" in ext or ".docx" in ext %}
-                                <span class="file-badge badge-doc">DOCX</span>
-                            {% elif ".xls" in ext or ".xlsx" in ext %}
-                                <span class="file-badge badge-xls">XLSX</span>
-                            {% else %}
-                                <span class="file-badge badge-file">FILE</span>
-                            {% endif %}
-                            {% endwith %}
-                        </div>
-                        <div class="file-info">
-                            <div class="file-name">{{ main_attachment.file_van_ban.name }}</div>
-                            <div class="file-type-desc">
-                                {% with ext=main_attachment.file_van_ban.name|lower %}
-                                {% if ".pdf" in ext %}PDF Document{% elif ".doc" in ext or ".docx" in ext %}Word Document{% elif ".xls" in ext or ".xlsx" in ext %}Excel Spreadsheet{% else %}File{% endif %}
-                                {% endwith %}
-                            </div>
-                        </div>
+    {% if result_files %}
+    <div class="section">
+        <h3>File kết quả xử lý</h3>
+        <div class="file-list">
+            {% for attachment in result_files %}
+            <div class="file-card">
+                <div>
+                    <a href="{{ attachment.file_van_ban.url }}" target="_blank" style="font-weight:700; color:#006e9f;">
+                        {{ attachment.file_van_ban.name|cut:"file_cv_lien_quan/" }}
+                    </a>
+                    <div style="margin-top:4px; font-size:12px; color:#7f90a0;">
+                        Upload bởi {{ attachment.nguoi_tai_len.ho_va_ten|default:"Chuyên viên" }}
                     </div>
                 </div>
-                {% endif %}
-
-                <!-- Preview Container in the middle -->
-                <div class="preview-container" id="previewContainer" {% if not attachments %}style="display:none;"{% endif %}>
-                    <div class="preview-top-bar">
-                        <div class="preview-label" id="previewFilename">
-                            {% if first_pdf %}{{ first_pdf.file_van_ban.name }}{% elif attachments %}{{ attachments.0.file_van_ban.name }}{% endif %}
-                        </div>
-                        <div class="preview-actions">
-                            <button class="preview-btn-icon" onclick="openInNewTab()" title="Mở tab mới">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                    <polyline points="15 3 21 3 21 9"></polyline>
-                                    <line x1="10" y1="14" x2="21" y2="3"></line>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="viewer-wrapper">
-                        <iframe id="mainViewer" class="pdf-viewer" src="{% if first_pdf %}{{ first_pdf.file_van_ban.url }}#toolbar=0{% elif attachments %}{{ attachments.0.file_van_ban.url }}{% endif %}" frameborder="0"></iframe>
-                    </div>
-                </div>
-
-                {% if related_files %}
-                <div class="file-group-label" style="margin-top: 16px;">Tài liệu liên quan:</div>
-                <div class="file-cards-container" id="fileCardsContainer">
-                    {% for f in related_files %}
-                    <div class="file-card {% if first_pdf == f %}active{% endif %}" 
-                         data-url="{{ f.file_van_ban.url }}" 
-                         data-name="{{ f.file_van_ban.name }}"
-                         onclick="previewFile(this)">
-                        <div class="file-card-icon">
-                            {% with ext=f.file_van_ban.name|lower %}
-                            {% if ".pdf" in ext %}
-                                <span class="file-badge badge-pdf">PDF</span>
-                            {% elif ".doc" in ext or ".docx" in ext %}
-                                <span class="file-badge badge-doc">DOCX</span>
-                            {% elif ".xls" in ext or ".xlsx" in ext %}
-                                <span class="file-badge badge-xls">XLSX</span>
-                            {% else %}
-                                <span class="file-badge badge-file">FILE</span>
-                            {% endif %}
-                            {% endwith %}
-                        </div>
-                        <div class="file-info">
-                            <div class="file-name">{{ f.file_van_ban.name }}</div>
-                            <div class="file-type-desc">
-                                {% with ext=f.file_van_ban.name|lower %}
-                                {% if ".pdf" in ext %}PDF Document{% elif ".doc" in ext or ".docx" in ext %}Word Document{% elif ".xls" in ext or ".xlsx" in ext %}Excel Spreadsheet{% else %}File{% endif %}
-                                {% endwith %}
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
-
-                {% if not main_attachment and not related_files %}
-                <div style="padding: 24px; text-align: center; color: #94A3B8; font-style: italic;">
-                    Không có văn bản hoặc tài liệu nào được đính kèm.
-                </div>
-                {% endif %}
             </div>
-        </div>
-
-    <!-- Process/Result Task Modal -->
-    <div id="processTaskOverlay" class="modal-overlay"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); backdrop-filter:blur(4px); z-index:2000; align-items:center; justify-content:center;">
-        <div class="premium-modal"
-            style="background:white; width:600px; max-width:90%; border-radius:12px; transform:scale(0.9); transition:transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
-            <div class="modal-header" style="padding:24px 24px 12px; text-align:center;">
-                <div class="modal-icon-container"
-                    style="width:56px; height:56px; background:#DBEAFE; color:#1E40AF; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 20h9"></path>
-                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                    </svg>
-                </div>
-                <h3 class="modal-title">CẬP NHẬT KẾT QUẢ XỬ LÝ</h3>
-            </div>
-            <form action="{% url 'quanlycongviec:update_progress' task.pk %}" method="POST">
-                {% csrf_token %}
-                <div class="modal-body" style="padding:0 24px 24px; text-align:left;">
-                    <label class="section-title" style="margin-bottom:8px;">Kết quả công việc</label>
-                    <textarea name="ket_qua" class="form-control" rows="6"
-                        placeholder="Nhập chi tiết kết quả xử lý công việc..." required
-                        style="width:100%; border:1px solid #E2E8F0; border-radius:6px; padding:12px; font-size:14px; outline:none; transition:border-color 0.2s;"></textarea>
-                    <p style="font-size:12px; color:#64748B; margin-top:8px; font-style:italic;">* Sau khi gửi kết quả,
-                        trạng thái sẽ chuyển sang 'Chờ duyệt'.</p>
-                </div>
-                <div class="modal-footer" style="padding:16px 24px 24px; display:flex; gap:12px;">
-                    <button type="button" class="modal-btn btn-cancel-modal" id="btnCancelProcess"
-                        style="flex:1; padding:10px; border-radius:6px; font-weight:600; font-size:14px; cursor:pointer; background:#F8FAFC; color:#475569; border:1px solid #E2E8F0;">Hủy</button>
-                    <button type="submit" class="modal-btn btn-confirm-modal"
-                        style="flex:1; padding:10px; border-radius:6px; font-weight:600; font-size:14px; cursor:pointer; background:#0284C7; color:white; border:none; outline:none;">Gửi
-                        kết quả</button>
-                </div>
-            </form>
+            {% endfor %}
         </div>
     </div>
+    {% endif %}
+
+    {% if return_records %}
+    <div class="section">
+        <h3>Lịch sử hoàn trả</h3>
+        <div class="history-list">
+            {% for record in return_records %}
+            <div class="history-item">
+                <div style="display:flex; justify-content:space-between; gap:12px; margin-bottom:8px; font-weight:700; color:#8f2b2b;">
+                    <span>
+                        {% if record.nguoi_hoan_tra_id == task.nguoi_giao_id %}
+                        Lãnh đạo hoàn trả cho chuyên viên
+                        {% else %}
+                        Chuyên viên hoàn trả lãnh đạo
+                        {% endif %}
+                    </span>
+                    <span>{{ record.ngay_hoan_tra|date:"d/m/Y" }}</span>
+                </div>
+                <div style="font-size:14px; line-height:1.7; color:#5c2626;">
+                    <strong>{{ record.nguoi_hoan_tra.ho_va_ten|default:"Không xác định" }}:</strong>
+                    {{ record.noi_dung|linebreaksbr }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if main_attachment and ".pdf" in main_attachment.file_van_ban.name|lower %}
+    <div class="section">
+        <h3>Xem trước file chính</h3>
+        <iframe class="preview-frame" src="{{ main_attachment.file_van_ban.url }}#toolbar=0"></iframe>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const btnDelete = document.getElementById('btnDeleteDetail');
-        if (btnDelete) {
-            btnDelete.addEventListener('click', function (e) {
-                e.preventDefault();
+    document.addEventListener("DOMContentLoaded", function () {
+        const deleteButton = document.getElementById("btnDeleteTask");
+        const deleteForm = document.getElementById("deleteTaskForm");
+        if (!deleteButton || !deleteForm) {
+            return;
+        }
+
+        deleteButton.addEventListener("click", function () {
+            if (window.confirmAction) {
                 window.confirmAction(
-                    'Xác nhận xóa công việc',
-                    'Bạn có chắc chắn muốn xóa công việc này không? Hành động này không thể hoàn tác.',
-                    () => {
-                        document.getElementById('deleteDetailForm').submit();
+                    "Xóa công việc",
+                    "Bạn có chắc chắn muốn xóa công việc này không?",
+                    function () {
+                        deleteForm.submit();
                     }
                 );
-            });
-        }
-
-        // Logic Cập nhật kết quả (Xử lý khi đã ở trạng thái Đang xử lý)
-        const btnProcess = document.getElementById('btnProcessTask');
-        const overlayProcess = document.getElementById('processTaskOverlay');
-        const btnCancelProcess = document.getElementById('btnCancelProcess');
-
-        if (btnProcess) {
-            btnProcess.addEventListener('click', function () {
-                overlayProcess.style.display = 'flex';
-                setTimeout(() => {
-                    overlayProcess.querySelector('.premium-modal').style.transform = 'scale(1)';
-                }, 10);
-            });
-        }
-
-        if (btnCancelProcess) {
-            btnCancelProcess.addEventListener('click', function () {
-                overlayProcess.querySelector('.premium-modal').style.transform = 'scale(0.9)';
-                setTimeout(() => {
-                    overlayProcess.style.display = 'none';
-                }, 300);
-            });
-        }
-
-        if (overlayProcess) {
-            overlayProcess.addEventListener('click', function (e) {
-                if (e.target === overlayProcess) {
-                    btnCancelProcess.click();
-                }
-            });
-        }
+                return;
+            }
+            deleteForm.submit();
+        });
     });
-
-    function previewFile(element) {
-        // Toggle active class
-        const cards = document.querySelectorAll('.file-card');
-        cards.forEach(c => c.classList.remove('active'));
-        element.classList.add('active');
-
-        // Update viewer
-        const url = element.getAttribute('data-url');
-        const name = element.getAttribute('data-name');
-        const viewer = document.getElementById('mainViewer');
-        const filenameDisplay = document.getElementById('previewFilename');
-        
-        if (filenameDisplay) {
-            filenameDisplay.innerText = name;
-        }
-
-        // Append #toolbar=0 for PDFs to match screenshot style
-        const finalUrl = url.toLowerCase().endsWith('.pdf') ? url + '#toolbar=0' : url;
-        viewer.src = finalUrl;
-    }
-
-    function openInNewTab() {
-        const activeCard = document.querySelector('.file-card.active');
-        if (activeCard) {
-            const url = activeCard.getAttribute('data-url');
-            window.open(url, '_blank');
-        }
-    }
 </script>
 {% endblock %}

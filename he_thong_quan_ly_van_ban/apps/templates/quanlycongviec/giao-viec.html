@@ -342,8 +342,9 @@
                 style="display:flex; background:#F1F5F9; border-radius:4px; padding:4px;">
                 <button class="filter-tab active" data-tab="all">Tất cả</button>
                 <button class="filter-tab" data-tab="Chờ xử lý">Chờ xử lý</button>
+                <button class="filter-tab" data-tab="Hoàn trả_CV">Hoàn trả CV</button>
                 <button class="filter-tab" data-tab="Chờ duyệt">Chờ duyệt</button>
-                <button class="filter-tab" data-tab="Hoàn trả">Hoàn trả</button>
+                <button class="filter-tab" data-tab="Hoàn trả_LĐ">Hoàn trả LĐ</button>
                 <button class="filter-tab" data-tab="Đã hoàn thành">Đã hoàn thành</button>
             </div>
             {% if is_lanh_dao %}
@@ -393,7 +394,7 @@
                 </thead>
                 <tbody id="congViecBody">
                     {% for task in tasks %}
-                    <tr data-id="{{ task.pk }}">
+                    <tr data-id="{{ task.pk }}" data-status="{{ task.trang_thai }}">
                         <td class="text-center">{{ forloop.counter }}</td>
                         <td><strong>{{ task.ten_cong_viec }}</strong></td>
                         <td>{{ task.nguoi_thuc_hien.ho_va_ten }}</td>
@@ -402,15 +403,15 @@
                         <td>{{ task.nguon_giao }}</td>
                         <td>
                             {% if task.trang_thai == "Chờ xử lý" %}
-                            <span class="badge badge-cho-xu-ly">{{ task.trang_thai }}</span>
+                            <span class="badge badge-cho-xu-ly">{{ task.get_trang_thai_display }}</span>
                             {% elif task.trang_thai == "Chờ duyệt" %}
-                            <span class="badge badge-cho-duyet">{{ task.trang_thai }}</span>
-                            {% elif task.trang_thai == "Hoàn trả" %}
-                            <span class="badge badge-hoan-tra">{{ task.trang_thai }}</span>
+                            <span class="badge badge-cho-duyet">{{ task.get_trang_thai_display }}</span>
                             {% elif task.trang_thai == "Đã hoàn thành" %}
-                            <span class="badge badge-da-hoan-thanh">{{ task.trang_thai }}</span>
+                            <span class="badge badge-da-hoan-thanh">{{ task.get_trang_thai_display }}</span>
+                            {% elif task.trang_thai == "Hoàn trả_CV" or task.trang_thai == "Hoàn trả_LĐ" %}
+                            <span class="badge badge-hoan-tra">{{ task.get_trang_thai_display }}</span>
                             {% else %}
-                            <span class="badge">{{ task.trang_thai }}</span>
+                            <span class="badge">{{ task.get_trang_thai_display }}</span>
                             {% endif %}
                         </td>
                     </tr>
@@ -498,6 +499,13 @@
                     placeholder="Nhập ghi chú (nếu có)..."></textarea>
             </div>
 
+            <div class="form-full">
+                <label class="form-label" style="display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" name="yeu_cau_phe_duyet" checked>
+                    Yêu cầu lãnh đạo phê duyệt kết quả xử lý
+                </label>
+            </div>
+
             <div class="form-grid-2">
                 <div>
                     <label class="form-label">File đính kèm</label>
@@ -570,6 +578,12 @@
         document.getElementById('congViecListView').style.display = 'none';
         document.getElementById('congViecFormView').style.display = 'block';
         document.getElementById('bcAction').style.display = 'inline';
+        document.getElementById('cvForm').reset();
+        document.getElementById('cvForm').action = `{% url 'quanlycongviec:add_task' %}`;
+        document.getElementById('gvFormTitle').innerText = 'Giao công việc mới';
+        document.getElementById('file-list-main').innerHTML = '';
+        document.getElementById('file-list-ref').innerHTML = '';
+        document.querySelector('input[name="yeu_cau_phe_duyet"]').checked = true;
         
         // Mặc định ngày bắt đầu và các ràng buộc ngày tối thiểu về hôm nay
         const today = new Date().toISOString().split('T')[0];
@@ -581,6 +595,12 @@
         document.getElementById('congViecFormView').style.display = 'none';
         document.getElementById('congViecListView').style.display = 'block';
         document.getElementById('bcAction').style.display = 'none';
+        document.getElementById('cvForm').reset();
+        document.getElementById('cvForm').action = `{% url 'quanlycongviec:add_task' %}`;
+        document.getElementById('gvFormTitle').innerText = 'Giao công việc mới';
+        document.getElementById('file-list-main').innerHTML = '';
+        document.getElementById('file-list-ref').innerHTML = '';
+        document.querySelector('input[name="yeu_cau_phe_duyet"]').checked = true;
         document.getElementById('deleteFilesInput').value = ''; // Reset deleted files
         document.getElementById('formPreviewContainer').style.display = 'none';
         document.getElementById('formViewer').src = '';
@@ -606,6 +626,7 @@
                 form.elements['nguoi_phoi_hop'].value = data.collaborator_id || '';
                 form.elements['noi_dung'].value = data.content;
                 form.elements['ghi_chu'].value = data.ghi_chu || '';
+                form.elements['yeu_cau_phe_duyet'].checked = !!data.yeu_cau_phe_duyet;
 
                 // Cho phép ngày bắt đầu là ngày cũ nếu đang chỉnh sửa công việc đã có
                 document.getElementById('ngayBatDau').min = data.start_date;
@@ -677,7 +698,7 @@
                 if (row.cells.length < 2) return; // Skip empty row
 
                 const taskName = row.cells[1].innerText.toLowerCase();
-                const taskStatus = row.cells[6].innerText.trim();
+                const taskStatus = row.getAttribute('data-status') || row.cells[6].innerText.trim();
                 const taskSource = row.cells[5].innerText.trim();
 
                 const matchesTab = (activeTab === 'all' || taskStatus === activeTab);
