@@ -99,6 +99,7 @@ class HoSoVanBan(models.Model):
         ("Theo quy định - 5 năm", "Theo quy định - 5 năm"),
         ("Theo quy định - 10 năm", "Theo quy định - 10 năm"),
         ("Vĩnh viễn", "Vĩnh viễn"),
+        ("Tạm thời", "Tạm thời"),
     )
 
     TRANG_THAI_CHOICES = (
@@ -124,8 +125,8 @@ class HoSoVanBan(models.Model):
     )
     so_nam_luu_tru = models.PositiveIntegerField(null=False)
     trang_thai = models.IntegerField(
-        null=False,
         choices=TRANG_THAI_CHOICES,
+        default=1
     )
     mo_ta = models.TextField(null=True, blank=True)
 
@@ -258,9 +259,10 @@ class VanBan(models.Model):
     )
     ho_so_van_ban = models.ForeignKey(
         "core.HoSoVanBan",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         db_column="ho_so_van_ban_id",
-        null=False,
+        null=True,
+        blank=True,
     )
     so_ky_hieu = models.CharField(max_length=255, null=False)
     trich_yeu = models.CharField(max_length=255, null=False)
