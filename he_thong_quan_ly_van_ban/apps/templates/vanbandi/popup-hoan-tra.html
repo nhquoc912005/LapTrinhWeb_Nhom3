@@ -1,0 +1,146 @@
+{% load static %}
+<!-- popup-hoan-tra.html: Popup hoan tra van ban -->
+
+<style>
+  .hoantra-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.35);
+    z-index: 9999;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 60px 16px;
+    overflow-y: auto;
+  }
+  .hoantra-overlay.active { display: flex; }
+
+  .hoantra-modal {
+    width: 100%;
+    max-width: 680px;
+    background: #fff;
+    padding: 28px 30px 26px;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.14);
+
+  }
+
+  .hoantra-title {
+    margin: 0 0 20px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #0077b6;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .hoantra-info-box {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    padding: 10px 12px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #2f2f2f;
+    margin-bottom: 18px;
+    background: #f9fafb;
+  }
+
+  .hoantra-label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #333;
+  }
+
+  .hoantra-textarea {
+    width: 100%;
+    min-height: 126px;
+    border: 1px solid #d1d5db;
+    padding: 14px;
+    font-size: 15px;
+    color: #374151;
+    resize: vertical;
+    outline: none;
+    font-family: inherit;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+  }
+  .hoantra-textarea:focus { border-color: #0077b6; }
+
+  .hoantra-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: 22px;
+  }
+
+  .hoantra-btn {
+    min-width: 94px;
+    height: 46px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+  }
+  .hoantra-btn--cancel {
+    border: 1px solid #d1d5db;
+    background: #f3f4f6;
+    color: #444;
+  }
+  .hoantra-btn--submit {
+    background: #f59e0b;
+    color: #fff;
+  }
+</style>
+
+<div id="returnModal" class="hoantra-overlay">
+  <div class="hoantra-modal">
+    <h2 class="hoantra-title">Hoan tra van ban</h2>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div style="margin-bottom:12px; padding:10px 12px; background:#fee2e2; color:#b91c1c;
+                    font-size:14px; border:1px solid #fecaca;">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="hoantra-info-box">
+      Chuyen vien: {{ vb.nguoi_tao.ho_va_ten|default:"-" }}
+    </div>
+
+    <form method="post" action="{% url 'quanlyvanbandi:hoan_tra_van_ban_di' vb.pk %}">
+      {% csrf_token %}
+      <label for="ly_do" class="hoantra-label">Ly do / Yeu cau chinh sua</label>
+      <textarea id="ly_do" name="ly_do" class="hoantra-textarea"
+                placeholder="Nhap ly do / Yeu cau chinh sua..." required></textarea>
+      <div class="hoantra-footer">
+        <button type="button" id="closeReturnModal" class="hoantra-btn hoantra-btn--cancel">Huy</button>
+        <button type="submit" class="hoantra-btn hoantra-btn--submit">Hoan tra</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function () {
+  function setupHoanTraModal() {
+    var overlay  = document.getElementById("returnModal");
+    var openBtn  = document.getElementById("openReturnModal");
+    var closeBtn = document.getElementById("closeReturnModal");
+    if (!overlay) return;
+
+    function openModal()  { overlay.classList.add("active");    document.body.style.overflow = "hidden"; }
+    function closeModal() { overlay.classList.remove("active"); document.body.style.overflow = ""; }
+
+    if (openBtn)  openBtn.addEventListener("click",  openModal);
+    if (closeBtn) closeBtn.addEventListener("click", closeModal);
+    overlay.addEventListener("click", function (e) { if (e.target === overlay) closeModal(); });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", setupHoanTraModal);
+  } else {
+    setupHoanTraModal();
+  }
+})();
+</script>
