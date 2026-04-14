@@ -30,7 +30,7 @@
   --header-nav-height: 42px;
   --breadcrumb-height: 44px;
   --font: 'Arimo', Arial, sans-serif;
-  --radius: 0px;
+  --radius: 6px;
   --shadow: 0 1px 4px rgba(0,0,0,0.08);
   --shadow-md: 0 2px 12px rgba(0,0,0,0.10);
   --transition: 0.2s ease;
@@ -154,7 +154,7 @@ table { border-collapse: collapse; width: 100%; }
 .login-error {
   background: #FEE2E2;
   border: 1px solid #FECACA;
-  border-radius: 0px;
+  border-radius: var(--radius);
   color: #991B1B;
   padding: 10px 14px;
   font-size: 13px;
@@ -263,7 +263,7 @@ table { border-collapse: collapse; width: 100%; }
 .otp-input {
   width: 52px; height: 56px;
   border: 2px solid var(--border-color);
-  border-radius: 0px;
+  border-radius: var(--radius);
   font-size: 24px;
   font-weight: 700;
   text-align: center;
@@ -342,7 +342,7 @@ table { border-collapse: collapse; width: 100%; }
 .header-brand-icon {
   width: 36px; height: 36px;
   background: rgba(255,255,255,0.2);
-  border-radius: 0px;
+  border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
@@ -377,7 +377,7 @@ table { border-collapse: collapse; width: 100%; }
   gap: 10px;
   cursor: pointer;
   padding: 6px 10px;
-  border-radius: 0px;
+  border-radius: var(--radius);
   transition: background var(--transition);
   position: relative;
 }
@@ -415,7 +415,7 @@ table { border-collapse: collapse; width: 100%; }
   right: 0;
   background: white;
   border: 1px solid var(--border-color);
-  border-radius: 0px;
+  border-radius: var(--radius);
   box-shadow: var(--shadow-md);
   min-width: 180px;
   z-index: 200;
@@ -647,10 +647,9 @@ table { border-collapse: collapse; width: 100%; }
   content: '';
   width: 4px; height: 22px;
   background: var(--primary);
-  border-radius: 0px;
+  border-radius: 2px;
   flex-shrink: 0;
 }
-
 
 /* ------------------------------------------------------------
    6. FORM COMPONENTS
@@ -672,7 +671,7 @@ table { border-collapse: collapse; width: 100%; }
 .form-control {
   padding: 9px 12px;
   border: 1px solid var(--border-color);
-  border-radius: 0px;
+  border-radius: var(--radius);
   font-size: 14px;
   font-family: var(--font);
   color: var(--text-main);
@@ -714,7 +713,7 @@ textarea.form-control { resize: vertical; min-height: 90px; }
 /* File Upload */
 .file-upload-area {
   border: 2px dashed var(--border-color);
-  border-radius: 0px;
+  border-radius: var(--radius);
   padding: 24px;
   text-align: center;
   cursor: pointer;
@@ -739,7 +738,7 @@ textarea.form-control { resize: vertical; min-height: 90px; }
   font-size: 14px;
   font-weight: 600;
   font-family: var(--font);
-  border-radius: 0px;
+  border-radius: var(--radius);
   border: 1px solid transparent;
   cursor: pointer;
   transition: all var(--transition);
@@ -777,7 +776,7 @@ textarea.form-control { resize: vertical; min-height: 90px; }
   pointer-events: none;
 }
 
-.btn-icon { padding: 7px; border-radius: 0px; }
+.btn-icon { padding: 7px; border-radius: var(--radius); }
 
 /* ------------------------------------------------------------
    8. CARD COMPONENT
@@ -785,7 +784,7 @@ textarea.form-control { resize: vertical; min-height: 90px; }
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 0px;
+  border-radius: var(--radius);
   box-shadow: var(--shadow);
 }
 
@@ -811,11 +810,11 @@ textarea.form-control { resize: vertical; min-height: 90px; }
   content: '';
   width: 3px; height: 16px;
   background: var(--primary);
-  border-radius: 0px;
+  border-radius: 2px;
 }
 
 .card-body { padding: 20px; }
-.card-footer { padding: 14px 20px; border-top: 1px solid var(--border-color); background: #fafbfc; border-radius: 0; }
+.card-footer { padding: 14px 20px; border-top: 1px solid var(--border-color); background: #fafbfc; border-radius: 0 0 var(--radius) var(--radius); }
 
 /* ------------------------------------------------------------
    9. FILTER BAR
@@ -823,7 +822,7 @@ textarea.form-control { resize: vertical; min-height: 90px; }
 .filter-card {
   background: white;
   border: 1px solid var(--border-color);
-  border-radius: 0px;
+  border-radius: var(--radius);
   padding: 18px 20px;
   margin-bottom: 16px;
   box-shadow: var(--shadow);
@@ -925,7 +924,7 @@ textarea.form-control { resize: vertical; min-height: 90px; }
 .table-container {
   overflow-x: auto;
   border: 1px solid var(--border-color);
-  border-radius: 0px;
+  border-radius: var(--radius);
   background: white;
   box-shadow: var(--shadow);
 }
@@ -978,7 +977,7 @@ table.data-table tbody tr:last-child { border-bottom: none; }
 
 table.data-table tbody td {
   padding: 10px 12px;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-main);
   vertical-align: middle;
 }
@@ -1004,7 +1003,7 @@ td.td-truncate {
   padding: 12px 16px;
   border-top: 1px solid var(--border-color);
   background: white;
-  border-radius: 0;
+  border-radius: 0 0 var(--radius) var(--radius);
 }
 
 .pagination-info { font-size: 13px; color: var(--text-secondary); }
@@ -1018,7 +1017,7 @@ td.td-truncate {
   width: 32px; height: 32px;
   display: flex; align-items: center; justify-content: center;
   border: 1px solid var(--border-color);
-  border-radius: 0px;
+  border-radius: 4px;
   background: white;
   font-size: 13px;
   color: var(--text-secondary);
@@ -1088,7 +1087,7 @@ td.td-truncate {
 
 .modal {
   background: white;
-  border-radius: 0px;
+  border-radius: 10px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.2);
   width: 100%;
   max-width: 800px;
@@ -1132,7 +1131,7 @@ td.td-truncate {
   width: 32px; height: 32px;
   border: none;
   background: #f3f4f6;
-  border-radius: 0px;
+  border-radius: var(--radius);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   transition: background var(--transition);
@@ -1151,7 +1150,7 @@ td.td-truncate {
   justify-content: flex-end;
   gap: 10px;
   background: #fafbfc;
-  border-radius: 0;
+  border-radius: 0 0 10px 10px;
 }
 
 /* Section heading inside modal/form */
@@ -1179,7 +1178,7 @@ td.td-truncate {
 .stat-card {
   background: white;
   border: 1px solid var(--border-color);
-  border-radius: 0px;
+  border-radius: var(--radius);
   padding: 18px 20px;
   box-shadow: var(--shadow);
   display: flex;
@@ -1192,7 +1191,7 @@ td.td-truncate {
 
 .stat-icon {
   width: 44px; height: 44px;
-  border-radius: 0px;
+  border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
@@ -1331,7 +1330,7 @@ td.td-truncate {
   background: var(--primary-light);
   border-left: 4px solid var(--primary);
   padding: 12px 16px;
-  border-radius: 0;
+  border-radius: 0 var(--radius) var(--radius) 0;
   font-size: 14px;
   color: var(--text-main);
   margin: 12px 0;
@@ -1344,24 +1343,20 @@ td.td-truncate {
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  background: #f8fafc;
+  background: #ffffff;
   border: 1px solid var(--border-color);
-  border-radius: 0px;
 }
 .file-item-icon {
-  width: 34px; height: 34px;
-  border-radius: 0px;
+  width: 40px; height: 40px;
+  border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
   font-size: 10px;
   font-weight: 800;
-  color: white;
   flex-shrink: 0;
 }
-.file-icon-pdf { background: #EF4444; }
-.file-icon-doc { background: #3B82F6; }
-.file-icon-docx { background: #3B82F6; }
-.file-icon-xls { background: #10B981; }
-.file-icon-xlsx { background: #10B981; }
+.file-icon-pdf  { background: #F1F5F9; color: #EF4444; }
+.file-icon-docx { background: #F1F5F9; color: #2563EB; }
+.file-icon-xlsx { background: #F1F5F9; color: #16A371; }
 
 .file-item-name { font-size: 13px; font-weight: 600; color: var(--primary); }
 .file-item-type { font-size: 11px; color: var(--text-muted); }
@@ -1383,7 +1378,7 @@ td.td-truncate {
 .toast {
   background: white;
   border: 1px solid var(--border-color);
-  border-radius: 0px;
+  border-radius: var(--radius);
   box-shadow: var(--shadow-md);
   padding: 12px 16px;
   display: flex;
@@ -1429,7 +1424,7 @@ td.td-truncate {
 
 .confirm-dialog {
   background: white;
-  border-radius: 0px;
+  border-radius: 10px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.2);
   padding: 28px 32px;
   max-width: 420px;
@@ -1532,7 +1527,7 @@ td.td-truncate {
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s;
-  border-radius: 0px;
+  border-radius: 4px;
   font-size: 14px;
 }
 .filter-tab.active {
@@ -1557,4 +1552,8 @@ td.td-truncate {
 }
 .breadcrumb-link:hover {
   text-decoration: underline;
+}
+
+#vanBanDiBody td {
+    font-size: 15px !important;
 }
