@@ -209,6 +209,7 @@
 }
 .file-icon.pdf { color: #ef4444; }
 .file-icon.docx, .file-icon.doc { color: #2563eb; }
+.file-icon.xlsx { color: #16a34a; }
 .file-info { flex: 1; min-width: 0; }
 .file-name { font-size: 14px; font-weight: 700; color: #111827; line-height: 1.4; word-break: break-word; }
 .file-type { font-size: 12px; color: #9ca3af; line-height: 1.4; }
@@ -432,7 +433,7 @@
                 chọn file
               </span>
             </div>
-            <div class="vbdi-upload-sub">PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX (≤ 50MB)</div>
+            <div class="vbdi-upload-sub">PDF, DOCX, XLSX (≤ 50MB) &mdash; 01 file duy nhất</div>
             <div id="file_dinh_kem_name" class="vbdi-selected-file"></div>
             {% if form.file_dinh_kem.errors %}
               <div class="vbdi-error">{{ form.file_dinh_kem.errors|striptags }}</div>
@@ -449,32 +450,40 @@
           <div id="existing-lien-quan-list">
             <p style="font-size:12px;color:#6b7280;margin:0 0 6px;">File hiện có:</p>
             {% for lq in existing_lien_quan %}
-              {% with lq.file.name as fname %}
+              {% with lq.file_van_ban.name as fname %}
               <div class="file-preview-item existing-file" id="existing-lq-{{ lq.pk }}">
-                <div class="file-icon">
-                  {{ fname|slice:"-4"|upper|slice:"1" }}
+                <div class="file-icon
+                  {% with fname|lower as fl %}
+                    {% if '.pdf' in fl %}pdf{% elif '.docx' in fl %}docx{% elif '.xlsx' in fl %}xlsx{% endif %}
+                  {% endwith %}
+                ">
+                  {% with fname|lower as fl %}
+                    {% if '.pdf' in fl %}PDF{% elif '.docx' in fl %}DOCX{% elif '.xlsx' in fl %}XLSX{% else %}FILE{% endif %}
+                  {% endwith %}
                 </div>
                 <div class="file-info">
-                  <div class="file-name">{{ fname }}</div>
+                  <div class="file-name">{{ fname|cut:"van_ban_lien_quan/" }}</div>
                   <div class="file-existing-badge">File hiện tại</div>
                 </div>
-                <label style="font-size:12px;color:#dc2626;cursor:pointer;display:flex;align-items:center;gap:4px;">
-                  <input type="checkbox" name="xoa_lien_quan" value="{{ lq.pk }}"
-                         style="accent-color:#dc2626;">
-                  Xóa
-                </label>
+                <input type="checkbox" name="xoa_lien_quan" value="{{ lq.pk }}"
+                       id="xoa-lq-{{ lq.pk }}" style="display:none;">
+                <button type="button" class="file-remove"
+                        onclick="toggleXoaLienQuan('{{ lq.pk }}')"
+                        id="btn-xoa-lq-{{ lq.pk }}"
+                        aria-label="Xóa">×</button>
               </div>
               {% endwith %}
             {% endfor %}
           </div>
         {% endif %}
 
+        {# — Giao diện upload tài liệu liên quan — #}
         <input type="file"
                id="id_file_lien_quan"
                name="file_lien_quan"
                multiple
                style="display:none"
-               accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx">
+               accept=".pdf,.docx,.xlsx">
 
         <div class="vbdi-upload-box"
              onclick="document.getElementById('id_file_lien_quan').click()">
@@ -486,10 +495,7 @@
                 chọn file
               </span>
             </div>
-            <div class="vbdi-upload-sub">
-              PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX (≤ 50MB) — Chọn nhiều file
-            </div>
-            <div id="file_lien_quan_name" class="vbdi-selected-file"></div>
+            <div class="vbdi-upload-sub">PDF, DOCX, XLSX (≤ 50MB) — Chọn nhiều file</div>
           </div>
         </div>
         <div id="related-file-preview-list"></div>
@@ -518,18 +524,24 @@
 {% block extra_js %}
 <script>
 const IS_EDIT = {{ is_edit|yesno:"true,false" }};
+const ALLOWED_EXTS = ["pdf", "docx", "xlsx"];
 
-function getExt(fileName) { return fileName.split(".").pop().toLowerCase(); }
-function getFileTypeLabel(ext) {
-  const map = { pdf:"PDF Document", docx:"Docx Document", doc:"Doc Document", ppt:"PPT Document", pptx:"PPTX Document", xls:"XLS Document", xlsx:"XLSX Document" };
-  return map[ext] || ext.toUpperCase();
-}
+function getExt(fileName) { return (fileName.split(".").pop() || "").toLowerCase(); }
+
 function getFileIconClass(ext) {
   if (ext === "pdf") return "pdf";
-  if (ext === "doc" || ext === "docx") return "docx";
+  if (ext === "docx") return "docx";
+  if (ext === "xlsx") return "xlsx";
   return "";
 }
-function buildPreviewHTML(fileName, ext, removeCall) {
+
+function getFileTypeLabel(ext) {
+  const map = { pdf:"PDF Document", docx:"DOCX Document", xlsx:"XLSX Document" };
+  return map[ext] || ext.toUpperCase();
+}
+
+// ===== FILE ĐÍNH KÈM CHÍNH =====
+function buildMainPreviewHTML(fileName, ext) {
   return `
     <div class="file-preview-item">
       <div class="file-icon ${getFileIconClass(ext)}">${ext.toUpperCase()}</div>
@@ -537,63 +549,125 @@ function buildPreviewHTML(fileName, ext, removeCall) {
         <div class="file-name">${fileName}</div>
         <div class="file-type">${getFileTypeLabel(ext)}</div>
       </div>
-      <button type="button" class="file-remove" onclick="${removeCall}" aria-label="Xóa">×</button>
+      <button type="button" class="file-remove" onclick="removeMainFile()" aria-label="Xóa">×</button>
     </div>`;
 }
 
 function renderMainFilePreview(file) {
   const container = document.getElementById("file-preview-list");
-  container.innerHTML = file ? buildPreviewHTML(file.name, getExt(file.name), "removeMainFile()") : "";
+  if (!container) return;
+  container.innerHTML = file ? buildMainPreviewHTML(file.name, getExt(file.name)) : "";
 }
+
 function removeMainFile() {
-  document.getElementById("id_file_dinh_kem").value = "";
-  document.getElementById("file-preview-list").innerHTML = "";
-  document.getElementById("file_dinh_kem_name").innerText = "";
+  const inp = document.getElementById("id_file_dinh_kem");
+  if (inp) inp.value = "";
+  const preview = document.getElementById("file-preview-list");
+  if (preview) preview.innerHTML = "";
+  const label = document.getElementById("file_dinh_kem_name");
+  if (label) label.innerText = "";
   checkFormValidity();
 }
+
+function toggleXoaLienQuan(pk) {
+  const cb  = document.getElementById("xoa-lq-" + pk);
+  const row = document.getElementById("existing-lq-" + pk);
+  const btn = document.getElementById("btn-xoa-lq-" + pk);
+  if (!cb || !row) return;
+  cb.checked = !cb.checked;
+  if (cb.checked) {
+    row.style.opacity = "0.4";
+    row.style.textDecoration = "line-through";
+    if (btn) { btn.style.color = "#ef4444"; btn.title = "Hoàn tác"; }
+  } else {
+    row.style.opacity = "";
+    row.style.textDecoration = "";
+    if (btn) { btn.style.color = ""; btn.title = ""; }
+  }
+}
+
 function handleMainFileChange() {
   const input = document.getElementById("id_file_dinh_kem");
-  const file  = input.files[0] || null;
-  document.getElementById("file_dinh_kem_name").innerText = file ? "Đã chọn: " + file.name : "";
+  const file  = input && input.files[0] ? input.files[0] : null;
+  const label = document.getElementById("file_dinh_kem_name");
+
+  if (file) {
+    const ext = getExt(file.name);
+    if (!ALLOWED_EXTS.includes(ext)) {
+      alert("Chỉ chấp nhận định dạng PDF, DOCX, XLSX.");
+      input.value = "";
+      if (label) label.innerText = "";
+      renderMainFilePreview(null);
+      checkFormValidity();
+      return;
+    }
+    if (label) label.innerText = "Đã chọn: " + file.name;
+  } else {
+    if (label) label.innerText = "";
+  }
   renderMainFilePreview(file);
   checkFormValidity();
 }
 
-function renderRelatedFilePreview(files) {
-  const container = document.getElementById("related-file-preview-list");
-  container.innerHTML = "";
-  Array.from(files).forEach((file, idx) => {
-    container.insertAdjacentHTML("beforeend", buildPreviewHTML(file.name, getExt(file.name), `removeRelatedFile(${idx})`));
-  });
-}
-function removeRelatedFile(idx) {
-  const input = document.getElementById("id_file_lien_quan");
-  const dt = new DataTransfer();
-  Array.from(input.files).forEach((f, i) => { if (i !== idx) dt.items.add(f); });
-  input.files = dt.files;
-  updateRelatedFileText();
-  renderRelatedFilePreview(input.files);
-}
-function updateRelatedFileText() {
-  const input = document.getElementById("id_file_lien_quan");
-  const box   = document.getElementById("file_lien_quan_name");
-  box.innerHTML = "";
-  if (input.files.length > 0) {
-    const title = document.createElement("div");
-    title.innerText = `Đã chọn ${input.files.length} file:`;
-    box.appendChild(title);
-    Array.from(input.files).forEach(f => {
-      const d = document.createElement("div");
-      d.innerText = f.name;
-      box.appendChild(d);
-    });
-  }
-}
-function handleRelatedFileChange() {
-  updateRelatedFileText();
-  renderRelatedFilePreview(document.getElementById("id_file_lien_quan").files);
+// ===== TÀI LIỆU LIÊN QUAN — UPLOAD BOX =====
+// Danh sách file đã chọn (dùng DataTransfer quản lý)
+let relatedFiles = [];
+
+function buildRelatedPreviewHTML(idx, fileName, ext) {
+  return `
+    <div class="file-preview-item" id="related-item-${idx}">
+      <div class="file-icon ${getFileIconClass(ext)}">${ext.toUpperCase()}</div>
+      <div class="file-info">
+        <div class="file-name">${fileName}</div>
+        <div class="file-type">${getFileTypeLabel(ext)}</div>
+      </div>
+      <button type="button" class="file-remove" onclick="removeRelatedFile(${idx})" aria-label="Xóa">×</button>
+    </div>`;
 }
 
+function syncRelatedInput() {
+  const input = document.getElementById("id_file_lien_quan");
+  if (!input) return;
+  const dt = new DataTransfer();
+  relatedFiles.forEach(f => dt.items.add(f));
+  input.files = dt.files;
+}
+
+function renderRelatedPreviews() {
+  const container = document.getElementById("related-file-preview-list");
+  if (!container) return;
+  container.innerHTML = "";
+  relatedFiles.forEach((file, idx) => {
+    container.insertAdjacentHTML("beforeend", buildRelatedPreviewHTML(idx, file.name, getExt(file.name)));
+  });
+}
+
+function removeRelatedFile(idx) {
+  relatedFiles.splice(idx, 1);
+  syncRelatedInput();
+  renderRelatedPreviews();
+}
+
+function handleRelatedFileChange() {
+  const input = document.getElementById("id_file_lien_quan");
+  if (!input) return;
+  const invalid = [];
+  Array.from(input.files).forEach(file => {
+    const ext = getExt(file.name);
+    if (!ALLOWED_EXTS.includes(ext)) {
+      invalid.push(file.name);
+    } else {
+      relatedFiles.push(file);
+    }
+  });
+  if (invalid.length) {
+    alert("Các file sau không hợp lệ (chỉ PDF, DOCX, XLSX):\n" + invalid.join("\n"));
+  }
+  syncRelatedInput();
+  renderRelatedPreviews();
+}
+
+// ===== VALIDATION =====
 function validateDates() {
   const ngayInput  = document.getElementById("id_ngay_van_ban");
   const hanInput   = document.getElementById("id_han_xu_ly");
@@ -632,10 +706,12 @@ function checkFormValidity() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  const mainInput    = document.getElementById("id_file_dinh_kem");
+  const mainInput = document.getElementById("id_file_dinh_kem");
+  if (mainInput) mainInput.addEventListener("change", handleMainFileChange);
+
   const relatedInput = document.getElementById("id_file_lien_quan");
-  if (mainInput)    mainInput.addEventListener("change", handleMainFileChange);
   if (relatedInput) relatedInput.addEventListener("change", handleRelatedFileChange);
+
   const watchIds = ["id_so_ky_hieu", "id_loai_van_ban", "id_hinh_thuc", "id_trich_yeu", "id_ngay_van_ban", "id_do_khan", "id_lanh_dao_duyet", "id_han_xu_ly"];
   watchIds.forEach(id => {
     const el = document.getElementById(id);
@@ -647,4 +723,4 @@ document.addEventListener("DOMContentLoaded", function () {
   checkFormValidity();
 });
 </script>
-{% endblock %}
+{% endblock %}

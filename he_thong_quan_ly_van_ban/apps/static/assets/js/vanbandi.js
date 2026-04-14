@@ -35,19 +35,6 @@ document.addEventListener("DOMContentLoaded", function () {
     activeFilters.innerHTML = "";
     const chips = [];
 
-    if (hiddenTrangThai && hiddenTrangThai.value) {
-      chips.push(createChip("Trạng thái", hiddenTrangThai.value, function () {
-        hiddenTrangThai.value = "";
-        form.submit();
-      }));
-    }
-
-    if (searchKeyword && searchKeyword.value.trim()) {
-      chips.push(createChip("Từ khóa", searchKeyword.value.trim(), function () {
-        searchKeyword.value = "";
-        form.submit();
-      }));
-    }
 
     if (filterDonVi && filterDonVi.value) {
       chips.push(createChip("Đơn vị", filterDonVi.options[filterDonVi.selectedIndex].text, function () {
@@ -101,11 +88,21 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   if (searchKeyword) {
+    // Submit khi nhấn Enter
     searchKeyword.addEventListener("keydown", function (e) {
       if (e.key === "Enter") {
         e.preventDefault();
         form.submit();
       }
+    });
+
+    // Debounce: tự động tìm kiếm sau 400ms khi ngừng gõ
+    let debounceTimer = null;
+    searchKeyword.addEventListener("input", function () {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function () {
+        form.submit();
+      }, 400);
     });
   }
 });

@@ -431,13 +431,15 @@ class BanHanhChiTiep(models.Model):
         "core.PhongBan",
         on_delete=models.CASCADE,
         db_column="phong_ban_id",
-        null=False,
+        null=True,
+        blank=True,
     )
     don_vi_ngoai = models.ForeignKey(
         "core.DonViNgoai",
         on_delete=models.CASCADE,
         db_column="don_vi_ngoai_id",
-        null=False,
+        null=True,
+        blank=True,
     )
 
     class Meta:
