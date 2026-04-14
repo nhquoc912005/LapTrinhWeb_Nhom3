@@ -3,7 +3,7 @@ from django import forms
 from django.utils import timezone
 from ..core.models import VanBan, NguoiDung
 
-ALLOWED_EXTENSIONS = {".pdf", ".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx"}
+ALLOWED_EXTENSIONS = {".pdf", ".docx", ".xlsx"}
 
 def validate_file_size(file, max_mb=50):
     if file and file.size > max_mb * 1024 * 1024:
@@ -17,7 +17,7 @@ def validate_file_extension(file):
         ext = os.path.splitext(file.name)[1].lower()
         if ext not in ALLOWED_EXTENSIONS:
             raise forms.ValidationError(
-                "Chỉ chấp nhận các định dạng: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX."
+                "Chỉ chấp nhận các định dạng: PDF, DOCX, XLSX."
             )
 
 
@@ -67,6 +67,7 @@ class VanBanDiForm(forms.ModelForm):
             "file_dinh_kem": forms.FileInput(attrs={
                 "id": "id_file_dinh_kem",
                 "style": "display:none",
+                "accept": ".pdf,.docx,.xlsx",
             }),
             "lanh_dao_duyet": forms.Select(attrs={"class": "vbdi-select"}),
             "noi_dung": forms.Textarea(attrs={
@@ -107,7 +108,9 @@ class VanBanDiForm(forms.ModelForm):
 
     def clean_file_dinh_kem(self):
         file = self.cleaned_data.get("file_dinh_kem")
-        validate_file_size(file, 50)
+        if file and hasattr(file, 'name'):
+            validate_file_size(file, 50)
+            validate_file_extension(file)
         return file
 
     def clean(self):

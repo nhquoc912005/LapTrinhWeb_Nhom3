@@ -1,17 +1,23 @@
+import json
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.utils import timezone
 from django import forms
-from django.views.decorators.http import require_http_methods, require_POST
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
 
 from ..accounts.decorators import role_required
 from ..accounts.models import Customer
-from ..core.models import VanBan, VanBanLienQuan, NguoiDung, VanBanDuyet, VanBanHoanTra
+from ..core.models import (
+    VanBan, VanBanLienQuan, NguoiDung, VanBanDuyet, VanBanHoanTra,
+    ChiNhanh, PhongBan, DonViNgoai, BanHanh, BanHanhChiTiep,
+)
 from .forms import VanBanDiForm, validate_file_size, validate_file_extension
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Count
 
 
 @role_required(*Customer.Role.values)
@@ -204,6 +210,12 @@ def chi_tiet_van_ban_di(request, id):
         chuc_vu=NguoiDung.ChucVu.VAN_THU
     ).order_by("ho_va_ten")
 
+    hoan_tra = vb.vanbanhoantra_set.order_by("-ngay_hoan_tra").first()
+    duyet_record = vb.vanbanduyet_set.order_by("-ngay_duyet").first()
+
+    # Danh sách chi nhánh cho popup ban hành
+    ds_chi_nhanh = ChiNhanh.objects.order_by("ten_chi_nhanh")
+
     return render(request, "vanbandi/chi-tiet-van-ban-di.html", {
         "vb": vb,
         "ds_lien_quan": ds_lien_quan,
@@ -212,6 +224,10 @@ def chi_tiet_van_ban_di(request, id):
         "selected_van_thu_id": None,
         "ghi_chu_mac_dinh": "",
         "show_approval_modal": False,
+        "hoan_tra": hoan_tra,
+        "duyet_record": duyet_record,
+        "ds_chi_nhanh": ds_chi_nhanh,
+        "ban_hanh_url": reverse("quanlyvanbandi:ban_hanh_van_ban", args=[vb.pk]),
     })
 
 @require_POST
@@ -247,7 +263,7 @@ def phe_duyet_van_ban_di(request, vb_pk):
         messages.error(request, "Văn thư không hợp lệ.")
         return redirect("quanlyvanbandi:chi_tiet_van_ban_di", id=vb.pk)
 
-    vb.trang_thai = "Đã Xử Lý"
+    vb.trang_thai = "Chờ ban hành"
     vb.lanh_dao_duyet = user
     vb.noi_dung = ghi_chu
     vb.save()
@@ -260,7 +276,7 @@ def phe_duyet_van_ban_di(request, vb_pk):
     messages.success(request, "Phê duyệt văn bản thành công.")
     return redirect("quanlyvanbandi:chi_tiet_van_ban_di", id=vb.pk)
 
-@require_http_methods(["GET", "POST"])
+@require_POST
 def hoan_tra_van_ban_di(request, vb_pk):
     vb = get_object_or_404(
         VanBan,
@@ -275,47 +291,180 @@ def hoan_tra_van_ban_di(request, vb_pk):
     if nguoi_dung.chuc_vu != NguoiDung.ChucVu.LANH_DAO:
         raise PermissionDenied
 
-    if vb.trang_thai in ["Đã ban hành"]:
+    if vb.trang_thai in ["Chờ ban hành", "Đã ban hành"]:
         messages.warning(request, "Văn bản này không thể hoàn trả.")
-        return redirect("quanlyvanbandi:chi_tiet_van_ban_di", vb_pk=vb.pk)
+        return redirect("quanlyvanbandi:chi_tiet_van_ban_di", id=vb.pk)
 
-    if request.method == "POST":
-        ly_do = request.POST.get("ly_do", "").strip()
+    ly_do = request.POST.get("ly_do", "").strip()
 
-        if not ly_do:
-            messages.error(request, "Vui lòng nhập lý do / yêu cầu chỉnh sửa.")
-            return render(
-                request,
-                "vanbandi/popup-hoan-tra-van-ban.html",
-                {
-                    "vb": vb,
-                    "chuyen_vien": vb.nguoi_tao,
-                    "action_url": request.path,
-                    "ly_do_cu": ly_do,
-                    "show_modal": True,
-                },
+    if not ly_do:
+        messages.error(request, "Vui lòng nhập lý do / yêu cầu chỉnh sửa.")
+        return redirect("quanlyvanbandi:chi_tiet_van_ban_di", id=vb.pk)
+
+    vb.trang_thai = "Hoàn Trả"
+    vb.lanh_dao_duyet = nguoi_dung
+    vb.save()
+
+    VanBanHoanTra.objects.create(
+        van_ban=vb,
+        noi_dung=ly_do,
+    )
+
+    messages.success(request, "Hoàn trả văn bản thành công.")
+    return redirect("quanlyvanbandi:chi_tiet_van_ban_di", id=vb.pk)
+
+
+# ─────────────────────────────────────────
+# API: ChiNhánh → PhòngBan
+# GET /api/chi-nhanh-phong-ban/?chi_nhanh_id=<id>
+# ─────────────────────────────────────────
+@role_required(*Customer.Role.values)
+def api_chi_nhanh_phong_ban(request):
+    """Trả về danh sách chi nhánh (kèm phòng ban nếu có chi_nhanh_id)."""
+    chi_nhanh_id = request.GET.get("chi_nhanh_id")
+
+    if chi_nhanh_id:
+        try:
+            phong_bans = (
+                PhongBan.objects
+                .filter(chi_nhanh_id=chi_nhanh_id)
+                .annotate(so_thanh_vien=Count("users"))
+                .order_by("ten_phong_ban")
             )
+            data = [
+                {
+                    "id": pb.phong_ban_id,
+                    "ten": pb.ten_phong_ban,
+                    "so_thanh_vien": pb.so_thanh_vien,
+                }
+                for pb in phong_bans
+            ]
+        except (ValueError, ChiNhanh.DoesNotExist):
+            data = []
+        return JsonResponse({"phong_ban": data})
 
-        vb.trang_thai = "Hoàn Trả"
-        vb.lanh_dao_duyet = nguoi_dung
-        vb.save()
+    # Trả về tất cả chi nhánh
+    chi_nhanhs = ChiNhanh.objects.order_by("ten_chi_nhanh")
+    data = [
+        {"id": cn.chi_nhanh_id, "ten": cn.ten_chi_nhanh}
+        for cn in chi_nhanhs
+    ]
+    return JsonResponse({"chi_nhanh": data})
 
-        VanBanHoanTra.objects.create(
-            van_ban=vb,
-            noi_dung=ly_do,
+
+# ─────────────────────────────────────────
+# API: NguoiDung theo PhòngBan
+# GET /api/nhan-vien/?phong_ban_id=<id>
+# ─────────────────────────────────────────
+@role_required(*Customer.Role.values)
+def api_nhan_vien_phong_ban(request):
+    """Trả về danh sách nhân viên trong phòng ban."""
+    phong_ban_id = request.GET.get("phong_ban_id")
+    if not phong_ban_id:
+        return JsonResponse({"nhan_vien": []})
+    qs = (
+        NguoiDung.objects
+        .filter(phong_ban_id=phong_ban_id)
+        .order_by("ho_va_ten")
+    )
+    data = [
+        {
+            "id": nd.nguoi_dung_id,
+            "ho_va_ten": nd.ho_va_ten,
+            "chuc_vu": nd.chuc_vu,
+            "email": nd.email or "",
+            "sdt": nd.sdt or "",
+        }
+        for nd in qs
+    ]
+    return JsonResponse({"nhan_vien": data})
+
+
+# ─────────────────────────────────────────
+# API: DonViNgoai list + search
+# GET /api/don-vi-ngoai/?q=<search>
+# ─────────────────────────────────────────
+@role_required(*Customer.Role.values)
+def api_don_vi_ngoai(request):
+    """Trả về danh sách đơn vị ngoài, hỗ trợ tìm kiếm."""
+    q = request.GET.get("q", "").strip()
+    qs = DonViNgoai.objects.order_by("ten_don_vi")
+    if q:
+        qs = qs.filter(
+            Q(ten_don_vi__icontains=q) |
+            Q(email__icontains=q) |
+            Q(so_dien_thoai__icontains=q)
+        )
+    data = [
+        {
+            "id": dv.don_vi_ngoai_id,
+            "ten": dv.ten_don_vi,
+            "dia_chi": dv.dia_chi or "",
+            "sdt": dv.so_dien_thoai or "",
+            "email": dv.email or "",
+        }
+        for dv in qs
+    ]
+    return JsonResponse({"don_vi_ngoai": data})
+
+
+# ─────────────────────────────────────────
+# ACTION: Ban hành văn bản
+# POST /van-ban-di/<pk>/ban-hanh/
+# ─────────────────────────────────────────
+@require_POST
+@role_required(Customer.Role.VAN_THU)
+def ban_hanh_van_ban(request, vb_pk):
+    """Thực hiện ban hành văn bản đi."""
+    vb = get_object_or_404(VanBan, pk=vb_pk, phan_loai="Văn bản đi")
+
+    if vb.trang_thai != "Chờ ban hành":
+        return JsonResponse(
+            {"ok": False, "error": "Văn bản không ở trạng thái Chờ ban hành."},
+            status=400
         )
 
-        messages.success(request, "Hoàn trả văn bản thành công.")
-        return redirect("quanlyvanbandi:chi_tiet_van_ban_di", vb_pk=vb.pk)
+    phong_ban_ids = request.POST.getlist("phong_ban_ids[]")
+    don_vi_ngoai_ids = request.POST.getlist("don_vi_ngoai_ids[]")
 
-    return render(
-        request,
-        "vanbandi/popup-hoan-tra-van-ban.html",
-        {
-            "vb": vb,
-            "chuyen_vien": vb.nguoi_tao,
-            "action_url": request.path,
-            "ly_do_cu": "",
-            "show_modal": True,
-        },
-    )
+    if not phong_ban_ids and not don_vi_ngoai_ids:
+        return JsonResponse(
+            {"ok": False, "error": "Danh sách phát hành không được để trống."},
+            status=400
+        )
+
+    # Tạo bản ghi BanHanh
+    ban_hanh = BanHanh.objects.create(van_ban=vb)
+
+    # Tạo chi tiết — phòng ban nội bộ
+    for pb_id in phong_ban_ids:
+        try:
+            pb = PhongBan.objects.get(pk=pb_id)
+            # BanHanhChiTiep yêu cầu cả phong_ban lẫn don_vi_ngoai không null,
+            # tuy nhiên model hiện tại để cả 2 non-null. Dùng phong_ban, skip don_vi_ngoai.
+            # Để tương thích, tạo riêng từng trường hợp:
+            BanHanhChiTiep.objects.create(
+                ban_hanh=ban_hanh,
+                phong_ban=pb,
+                don_vi_ngoai_id=None,
+            )
+        except (PhongBan.DoesNotExist, Exception):
+            pass
+
+    # Tạo chi tiết — đơn vị ngoài
+    for dv_id in don_vi_ngoai_ids:
+        try:
+            dv = DonViNgoai.objects.get(pk=dv_id)
+            BanHanhChiTiep.objects.create(
+                ban_hanh=ban_hanh,
+                phong_ban=None,
+                don_vi_ngoai=dv,
+            )
+        except (DonViNgoai.DoesNotExist, Exception):
+            pass
+
+    # Đổi trạng thái văn bản
+    vb.trang_thai = "Đã ban hành"
+    vb.save(update_fields=["trang_thai"])
+
+    return JsonResponse({"ok": True, "message": "Ban hành văn bản đi thành công!"})

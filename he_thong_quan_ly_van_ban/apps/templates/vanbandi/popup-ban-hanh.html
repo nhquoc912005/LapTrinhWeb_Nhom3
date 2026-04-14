@@ -1,0 +1,924 @@
+{% load static %}
+
+{# ── CSS ── #}
+<style>
+  /* ── Overlay chung ── */
+  .bh-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.38);
+    z-index: 9000;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px;
+    overflow-y: auto;
+  }
+  .bh-overlay.active { display: flex; }
+
+  .bh-modal {
+    width: 100%;
+    max-width: 860px;
+    background: #fff;
+    padding: 28px 32px 26px;
+    box-shadow: 0 14px 48px rgba(0,0,0,0.14);
+    border-radius: 2px;
+    position: relative;
+  }
+  .bh-modal-sm { max-width: 640px; }
+  .bh-modal-xs { max-width: 520px; }
+
+  .bh-title {
+    margin: 0 0 18px;
+    font-size: 19px;
+    font-weight: 700;
+    color: #0077b6;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .bh-subtitle {
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 8px;
+  }
+
+  .bh-section { margin-bottom: 20px; }
+
+  /* Bảng phát hành chính */
+  .bh-phat-hanh-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .bh-phat-hanh-table th {
+    background: #1a7abf; color: #fff;
+    padding: 9px 12px; text-align: left; font-weight: 600;
+  }
+  .bh-phat-hanh-table td {
+    padding: 8px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle;
+  }
+  .bh-phat-hanh-table tr:hover td { background: #f8fafc; }
+  .bh-type-badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .bh-type-noi-bo { background: #dbeafe; color: #1d4ed8; }
+  .bh-type-ngoai  { background: #fef3c7; color: #92400e; }
+  .bh-empty-row td { text-align: center; color: #94a3b8; font-style: italic; padding: 20px; }
+
+  /* Nút thêm */
+  .bh-add-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border: 1px solid #1a7abf; background: #eff6ff;
+    color: #1d4ed8; font-size: 13px; font-weight: 600;
+    cursor: pointer; border-radius: 2px; transition: background 0.15s;
+  }
+  .bh-add-btn:hover { background: #dbeafe; }
+  .bh-add-btn.amber { border-color: #d97706; color: #92400e; background: #fffbeb; }
+  .bh-add-btn.amber:hover { background: #fef3c7; }
+
+  /* Footer modal */
+  .bh-footer {
+    display: flex; justify-content: flex-end; gap: 12px;
+    margin-top: 22px; padding-top: 16px; border-top: 1px solid #e5e7eb;
+  }
+
+  /* Popup filter row */
+  .pop-filter-row {
+    display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;
+  }
+  .pop-filter-row select,
+  .pop-filter-row input[type=text] {
+    padding: 8px 10px; border: 1px solid #cbd5e1;
+    font-size: 13px; outline: none; flex: 1; min-width: 140px;
+  }
+  .pop-filter-row select:focus,
+  .pop-filter-row input[type=text]:focus { border-color: #1a7abf; }
+
+  /* Bảng popup */
+  .pop-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .pop-table th {
+    background: #1a7abf; color: #fff;
+    padding: 9px 12px; text-align: left; font-weight: 600;
+  }
+  .pop-table td {
+    padding: 8px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle;
+  }
+  .pop-table tr:hover td { background: #f8fafc; }
+  .pop-table-wrap { max-height: 300px; overflow-y: auto; border: 1px solid #e5e7eb; }
+
+  /* Footer popup */
+  .pop-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 0 0; font-size: 13px; color: #475569;
+    flex-wrap: wrap; gap: 8px;
+  }
+  .pop-footer-count strong { color: #1d4ed8; }
+  .pop-footer-btns { display: flex; gap: 10px; }
+
+  /* Icon buttons */
+  .pop-icon-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 4px 6px; color: #64748b; border-radius: 3px;
+  }
+  .pop-icon-btn:hover { background: #f1f5f9; color: #1d4ed8; }
+  .pop-icon-btn.del:hover { color: #dc2626; }
+
+  /* Form thêm ngoại bộ */
+  .bh-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .bh-form-field label {
+    display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 5px;
+  }
+  .bh-form-field label .req { color: #dc2626; }
+  .bh-form-field input {
+    width: 100%; padding: 9px 11px; border: 1px solid #cbd5e1;
+    font-size: 13px; outline: none; box-sizing: border-box; transition: border-color 0.15s;
+  }
+  .bh-form-field input:focus { border-color: #1a7abf; }
+  .bh-form-field .bh-field-err { color: #dc2626; font-size: 11px; margin-top: 3px; display: none; }
+  .bh-form-field.has-error .bh-field-err { display: block; }
+  .bh-form-field.has-error input { border-color: #dc2626; }
+
+  .bh-alert {
+    padding: 10px 14px; font-size: 13px; margin-bottom: 14px; display: none;
+  }
+  .bh-alert.error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+
+  /* Toast */
+  .bh-success-toast {
+    position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
+    background: #16a34a; color: #fff; padding: 14px 28px;
+    font-size: 15px; font-weight: 600; border-radius: 4px;
+    z-index: 99999; box-shadow: 0 4px 20px rgba(0,0,0,0.18); display: none;
+  }
+
+  /* Loading spinner nhỏ */
+  .bh-spinner {
+    display: inline-block; width: 16px; height: 16px;
+    border: 2px solid #cbd5e1; border-top-color: #1a7abf;
+    border-radius: 50%; animation: bh-spin 0.6s linear infinite; vertical-align: middle;
+  }
+  @keyframes bh-spin { to { transform: rotate(360deg); } }
+</style>
+
+{# ══════════════════════════════════════
+   MODAL CHÍNH — BIỂU MẪU BAN HÀNH
+══════════════════════════════════════ #}
+<div id="banHanhOverlay" class="bh-overlay">
+  <div class="bh-modal">
+    <h2 class="bh-title">📋 Biểu mẫu Ban hành văn bản đi</h2>
+
+    <div id="bhMainAlert" class="bh-alert error"></div>
+
+    {# Thông tin văn bản #}
+    <div class="bh-section" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;
+         background:#f8fafc; padding:14px 16px; border:1px solid #e5e7eb;">
+      <div>
+        <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase;">Số ký hiệu</div>
+        <div style="font-size:14px; font-weight:700; color:#1e293b; margin-top:3px;">{{ vb.so_ky_hieu|default:"—" }}</div>
+      </div>
+      <div>
+        <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase;">Hình thức</div>
+        <div style="font-size:13px; color:#334155; margin-top:3px;">{{ vb.hinh_thuc|default:"—" }}</div>
+      </div>
+      <div>
+        <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase;">Trạng thái</div>
+        <div style="margin-top:3px;">
+          <span style="display:inline-block; padding:4px 12px; border-radius:999px; font-size:12px;
+                       font-weight:600; background:#FEF3C7; color:#92400E;">{{ vb.trang_thai|default:"Chờ ban hành" }}</span>
+        </div>
+      </div>
+      <div style="grid-column:1/-1;">
+        <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase;">Trích yếu</div>
+        <div style="font-size:13px; color:#334155; margin-top:3px;">{{ vb.trich_yeu|default:"—" }}</div>
+      </div>
+    </div>
+
+    {# Danh sách phát hành #}
+    <div class="bh-section">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div class="bh-subtitle">Danh sách phát hành</div>
+        <div style="display:flex; gap:8px;">
+          <button type="button" class="bh-add-btn" id="openNoiBoPopup">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            + Đơn vị nội bộ
+          </button>
+          <button type="button" class="bh-add-btn amber" id="openNgoaiPopup">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            + Đơn vị ngoài
+          </button>
+        </div>
+      </div>
+      <div style="border:1px solid #e5e7eb; overflow:hidden;">
+        <table class="bh-phat-hanh-table">
+          <thead>
+            <tr>
+              <th style="width:36px;">#</th>
+              <th>Đơn vị / Phòng ban</th>
+              <th style="width:90px;">Loại</th>
+              <th>Thành viên / Đại diện</th>
+              <th style="width:66px; text-align:center;">Xóa</th>
+            </tr>
+          </thead>
+          <tbody id="bhPhatHanhBody">
+            <tr class="bh-empty-row">
+              <td colspan="5">Chưa có đơn vị nào — vui lòng thêm ít nhất 1 để ban hành.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="bh-footer">
+      <button type="button" id="closeBanHanhModal"
+              style="min-width:88px; height:40px; border:1px solid #d1d5db; background:#f3f4f6;
+                     color:#444; font-size:14px; font-weight:600; cursor:pointer;">
+        Hủy
+      </button>
+      <button type="button" id="btnBanHanhLuu"
+              style="min-width:130px; height:40px; border:none; background:#94a3b8;
+                     color:#fff; font-size:14px; font-weight:700; cursor:not-allowed;" disabled>
+        🚀 Lưu &amp; Ban hành
+      </button>
+    </div>
+  </div>
+</div>
+
+{# ══════════════════════════════════════
+   POPUP 1 — CHỌN ĐƠN VỊ NỘI BỘ
+══════════════════════════════════════ #}
+<div id="noiBoOverlay" class="bh-overlay" style="z-index:9500;">
+  <div class="bh-modal bh-modal-sm">
+    <h2 class="bh-title" style="font-size:17px;">🏢 Chọn đơn vị nội bộ</h2>
+
+    <div class="pop-filter-row">
+      {# Dropdown Chi nhánh — được render từ context Django #}
+      <select id="noiBoChiNhanh" style="max-width:280px;">
+        <option value="">-- Chọn chi nhánh --</option>
+        {% for cn in ds_chi_nhanh %}
+          <option value="{{ cn.chi_nhanh_id }}">{{ cn.ten_chi_nhanh }}</option>
+        {% endfor %}
+      </select>
+      <input type="text" id="noiBoSearch" placeholder="Tìm nhanh tên phòng ban...">
+    </div>
+
+    <div class="pop-table-wrap" id="noiBoTableWrap">
+      <table class="pop-table">
+        <thead>
+          <tr>
+            <th style="width:40px;"><input type="checkbox" id="noiBoCheckAll"></th>
+            <th>Đơn vị / Thành viên</th>
+          </tr>
+        </thead>
+        <tbody id="noiBoTableBody">
+          <tr><td colspan="2" style="text-align:center; color:#94a3b8; padding:18px;">
+            Chọn chi nhánh để tải danh sách phòng ban.
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pop-footer">
+      <div class="pop-footer-count">Đang chọn: <strong id="noiBoCount">0</strong> đơn vị</div>
+      <div class="pop-footer-btns">
+        <button type="button" id="noiBoSave"
+                style="padding:8px 22px; background:#1a7abf; color:#fff; border:none;
+                       font-size:14px; font-weight:700; cursor:pointer;">LƯU LẠI</button>
+        <button type="button" id="noiBoCancel"
+                style="padding:8px 20px; background:#9ca3af; color:#fff; border:none;
+                       font-size:14px; font-weight:700; cursor:pointer;">HỦY BỎ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ══════════════════════════════════════
+   POPUP 2 — CHỌN ĐƠN VỊ NGOÀI
+══════════════════════════════════════ #}
+<div id="ngoaiOverlay" class="bh-overlay" style="z-index:9500;">
+  <div class="bh-modal bh-modal-sm">
+    <h2 class="bh-title" style="font-size:17px;">🌐 Chọn đơn vị ngoài</h2>
+
+    <div class="pop-filter-row">
+      <input type="text" id="ngoaiSearch" placeholder="Tìm nhanh tên, email hoặc số điện thoại...">
+      <button type="button" id="openAddNgoaiForm"
+              style="padding:8px 14px; background:#1a7abf; color:#fff; border:none;
+                     font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap;">
+        + Thêm đơn vị
+      </button>
+    </div>
+
+    <div class="pop-table-wrap">
+      <table class="pop-table">
+        <thead>
+          <tr>
+            <th style="width:40px;"><input type="checkbox" id="ngoaiCheckAll"></th>
+            <th>Đơn vị / Thành viên</th>
+            <th>Đại diện</th>
+            <th>Số điện thoại</th>
+            <th>Email</th>
+            <th style="width:76px; text-align:center;">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="ngoaiTableBody">
+          <tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:18px;">
+            <span class="bh-spinner"></span> Đang tải...
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pop-footer">
+      <div class="pop-footer-count">Đang chọn: <strong id="ngoaiCount">0</strong> đơn vị</div>
+      <div class="pop-footer-btns">
+        <button type="button" id="ngoaiSave"
+                style="padding:8px 22px; background:#1a7abf; color:#fff; border:none;
+                       font-size:14px; font-weight:700; cursor:pointer;">LƯU LẠI</button>
+        <button type="button" id="ngoaiCancel"
+                style="padding:8px 20px; background:#9ca3af; color:#fff; border:none;
+                       font-size:14px; font-weight:700; cursor:pointer;">HỦY BỎ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ══════════════════════════════════════
+   POPUP 3 — FORM THÊM ĐƠN VỊ NGOẠI BỘ
+══════════════════════════════════════ #}
+<div id="addNgoaiOverlay" class="bh-overlay" style="z-index:10000;">
+  <div class="bh-modal bh-modal-xs">
+    <h2 class="bh-title" style="font-size:17px; color:#334155;">Thêm đơn vị ngoại bộ</h2>
+
+    <div id="addNgoaiAlert" class="bh-alert error"></div>
+
+    <div class="bh-section">
+      <div class="bh-form-field" style="margin-bottom:14px;" id="field-ten-don-vi">
+        <label>Tên đơn vị <span class="req">*</span></label>
+        <input type="text" id="addTenDonVi" placeholder="Nhập tên đơn vị ngoại bộ">
+        <div class="bh-field-err">Vui lòng nhập tên đơn vị.</div>
+      </div>
+      <div class="bh-form-row">
+        <div class="bh-form-field" id="field-dai-dien">
+          <label>Đại diện <span class="req">*</span></label>
+          <input type="text" id="addDaiDien" placeholder="Tên người đại diện">
+          <div class="bh-field-err">Vui lòng nhập đại diện.</div>
+        </div>
+        <div class="bh-form-field" id="field-sdt">
+          <label>Số điện thoại <span class="req">*</span></label>
+          <input type="text" id="addSdt" placeholder="Số điện thoại">
+          <div class="bh-field-err">Vui lòng nhập số điện thoại.</div>
+        </div>
+      </div>
+      <div class="bh-form-field" style="margin-top:14px;" id="field-email">
+        <label>Email <span class="req">*</span></label>
+        <input type="email" id="addEmail" placeholder="Nhập email">
+        <div class="bh-field-err">Vui lòng nhập email hợp lệ.</div>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:10px; padding-top:14px; border-top:1px solid #e5e7eb;">
+      <button type="button" id="addNgoaiHuy"
+              style="padding:7px 20px; background:#f3f4f6; border:1px solid #d1d5db;
+                     color:#374151; font-size:13px; font-weight:600; cursor:pointer;">Hủy</button>
+      <button type="button" id="addNgoaiLuu"
+              style="padding:7px 20px; background:#9ca3af; color:#fff; border:none;
+                     font-size:13px; font-weight:700; cursor:pointer;">Lưu</button>
+    </div>
+  </div>
+</div>
+
+{# Toast thành công #}
+<div id="bhSuccessToast" class="bh-success-toast">✅ Ban hành văn bản đi thành công!</div>
+
+{# ══════════════════════════════════════
+   JAVASCRIPT
+══════════════════════════════════════ #}
+<script>
+(function () {
+  "use strict";
+
+  // ── URLs từ Django context ──
+  const BAN_HANH_URL   = "{{ ban_hanh_url }}";
+  const API_PHONG_BAN  = "{% url 'quanlyvanbandi:api_chi_nhanh_phong_ban' %}";
+  const API_DON_VI_NGOAI = "{% url 'quanlyvanbandi:api_don_vi_ngoai' %}";
+  const CSRF_TOKEN     = "{{ csrf_token }}";
+
+  // ── State ──
+  let selectedNoiBo = [];   // { id, ten, soThanhVien, loai:"noi_bo" }
+  let selectedNgoai = [];   // { id, ten, daiDien, sdt, email, loai:"ngoai", local?:true }
+  let tempNoiBo     = [];
+  let tempNgoai     = [];
+
+  // Dữ liệu phòng ban hiện tại (từ API)
+  let currentPhongBanList = [];
+  // Dữ liệu đơn vị ngoài (từ API + local adds)
+  let allDonViNgoai = [];
+
+  // ── Helper ──
+  function openOverlay(id) {
+    document.getElementById(id).classList.add("active");
+    document.body.style.overflow = "hidden";
+  }
+  function closeOverlay(id) {
+    document.getElementById(id).classList.remove("active");
+    document.body.style.overflow = "";
+  }
+
+  // ── Render bảng danh sách phát hành ──
+  function renderPhatHanhTable() {
+    const body   = document.getElementById("bhPhatHanhBody");
+    const btnLuu = document.getElementById("btnBanHanhLuu");
+    const all    = [...selectedNoiBo, ...selectedNgoai];
+
+    if (all.length === 0) {
+      body.innerHTML = `<tr class="bh-empty-row"><td colspan="5">Chưa có đơn vị nào — vui lòng thêm ít nhất 1 để ban hành.</td></tr>`;
+      btnLuu.disabled = true;
+      btnLuu.style.background = "#94a3b8";
+      btnLuu.style.cursor = "not-allowed";
+      return;
+    }
+
+    body.innerHTML = all.map((item, idx) => {
+      const isNB = item.loai === "noi_bo";
+      return `<tr>
+        <td>${idx + 1}</td>
+        <td>${item.ten}</td>
+        <td><span class="bh-type-badge ${isNB ? 'bh-type-noi-bo' : 'bh-type-ngoai'}">${isNB ? 'Nội bộ' : 'Ngoài'}</span></td>
+        <td>${isNB ? (item.soThanhVien + " thành viên") : (item.daiDien || "—")}</td>
+        <td style="text-align:center;">
+          <button type="button" class="pop-icon-btn del"
+                  onclick="bhRemovePhatHanh('${item.id}','${item.loai}')" title="Xóa">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+              <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+            </svg>
+          </button>
+        </td>
+      </tr>`;
+    }).join("");
+
+    btnLuu.disabled = false;
+    btnLuu.style.background = "#16a34a";
+    btnLuu.style.cursor = "pointer";
+  }
+
+  window.bhRemovePhatHanh = function (id, loai) {
+    if (loai === "noi_bo") selectedNoiBo = selectedNoiBo.filter(x => String(x.id) !== String(id));
+    else                   selectedNgoai  = selectedNgoai.filter(x => String(x.id) !== String(id));
+    renderPhatHanhTable();
+  };
+
+  // ════════════════════════════════════════
+  // MODAL CHÍNH
+  // ════════════════════════════════════════
+  const openBhBtn   = document.getElementById("openBanHanhModal");
+  const banHanhOverlay = document.getElementById("banHanhOverlay");
+  const closeBhBtn  = document.getElementById("closeBanHanhModal");
+  const btnBanHanhLuu = document.getElementById("btnBanHanhLuu");
+
+  if (openBhBtn) {
+    openBhBtn.addEventListener("click", () => openOverlay("banHanhOverlay"));
+  }
+  closeBhBtn.addEventListener("click", () => closeOverlay("banHanhOverlay"));
+  banHanhOverlay.addEventListener("click", e => { if (e.target === banHanhOverlay) closeOverlay("banHanhOverlay"); });
+
+  btnBanHanhLuu.addEventListener("click", function () {
+    if (this.disabled) return;
+    const all = [...selectedNoiBo, ...selectedNgoai];
+    if (all.length === 0) return;
+
+    this.disabled = true;
+    this.textContent = "Đang lưu...";
+
+    const formData = new FormData();
+    formData.append("csrfmiddlewaretoken", CSRF_TOKEN);
+    selectedNoiBo.forEach(nb => formData.append("phong_ban_ids[]", nb.id));
+    selectedNgoai.forEach(dv => {
+      if (!dv.local) formData.append("don_vi_ngoai_ids[]", dv.id);
+    });
+
+    fetch(BAN_HANH_URL, { method: "POST", body: formData, credentials: "same-origin" })
+      .then(r => r.json())
+      .then(data => {
+        if (data.ok) {
+          closeOverlay("banHanhOverlay");
+          const toast = document.getElementById("bhSuccessToast");
+          toast.style.display = "block";
+          setTimeout(() => { toast.style.display = "none"; }, 3500);
+          // Cập nhật badge trạng thái trên trang
+          document.querySelectorAll(".status-badge-detail").forEach(el => {
+            el.textContent = "Đã ban hành";
+          });
+          // Ẩn nút Ban hành
+          if (openBhBtn) openBhBtn.style.display = "none";
+        } else {
+          const alert = document.getElementById("bhMainAlert");
+          alert.textContent = data.error || "Có lỗi xảy ra.";
+          alert.style.display = "block";
+          btnBanHanhLuu.disabled = false;
+          btnBanHanhLuu.textContent = "🚀 Lưu & Ban hành";
+        }
+      })
+      .catch(() => {
+        const alert = document.getElementById("bhMainAlert");
+        alert.textContent = "Lỗi kết nối. Vui lòng thử lại.";
+        alert.style.display = "block";
+        btnBanHanhLuu.disabled = false;
+        btnBanHanhLuu.textContent = "🚀 Lưu & Ban hành";
+      });
+  });
+
+  // ════════════════════════════════════════
+  // POPUP 1 — NỘI BỘ
+  // ════════════════════════════════════════
+  const noiBoChiNhanhSel = document.getElementById("noiBoChiNhanh");
+  const noiBoSearchInput = document.getElementById("noiBoSearch");
+  const noiBoCheckAll    = document.getElementById("noiBoCheckAll");
+  const noiBoCountEl     = document.getElementById("noiBoCount");
+
+  function renderNoiBoTable(filterText) {
+    const body = document.getElementById("noiBoTableBody");
+    const ft   = (filterText || "").toLowerCase();
+    const filtered = currentPhongBanList.filter(i => i.ten.toLowerCase().includes(ft));
+
+    if (filtered.length === 0) {
+      body.innerHTML = `<tr><td colspan="2" style="text-align:center; color:#94a3b8; padding:18px;">Không tìm thấy phòng ban.</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = filtered.map(item => {
+      const checked = tempNoiBo.some(t => String(t.id) === String(item.id)) ? "checked" : "";
+      return `<tr>
+        <td><input type="checkbox" class="noibo-cb"
+            data-id="${item.id}" data-ten="${item.ten.replace(/"/g,'&quot;')}" data-tv="${item.soThanhVien}" ${checked}></td>
+        <td>${item.ten} <span style="color:#64748b;font-size:12px;">(${String(item.soThanhVien).padStart(2,"0")} thành viên)</span></td>
+      </tr>`;
+    }).join("");
+
+    body.querySelectorAll(".noibo-cb").forEach(cb => {
+      cb.addEventListener("change", function () {
+        const id  = this.dataset.id;
+        const ten = this.dataset.ten;
+        const tv  = parseInt(this.dataset.tv) || 0;
+        if (this.checked) {
+          if (!tempNoiBo.some(t => String(t.id) === String(id)))
+            tempNoiBo.push({ id, ten, soThanhVien: tv, loai: "noi_bo" });
+        } else {
+          tempNoiBo = tempNoiBo.filter(t => String(t.id) !== String(id));
+        }
+        updateNoiBoCount();
+        syncCheckAll();
+      });
+    });
+  }
+
+  function updateNoiBoCount() {
+    noiBoCountEl.textContent = tempNoiBo.length;
+  }
+
+  function syncCheckAll() {
+    const ft       = noiBoSearchInput.value.toLowerCase();
+    const filtered = currentPhongBanList.filter(i => i.ten.toLowerCase().includes(ft));
+    noiBoCheckAll.checked =
+      filtered.length > 0 &&
+      filtered.every(i => tempNoiBo.some(t => String(t.id) === String(i.id)));
+  }
+
+  function loadPhongBan(chiNhanhId) {
+    const body = document.getElementById("noiBoTableBody");
+    body.innerHTML = `<tr><td colspan="2" style="text-align:center; padding:18px;"><span class="bh-spinner"></span> Đang tải...</td></tr>`;
+    currentPhongBanList = [];
+    noiBoCheckAll.checked = false;
+
+    fetch(`${API_PHONG_BAN}?chi_nhanh_id=${chiNhanhId}`, { credentials: "same-origin" })
+      .then(r => r.json())
+      .then(data => {
+        currentPhongBanList = (data.phong_ban || []).map(pb => ({
+          id: pb.id,
+          ten: pb.ten,
+          soThanhVien: pb.so_thanh_vien || 0,
+        }));
+        renderNoiBoTable(noiBoSearchInput.value);
+        syncCheckAll();
+      })
+      .catch(() => {
+        body.innerHTML = `<tr><td colspan="2" style="text-align:center; color:#b91c1c; padding:18px;">Lỗi tải dữ liệu.</td></tr>`;
+      });
+  }
+
+  document.getElementById("openNoiBoPopup").addEventListener("click", function () {
+    tempNoiBo = selectedNoiBo.map(x => ({ ...x }));
+    currentPhongBanList = [];
+    document.getElementById("noiBoTableBody").innerHTML =
+      `<tr><td colspan="2" style="text-align:center; color:#94a3b8; padding:18px;">Chọn chi nhánh để tải danh sách phòng ban.</td></tr>`;
+    noiBoChiNhanhSel.value = "";
+    noiBoSearchInput.value = "";
+    noiBoCheckAll.checked = false;
+    updateNoiBoCount();
+    openOverlay("noiBoOverlay");
+  });
+
+  noiBoChiNhanhSel.addEventListener("change", function () {
+    noiBoSearchInput.value = "";
+    if (this.value) loadPhongBan(this.value);
+    else {
+      currentPhongBanList = [];
+      document.getElementById("noiBoTableBody").innerHTML =
+        `<tr><td colspan="2" style="text-align:center; color:#94a3b8; padding:18px;">Chọn chi nhánh để tải danh sách phòng ban.</td></tr>`;
+    }
+  });
+
+  noiBoSearchInput.addEventListener("input", function () {
+    renderNoiBoTable(this.value);
+    syncCheckAll();
+  });
+
+  noiBoCheckAll.addEventListener("change", function () {
+    const ft = noiBoSearchInput.value.toLowerCase();
+    const filtered = currentPhongBanList.filter(i => i.ten.toLowerCase().includes(ft));
+    if (this.checked) {
+      filtered.forEach(i => {
+        if (!tempNoiBo.some(t => String(t.id) === String(i.id)))
+          tempNoiBo.push({ ...i, loai: "noi_bo" });
+      });
+    } else {
+      const ids = filtered.map(i => String(i.id));
+      tempNoiBo = tempNoiBo.filter(t => !ids.includes(String(t.id)));
+    }
+    renderNoiBoTable(noiBoSearchInput.value);
+    updateNoiBoCount();
+  });
+
+  document.getElementById("noiBoSave").addEventListener("click", function () {
+    selectedNoiBo = tempNoiBo.map(x => ({ ...x }));
+    renderPhatHanhTable();
+    closeOverlay("noiBoOverlay");
+  });
+  document.getElementById("noiBoCancel").addEventListener("click", () => closeOverlay("noiBoOverlay"));
+  document.getElementById("noiBoOverlay").addEventListener("click", e => {
+    if (e.target === document.getElementById("noiBoOverlay")) closeOverlay("noiBoOverlay");
+  });
+
+  // ════════════════════════════════════════
+  // POPUP 2 — ĐƠN VỊ NGOÀI
+  // ════════════════════════════════════════
+  const ngoaiSearchInput = document.getElementById("ngoaiSearch");
+  const ngoaiCheckAll    = document.getElementById("ngoaiCheckAll");
+  const ngoaiCountEl     = document.getElementById("ngoaiCount");
+
+  function renderNgoaiTable(list) {
+    const body = document.getElementById("ngoaiTableBody");
+    if (list.length === 0) {
+      body.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:18px;">Không tìm thấy đơn vị ngoài.</td></tr>`;
+      return;
+    }
+    body.innerHTML = list.map(item => {
+      const checked = tempNgoai.some(t => String(t.id) === String(item.id)) ? "checked" : "";
+      return `<tr>
+        <td><input type="checkbox" class="ngoai-cb" data-id="${item.id}" ${checked}></td>
+        <td>${item.ten}</td>
+        <td>${item.daiDien || "—"}</td>
+        <td>${item.sdt || "—"}</td>
+        <td>${item.email || "—"}</td>
+        <td style="text-align:center;">
+          <button type="button" class="pop-icon-btn" onclick="bhEditNgoai('${item.id}')" title="Sửa">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+          ${item.local ? `<button type="button" class="pop-icon-btn del" onclick="bhDeleteNgoai('${item.id}')" title="Xóa">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+              <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+            </svg>
+          </button>` : ""}
+        </td>
+      </tr>`;
+    }).join("");
+
+    body.querySelectorAll(".ngoai-cb").forEach(cb => {
+      cb.addEventListener("change", function () {
+        const id   = this.dataset.id;
+        const item = allDonViNgoai.find(x => String(x.id) === String(id));
+        if (!item) return;
+        if (this.checked) {
+          if (!tempNgoai.some(t => String(t.id) === String(id)))
+            tempNgoai.push({ ...item, loai: "ngoai" });
+        } else {
+          tempNgoai = tempNgoai.filter(t => String(t.id) !== String(id));
+        }
+        updateNgoaiCount();
+        syncNgoaiCheckAll(getFilteredNgoai());
+      });
+    });
+  }
+
+  function getFilteredNgoai() {
+    const ft = ngoaiSearchInput.value.toLowerCase();
+    if (!ft) return allDonViNgoai;
+    return allDonViNgoai.filter(i =>
+      i.ten.toLowerCase().includes(ft) ||
+      (i.email || "").toLowerCase().includes(ft) ||
+      (i.sdt || "").includes(ft)
+    );
+  }
+
+  function updateNgoaiCount() {
+    ngoaiCountEl.textContent = tempNgoai.length;
+  }
+
+  function syncNgoaiCheckAll(list) {
+    ngoaiCheckAll.checked =
+      list.length > 0 && list.every(i => tempNgoai.some(t => String(t.id) === String(i.id)));
+  }
+
+  function loadDonViNgoai(q) {
+    const body = document.getElementById("ngoaiTableBody");
+    body.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:18px;"><span class="bh-spinner"></span> Đang tải...</td></tr>`;
+
+    const url = q ? `${API_DON_VI_NGOAI}?q=${encodeURIComponent(q)}` : API_DON_VI_NGOAI;
+    fetch(url, { credentials: "same-origin" })
+      .then(r => r.json())
+      .then(data => {
+        // Merge API data với các local items
+        const apiIds = (data.don_vi_ngoai || []).map(x => String(x.id));
+        const localItems = allDonViNgoai.filter(x => x.local);
+        allDonViNgoai = [
+          ...(data.don_vi_ngoai || []).map(dv => ({
+            id: String(dv.id),
+            ten: dv.ten, daiDien: dv.dia_chi || "",
+            sdt: dv.sdt, email: dv.email, local: false,
+          })),
+          ...localItems.filter(l => !apiIds.includes(String(l.id))),
+        ];
+        const filtered = getFilteredNgoai();
+        renderNgoaiTable(filtered);
+        updateNgoaiCount();
+        syncNgoaiCheckAll(filtered);
+      })
+      .catch(() => {
+        body.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#b91c1c; padding:18px;">Lỗi tải dữ liệu đơn vị ngoài.</td></tr>`;
+      });
+  }
+
+  document.getElementById("openNgoaiPopup").addEventListener("click", function () {
+    tempNgoai = selectedNgoai.map(x => ({ ...x }));
+    ngoaiSearchInput.value = "";
+    loadDonViNgoai("");
+    openOverlay("ngoaiOverlay");
+  });
+
+  let ngoaiSearchTimer = null;
+  ngoaiSearchInput.addEventListener("input", function () {
+    clearTimeout(ngoaiSearchTimer);
+    const q = this.value.trim();
+    ngoaiSearchTimer = setTimeout(() => {
+      if (q.length >= 2 || q === "") loadDonViNgoai(q);
+      else {
+        const filtered = getFilteredNgoai();
+        renderNgoaiTable(filtered);
+        syncNgoaiCheckAll(filtered);
+      }
+    }, 300);
+  });
+
+  ngoaiCheckAll.addEventListener("change", function () {
+    const filtered = getFilteredNgoai();
+    if (this.checked) {
+      filtered.forEach(i => {
+        if (!tempNgoai.some(t => String(t.id) === String(i.id)))
+          tempNgoai.push({ ...i, loai: "ngoai" });
+      });
+    } else {
+      const ids = filtered.map(i => String(i.id));
+      tempNgoai = tempNgoai.filter(t => !ids.includes(String(t.id)));
+    }
+    renderNgoaiTable(filtered);
+    updateNgoaiCount();
+  });
+
+  document.getElementById("ngoaiSave").addEventListener("click", function () {
+    selectedNgoai = tempNgoai.map(x => ({ ...x }));
+    renderPhatHanhTable();
+    closeOverlay("ngoaiOverlay");
+  });
+  document.getElementById("ngoaiCancel").addEventListener("click", () => closeOverlay("ngoaiOverlay"));
+  document.getElementById("ngoaiOverlay").addEventListener("click", e => {
+    if (e.target === document.getElementById("ngoaiOverlay")) closeOverlay("ngoaiOverlay");
+  });
+
+  // Sửa đơn vị ngoài
+  window.bhEditNgoai = function (id) {
+    const item = allDonViNgoai.find(x => String(x.id) === String(id));
+    if (!item) return;
+    document.getElementById("addTenDonVi").value = item.ten;
+    document.getElementById("addDaiDien").value  = item.daiDien || "";
+    document.getElementById("addSdt").value      = item.sdt || "";
+    document.getElementById("addEmail").value    = item.email || "";
+    document.getElementById("addNgoaiAlert").style.display = "none";
+    document.getElementById("addNgoaiLuu").dataset.editId = id;
+    document.getElementById("addNgoaiLuu").style.background = "#1a7abf";
+    ["field-ten-don-vi","field-dai-dien","field-sdt","field-email"].forEach(f =>
+      document.getElementById(f).classList.remove("has-error")
+    );
+    openOverlay("addNgoaiOverlay");
+  };
+
+  // Xóa đơn vị ngoài local
+  window.bhDeleteNgoai = function (id) {
+    allDonViNgoai = allDonViNgoai.filter(x => String(x.id) !== String(id));
+    tempNgoai     = tempNgoai.filter(x => String(x.id) !== String(id));
+    const filtered = getFilteredNgoai();
+    renderNgoaiTable(filtered);
+    updateNgoaiCount();
+    syncNgoaiCheckAll(filtered);
+  };
+
+  // ════════════════════════════════════════
+  // POPUP 3 — FORM THÊM NGOẠI BỘ
+  // ════════════════════════════════════════
+  const addLuuBtn = document.getElementById("addNgoaiLuu");
+
+  function resetAddForm() {
+    ["addTenDonVi","addDaiDien","addSdt","addEmail"].forEach(id => document.getElementById(id).value = "");
+    ["field-ten-don-vi","field-dai-dien","field-sdt","field-email"].forEach(id =>
+      document.getElementById(id).classList.remove("has-error")
+    );
+    document.getElementById("addNgoaiAlert").style.display = "none";
+    delete addLuuBtn.dataset.editId;
+    addLuuBtn.style.background = "#9ca3af";
+  }
+
+  // Theo dõi input để kích hoạt nút Lưu
+  ["addTenDonVi","addDaiDien","addSdt","addEmail"].forEach(id => {
+    document.getElementById(id).addEventListener("input", function () {
+      const allFilled = ["addTenDonVi","addDaiDien","addSdt","addEmail"]
+        .every(f => document.getElementById(f).value.trim() !== "");
+      addLuuBtn.style.background = allFilled ? "#1a7abf" : "#9ca3af";
+    });
+  });
+
+  document.getElementById("openAddNgoaiForm").addEventListener("click", function () {
+    resetAddForm();
+    openOverlay("addNgoaiOverlay");
+  });
+
+  addLuuBtn.addEventListener("click", function () {
+    const ten     = document.getElementById("addTenDonVi").value.trim();
+    const daiDien = document.getElementById("addDaiDien").value.trim();
+    const sdt     = document.getElementById("addSdt").value.trim();
+    const email   = document.getElementById("addEmail").value.trim();
+    const editId  = this.dataset.editId;
+
+    // Validate required
+    let valid = true;
+    [["field-ten-don-vi", ten], ["field-dai-dien", daiDien],
+     ["field-sdt", sdt],       ["field-email", email]].forEach(([fid, val]) => {
+      const el = document.getElementById(fid);
+      if (!val) { el.classList.add("has-error"); valid = false; }
+      else       el.classList.remove("has-error");
+    });
+    if (!valid) return;
+
+    // Validate trùng (email hoặc SĐT)
+    const duplicate = allDonViNgoai.find(x =>
+      String(x.id) !== String(editId) &&
+      ((x.email && x.email === email) || (x.sdt && x.sdt === sdt))
+    );
+    if (duplicate) {
+      const alertEl = document.getElementById("addNgoaiAlert");
+      alertEl.textContent = "Đơn vị ngoại bộ đã tồn tại.";
+      alertEl.style.display = "block";
+      return;
+    }
+    document.getElementById("addNgoaiAlert").style.display = "none";
+
+    if (editId) {
+      // Cập nhật
+      const idx = allDonViNgoai.findIndex(x => String(x.id) === String(editId));
+      if (idx !== -1) allDonViNgoai[idx] = { ...allDonViNgoai[idx], ten, daiDien, sdt, email };
+      const ti = tempNgoai.findIndex(x => String(x.id) === String(editId));
+      if (ti !== -1) tempNgoai[ti] = { ...tempNgoai[ti], ten, daiDien, sdt, email };
+    } else {
+      // Thêm local mới (chưa lưu vào DB)
+      const newId  = "local_" + Date.now();
+      const newItem = { id: newId, ten, daiDien, sdt, email, local: true };
+      allDonViNgoai.push(newItem);
+    }
+
+    closeOverlay("addNgoaiOverlay");
+    const filtered = getFilteredNgoai();
+    renderNgoaiTable(filtered);
+    updateNgoaiCount();
+    syncNgoaiCheckAll(filtered);
+  });
+
+  document.getElementById("addNgoaiHuy").addEventListener("click", () => closeOverlay("addNgoaiOverlay"));
+  document.getElementById("addNgoaiOverlay").addEventListener("click", e => {
+    if (e.target === document.getElementById("addNgoaiOverlay")) closeOverlay("addNgoaiOverlay");
+  });
+
+})();
+</script>

@@ -17,8 +17,13 @@
           <div class="approval-file-list">
             {% if vb.file_dinh_kem %}
               <div class="approval-file-card">
-                <div class="approval-file-icon">
-                  {{ vb.file_dinh_kem.name|slice:"-3:"|upper }}
+                <div class="approval-file-icon"
+                  {% with vb.file_dinh_kem.name|lower as fl %}
+                    style="color:{% if '.pdf' in fl %}#ef4444{% elif '.docx' in fl %}#2563eb{% elif '.xlsx' in fl %}#16a34a{% else %}#475569{% endif %};"
+                  {% endwith %}>
+                  {% with vb.file_dinh_kem.name|lower as fl %}
+                    {% if '.pdf' in fl %}PDF{% elif '.docx' in fl %}DOCX{% elif '.xlsx' in fl %}XLSX{% else %}FILE{% endif %}
+                  {% endwith %}
                 </div>
                 <div class="approval-file-info">
                   <div class="approval-file-name">
@@ -46,8 +51,13 @@
             {% if ds_lien_quan %}
               {% for item in ds_lien_quan %}
                 <div class="approval-file-card">
-                  <div class="approval-file-icon">
-                    {{ item.file_van_ban.name|slice:"-3:"|upper }}
+                  <div class="approval-file-icon"
+                    {% with item.file_van_ban.name|lower as fl %}
+                      style="color:{% if '.pdf' in fl %}#ef4444{% elif '.docx' in fl %}#2563eb{% elif '.xlsx' in fl %}#16a34a{% else %}#475569{% endif %};"
+                    {% endwith %}>
+                    {% with item.file_van_ban.name|lower as fl %}
+                      {% if '.pdf' in fl %}PDF{% elif '.docx' in fl %}DOCX{% elif '.xlsx' in fl %}XLSX{% else %}FILE{% endif %}
+                    {% endwith %}
                   </div>
                   <div class="approval-file-info">
                     <div class="approval-file-name">
