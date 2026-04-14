@@ -1,0 +1,450 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Trình văn bản đến{% endblock %}
+{% block nav_van_ban_den_active %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+    .vbd-card-title{
+        border-left:4px solid var(--primary);
+        padding-left:12px;
+        font-size:15px;
+        font-weight:700;
+        color:var(--text-main);
+        margin:0 0 24px 0;
+        padding-bottom:20px;
+        border-bottom:1px solid var(--border-color);
+        text-transform:uppercase;
+        line-height:1.2;
+    }
+
+    .sub-title{
+        color:var(--primary);
+        font-size:16px;
+        font-weight:700;
+        margin:20px 0 14px;
+    }
+
+    .form-row{
+        display:grid;
+        grid-template-columns:repeat(4,1fr);
+        gap:15px;
+        margin-bottom:15px;
+    }
+
+    .form-row-5{
+        display:grid;
+        grid-template-columns:repeat(5,1fr);
+        gap:15px;
+        margin-bottom:15px;
+    }
+
+    .form-group{
+        margin-bottom:15px;
+    }
+
+    .form-label{
+        display:block;
+        font-size:15px;
+        font-weight:600;
+        margin-bottom:8px;
+        color:#334155;
+    }
+
+    .required{
+        color:#EF4444;
+    }
+
+    .form-control,
+    input[type="text"],
+    input[type="date"],
+    select,
+    textarea{
+        width:100%;
+        border:1px solid var(--border-color);
+        border-radius:6px;
+        font-size:15px;
+        font-family:'Arimo', sans-serif;
+        outline:none;
+        background:#fff;
+        box-sizing:border-box;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    select{
+        height:40px;
+        padding:0 12px;
+    }
+
+    textarea{
+        height:auto;
+        min-height:110px;
+        padding:14px 16px;
+        resize:vertical;
+        line-height:1.6;
+        vertical-align:top;
+    }
+
+    .upload-box{
+        border:1px dashed var(--border-color);
+        border-radius:8px;
+        min-height:90px;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        text-align:center;
+        color:#64748B;
+        background:#fff;
+        cursor:pointer;
+        padding:12px;
+    }
+
+    .upload-box:hover{
+        border-color:var(--primary);
+        background:#F8FCFE;
+    }
+
+    .upload-box b{
+        color:var(--primary);
+    }
+
+    .hidden-input{
+        position:absolute;
+        left:-9999px;
+        width:1px;
+        height:1px;
+        opacity:0;
+    }
+
+    .file-list-wrap{
+        margin-top:12px;
+        display:flex;
+        flex-direction:column;
+        gap:12px;
+    }
+
+    .file-item{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        border:1px dashed #D1D5DC;
+        border-radius:8px;
+        padding:14px 16px;
+        background:#fff;
+    }
+
+    .file-left{
+        display:flex;
+        align-items:center;
+        gap:12px;
+        min-width:0;
+    }
+
+    .file-tag{
+        min-width:30px;
+        text-align:center;
+        font-size:12px;
+        font-weight:700;
+        padding:8px 6px;
+        border-radius:4px;
+    }
+
+    .file-tag.pdf{
+        color:#DC2626;
+        background:#FEE2E2;
+    }
+
+    .file-tag.docx{
+        color:#2563EB;
+        background:#DBEAFE;
+    }
+
+    .file-tag.file{
+        color:#475569;
+        background:#E2E8F0;
+    }
+
+    .file-name{
+        font-weight:700;
+        color:#0F172A;
+        word-break:break-all;
+    }
+
+    .file-meta{
+        font-size:13px;
+        color:#94A3B8;
+    }
+
+    .file-remove{
+        color:#0284C7;
+        font-size:22px;
+        line-height:1;
+        text-decoration:none;
+        cursor:pointer;
+        padding:0 6px;
+    }
+
+    .form-actions{
+        display:flex;
+        justify-content:flex-end;
+        gap:10px;
+        margin-top:18px;
+    }
+
+    .btn-local{
+        border:none;
+        border-radius:6px;
+        padding:10px 18px;
+        font-size:15px;
+        font-weight:700;
+        cursor:pointer;
+        font-family:'Arimo', sans-serif;
+        text-decoration:none;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+    }
+
+    .btn-cancel{
+        background:#E2E8F0;
+        color:#334155;
+    }
+
+    .btn-submit{
+        background:#0076A2;
+        color:#fff;
+    }
+
+    .errors{
+        background:#FEF2F2;
+        border:1px solid #FECACA;
+        color:#991B1B;
+        border-radius:6px;
+        padding:12px;
+        margin-bottom:15px;
+    }
+
+    @media (max-width:1000px){
+        .form-row,
+        .form-row-5{
+            grid-template-columns:1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'core:dashboard' %}">
+    <svg width="14" height="14" viewBox="0 0 24 24">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+    </svg>
+    Trang chủ
+</a>
+<span class="breadcrumb-sep">›</span>
+<a href="{% url 'quanlyvanbanden:danh_sach' %}">Văn bản đến</a>
+<span class="breadcrumb-sep">›</span>
+<span>Trình văn bản đến</span>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="padding:24px;">
+    <div class="vbd-card-title">TRÌNH VĂN BẢN ĐẾN</div>
+
+    {% if form.errors %}
+        <div class="errors">{{ form.errors }}</div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="sub-title">Thông tin văn bản</div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Số ký hiệu <span class="required">*</span></label>
+                {{ form.so_ky_hieu }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Đơn vị ban hành <span class="required">*</span></label>
+                {{ form.don_vi_ban_hanh }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Loại văn bản <span class="required">*</span></label>
+                {{ form.loai_van_ban }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Hình thức văn bản <span class="required">*</span></label>
+                {{ form.hinh_thuc_van_ban }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Trích yếu <span class="required">*</span></label>
+            {{ form.trich_yeu }}
+        </div>
+
+        <div class="form-row-5">
+            <div class="form-group">
+                <label class="form-label">Ngày văn bản <span class="required">*</span></label>
+                {{ form.ngay_van_ban }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Ngày đến</label>
+                {{ form.ngay_den }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Hạn xử lý</label>
+                {{ form.han_xu_ly }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Độ mật</label>
+                {{ form.do_mat }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Độ khẩn</label>
+                {{ form.do_khan }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">File đính kèm</label>
+            <label class="upload-box" for="id_file_dinh_kem_files">
+                <input type="file" name="file_dinh_kem_files" id="id_file_dinh_kem_files" class="hidden-input" multiple>
+                <div>Kéo thả file hoặc <b>chọn file</b></div>
+                <div style="font-size:13px; margin-top:6px;">PDF, DOC, DOCX, XLS, XLSX, PNG, JPG, JPEG</div>
+            </label>
+            <div id="main-file-preview" class="file-list-wrap"></div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Tài liệu liên quan</label>
+            <label class="upload-box" for="id_tai_lieu_lien_quan_files">
+                <input type="file" name="tai_lieu_lien_quan_files" id="id_tai_lieu_lien_quan_files" class="hidden-input" multiple>
+                <div>Kéo thả file hoặc <b>chọn file</b></div>
+                <div style="font-size:13px; margin-top:6px;">PDF, DOC, DOCX, XLS, XLSX, PNG, JPG, JPEG</div>
+            </label>
+            <div id="related-file-preview" class="file-list-wrap"></div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid var(--border-color); margin:26px 0;">
+
+        <div class="sub-title">Thông tin xử lý</div>
+
+        <div class="form-group">
+            <label class="form-label">Lãnh đạo xử lý <span class="required">*</span></label>
+            {{ form.lanh_dao_xu_ly }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Nội dung trình lãnh đạo</label>
+            {{ form.noi_dung_xu_ly }}
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'quanlyvanbanden:danh_sach' %}" class="btn-local btn-cancel">Hủy</a>
+            <button type="submit" class="btn-local btn-submit">Gửi trình lãnh đạo</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function getFileTagClass(filename) {
+        const name = filename.toLowerCase();
+        if (name.endsWith('.pdf')) return 'pdf';
+        if (name.endsWith('.doc') || name.endsWith('.docx')) return 'docx';
+        return 'file';
+    }
+
+    function getFileLabel(filename) {
+        const name = filename.toLowerCase();
+        if (name.endsWith('.pdf')) return 'PDF';
+        if (name.endsWith('.doc') || name.endsWith('.docx')) return 'DOCX';
+        return 'FILE';
+    }
+
+    const mainInput = document.getElementById('id_file_dinh_kem_files');
+    const relatedInput = document.getElementById('id_tai_lieu_lien_quan_files');
+    const mainPreview = document.getElementById('main-file-preview');
+    const relatedPreview = document.getElementById('related-file-preview');
+
+    function renderFileItem(file, removeFnName, index, metaText) {
+        return `
+            <div class="file-item new-file-item" data-index="${index}">
+                <div class="file-left">
+                    <span class="file-tag ${getFileTagClass(file.name)}">${getFileLabel(file.name)}</span>
+                    <div>
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-meta">${metaText}</div>
+                    </div>
+                </div>
+                <a href="javascript:void(0)" class="file-remove" onclick="${removeFnName}(${index})">×</a>
+            </div>
+        `;
+    }
+
+    function renderMainFiles() {
+        if (!mainPreview || !mainInput) return;
+        mainPreview.innerHTML = '';
+        Array.from(mainInput.files).forEach((file, index) => {
+            mainPreview.insertAdjacentHTML(
+                'beforeend',
+                renderFileItem(file, 'removeNewMainFile', index, 'File đính kèm mới')
+            );
+        });
+    }
+
+    function renderRelatedFiles() {
+        if (!relatedPreview || !relatedInput) return;
+        relatedPreview.innerHTML = '';
+        Array.from(relatedInput.files).forEach((file, index) => {
+            relatedPreview.insertAdjacentHTML(
+                'beforeend',
+                renderFileItem(file, 'removeNewRelatedFile', index, 'Tài liệu liên quan mới')
+            );
+        });
+    }
+
+    if (mainInput) {
+        mainInput.addEventListener('change', renderMainFiles);
+    }
+
+    if (relatedInput) {
+        relatedInput.addEventListener('change', renderRelatedFiles);
+    }
+
+    function removeNewMainFile(removeIndex) {
+        if (!mainInput) return;
+        const dt = new DataTransfer();
+        const files = mainInput.files;
+
+        for (let i = 0; i < files.length; i++) {
+            if (i !== removeIndex) {
+                dt.items.add(files[i]);
+            }
+        }
+
+        mainInput.files = dt.files;
+        renderMainFiles();
+    }
+
+    function removeNewRelatedFile(removeIndex) {
+        if (!relatedInput) return;
+        const dt = new DataTransfer();
+        const files = relatedInput.files;
+
+        for (let i = 0; i < files.length; i++) {
+            if (i !== removeIndex) {
+                dt.items.add(files[i]);
+            }
+        }
+
+        relatedInput.files = dt.files;
+        renderRelatedFiles();
+    }
+</script>
+{% endblock %}
