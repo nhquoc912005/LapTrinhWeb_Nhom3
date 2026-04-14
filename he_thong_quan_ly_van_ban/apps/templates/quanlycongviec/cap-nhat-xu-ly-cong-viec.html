@@ -1,0 +1,440 @@
+{% extends "base.html" %}
+
+{% block title %}Cập nhật báo cáo xử lý công việc - Hệ thống quản lý văn bản{% endblock %}
+
+{% block extra_css %}
+<style>
+    .update-card {
+        margin-top: 16px;
+        background: #fff;
+        border: 1px solid #d6dee7;
+        padding: 28px 38px 30px;
+    }
+
+    .update-title {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-bottom: 22px;
+        margin-bottom: 34px;
+        border-bottom: 1px solid #edf1f5;
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.2;
+        text-transform: uppercase;
+        color: #202938;
+    }
+
+    .update-title::before {
+        content: "";
+        width: 4px;
+        height: 28px;
+        background: #1e7fe9;
+    }
+
+    .update-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px 60px;
+        margin-bottom: 28px;
+    }
+
+    .update-label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 13px;
+        font-weight: 400;
+        color: #6d7785;
+    }
+
+    .update-value {
+        font-size: 15px;
+        line-height: 1.6;
+        color: #344255;
+    }
+
+    .update-full {
+        grid-column: 1 / -1;
+    }
+
+    .update-form-group {
+        margin-bottom: 26px;
+    }
+
+    .update-form-label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 15px;
+        color: #526072;
+    }
+
+    .update-form-control {
+        min-height: 164px;
+        border: 1px solid #d8e1ea;
+        padding: 14px 16px;
+        font-size: 15px;
+        color: #374151;
+        box-shadow: none;
+    }
+
+    .update-form-control::placeholder {
+        color: #a0a7b4;
+    }
+
+    .update-note-control {
+        min-height: 126px;
+    }
+
+    .update-file-list {
+        display: grid;
+        gap: 12px;
+        padding-bottom: 16px;
+        border-bottom: 1px dashed #d9e2ea;
+    }
+
+    .update-file-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 4px 0;
+    }
+
+    .update-file-meta {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .update-file-icon {
+        width: 46px;
+        height: 46px;
+        border: 1px solid #e4e9ef;
+        background: #eef9f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 700;
+        color: #12a150;
+        text-transform: uppercase;
+    }
+
+    .update-file-text strong {
+        display: block;
+        font-size: 15px;
+        color: #1f2937;
+    }
+
+    .update-file-text span {
+        display: block;
+        margin-top: 2px;
+        font-size: 11px;
+        color: #9aa3af;
+        font-weight: 600;
+    }
+
+    .update-file-delete {
+        border: none;
+        background: transparent;
+        color: #1381c5;
+        font-size: 28px;
+        line-height: 1;
+        padding: 0 6px;
+    }
+
+    .update-file-item.pending-delete {
+        opacity: 0.45;
+        text-decoration: line-through;
+    }
+
+    .update-upload-zone {
+        position: relative;
+        border: 1px dashed #ccd6df;
+        background: #fff;
+        min-height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 24px 18px;
+    }
+
+    .update-upload-zone input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .update-upload-zone p {
+        margin: 0;
+        font-size: 15px;
+        color: #5c6572;
+    }
+
+    .update-upload-zone strong {
+        color: #0d7db8;
+        font-weight: 700;
+    }
+
+    .update-upload-zone small {
+        display: block;
+        margin-top: 8px;
+        font-size: 12px;
+        color: #9ba4af;
+    }
+
+    .new-upload-list {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+    }
+
+    .new-upload-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border: 1px solid #e3e9ef;
+        background: #f8fbfd;
+    }
+
+    .new-upload-item strong {
+        display: block;
+        font-size: 14px;
+        color: #243243;
+    }
+
+    .new-upload-item span {
+        display: block;
+        margin-top: 2px;
+        font-size: 11px;
+        color: #98a2af;
+    }
+
+    .update-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 16px;
+        margin-top: 30px;
+    }
+
+    .update-btn {
+        min-width: 116px;
+        height: 42px;
+        padding: 0 18px;
+        border: none;
+        font-size: 15px;
+        font-weight: 700;
+        border-radius: 0;
+    }
+
+    .update-btn.cancel {
+        background: #f3f4f6;
+        color: #4b5563;
+        border: 1px solid #e5e7eb;
+    }
+
+    .update-btn.submit {
+        background: #8e8e8e;
+        color: #fff;
+    }
+
+    .update-btn.submit:hover {
+        background: #0076a2;
+    }
+
+    .update-errors {
+        margin-top: 8px;
+        font-size: 13px;
+        color: #dc2626;
+    }
+
+    @media (max-width: 960px) {
+        .update-card {
+            padding: 24px 20px 28px;
+        }
+
+        .update-grid {
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+
+        .update-actions {
+            flex-wrap: wrap;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url task_list_url %}">Quản lý công việc</a>
+<span class="breadcrumb-sep">›</span>
+<a href="{% url 'quanlycongviec:task_detail' task.pk %}">Thông tin chi tiết công việc</a>
+<span class="breadcrumb-sep">›</span>
+<span>Cập nhật báo cáo xử lý công việc</span>
+{% endblock %}
+
+{% block content %}
+<div class="update-card">
+    <div class="update-title">{{ template_title }}</div>
+
+    <div class="update-grid">
+        <div>
+            <span class="update-label">Lãnh đạo giao việc</span>
+            <div class="update-value">{{ task.nguoi_giao.ho_va_ten }}</div>
+        </div>
+        <div>
+            <span class="update-label">Tên công việc</span>
+            <div class="update-value">{{ task.ten_cong_viec }}</div>
+        </div>
+        <div>
+            <span class="update-label">Nguồn giao</span>
+            <div class="update-value">{{ task.nguon_giao|default:"-" }}</div>
+        </div>
+        <div>
+            <span class="update-label">Hạn xử lý</span>
+            <div class="update-value">{{ task.han_xu_ly|date:"d/m/Y" }}</div>
+        </div>
+        <div>
+            <span class="update-label">Chuyên viên thực hiện</span>
+            <div class="update-value">{{ task.nguoi_thuc_hien.ho_va_ten }}</div>
+        </div>
+        <div>
+            <span class="update-label">Ngày bắt đầu</span>
+            <div class="update-value">{{ task.ngay_bat_dau|date:"d/m/Y" }}</div>
+        </div>
+        <div class="update-full">
+            <span class="update-label">Nội dung công việc</span>
+            <div class="update-value">{{ task.noi_dung_cong_viec|linebreaksbr }}</div>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.delete_file_ids }}
+
+        <div class="update-form-group">
+            <label class="update-form-label" for="{{ form.ket_qua_xu_ly.id_for_label }}">Cập nhật kết quả xử lý</label>
+            {{ form.ket_qua_xu_ly }}
+            {% if form.ket_qua_xu_ly.errors %}
+            <div class="update-errors">{{ form.ket_qua_xu_ly.errors|join:", " }}</div>
+            {% endif %}
+        </div>
+
+        <div class="update-form-group">
+            <label class="update-form-label" for="{{ form.ghi_chu.id_for_label }}">Ghi chú</label>
+            {{ form.ghi_chu }}
+            {% if form.ghi_chu.errors %}
+            <div class="update-errors">{{ form.ghi_chu.errors|join:", " }}</div>
+            {% endif %}
+        </div>
+
+        <div class="update-form-group">
+            <label class="update-form-label">File đính kèm</label>
+            <div class="update-file-list" id="existingResultFiles">
+                {% for attachment in result_files %}
+                <div class="update-file-item" data-id="{{ attachment.pk }}">
+                    <div class="update-file-meta">
+                        {% with ext=attachment.file_van_ban.name|lower %}
+                        <span class="update-file-icon">
+                            {% if '.pdf' in ext %}PDF{% elif '.docx' in ext or '.doc' in ext %}DOC{% elif '.xlsx' in ext or '.xls' in ext %}XLS{% else %}FILE{% endif %}
+                        </span>
+                        <span class="update-file-text">
+                            <strong>{{ attachment.file_van_ban.name|cut:"file_cv_lien_quan/" }}</strong>
+                            <span>{% if '.pdf' in ext %}PDF Document{% elif '.docx' in ext or '.doc' in ext %}Word Document{% elif '.xlsx' in ext or '.xls' in ext %}Excel Document{% else %}Tài liệu kết quả{% endif %}</span>
+                        </span>
+                        {% endwith %}
+                    </div>
+                    {% if can_delete_result_files and attachment.nguoi_tai_len_id == user.core_profile.pk %}
+                    <button type="button" class="update-file-delete btn-mark-delete">×</button>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <div class="update-value">Chưa có file kết quả.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="update-form-group">
+            <label class="update-upload-zone">
+                {{ form.tep_ket_qua }}
+                <div>
+                    <p>Kéo thả file hoặc <strong>chọn file</strong></p>
+                    <small>PDF, DOC, DOCX, XLS, XLSX (Tối đa 50MB/1 file)</small>
+                </div>
+            </label>
+            <div id="selectedFiles" class="new-upload-list"></div>
+            {% if form.tep_ket_qua.errors %}
+            <div class="update-errors">{{ form.tep_ket_qua.errors|join:", " }}</div>
+            {% endif %}
+        </div>
+
+        <div class="update-actions">
+            <a href="{% url 'quanlycongviec:task_detail' task.pk %}" class="update-btn cancel">Hủy</a>
+            <button type="submit" class="update-btn submit">{{ submit_label }}</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const deleteInput = document.getElementById("id_delete_file_ids");
+        const fileInput = document.getElementById("id_tep_ket_qua");
+        const selectedContainer = document.getElementById("selectedFiles");
+        const resultTextarea = document.getElementById("id_ket_qua_xu_ly");
+        const noteTextarea = document.getElementById("id_ghi_chu");
+
+        if (resultTextarea) {
+            resultTextarea.classList.add("form-control", "update-form-control");
+        }
+
+        if (noteTextarea) {
+            noteTextarea.classList.add("form-control", "update-form-control", "update-note-control");
+        }
+
+        document.querySelectorAll(".btn-mark-delete").forEach((button) => {
+            button.addEventListener("click", function () {
+                const fileItem = this.closest(".update-file-item");
+                const fileId = fileItem.dataset.id;
+                let values = deleteInput.value ? deleteInput.value.split(",") : [];
+
+                if (values.includes(fileId)) {
+                    values = values.filter((value) => value !== fileId);
+                    fileItem.classList.remove("pending-delete");
+                    this.innerText = "×";
+                } else {
+                    values.push(fileId);
+                    fileItem.classList.add("pending-delete");
+                    this.innerText = "↺";
+                }
+
+                deleteInput.value = values.filter(Boolean).join(",");
+            });
+        });
+
+        if (!fileInput || !selectedContainer) {
+            return;
+        }
+
+        fileInput.addEventListener("change", function () {
+            selectedContainer.innerHTML = "";
+            Array.from(this.files).forEach((file) => {
+                const item = document.createElement("div");
+                item.className = "new-upload-item";
+                item.innerHTML = `
+                    <span class="update-file-icon">${file.name.split(".").pop().toUpperCase()}</span>
+                    <span>
+                        <strong>${file.name}</strong>
+                        <span>${(file.size / (1024 * 1024)).toFixed(2)} MB</span>
+                    </span>
+                `;
+                selectedContainer.appendChild(item);
+            });
+        });
+    });
+</script>
+{% endblock %}
