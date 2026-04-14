@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -154,8 +155,13 @@ def giao_viec(request):
     if request.user.is_lanh_dao:
         tasks = tasks.filter(nguoi_giao=request.user.core_profile)
 
+    paginator = Paginator(tasks, 10)
+    page_number = request.GET.get("page")
+    tasks = paginator.get_page(page_number)
+
     context = {
         "tasks": tasks,
+        "page_obj": tasks,
         "chuyen_vien_list": NguoiDung.objects.filter(chuc_vu=NguoiDung.ChucVu.CHUYEN_VIEN),
         "all_users": NguoiDung.objects.all(),
         "van_ban_list": VanBan.objects.all().order_by("-ngay_den"),
@@ -169,8 +175,14 @@ def giao_viec(request):
 @role_required(Customer.Role.CHUYEN_VIEN)
 def xu_ly_cong_viec(request):
     tasks = _task_queryset().filter(nguoi_thuc_hien=request.user.core_profile).order_by("-last_activity")
+
+    paginator = Paginator(tasks, 10)
+    page_number = request.GET.get("page")
+    tasks = paginator.get_page(page_number)
+
     context = {
         "tasks": tasks,
+        "page_obj": tasks,
         "status_choices": CongViec.TrangThai.choices,
     }
     return render(request, "quanlycongviec/cong-viec-cua-toi.html", context)

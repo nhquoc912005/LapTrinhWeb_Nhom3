@@ -5,6 +5,7 @@ from django.db import models
 
 from .role_groups import sync_user_role_group
 
+
 class Customer(AbstractUser):
     class Role(models.TextChoices):
         ADMIN = "ADMIN", "Quản trị hệ thống"
@@ -25,16 +26,30 @@ class Customer(AbstractUser):
         Role.CHUYEN_VIEN: "Chuyên Viên",
     }
 
-    email = models.EmailField("Email",unique=True)
-    ho_va_ten = models.CharField("Họ và tên",max_length=255)
-    chuc_vu = models.CharField("Chức vụ",max_length=255,blank=True)
-    sdt = models.CharField("Số điện thoại",max_length=20,blank=True)
-    role = models.CharField("Vai trò",max_length=20,choices=Role.choices, default=Role.CHUYEN_VIEN)
+    email = models.EmailField("Email", unique=True)
+    ho_va_ten = models.CharField("Họ và tên", max_length=255)
+    chuc_vu = models.CharField("Chức vụ", max_length=255, blank=True)
+    sdt = models.CharField("Số điện thoại", max_length=20, blank=True)
+    role = models.CharField("Vai trò", max_length=20, choices=Role.choices, default=Role.CHUYEN_VIEN)
 
-    chi_nhanh = models.ForeignKey("core.ChiNhanh",on_delete=models.SET_NULL,null=True,blank=True,related_name="users",verbose_name="Chi nhánh")
-    phong_ban = models.ForeignKey("core.PhongBan",on_delete=models.SET_NULL,null=True,blank=True,related_name="users",verbose_name="Phòng ban")
+    chi_nhanh = models.ForeignKey(
+        "core.ChiNhanh",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="users",
+        verbose_name="Chi nhánh",
+    )
+    phong_ban = models.ForeignKey(
+        "core.PhongBan",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="users",
+        verbose_name="Phòng ban",
+    )
 
-    REQUIRED_FIELDS = ["email","ho_va_ten"]
+    REQUIRED_FIELDS = ["email", "ho_va_ten"]
 
     class Meta:
         verbose_name = "Người dùng"
@@ -61,7 +76,6 @@ class Customer(AbstractUser):
             ("approve_outgoing_document", "Có thể phê duyệt văn bản đi"),
             ("return_outgoing_document", "Có thể hoàn trả văn bản đi"),
             ("issue_outgoing_document", "Có thể ban hành văn bản đi"),
-# Create your models here.
 
             ("assign_task", "Có thể giao việc"),
             ("edit_task", "Có thể chỉnh sửa công việc"),
@@ -75,17 +89,22 @@ class Customer(AbstractUser):
             ("add_document_to_record", "Có thể thêm văn bản vào hồ sơ"),
             ("remove_document_from_record", "Có thể xóa văn bản khỏi hồ sơ"),
         ]
+
     def __str__(self):
         return self.ho_va_ten or self.username
+
     @property
     def is_admin_role(self):
         return self.role == self.Role.ADMIN
+
     @property
     def is_lanh_dao(self):
         return self.role == self.Role.LANH_DAO
+
     @property
     def is_van_thu(self):
         return self.role == self.Role.VAN_THU
+
     @property
     def is_chuyen_vien(self):
         return self.role == self.Role.CHUYEN_VIEN

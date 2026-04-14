@@ -213,13 +213,13 @@ def sua_ho_so_van_ban(request, pk):
     else:
         init_phong_ban = ho_so.phongxemhoso_set.values_list('phong_ban_id', flat=True)
         init_nguoi_xu_ly = ho_so.nguoixulyhoso_set.values_list('nguoi_xu_ly_id', flat=True)
-        
+
         form = HoSoVanBanUpdateForm(instance=ho_so, initial={
             'phong_ban': init_phong_ban,
             'nguoi_xu_ly': init_nguoi_xu_ly,
         })
-        
-        return render(
+
+    return render(
         request,
         "hosovanban/sua-ho-so-van-ban.html",
         {
@@ -260,7 +260,7 @@ def chi_tiet_van_ban_trong_ho_so(request, ho_so_id, vb_id):
     return render(request, "hosovanban/chi-tiet-van-ban.html", context)
 
 
-@role_required("vanthu")
+@role_required(Customer.Role.VAN_THU)
 def xoa_van_ban_khoi_ho_so(request, ho_so_id, vb_id):
     if request.method == "POST":
         ho_so = get_object_or_404(HoSoVanBan, pk=ho_so_id)
