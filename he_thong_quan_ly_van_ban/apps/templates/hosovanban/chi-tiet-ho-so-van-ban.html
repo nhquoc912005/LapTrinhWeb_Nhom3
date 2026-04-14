@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}Chi tiết hồ sơ văn bản - QLVB{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'core:dashboard' %}">
+        <svg width="14" height="14" viewBox="0 0 24 24">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+        </svg>Trang chủ
+    </a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="{% url 'hosovanban:danh_sach' %}">Hồ sơ văn bản</a>
+    <span class="breadcrumb-sep">›</span>
+    <span>Chi tiết hồ sơ văn bản</span>
+{% endblock %}
+
+{% block page_wrapper %}
+<div class="page-main">
+    {% if messages %}
+        <div class="messages" style="margin-bottom:16px;">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}" style="padding:10px; background:#d1fae5; color:#065f46; border-radius:4px;">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="filter-card" style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:24px; margin-bottom:24px; position:relative;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+            <h3 style="color:#0f172a; font-size:16px; font-weight:700; border-left:4px solid #0284C7; padding-left:12px; margin:0; text-transform:uppercase;">
+                THÔNG TIN HỒ SƠ VĂN BẢN
+            </h3>
+            
+            <div style="display:flex; gap:12px;">
+                {% if request.user.is_van_thu %}
+                    {% if ho_so.trang_thai == 1 %}
+                    <a href="{% url 'hosovanban:sua' ho_so.pk %}" class="btn" style="display:inline-flex; align-items:center; gap:8px; padding:8px 16px; background:#0284C7; color:white; border-radius:4px; text-decoration:none; font-weight:600; font-size:14px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg> 
+                        Chỉnh sửa
+                    </a>
+                    {% endif %}
+                    
+                    <form method="post" action="{% url 'hosovanban:xoa' ho_so.pk %}" onsubmit="return confirm('Bạn có chắc chắn muốn xóa hồ sơ văn bản này không?');" style="margin:0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn" style="display:inline-flex; align-items:center; gap:8px; padding:8px 16px; background:#ef4444; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:600; font-size:14px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                            Xóa
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="position:absolute; right:24px; top:80px;">
+            {% if ho_so.trang_thai == 1 %}
+            <span style="background-color: #d1fae5; color: #065f46; padding: 6px 12px; border-radius: 9999px; font-size: 13px; font-weight: 600;">Hiện hành</span>
+            {% else %}
+            <span style="background-color: #f1f5f9; color: #475569; padding: 6px 12px; border-radius: 9999px; font-size: 13px; font-weight: 600;">Lưu trữ</span>
+            {% endif %}
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:32px;">
+            <div>
+                <div style="margin-bottom:16px;">
+                    <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Tiêu đề hồ sơ</div>
+                    <div style="color:#0f172a; font-size:15px; font-weight:500;">{{ ho_so.tieu_de_ho_so }}</div>
+                </div>
+                <div style="margin-bottom:16px;">
+                    <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Ngày tạo hồ sơ</div>
+                    <div style="color:#0f172a; font-size:15px; font-weight:500;">{{ ho_so.ngay_tao_ho_so|date:"d/m/Y" }}</div>
+                </div>
+                <div style="margin-bottom:16px;">
+                    <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Đơn vị / Phòng ban</div>
+                    <div style="color:#0f172a; font-size:15px; font-weight:500;">
+                        {% for ph in ds_phong_ban %}
+                            {{ ph.phong_ban.ten_phong_ban }}{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            --
+                        {% endfor %}
+                    </div>
+                </div>
+                <div>
+                    <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Mô tả</div>
+                    <div style="color:#0f172a; font-size:15px; font-weight:500; line-height:1.5;">{{ ho_so.mo_ta|default:"--" }}</div>
+                </div>
+            </div>
+            
+            <div>
+                <div style="margin-bottom:16px;">
+                    <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Ký hiệu hồ sơ</div>
+                    <div style="color:#0f172a; font-size:15px; font-weight:500;">{{ ho_so.ky_hieu_ho_so }}</div>
+                </div>
+                <div style="margin-bottom:16px;">
+                    <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Thời gian bảo quản</div>
+                    <div style="color:#0f172a; font-size:15px; font-weight:500;">{{ ho_so.thoi_gian_bao_quan }}</div>
+                </div>
+                <div style="margin-bottom:16px;">
+                    <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Quyền xử lý văn bản</div>
+                    <div style="color:#0f172a; font-size:15px; font-weight:500;">
+                        {% for nx in ds_nguoi_xu_ly %}
+                            {{ nx.nguoi_xu_ly.ho_va_ten }}{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            --
+                        {% endfor %}
+                    </div>
+                </div>
+                <div style="margin-bottom:16px;">
+                    <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Số năm lưu trữ</div>
+                    <div style="color:#0f172a; font-size:15px; font-weight:500; padding-bottom:8px; border-bottom:1px solid #d1d5db; width: fit-content; min-width: 80px;">
+                        {{ ho_so.so_nam_luu_tru|default:"--" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; padding-top:16px; border-top:1px solid #f1f5f9;">
+            <div style="color:#64748b; font-size:13px;">Văn thư: <span style="color:#0f172a; font-weight:600;">{{ ho_so.nguoi_tao.ho_va_ten|default:"--" }}</span></div>
+            <div style="color:#64748b; font-size:13px;">Ngày cập nhật: {{ ho_so.ngay_cap_nhat|date:"d/m/Y" }}</div>
+        </div>
+    </div>
+
+    <!-- DANH SÁCH VĂN BẢN TRONG HỒ SƠ -->
+    <div class="filter-card" style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:24px;">
+        <div style="margin-bottom:24px;">
+            <h3 style="color:#0f172a; font-size:16px; font-weight:700; border-left:4px solid #0284C7; padding-left:12px; margin:0; text-transform:uppercase;">
+                DANH SÁCH HỒ SƠ ({{ ds_van_ban|length }})
+            </h3>
+        </div>
+
+        <div class="table-container">
+            <div style="overflow-x:auto;">
+                <table class="data-table" style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr style="border-bottom:1px solid #e5e7eb;">
+                            <th style="text-align:left; padding:12px 16px; font-weight:600; color:#475569; font-size:14px; width:60px;">STT</th>
+                            <th style="text-align:left; padding:12px 16px; font-weight:600; color:#475569; font-size:14px;">Số ký hiệu</th>
+                            <th style="text-align:left; padding:12px 16px; font-weight:600; color:#475569; font-size:14px;">Trích yếu</th>
+                            <th style="text-align:left; padding:12px 16px; font-weight:600; color:#475569; font-size:14px;">Đơn vị ban hành</th>
+                            <th style="text-align:left; padding:12px 16px; font-weight:600; color:#475569; font-size:14px;">Ngày văn bản</th>
+                            <th style="text-align:left; padding:12px 16px; font-weight:600; color:#475569; font-size:14px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vb in ds_van_ban %}
+                        <tr style="border-bottom:1px solid #f1f5f9; cursor: pointer;" onclick="window.location.href='{% url 'hosovanban:chi_tiet_van_ban' ho_so.pk vb.pk %}';">
+                            <td style="padding:16px; font-size:14px; color:#333;">{{ forloop.counter }}</td>
+                            <td style="padding:16px; font-size:14px;"><a href="{% url 'hosovanban:chi_tiet_van_ban' ho_so.pk vb.pk %}" style="color:#0284C7; text-decoration:none; font-weight:500;" onclick="event.stopPropagation();">{{ vb.so_ky_hieu }}</a></td>
+                            <td style="padding:16px; font-size:14px; color:#333;">{{ vb.trich_yeu }}</td>
+                            <td style="padding:16px; font-size:14px; color:#333;">{{ vb.don_vi_ban_hanh }}</td>
+                            <td style="padding:16px; font-size:14px; color:#333;">{{ vb.ngay_van_ban|date:"d/m/Y" }}</td>
+                            <td style="padding:16px; font-size:14px;">
+                                {% if request.user.is_van_thu and ho_so.trang_thai == 1 %}
+                                <form method="post" action="{% url 'hosovanban:xoa_van_ban_khoi_ho_so' ho_so.pk vb.pk %}" style="margin:0;" onsubmit="event.stopPropagation(); return confirm('Bạn có chắc chắn muốn gỡ văn bản này khỏi hồ sơ không?');">
+                                    {% csrf_token %}
+                                    <button type="submit" style="color:#ef4444; background:none; border:none; cursor:pointer; padding:0; display:flex;" title="Gỡ văn bản khỏi hồ sơ" onclick="event.stopPropagation();">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align:center; padding:32px; color:#64748b; font-size:14px;">Chưa có văn bản nào trong hồ sơ này.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
