@@ -9,6 +9,30 @@
         gap: 24px;
     }
 
+    .dashboard-home__hero {
+        display: grid;
+        gap: 8px;
+        padding: 4px 2px 0;
+    }
+
+    .dashboard-home__eyebrow {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #0284c7;
+    }
+
+    .dashboard-home__title {
+        margin: 0;
+        font-size: 30px;
+        line-height: 1.15;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: #0f172a;
+    }
+
     .dashboard-home__section {
         display: grid;
         gap: 24px;
@@ -430,6 +454,11 @@
         {% endif %}
 
         <div class="dashboard-home">
+            <section class="dashboard-home__hero" aria-label="Tong quan he thong">
+                <p class="dashboard-home__eyebrow">Trang chủ điều hành</p>
+                <h2 class="dashboard-home__title">TỔNG QUAN HỆ THỐNG</h2>
+            </section>
+
             <section class="dashboard-home__section">
                 <div class="dashboard-home__stats">
                     {% for card in dashboard_metrics %}

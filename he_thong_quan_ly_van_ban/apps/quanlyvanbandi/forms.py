@@ -40,6 +40,7 @@ class VanBanDiForm(forms.ModelForm):
             "loai_van_ban",
             "hinh_thuc",
             "trich_yeu",
+            "ngay_van_ban",
             "han_xu_ly",
             "do_khan",
             "file_dinh_kem",
@@ -81,9 +82,12 @@ class VanBanDiForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         self.fields["lanh_dao_duyet"].queryset = NguoiDung.objects.filter(
-            chuc_vu="Lãnh Đạo"
+            chuc_vu=NguoiDung.ChucVu.LANH_DAO
         )
         self.fields["lanh_dao_duyet"].empty_label = "-- Chọn lãnh đạo --"
+
+        if self.instance and self.instance.pk and self.instance.ngay_van_ban:
+            self.fields["ngay_van_ban"].initial = self.instance.ngay_van_ban
 
         self.fields["don_vi_soan_thao"].required = False
         self.fields["han_xu_ly"].required = False

@@ -20,6 +20,18 @@ from django.core.paginator import Paginator
 from django.db.models import Q, Count
 
 
+def _current_core_user(request):
+    return request.user.core_profile
+
+
+def _user_is_document_creator(request, van_ban):
+    return van_ban.nguoi_tao_id == _current_core_user(request).pk
+
+
+def _user_is_assigned_approver(request, van_ban):
+    return van_ban.lanh_dao_duyet_id == _current_core_user(request).pk
+
+
 @role_required(*Customer.Role.values)
 def van_ban_di(request):
     trang_thai = request.GET.get("trang_thai", "").strip()
@@ -126,8 +138,7 @@ def van_ban_di_edit(request, vb_pk=None):
 
     if vb_pk is not None:
         van_ban = get_object_or_404(VanBan, pk=vb_pk, phan_loai="Văn bản đi")
-        user = request.user
-        if not user.is_staff and van_ban.nguoi_tao_id != user.id:
+        if not _user_is_document_creator(request, van_ban):
             raise PermissionDenied
 
     is_edit = van_ban is not None
@@ -215,12 +226,12 @@ def chi_tiet_van_ban_di(request, id):
     # ── Kiểm tra quyền xem chi tiết ──
     if user.has_role(Customer.Role.CHUYEN_VIEN):
         # Chứ người tạo mới được xem
-        if vb.nguoi_tao != user.nguoi_dung_core:
+        if not _user_is_document_creator(request, vb):
             raise PermissionDenied
 
     elif user.has_role(Customer.Role.LANH_DAO):
         # Chỉ lãnh đạo được chỉ định mới được xem
-        if vb.lanh_dao_duyet != user.nguoi_dung_core:
+        if not _user_is_assigned_approver(request, vb):
             raise PermissionDenied
 
     elif user.has_role(Customer.Role.VAN_THU):
@@ -263,6 +274,7 @@ def chi_tiet_van_ban_di(request, id):
     })
 
 @require_POST
+@role_required(Customer.Role.LANH_DAO)
 def phe_duyet_van_ban_di(request, vb_pk):
     vb = get_object_or_404(
         VanBan,
@@ -270,9 +282,12 @@ def phe_duyet_van_ban_di(request, vb_pk):
         phan_loai="Văn bản đi"
     )
 
-    user = request.user.nguoi_dung_core
+    user = _current_core_user(request)
 
     if user.chuc_vu != NguoiDung.ChucVu.LANH_DAO:
+        raise PermissionDenied
+
+    if not _user_is_assigned_approver(request, vb):
         raise PermissionDenied
 
     if vb.trang_thai in ["Đã Xử Lý", "Đã ban hành", "Xem Để Biết"]:
@@ -309,6 +324,7 @@ def phe_duyet_van_ban_di(request, vb_pk):
     return redirect("quanlyvanbandi:chi_tiet_van_ban_di", id=vb.pk)
 
 @require_POST
+@role_required(Customer.Role.LANH_DAO)
 def hoan_tra_van_ban_di(request, vb_pk):
     vb = get_object_or_404(
         VanBan,
@@ -316,11 +332,12 @@ def hoan_tra_van_ban_di(request, vb_pk):
         phan_loai="Văn bản đi",
     )
 
-    nguoi_dung = getattr(request.user, "nguoi_dung_core", None)
-    if not nguoi_dung:
-        raise PermissionDenied
+    nguoi_dung = _current_core_user(request)
 
     if nguoi_dung.chuc_vu != NguoiDung.ChucVu.LANH_DAO:
+        raise PermissionDenied
+
+    if not _user_is_assigned_approver(request, vb):
         raise PermissionDenied
 
     if vb.trang_thai in ["Chờ ban hành", "Đã ban hành"]:
@@ -513,7 +530,7 @@ def xoa_van_ban_di(request, vb_pk):
     vb = get_object_or_404(VanBan, pk=vb_pk, phan_loai="Văn bản đi")
 
     # Chỉ người tạo mới được xóa
-    if vb.nguoi_tao != request.user.nguoi_dung_core:
+    if not _user_is_document_creator(request, vb):
         raise PermissionDenied
 
     # Chỉ xóa khi chưa được duyệt
@@ -527,4 +544,4 @@ def xoa_van_ban_di(request, vb_pk):
 
     messages.success(request, "Xóa văn bản thành công.")
     return redirect("quanlyvanbandi:van_ban_di")
-
+
