@@ -398,7 +398,13 @@
                 </td>
 
                 <td>
-                  {% if vb.trang_thai|lower == "chờ xử lý" %}
+                  {% if not request.user.is_van_thu and vb.trang_thai == "Chờ ban hành" %}
+                    {# CV và LĐ thấy "Đã Xử Lý" khi Lãnh đạo đã duyệt (status = Chờ ban hành) #}
+                    <span class="status-badge badge-da-xu-ly">Đã Xử Lý</span>
+                  {% elif not request.user.is_van_thu and vb.trang_thai == "Đã ban hành" %}
+                    {# CV và LĐ thấy "Đã Xử Lý" khi đã ban hành xong #}
+                    <span class="status-badge badge-da-xu-ly">Đã Xử Lý</span>
+                  {% elif vb.trang_thai|lower == "chờ xử lý" %}
                     <span class="status-badge badge-cho-xu-ly">{{ vb.trang_thai }}</span>
                   {% elif vb.trang_thai|lower == "đã xử lý" %}
                     <span class="status-badge badge-da-xu-ly">{{ vb.trang_thai }}</span>

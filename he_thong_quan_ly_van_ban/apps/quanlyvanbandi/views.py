@@ -23,14 +23,15 @@ from django.db.models import Q, Count
 @role_required(*Customer.Role.values)
 def van_ban_di(request):
     trang_thai = request.GET.get("trang_thai", "").strip()
-    keyword = request.GET.get("keyword", "").strip()
-    don_vi = request.GET.get("don_vi_soan_thao", "").strip()
-    loai_vb = request.GET.get("loai_van_ban", "").strip()
-    hinh_thuc = request.GET.get("hinh_thuc", "").strip()
-    do_khan = request.GET.get("do_khan", "").strip()
+    keyword    = request.GET.get("keyword", "").strip()
+    don_vi     = request.GET.get("don_vi_soan_thao", "").strip()
+    loai_vb    = request.GET.get("loai_van_ban", "").strip()
+    hinh_thuc  = request.GET.get("hinh_thuc", "").strip()
+    do_khan    = request.GET.get("do_khan", "").strip()
 
     user = request.user
 
+    # ── Phân quyền theo role ──
     if user.has_role(Customer.Role.VAN_THU):
         trang_thai_filter_choices = [
             ("", "Tất cả"),
@@ -39,14 +40,17 @@ def van_ban_di(request):
             ("Xem Để Biết", "Xem để biết"),
         ]
         allowed_statuses = ["Chờ ban hành", "Đã ban hành", "Xem Để Biết"]
+
     else:
+        # Cả Chuyên viên lẫn Lãnh đạo dùng bộ lọc này
         trang_thai_filter_choices = [
             ("", "Tất cả"),
             ("Chờ Xử Lý", "Chờ xử lý"),
-            ("Đã Xử Lý", "Đã xử lý"),
+            ("Đã Xử Lý", "Đã xử lý"),   # hiển thị cho cả Chờ ban hành + Đã ban hành
             ("Hoàn Trả", "Hoàn trả"),
             ("Xem Để Biết", "Xem để biết"),
         ]
+        # CV/LĐ thấy cả trạng thái “Chờ ban hành” / “Đã ban hành” (hiển thị là “Đã Xử Lý”)
         allowed_statuses = [
             "Chờ Xử Lý",
             "Đã Xử Lý",
@@ -58,49 +62,56 @@ def van_ban_di(request):
 
     ds_van_ban_di_list = VanBan.objects.filter(
         phan_loai="Văn bản đi",
-        trang_thai__in=allowed_statuses
+        trang_thai__in=allowed_statuses,
     ).order_by("-van_ban_id")
 
-    if user.has_role(Customer.Role.LANH_DAO):
+    # ── Lọc theo quyền xem ──
+    if user.has_role(Customer.Role.CHUYEN_VIEN):
+        # Chứ xem văn bản do chính mình tạo
+        ds_van_ban_di_list = ds_van_ban_di_list.filter(
+            nguoi_tao=user.nguoi_dung_core
+        )
+    elif user.has_role(Customer.Role.LANH_DAO):
+        # Chỉ xem văn bản được chỉ định cho mình ký
         ds_van_ban_di_list = ds_van_ban_di_list.filter(
             lanh_dao_duyet=user.nguoi_dung_core
         )
 
+    # ── Bộ lọc trạng thái: "Dã Xử Lý" của CV/LĐ = Chờ ban hành + Đã ban hành + Đã Xử Lý ──
     if trang_thai:
-        ds_van_ban_di_list = ds_van_ban_di_list.filter(trang_thai=trang_thai)
+        if trang_thai == "Đã Xử Lý" and not user.has_role(Customer.Role.VAN_THU):
+            ds_van_ban_di_list = ds_van_ban_di_list.filter(
+                trang_thai__in=["Đã Xử Lý", "Chờ ban hành", "Đã ban hành"]
+            )
+        else:
+            ds_van_ban_di_list = ds_van_ban_di_list.filter(trang_thai=trang_thai)
 
     if keyword:
         ds_van_ban_di_list = ds_van_ban_di_list.filter(
-            Q(so_ky_hieu__icontains=keyword) |
-            Q(trich_yeu__icontains=keyword)
+            Q(so_ky_hieu__icontains=keyword) | Q(trich_yeu__icontains=keyword)
         )
-
     if don_vi:
         ds_van_ban_di_list = ds_van_ban_di_list.filter(don_vi_soan_thao=don_vi)
-
     if loai_vb:
         ds_van_ban_di_list = ds_van_ban_di_list.filter(loai_van_ban=loai_vb)
-
     if hinh_thuc:
         ds_van_ban_di_list = ds_van_ban_di_list.filter(hinh_thuc=hinh_thuc)
-
     if do_khan:
         ds_van_ban_di_list = ds_van_ban_di_list.filter(do_khan=do_khan)
 
-    paginator = Paginator(ds_van_ban_di_list, 10)
-    page_number = request.GET.get("page")
+    paginator    = Paginator(ds_van_ban_di_list, 10)
+    page_number  = request.GET.get("page")
     ds_van_ban_di = paginator.get_page(page_number)
 
     context = {
         "ds_van_ban_di": ds_van_ban_di,
-        "filter_don_vi_choices": VanBan.DON_VI_SOAN_THAO_CHOICES,
-        "filter_loai_choices": VanBan.LOAI_VAN_BAN_CHOICES,
+        "filter_don_vi_choices":    VanBan.DON_VI_SOAN_THAO_CHOICES,
+        "filter_loai_choices":      VanBan.LOAI_VAN_BAN_CHOICES,
         "filter_hinh_thuc_choices": VanBan.HINH_THUC_CHOICES,
-        "filter_do_khan_choices": VanBan.DO_KHAN_CHOICES,
+        "filter_do_khan_choices":   VanBan.DO_KHAN_CHOICES,
         "filter_trang_thai_choices": trang_thai_filter_choices,
-
         "selected_trang_thai": trang_thai,
-        "selected_don_vi": don_vi,
+        "selected_don_vi":   don_vi,
         "selected_loai_vb": loai_vb,
         "selected_hinh_thuc": hinh_thuc,
         "selected_do_khan": do_khan,
@@ -198,36 +209,55 @@ def van_ban_di_edit(request, vb_pk=None):
 
 @role_required(*Customer.Role.values)
 def chi_tiet_van_ban_di(request, id):
-    vb = get_object_or_404(VanBan, pk=id, phan_loai="Văn bản đi")
+    vb   = get_object_or_404(VanBan, pk=id, phan_loai="Văn bản đi")
     user = request.user
 
-    if user.has_role(Customer.Role.LANH_DAO):
+    # ── Kiểm tra quyền xem chi tiết ──
+    if user.has_role(Customer.Role.CHUYEN_VIEN):
+        # Chứ người tạo mới được xem
+        if vb.nguoi_tao != user.nguoi_dung_core:
+            raise PermissionDenied
+
+    elif user.has_role(Customer.Role.LANH_DAO):
+        # Chỉ lãnh đạo được chỉ định mới được xem
         if vb.lanh_dao_duyet != user.nguoi_dung_core:
             raise PermissionDenied
 
+    elif user.has_role(Customer.Role.VAN_THU):
+        # Văn thư chỉ thấy khi đã qua phê duyệt lãnh đạo
+        if vb.trang_thai not in ["Chờ ban hành", "Đã ban hành", "Xem Để Biết"]:
+            raise PermissionDenied
+
     ds_lien_quan = vb.vanbanlienquan_set.all()
-    ds_van_thu = NguoiDung.objects.filter(
+    ds_van_thu   = NguoiDung.objects.filter(
         chuc_vu=NguoiDung.ChucVu.VAN_THU
     ).order_by("ho_va_ten")
 
-    hoan_tra = vb.vanbanhoantra_set.order_by("-ngay_hoan_tra").first()
+    hoan_tra     = vb.vanbanhoantra_set.order_by("-ngay_hoan_tra").first()
     duyet_record = vb.vanbanduyet_set.order_by("-ngay_duyet").first()
 
-    # Danh sách chi nhánh cho popup ban hành
+    # ── Hiển thị trạng thái theo role ──
+    # CV và LĐ thấy “Đã Xử Lý” khi status thực là “Chờ ban hành” hoặc “Đã ban hành”
+    if not user.has_role(Customer.Role.VAN_THU) and vb.trang_thai in ["Chờ ban hành", "Đã ban hành"]:
+        hien_thi_trang_thai = "Đã Xử Lý"
+    else:
+        hien_thi_trang_thai = vb.trang_thai
+
     ds_chi_nhanh = ChiNhanh.objects.order_by("ten_chi_nhanh")
 
     return render(request, "vanbandi/chi-tiet-van-ban-di.html", {
-        "vb": vb,
-        "ds_lien_quan": ds_lien_quan,
-        "ds_van_thu": ds_van_thu,
-        "approve_action_url": reverse("quanlyvanbandi:phe_duyet_van_ban_di", args=[vb.pk]),
+        "vb":                  vb,
+        "ds_lien_quan":        ds_lien_quan,
+        "ds_van_thu":          ds_van_thu,
+        "approve_action_url":  reverse("quanlyvanbandi:phe_duyet_van_ban_di", args=[vb.pk]),
         "selected_van_thu_id": None,
-        "ghi_chu_mac_dinh": "",
+        "ghi_chu_mac_dinh":    "",
         "show_approval_modal": False,
-        "hoan_tra": hoan_tra,
-        "duyet_record": duyet_record,
-        "ds_chi_nhanh": ds_chi_nhanh,
-        "ban_hanh_url": reverse("quanlyvanbandi:ban_hanh_van_ban", args=[vb.pk]),
+        "hoan_tra":            hoan_tra,
+        "duyet_record":        duyet_record,
+        "ds_chi_nhanh":        ds_chi_nhanh,
+        "ban_hanh_url":        reverse("quanlyvanbandi:ban_hanh_van_ban", args=[vb.pk]),
+        "hien_thi_trang_thai": hien_thi_trang_thai,
     })
 
 @require_POST
