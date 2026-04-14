@@ -5,6 +5,9 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
+from apps.accounts.decorators import role_required
+from apps.accounts.models import Customer
+
 from .forms import VanBanDenForm
 from .models import VanBanDen, TepVanBanDen, VanBanDenChuyenTiep
 
@@ -24,6 +27,7 @@ def _chuyen_vien_duoc_phan_cong(vb, user):
 
 
 @login_required
+@role_required(Customer.Role.VAN_THU, Customer.Role.LANH_DAO, Customer.Role.CHUYEN_VIEN)
 def danh_sach_van_ban_den(request):
     # ===== DÙNG CHUNG =====
     ds = VanBanDen.objects.select_related(
@@ -93,6 +97,7 @@ def danh_sach_van_ban_den(request):
 
 
 @login_required
+@role_required(Customer.Role.VAN_THU, Customer.Role.LANH_DAO, Customer.Role.CHUYEN_VIEN)
 def chi_tiet_van_ban_den(request, pk):
     vb = get_object_or_404(
         VanBanDen.objects.select_related('nguoi_tao', 'lanh_dao_xu_ly'),
@@ -158,6 +163,7 @@ def chi_tiet_van_ban_den(request, pk):
 
 # ===== VĂN THƯ =====
 @login_required
+@role_required(Customer.Role.VAN_THU)
 def them_van_ban_den(request):
     User = get_user_model()
     lanh_daos = User.objects.filter(role='LANH_DAO')
@@ -200,6 +206,7 @@ def them_van_ban_den(request):
 
 # ===== VĂN THƯ =====
 @login_required
+@role_required(Customer.Role.VAN_THU)
 def sua_van_ban_den(request, pk):
     User = get_user_model()
     vb = get_object_or_404(VanBanDen, pk=pk)
@@ -283,6 +290,7 @@ def sua_van_ban_den(request, pk):
 
 # ===== VĂN THƯ =====
 @login_required
+@role_required(Customer.Role.VAN_THU)
 def xoa_van_ban_den(request, pk):
     vb = get_object_or_404(VanBanDen, pk=pk)
 
@@ -300,6 +308,7 @@ def xoa_van_ban_den(request, pk):
 
 # ===== LÃNH ĐẠO =====
 @login_required
+@role_required(Customer.Role.LANH_DAO)
 def lanh_dao_luu_van_ban_den(request, pk):
     vb = get_object_or_404(VanBanDen, pk=pk)
 
@@ -325,6 +334,7 @@ lanh_dao_xem_de_biet_van_ban_den = lanh_dao_luu_van_ban_den
 
 # ===== LÃNH ĐẠO =====
 @login_required
+@role_required(Customer.Role.LANH_DAO)
 def lanh_dao_chuyen_tiep_van_ban_den(request, pk):
     vb = get_object_or_404(VanBanDen, pk=pk)
 
@@ -371,6 +381,7 @@ def lanh_dao_chuyen_tiep_van_ban_den(request, pk):
 
 # ===== LÃNH ĐẠO =====
 @login_required
+@role_required(Customer.Role.LANH_DAO)
 def lanh_dao_hoan_tra_van_ban_den(request, pk):
     vb = get_object_or_404(VanBanDen, pk=pk)
 
