@@ -89,6 +89,10 @@
         color: #dc2626;
     }
 
+    .summary-card__trend.neutral {
+        color: #475569;
+    }
+
     .summary-card__label {
         margin: 0 0 6px;
         font-size: 15px;
@@ -308,6 +312,13 @@
         display: grid;
     }
 
+    .surface-card__empty {
+        padding: 24px;
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
     .document-list__item,
     .task-list__item {
         display: grid;
@@ -446,7 +457,7 @@
 {% block page_wrapper %}
     <div class="page-main">
         {% if messages %}
-            <div class="messages" style="margin-bottom: 18px;">
+            <div class="messages messages-inline">
                 {% for message in messages %}
                     <div class="message">{{ message }}</div>
                 {% endfor %}
@@ -464,7 +475,7 @@
                     {% for card in dashboard_metrics %}
                         <article class="summary-card">
                             <div class="summary-card__head">
-                                <div class="summary-card__icon" style="background: {{ card.accent }};">
+                                <div class="summary-card__icon summary-card__icon--dynamic" style="--card-accent: {{ card.accent }};">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                         <path d="{{ card.icon_path }}"/>
                                     </svg>
@@ -490,9 +501,9 @@
                                 {% for item in weekly_chart %}
                                     <div class="week-chart__group">
                                         <div class="week-chart__bars">
-                                            <span class="week-chart__bar incoming" style="height: {{ item.incoming_height }}%;"></span>
-                                            <span class="week-chart__bar outgoing" style="height: {{ item.outgoing_height }}%;"></span>
-                                            <span class="week-chart__bar tasks" style="height: {{ item.tasks_height }}%;"></span>
+                                            <span class="week-chart__bar incoming" style="--bar-height: {{ item.incoming_height }}%;"></span>
+                                            <span class="week-chart__bar outgoing" style="--bar-height: {{ item.outgoing_height }}%;"></span>
+                                            <span class="week-chart__bar tasks" style="--bar-height: {{ item.tasks_height }}%;"></span>
                                         </div>
                                         <span class="week-chart__label">{{ item.label }}</span>
                                     </div>
@@ -500,15 +511,15 @@
                             </div>
                             <div class="chart-legend">
                                 <span class="chart-legend__item">
-                                    <span class="chart-legend__swatch" style="background:#f6b10a;"></span>
+                                    <span class="chart-legend__swatch chart-legend__swatch--tasks"></span>
                                     Công việc
                                 </span>
                                 <span class="chart-legend__item">
-                                    <span class="chart-legend__swatch" style="background:#5ab85e;"></span>
+                                    <span class="chart-legend__swatch chart-legend__swatch--outgoing"></span>
                                     Văn bản đi
                                 </span>
                                 <span class="chart-legend__item">
-                                    <span class="chart-legend__swatch" style="background:#0f80a9;"></span>
+                                    <span class="chart-legend__swatch chart-legend__swatch--incoming"></span>
                                     Văn bản đến
                                 </span>
                             </div>
@@ -521,10 +532,10 @@
                         </div>
                         <div class="surface-card__body">
                             <div class="status-chart">
-                                <div class="status-chart__ring" style="background: {{ status_gradient }};">
+                                <div class="status-chart__ring status-chart__ring--dynamic" style="--status-gradient: {{ status_gradient }};">
                                     <div class="status-chart__center">
-                                        <strong>740</strong>
-                                        <span>hồ sơ</span>
+                                        <strong>{{ status_total }}</strong>
+                                        <span>{{ status_total_label }}</span>
                                     </div>
                                 </div>
 
@@ -549,7 +560,7 @@
                     <article class="surface-card">
                         <div class="surface-card__header">
                             <h2 class="surface-card__title">Văn bản gần đây</h2>
-                            <a class="surface-card__link" href="{% url 'quanlyvanbanden:danh_sach' %}">Xem tất cả</a>
+                            <a class="surface-card__link" href="{{ recent_documents_url }}">Xem tất cả</a>
                         </div>
                         <div class="document-list">
                             {% for item in recent_documents %}
@@ -563,6 +574,10 @@
                                     </div>
                                     <p class="document-list__title">{{ item.date }}</p>
                                 </div>
+                            {% empty %}
+                                <div class="surface-card__empty">
+                                    Chưa có văn bản nào trong phạm vi bạn được phép xem.
+                                </div>
                             {% endfor %}
                         </div>
                     </article>
@@ -570,7 +585,7 @@
                     <article class="surface-card">
                         <div class="surface-card__header">
                             <h2 class="surface-card__title">Công việc cần xử lý gấp</h2>
-                            <a class="surface-card__link" href="{% url 'quanlycongviec:giao_viec' %}">Xem tất cả</a>
+                            <a class="surface-card__link" href="{{ urgent_tasks_url }}">Xem tất cả</a>
                         </div>
                         <div class="task-list">
                             {% for item in urgent_tasks %}
@@ -588,6 +603,10 @@
                                         </svg>
                                         Hạn: {{ item.deadline }}
                                     </p>
+                                </div>
+                            {% empty %}
+                                <div class="surface-card__empty">
+                                    Hiện chưa có công việc gấp nào cần theo dõi.
                                 </div>
                             {% endfor %}
                         </div>

@@ -3,316 +3,7 @@
 
 {% block title %}Giao Việc - Hệ thống quản lý văn bản{% endblock %}
 
-{% block extra_css %}
-<style>
-    .form-card {
-        background: #fff;
-        padding: 32px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        margin-top: 16px;
-    }
-
-    .form-title-row {
-        display: flex;
-        align-items: center;
-        margin-bottom: 24px;
-        padding-bottom: 16px;
-        border-bottom: 1px solid #E2E8F0;
-    }
-
-    .form-title-bar {
-        width: 4px;
-        height: 24px;
-        background: #0284C7;
-        margin-right: 12px;
-    }
-
-    .form-title-text {
-        font-size: 18px;
-        font-weight: 700;
-        color: #1E293B;
-        text-transform: uppercase;
-    }
-
-    .form-grid-4 {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 20px;
-        margin-bottom: 20px;
-    }
-
-    .form-grid-2 {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-        margin-bottom: 20px;
-    }
-
-    .form-full {
-        width: 100%;
-        margin-bottom: 20px;
-    }
-
-    .form-label {
-        display: block;
-        font-size: 13px;
-        font-weight: 600;
-        color: #64748B;
-        margin-bottom: 8px;
-    }
-
-    .form-label .required {
-        color: #EF4444;
-        margin-left: 2px;
-    }
-
-    .form-control-static {
-        background: #F1F5F9;
-        border: 1px solid #E2E8F0;
-        padding: 10px 12px;
-
-        color: #475569;
-        font-size: 14px;
-    }
-
-    .drag-drop-area {
-        border: 1px dashed #CBD5E1;
-        background: #F8FAFC;
-        padding: 24px;
-
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .drag-drop-area:hover {
-        border-color: #0284C7;
-        background: #F1F5F9;
-    }
-
-    .drag-drop-text {
-        font-size: 13px;
-        color: #64748B;
-    }
-
-    .drag-drop-link {
-        color: #0284C7;
-        font-weight: 600;
-        text-decoration: none;
-    }
-
-    .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-        margin-top: 32px;
-        padding-top: 24px;
-        border-top: 1px solid #E2E8F0;
-    }
-
-    .btn-save {
-        background: #60A5FA;
-        color: white;
-        padding: 10px 32px;
-
-        font-weight: 600;
-        border: none;
-        cursor: pointer;
-    }
-
-    .btn-cancel {
-        background: #F8FAFC;
-        color: #475569;
-        padding: 10px 32px;
-        border: 1px solid #E2E8F0;
-
-        font-weight: 600;
-        cursor: pointer;
-    }
-
-    /* Filter Tabs Styling */
-    .filter-tabs {
-        display: flex;
-        background: #F1F5F9;
-        padding: 4px;
-        margin-bottom: 24px;
-        width: max-content;
-        border-radius: 0;
-    }
-
-    .filter-tab {
-        padding: 8px 20px;
-        border: none;
-        background: transparent;
-        color: #64748B;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-        border-radius: 0;
-        white-space: nowrap;
-    }
-
-    .filter-tab:hover {
-        color: #0284C7;
-        background: rgba(2, 132, 199, 0.05);
-    }
-
-    .filter-tab.active {
-        background: white;
-        color: #0284C7;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    .badge-cho-xu-ly {
-        background: #FEF3C7;
-        color: #92400E;
-    }
-
-    /* Yellow */
-    .badge-cho-duyet {
-        background: #F3E8FF;
-        color: #6B21A8;
-    }
-
-    /* Purple */
-    .badge-hoan-tra {
-        background: #FEE2E2;
-        color: #991B1B;
-    }
-
-    /* Red */
-    .badge-da-hoan-thanh {
-        background: #D1FAE5;
-        color: #065F46;
-    }
-
-    /* Green */
-
-    .data-table tbody tr {
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-
-    .data-table tbody tr:hover {
-        background-color: #F8FAFC !important;
-    }
-
-    /* Detail Modal Styles */
-    .detail-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 2000;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        backdrop-filter: blur(4px);
-    }
-
-    .detail-modal {
-        background: white;
-        width: 800px;
-        max-width: 95%;
-        max-height: 90vh;
-
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .detail-header {
-        padding: 20px 24px;
-        background: #F8FAFC;
-        border-bottom: 1px solid #E2E8F0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .detail-body {
-        padding: 24px;
-        overflow-y: auto;
-    }
-
-    .detail-section {
-        margin-bottom: 24px;
-    }
-
-    .detail-label {
-        font-size: 12px;
-        font-weight: 700;
-        color: #64748B;
-        text-transform: uppercase;
-        margin-bottom: 8px;
-        display: block;
-    }
-
-    .detail-value {
-        font-size: 14px;
-        color: #1E293B;
-        line-height: 1.6;
-    }
-
-    .detail-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 24px;
-        margin-bottom: 24px;
-    }
-
-    .attachment-item {
-        display: flex;
-        align-items: center;
-        padding: 10px;
-        background: #F1F5F9;
-
-        margin-bottom: 8px;
-        text-decoration: none;
-        color: #0284C7;
-        font-weight: 600;
-        font-size: 14px;
-        transition: background 0.2s;
-    }
-
-    .attachment-item:hover {
-        background: #E2E8F0;
-    }
-
-    .selected-files-list {
-        margin-top: 12px;
-        text-align: left;
-    }
-
-    .file-chip {
-        display: inline-flex;
-        align-items: center;
-        background: #E2E8F0;
-        color: #1E293B;
-        padding: 4px 10px;
-
-        margin: 4px;
-        font-size: 12px;
-        font-weight: 500;
-    }
-
-    .file-chip svg {
-        margin-right: 6px;
-    }
-    /* Global square transformation */
-    *:not(.badge):not([class*="badge-"]) {
-        border-radius: 0 !important;
-    }
-    
-    .badge-cho-xu-ly, .badge-cho-duyet, .badge-hoan-tra, .badge-da-hoan-thanh {
-        border-radius: 20px !important;
-    }
-</style>
-{% endblock %}
+{% block extra_css %}{% endblock %}
 
 {% block breadcrumb %}
 <a href="{% url 'core:dashboard' %}">
@@ -323,53 +14,42 @@
 </a>
 <span class="breadcrumb-sep">›</span>
 <a href="{% url 'quanlycongviec:giao_viec' %}" id="bcModule">Quản lý công việc</a>
-<span id="bcAction" style="display:none;"><span class="breadcrumb-sep">›</span> <span>Giao việc</span></span>
+<span id="bcAction" class="d-none"><span class="breadcrumb-sep">›</span> <span>Giao việc</span></span>
 {% endblock %}
 
 {% block content %}
 <div id="congViecListView">
-    <div class="filter-card" style="margin-bottom: 24px;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3
-                style="color:var(--text-color); font-size:16px; font-weight:700; border-left:4px solid var(--primary); padding-left:12px; margin:0; text-transform:uppercase;">
-                TRA CỨU THÔNG TIN
-            </h3>
-        </div>
-        <hr style="border:none; border-top:1px solid var(--border-color); margin:16px 0 24px 0;">
+    <div class="filter-card">
+        <div class="filter-stack">
+            <h2 class="section-title">Tra cứu thông tin</h2>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-            <div class="filter-tabs" id="filterTabs"
-                style="display:flex; background:#F1F5F9; border-radius:4px; padding:4px;">
-                <button class="filter-tab active" data-tab="all">Tất cả</button>
-                <button class="filter-tab" data-tab="Chờ xử lý">Chờ xử lý</button>
-                <button class="filter-tab" data-tab="Hoàn trả_CV">Hoàn trả CV</button>
-                <button class="filter-tab" data-tab="Chờ duyệt">Chờ duyệt</button>
-                <button class="filter-tab" data-tab="Hoàn trả_LĐ">Hoàn trả LĐ</button>
-                <button class="filter-tab" data-tab="Đã hoàn thành">Đã hoàn thành</button>
+            <div class="filter-controls-row">
+                <div class="tab-filter-group" id="filterTabs">
+                    <button class="filter-tab active" data-tab="all">Tất cả</button>
+                    <button class="filter-tab" data-tab="Chờ xử lý">Chờ xử lý</button>
+                    <button class="filter-tab" data-tab="Hoàn trả_CV">Hoàn trả CV</button>
+                    <button class="filter-tab" data-tab="Chờ duyệt">Chờ duyệt</button>
+                    <button class="filter-tab" data-tab="Hoàn trả_LĐ">Hoàn trả LĐ</button>
+                    <button class="filter-tab" data-tab="Đã hoàn thành">Đã hoàn thành</button>
+                </div>
+
+                {% if is_lanh_dao %}
+                <button class="btn btn-primary" id="btnThemCongViec" onclick="showForm()">
+                    + Giao việc
+                </button>
+                {% endif %}
             </div>
-            {% if is_lanh_dao %}
-            <button class="btn btn-primary" id="btnThemCongViec" onclick="showForm()"
-                style="padding:8px 16px; font-weight:600;">
-                + Giao việc
-            </button>
-            {% endif %}
-        </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 250px; gap:24px; align-items:end;">
-            <div class="search-input-wrap" style="position:relative;">
-                <svg width="18" height="18" viewBox="0 0 24 24"
-                    style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted);">
-                    <path
-                        d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+            <div class="custom-search-wrap">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
                 </svg>
-                <input type="text" id="searchKeyword" class="form-control" placeholder="Tìm theo tên công việc..."
-                    style="padding-left:40px; width:100%; font-size:14px; padding-top:10px; padding-bottom:10px;">
+                <input type="text" id="searchKeyword" class="custom-search-input" placeholder="Tìm theo tên công việc...">
             </div>
 
-            <div>
-                <label style="font-weight:600; font-size:13px; margin-bottom:6px; display:block;">Nguồn công
-                    việc</label>
-                <select id="filterNguonCV" class="form-control" style="font-size:14px; padding:10px;">
+            <div class="custom-select-wrap task-source-filter">
+                <label class="filter-label" for="filterNguonCV">Nguồn công việc</label>
+                <select id="filterNguonCV" class="form-control">
                     <option value="">-- Tất cả nguồn --</option>
                     <option value="Văn bản đến">Văn bản đến</option>
                     <option value="Văn bản đi">Văn bản đi</option>
@@ -379,23 +59,23 @@
     </div>
 
     <div class="table-container">
-        <div style="overflow-x:auto;">
+        <div class="table-scroll">
             <table class="data-table">
-                <thead style="background:#F8FAFC;">
+                <thead>
                     <tr>
-                        <th class="text-center" style="width:60px;">STT</th>
-                        <th style="min-width:250px;">Tên công việc</th>
-                        <th style="min-width:180px;">Chuyên viên</th>
-                        <th style="min-width:120px;">Ngày bắt đầu</th>
-                        <th style="min-width:120px;">Hạn xử lý</th>
-                        <th style="min-width:150px;">Nguồn</th>
-                        <th style="min-width:120px;">Trạng thái</th>
+                        <th class="text-center">STT</th>
+                        <th>Tên công việc</th>
+                        <th>Chuyên viên</th>
+                        <th>Ngày bắt đầu</th>
+                        <th>Hạn xử lý</th>
+                        <th>Nguồn</th>
+                        <th>Trạng thái</th>
                     </tr>
                 </thead>
                 <tbody id="congViecBody">
                     {% for task in tasks %}
                     <tr data-id="{{ task.pk }}" data-status="{{ task.trang_thai }}">
-                        <td class="text-center">{{ forloop.counter }}</td>
+                        <td class="text-center">{{ tasks.start_index|add:forloop.counter0 }}</td>
                         <td><strong>{{ task.ten_cong_viec }}</strong></td>
                         <td>{{ task.nguoi_thuc_hien.ho_va_ten }}</td>
                         <td>{{ task.ngay_bat_dau|date:"d/m/Y" }}</td>
@@ -423,20 +103,38 @@
                 </tbody>
             </table>
         </div>
+
+        <div class="pagination">
+            <span class="pagination-info">
+                Hiển thị {{ tasks.start_index }} - {{ tasks.end_index }} của {{ tasks.paginator.count }} công việc
+            </span>
+            <div class="pagination-btns">
+                {% if tasks.has_previous %}
+                    <a href="?page={{ tasks.previous_page_number }}" class="page-btn">Trước</a>
+                {% else %}
+                    <span class="page-btn disabled" aria-disabled="true">Trước</span>
+                {% endif %}
+
+                <span class="page-btn active">{{ tasks.number }}</span>
+
+                {% if tasks.has_next %}
+                    <a href="?page={{ tasks.next_page_number }}" class="page-btn">Sau</a>
+                {% else %}
+                    <span class="page-btn disabled" aria-disabled="true">Sau</span>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
 
-<div id="congViecFormView" style="display:none;">
+<div id="congViecFormView" class="d-none">
     <div class="form-card">
         <form id="cvForm" action="{% url 'quanlycongviec:add_task' %}" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="hidden" id="gvId" name="task_id">
             <input type="hidden" id="deleteFilesInput" name="delete_files" value="">
 
-            <div class="form-title-row">
-                <div class="form-title-bar"></div>
-                <div id="gvFormTitle" class="form-title-text">Giao công việc mới</div>
-            </div>
+            <h2 id="gvFormTitle" class="section-title">Giao công việc mới</h2>
 
             <div class="form-grid-4">
                 <div>
@@ -500,7 +198,7 @@
             </div>
 
             <div class="form-full">
-                <label class="form-label" style="display:flex; align-items:center; gap:8px;">
+                <label class="form-inline-check">
                     <input type="checkbox" name="yeu_cau_phe_duyet" checked>
                     Yêu cầu lãnh đạo phê duyệt kết quả xử lý
                 </label>
@@ -510,23 +208,22 @@
                 <div>
                     <label class="form-label">File đính kèm</label>
                     <div class="drag-drop-area" onclick="document.getElementById('file-input').click()">
-                        <input type="file" id="file-input" name="file_dinh_kem" style="display:none;"
+                        <input type="file" id="file-input" name="file_dinh_kem" class="d-none"
                             onchange="updateFileList(this, 'file-list-main')">
                         <div class="drag-drop-text">Kéo thả file hoặc <span class="drag-drop-link">chọn file</span>
                         </div>
-                        <div style="font-size:11px; color:#94A3B8; margin-top:4px;">Chọn 01 file duy nhất (PDF, DOC, DOCX, XLS, XLSX)</div>
+                        <div class="text-muted mt-8">Chọn 01 file duy nhất (PDF, DOC, DOCX, XLS, XLSX)</div>
                         <div id="file-list-main" class="selected-files-list"></div>
                     </div>
                 </div>
                 <div>
                     <label class="form-label">Tài liệu liên quan (Tải lên)</label>
                     <div class="drag-drop-area" onclick="document.getElementById('ref-file-input').click()">
-                        <input type="file" id="ref-file-input" name="tai_lieu_lien_quan" style="display:none;" multiple
+                        <input type="file" id="ref-file-input" name="tai_lieu_lien_quan" class="d-none" multiple
                             onchange="updateFileList(this, 'file-list-ref')">
                         <div class="drag-drop-text">Kéo thả file hoặc <span class="drag-drop-link">chọn file</span>
                         </div>
-                        <div style="font-size:11px; color:#94A3B8; margin-top:4px;">PDF, DOC, DOCX, XLS, XLSX (Tối đa
-                            50MB/1 file)</div>
+                        <div class="text-muted mt-8">PDF, DOC, DOCX, XLS, XLSX (Tối đa 50MB/1 file)</div>
                         <div id="file-list-ref" class="selected-files-list"></div>
                     </div>
                 </div>
@@ -540,21 +237,21 @@
     </div>
 
     <!-- Preview Area inside Form View -->
-    <div id="formPreviewContainer" style="display:none; margin-top: 32px; background: #F1F5F9; padding: 24px; border: 1px solid #E2E8F0;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <div style="font-size: 13px; font-weight: 600; color: #64748B;">Xem trước: <span id="previewFileName" style="color: #1E293B;"></span></div>
-            <button type="button" class="btn-sm btn-outline" onclick="openCurrentPreview()" style="font-size: 12px; height: 32px;">
+    <div id="formPreviewContainer" class="preview-panel d-none">
+        <div class="preview-panel-header">
+            <div class="preview-panel-meta">Xem trước: <strong id="previewFileName"></strong></div>
+            <button type="button" class="btn btn-outline btn-sm" onclick="openCurrentPreview()">
                 Mở tab mới
             </button>
         </div>
-        <div style="background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.08); min-height: 800px;">
-            <iframe id="formViewer" src="" frameborder="0" style="width:100%; height:800px; background: #525659;"></iframe>
+        <div class="preview-panel-frame">
+            <iframe id="formViewer" src="" frameborder="0"></iframe>
         </div>
     </div>
 </div>
 
 <!-- Modal logic components -->
-<form id="dtActionForm" method="POST" style="display:none;">
+<form id="dtActionForm" method="POST" class="d-none">
     {% csrf_token %}
 </form>
 {% endblock %}
@@ -575,9 +272,9 @@
     }
 
     function showForm() {
-        document.getElementById('congViecListView').style.display = 'none';
-        document.getElementById('congViecFormView').style.display = 'block';
-        document.getElementById('bcAction').style.display = 'inline';
+        document.getElementById('congViecListView').classList.add('d-none');
+        document.getElementById('congViecFormView').classList.remove('d-none');
+        document.getElementById('bcAction').classList.remove('d-none');
         document.getElementById('cvForm').reset();
         document.getElementById('cvForm').action = `{% url 'quanlycongviec:add_task' %}`;
         document.getElementById('gvFormTitle').innerText = 'Giao công việc mới';
@@ -592,9 +289,9 @@
     }
 
     function hideForm() {
-        document.getElementById('congViecFormView').style.display = 'none';
-        document.getElementById('congViecListView').style.display = 'block';
-        document.getElementById('bcAction').style.display = 'none';
+        document.getElementById('congViecFormView').classList.add('d-none');
+        document.getElementById('congViecListView').classList.remove('d-none');
+        document.getElementById('bcAction').classList.add('d-none');
         document.getElementById('cvForm').reset();
         document.getElementById('cvForm').action = `{% url 'quanlycongviec:add_task' %}`;
         document.getElementById('gvFormTitle').innerText = 'Giao công việc mới';
@@ -602,7 +299,7 @@
         document.getElementById('file-list-ref').innerHTML = '';
         document.querySelector('input[name="yeu_cau_phe_duyet"]').checked = true;
         document.getElementById('deleteFilesInput').value = ''; // Reset deleted files
-        document.getElementById('formPreviewContainer').style.display = 'none';
+        document.getElementById('formPreviewContainer').classList.add('d-none');
         document.getElementById('formViewer').src = '';
     }
 
@@ -642,25 +339,20 @@
                 if (data.attachments && data.attachments.length > 0) {
                     data.attachments.forEach(file => {
                         const chip = document.createElement('div');
-                        chip.className = 'file-chip';
+                        chip.className = 'file-chip file-chip--existing';
                         chip.id = `existing-file-${file.id}`;
-                        chip.style.background = '#F1F5F9';
-                        chip.style.border = '1px solid #CBD5E1';
-                        chip.style.display = 'inline-flex';
-                        chip.style.alignItems = 'center';
-                        chip.style.justifyContent = 'space-between';
                         
                         chip.innerHTML = `
-                            <div style="display:flex; align-items:center;">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2">
+                            <div class="file-chip-main">
+                                <span class="file-chip-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
                                     <polyline points="13 2 13 9 20 9"></polyline>
                                 </svg>
-                                <a href="javascript:void(0)" onclick="previewExistingFile('${file.url}', '${file.name}', event)" style="color: #64748B; font-weight: 600; margin-left: 6px; text-decoration: none;" title="Nhấn để xem trước tệp">[Hiện có] ${file.name}</a>
+                                </span>
+                                <a href="javascript:void(0)" onclick="previewExistingFile('${file.url}', '${file.name}', event)" class="file-chip-link" title="Nhấn để xem trước tệp">[Hiện có] ${file.name}</a>
                             </div>
-                            <span onclick="markFileForDeletion(${file.id}, event)" 
-                                  style="margin-left:8px; cursor:pointer; color:#EF4444; font-weight:bold; font-size:16px; padding: 0 4px;" 
-                                  title="Xóa file này">&times;</span>
+                            <button type="button" onclick="markFileForDeletion(${file.id}, event)" class="file-chip-action" title="Xóa file này">&times;</button>
                         `;
                         
                         if (file.loai_file === 'CHINH') {
@@ -688,21 +380,32 @@
         const searchInput = document.getElementById('searchKeyword');
         const sourceSelect = document.getElementById('filterNguonCV');
 
+        function normalizeText(value) {
+            return (value || '')
+                .toString()
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .trim();
+        }
+
         function filterTasks() {
             const activeTab = document.querySelector('.filter-tab.active').getAttribute('data-tab');
-            const keyword = searchInput.value.toLowerCase().trim();
+            const keyword = normalizeText(searchInput.value);
             const source = sourceSelect.value;
             let visibleCount = 0;
 
             rows.forEach(row => {
                 if (row.cells.length < 2) return; // Skip empty row
 
-                const taskName = row.cells[1].innerText.toLowerCase();
+                const taskName = normalizeText(row.cells[1].innerText);
+                const assignee = normalizeText(row.cells[2].innerText);
+                const taskSourceText = normalizeText(row.cells[5].innerText);
                 const taskStatus = row.getAttribute('data-status') || row.cells[6].innerText.trim();
                 const taskSource = row.cells[5].innerText.trim();
 
                 const matchesTab = (activeTab === 'all' || taskStatus === activeTab);
-                const matchesKeyword = taskName.includes(keyword);
+                const matchesKeyword = !keyword || taskName.includes(keyword) || assignee.includes(keyword) || taskSourceText.includes(keyword);
                 const matchesSource = (source === '' || taskSource === source);
 
                 if (matchesTab && matchesKeyword && matchesSource) {
@@ -719,7 +422,7 @@
                 if (!emptyMsg) {
                     emptyMsg = document.createElement('tr');
                     emptyMsg.id = 'emptyFilterMsg';
-                    emptyMsg.innerHTML = `<td colspan="7" class="text-center" style="padding: 40px; color: #64748B;">Không tìm thấy công việc phù hợp với tiêu chí lọc.</td>`;
+                    emptyMsg.innerHTML = `<td colspan="7" class="text-center empty-filter-row">Không tìm thấy công việc phù hợp với tiêu chí lọc.</td>`;
                     document.getElementById('congViecBody').appendChild(emptyMsg);
                 }
             } else if (emptyMsg) {
@@ -809,15 +512,17 @@
             for (let i = 0; i < input.files.length; i++) {
                 const file = input.files[i];
                 const chip = document.createElement('div');
-                chip.className = 'file-chip new-file-chip';
-                chip.style.background = '#ECFDF5';
-                chip.style.border = '1px solid #10B981';
+                chip.className = 'file-chip file-chip--new new-file-chip';
                 chip.innerHTML = `
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
-                        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
-                        <polyline points="13 2 13 9 20 9"></polyline>
-                    </svg>
-                    <span style="color: #059669; font-weight: 600;">[Thêm mới] ${file.name}</span>
+                    <span class="file-chip-main">
+                        <span class="file-chip-icon">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                                <polyline points="13 2 13 9 20 9"></polyline>
+                            </svg>
+                        </span>
+                        <span class="file-chip-label">[Thêm mới] ${file.name}</span>
+                    </span>
                 `;
                 listContainer.appendChild(chip);
             }
@@ -836,12 +541,12 @@
         // Hide the chip
         const chip = document.getElementById(`existing-file-${fileId}`);
         if (chip) {
-            chip.style.opacity = '0.4';
-            chip.style.textDecoration = 'line-through';
-            chip.querySelector('span:last-child').innerHTML = '&#8634;'; // Undo icon
-            chip.querySelector('span:last-child').onclick = (e) => unmarkFileForDeletion(fileId, e);
-            chip.querySelector('span:last-child').style.color = '#3B82F6';
-            chip.querySelector('span:last-child').title = 'Khôi phục';
+            chip.classList.add('is-deleting');
+            const actionBtn = chip.querySelector('.file-chip-action');
+            actionBtn.innerHTML = '&#8634;';
+            actionBtn.onclick = (e) => unmarkFileForDeletion(fileId, e);
+            actionBtn.classList.add('is-undo');
+            actionBtn.title = 'Khôi phục';
         }
     }
 
@@ -855,12 +560,12 @@
         // Restore the chip
         const chip = document.getElementById(`existing-file-${fileId}`);
         if (chip) {
-            chip.style.opacity = '1';
-            chip.style.textDecoration = 'none';
-            chip.querySelector('span:last-child').innerHTML = '&times;';
-            chip.querySelector('span:last-child').onclick = (e) => markFileForDeletion(fileId, e);
-            chip.querySelector('span:last-child').style.color = '#EF4444';
-            chip.querySelector('span:last-child').title = 'Xóa file này';
+            chip.classList.remove('is-deleting');
+            const actionBtn = chip.querySelector('.file-chip-action');
+            actionBtn.innerHTML = '&times;';
+            actionBtn.onclick = (e) => markFileForDeletion(fileId, e);
+            actionBtn.classList.remove('is-undo');
+            actionBtn.title = 'Xóa file này';
         }
     }
 
@@ -874,7 +579,7 @@
         
         currentPreviewUrl = url;
         nameSpan.innerText = name;
-        container.style.display = 'block';
+        container.classList.remove('d-none');
         
         const finalUrl = url.toLowerCase().endsWith('.pdf') ? url + '#toolbar=0' : url;
         viewer.src = finalUrl;

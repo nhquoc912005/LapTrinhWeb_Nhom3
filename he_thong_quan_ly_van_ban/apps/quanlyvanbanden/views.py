@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -73,8 +74,13 @@ def danh_sach_van_ban_den(request):
     if trang_thai:
         ds = ds.filter(trang_thai=trang_thai)
 
+    paginator = Paginator(ds, 10)
+    page_number = request.GET.get('page')
+    ds = paginator.get_page(page_number)
+
     context = {
         'ds': ds,
+        'page_obj': ds,
         'q': q,
         'selected_loai_van_ban': loai_van_ban,
         'selected_hinh_thuc_van_ban': hinh_thuc_van_ban,

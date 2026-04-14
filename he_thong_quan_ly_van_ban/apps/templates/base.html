@@ -6,180 +6,6 @@
     <title>{% block title %}Hệ thống quản lý văn bản{% endblock %}</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
-    <style>
-        .header-nav-link.is-disabled,
-        .sidebar-nav-link.is-disabled {
-            opacity: 0.55;
-            cursor: not-allowed;
-        }
-
-        .header-nav-link.is-disabled:hover {
-            color: rgba(255, 255, 255, 0.85);
-        }
-
-        .sidebar-nav-link.is-disabled:hover {
-            background: transparent;
-            color: var(--sidebar-text);
-        }
-
-        /* Toast Notifications */
-        .messages {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-width: 350px;
-        }
-
-        .message {
-            background: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            font-size: 14px;
-            font-weight: 600;
-            border-left: 4px solid var(--primary);
-            animation: slideIn 0.3s ease forwards;
-            position: relative;
-            display: flex;
-            align-items: center;
-            color: #1a2332;
-        }
-
-        .message.success { border-left-color: #10B981; }
-        .message.error { border-left-color: #EF4444; }
-        .message.warning { border-left-color: #F59E0B; }
-        .message.info { border-left-color: #3B82F6; }
-
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .message.fade-out {
-            transform:translateX(100%);
-            opacity: 0;
-        }
-
-        /* Modern Centered Confirmation Modal (Image 2 Style) */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(4px);
-            z-index: 2000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-
-        .modal-overlay.open {
-            display: flex;
-            opacity: 1;
-        }
-
-        .premium-modal {
-            background: white;
-            width: 440px;
-            max-width: 95%;
-            padding: 40px 32px;
-            text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            transform: translateY(20px);
-            transition: transform 0.3s ease;
-            position: relative;
-        }
-
-        .modal-overlay.open .premium-modal {
-            transform: translateY(0);
-        }
-
-        .modal-icon-container {
-            width: 72px;
-            height: 72px;
-            background: #FEE2E2 !important;
-            color: #EF4444 !important;
-            border-radius: 50% !important;
-            display: flex !important;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 24px !important;
-        }
-
-        .modal-title {
-            font-size: 22px !important;
-            font-weight: 700 !important;
-            color: #1E293B !important;
-            margin-bottom: 12px !important;
-            text-align: center !important;
-            border: none !important;
-            padding: 0 !important;
-            display: block !important;
-        }
-
-        .modal-title::before {
-            display: none !important;
-        }
-
-        .modal-body {
-            color: #475569 !important;
-            font-size: 16px !important;
-            line-height: 1.6 !important;
-            margin-bottom: 32px !important;
-            text-align: center !important;
-            padding: 0 !important;
-        }
-
-        .modal-footer {
-            display: flex !important;
-            gap: 16px !important;
-            justify-content: center !important;
-            padding: 0 !important;
-            margin: 0 !important;
-        }
-
-        .modal-btn {
-            min-width: 140px;
-            padding: 12px 24px;
-            font-weight: 700;
-            font-size: 15px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-            text-transform: none;
-        }
-
-        .btn-cancel-modal {
-            background: #F1F5F9;
-            color: #475569;
-            border-color: #E2E8F0;
-        }
-
-        .btn-cancel-modal:hover {
-            background: #E2E8F0;
-            color: #1E293B;
-        }
-
-        .btn-confirm-modal {
-            background: #EF4444;
-            color: white;
-            border: none;
-        }
-
-        .btn-confirm-modal:hover {
-            background: #DC2626;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-            transform: translateY(-1px);
-        }
-    </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -220,8 +46,8 @@
                     Hồ sơ cá nhân
                 </a>
                 <hr class="dropdown-divider">
-                <a href="{% url 'accounts:logout' %}" style="color:#EF4444;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#EF4444">
+                <a href="{% url 'accounts:logout' %}" class="logout-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24">
                         <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
                     </svg>
                     Đăng xuất
@@ -296,27 +122,27 @@
 </div>
 
 <!-- Reusable Modern Confirmation Modal -->
-<div id="confirmModalOverlay" class="modal-overlay">
-    <div class="premium-modal">
-        <div class="modal-icon-container">
+<div id="confirmModalOverlay" class="app-confirm-overlay">
+    <div class="app-confirm-dialog">
+        <div class="app-confirm-icon">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="8" x2="12" y2="12"></line>
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
             </svg>
         </div>
-        <h3 class="modal-title" id="confirmModalTitle">Xác nhận xóa</h3>
-        <div class="modal-body" id="confirmModalBody">
+        <h3 class="app-confirm-title" id="confirmModalTitle">Xác nhận xóa</h3>
+        <div class="app-confirm-body" id="confirmModalBody">
             Bạn có chắc chắn muốn thực hiện hành động này không?
         </div>
-        <div class="modal-footer">
-            <button type="button" class="modal-btn btn-cancel-modal" id="btnCancelModal">Hủy bỏ</button>
-            <button type="button" class="modal-btn btn-confirm-modal" id="btnConfirmModal">Xác nhận</button>
+        <div class="app-confirm-actions">
+            <button type="button" class="btn btn-secondary" id="btnCancelModal">Hủy bỏ</button>
+            <button type="button" class="btn btn-danger" id="btnConfirmModal">Xác nhận</button>
         </div>
     </div>
 </div>
 
-<div id="toastContainer" style="position: fixed; bottom: 24px; left: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 12px; pointer-events: none;"></div>
+<div id="toastContainer" class="toast-dock"></div>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -395,7 +221,7 @@
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
                     </svg>
                 </div>
-                <div class="toast-content" style="flex:1;">${message}</div>
+                <div class="toast-content">${message}</div>
             `;
             
             container.appendChild(toast);

@@ -4,261 +4,6 @@
 {% block title %}Văn bản đến{% endblock %}
 {% block nav_van_ban_den_active %}active{% endblock %}
 
-{% block extra_css %}
-<style>
-    .tab-filter-container{
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        margin-bottom:24px;
-        gap:16px;
-        flex-wrap:wrap;
-    }
-
-    .tab-filter-group{
-        display:flex;
-        background:#F1F5F9;
-        border:1px solid var(--border-color);
-        padding:1px;
-        flex-wrap:wrap;
-    }
-
-    .tab-filter-group .tab-filter-btn{
-        border:none;
-        background:transparent;
-        padding:8px 24px;
-        font-size:14px;
-        font-weight:500;
-        color:var(--text-secondary);
-        cursor:pointer;
-        text-decoration:none;
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        min-height:40px;
-    }
-
-    .tab-filter-group .tab-filter-btn.active{
-        background:#fff;
-        font-weight:700;
-        color:#0076A2;
-        box-shadow:0 1px 2px rgba(0,0,0,0.05);
-    }
-
-    .custom-filter-row{
-        display:flex;
-        gap:16px;
-        margin-bottom:16px;
-        flex-wrap:wrap;
-    }
-
-    .custom-search-wrap{
-        position:relative;
-        flex:1;
-        min-width:260px;
-    }
-
-    .custom-search-wrap svg{
-        position:absolute;
-        left:14px;
-        top:50%;
-        transform:translateY(-50%);
-        fill:var(--text-muted);
-    }
-
-    .custom-search-wrap input{
-        width:100%;
-        padding:10px 14px 10px 40px;
-        border:1px solid var(--border-color);
-        font-size:14px;
-        outline:none;
-        transition:border-color .2s;
-        height:42px;
-        background:#fff;
-    }
-
-    .custom-search-wrap input:focus{
-        border-color:#0076A2;
-    }
-
-    .custom-select-wrap{
-        flex:1;
-        min-width:180px;
-    }
-
-    .custom-select-wrap select{
-        width:100%;
-        padding:10px 14px;
-        border:1px solid var(--border-color);
-        font-size:14px;
-        outline:none;
-        appearance:none;
-        background:#fff url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 14px center;
-        cursor:pointer;
-        height:42px;
-    }
-
-    .section-title{
-        border-left:4px solid #0076A2;
-        padding-left:12px;
-        font-size:15px;
-        color:var(--text-main);
-        margin:0 0 24px 0;
-        padding-bottom:20px;
-        border-bottom:1px solid var(--border-color);
-        font-weight:700;
-        text-transform:uppercase;
-        line-height:1.2;
-    }
-
-    .vanban-table-wrap{
-        overflow-x:auto;
-    }
-
-    .vanban-table{
-        width:100%;
-        border-collapse:collapse;
-        min-width:980px;
-    }
-
-    .vanban-table th{
-        padding:12px;
-        font-weight:700;
-        color:var(--text-secondary);
-        border-bottom:1px solid var(--border-color);
-        text-align:left;
-        background:#fff;
-        white-space:nowrap;
-        font-size:14px;
-    }
-
-    .vanban-table td{
-        border-bottom:1px solid var(--border-color);
-        vertical-align:middle;
-        padding:14px 12px;
-        font-size:14px;
-        color:var(--text-main);
-    }
-
-    .vanban-table .text-center{
-        text-align:center;
-    }
-
-    .so-ky-hieu-link{
-        color:#0076A2;
-        font-weight:700;
-        text-decoration:none;
-    }
-
-    .so-ky-hieu-link:hover{
-        text-decoration:underline;
-    }
-
-    .trich-yeu-cell{
-        max-width:280px;
-        line-height:1.5;
-    }
-
-    .mat-khan-block{
-        line-height:1.4;
-    }
-
-    .do-khan-text{
-        color:#DC2626;
-        font-weight:700;
-        text-transform:uppercase;
-    }
-
-    .badge{
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        padding:5px 12px;
-        border-radius:10px;
-        font-size:13px;
-        font-weight:700;
-        white-space:nowrap;
-    }
-
-    .badge-cho-xu-ly{
-        background:#FEF3C7;
-        color:#B45309;
-    }
-
-    .badge-da-xu-ly{
-        background:#DBEAFE;
-        color:#1D4ED8;
-    }
-
-    .badge-hoan-tra{
-        background:#FEE2E2;
-        color:#B91C1C;
-    }
-
-    .badge-xem-de-biet{
-        background:#DCFCE7;
-        color:#15803D;
-    }
-
-    .table-footer{
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        gap:16px;
-        padding-top:16px;
-        flex-wrap:wrap;
-        color:var(--text-secondary);
-        font-size:14px;
-    }
-
-    .pagination-controls{
-        display:flex;
-        gap:6px;
-        align-items:center;
-    }
-
-    .page-btn-text{
-        padding:7px 12px;
-        border:1px solid var(--border-color);
-        background:white;
-        color:var(--text-secondary);
-        font-size:14px;
-    }
-
-    .page-btn-num{
-        width:34px;
-        height:34px;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        border:1px solid var(--border-color);
-        background:white;
-        color:var(--text-secondary);
-        font-weight:700;
-    }
-
-    .page-btn-num.active{
-        background:#0076A2;
-        color:white;
-        border-color:#0076A2;
-    }
-
-    .empty-state{
-        padding:30px 20px;
-        text-align:center;
-        color:var(--text-secondary);
-        background:#fff;
-        border:1px dashed #CBD5E1;
-    }
-
-    @media (max-width: 1200px){
-        .custom-filter-row{
-            flex-direction:column;
-        }
-    }
-</style>
-{% endblock %}
-
 {% block breadcrumb %}
 <a href="{% url 'core:dashboard' %}">
     <svg width="14" height="14" viewBox="0 0 24 24">
@@ -271,154 +16,164 @@
 {% endblock %}
 
 {% block content %}
-<div class="card" style="padding:24px;">
-    <div class="section-title">TRA CỨU THÔNG TIN</div>
+<div class="filter-card">
+    <div class="filter-stack">
+        <h2 class="section-title">Tra cứu thông tin</h2>
 
-    <div class="tab-filter-container">
-        <div class="tab-filter-group">
-            <a href="{% url 'quanlyvanbanden:danh_sach' %}"
-               class="tab-filter-btn {% if not selected_trang_thai %}active{% endif %}">
-                Tất cả
-            </a>
-            <a href="{% url 'quanlyvanbanden:danh_sach' %}?trang_thai=CHO_XU_LY"
-               class="tab-filter-btn {% if selected_trang_thai == 'CHO_XU_LY' %}active{% endif %}">
-                Chờ xử lý
-            </a>
-            <a href="{% url 'quanlyvanbanden:danh_sach' %}?trang_thai=DA_XU_LY"
-               class="tab-filter-btn {% if selected_trang_thai == 'DA_XU_LY' %}active{% endif %}">
-                Đã xử lý
-            </a>
-            <a href="{% url 'quanlyvanbanden:danh_sach' %}?trang_thai=HOAN_TRA"
-               class="tab-filter-btn {% if selected_trang_thai == 'HOAN_TRA' %}active{% endif %}">
-                Hoàn trả
-            </a>
-            <a href="{% url 'quanlyvanbanden:danh_sach' %}?trang_thai=XEM_DE_BIET"
-               class="tab-filter-btn {% if selected_trang_thai == 'XEM_DE_BIET' %}active{% endif %}">
-                Xem để biết
-            </a>
+        <div class="filter-controls-row">
+            <div class="tab-filter-group">
+                <a href="{% url 'quanlyvanbanden:danh_sach' %}" class="tab-filter-btn {% if not selected_trang_thai %}active{% endif %}">
+                    Tất cả
+                </a>
+                <a href="{% url 'quanlyvanbanden:danh_sach' %}?trang_thai=CHO_XU_LY" class="tab-filter-btn {% if selected_trang_thai == 'CHO_XU_LY' %}active{% endif %}">
+                    Chờ xử lý
+                </a>
+                <a href="{% url 'quanlyvanbanden:danh_sach' %}?trang_thai=DA_XU_LY" class="tab-filter-btn {% if selected_trang_thai == 'DA_XU_LY' %}active{% endif %}">
+                    Đã xử lý
+                </a>
+                <a href="{% url 'quanlyvanbanden:danh_sach' %}?trang_thai=HOAN_TRA" class="tab-filter-btn {% if selected_trang_thai == 'HOAN_TRA' %}active{% endif %}">
+                    Hoàn trả
+                </a>
+                <a href="{% url 'quanlyvanbanden:danh_sach' %}?trang_thai=XEM_DE_BIET" class="tab-filter-btn {% if selected_trang_thai == 'XEM_DE_BIET' %}active{% endif %}">
+                    Xem để biết
+                </a>
+            </div>
         </div>
-    </div>
 
-    <form method="get">
-        <input type="hidden" name="trang_thai" value="{{ selected_trang_thai }}">
+        <form method="get" class="filter-stack">
+            <input type="hidden" name="trang_thai" value="{{ selected_trang_thai }}">
 
-        <div class="custom-filter-row">
             <div class="custom-search-wrap">
-                <svg width="16" height="16" viewBox="0 0 24 24">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M15.5 14h-.79l-.28-.27a6 6 0 1 0-.71.71l.27.28v.79L20 21.5 21.5 20l-6-6zM10 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
                 </svg>
-                <input type="text"
-                       name="q"
-                       value="{{ q }}"
-                       placeholder="Tìm theo số ký hiệu, trích yếu văn bản...">
-            </div>
-        </div>
-
-        <div class="custom-filter-row">
-            <div class="custom-select-wrap">
-                <select name="loai_van_ban">
-                    <option value="">-- Loại văn bản --</option>
-                    {% for value, label in loai_van_ban_choices %}
-                        <option value="{{ value }}" {% if selected_loai_van_ban == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ q }}"
+                    class="custom-search-input"
+                    placeholder="Tìm theo số ký hiệu, trích yếu văn bản..."
+                >
             </div>
 
-            <div class="custom-select-wrap">
-                <select name="hinh_thuc_van_ban">
-                    <option value="">-- Hình thức văn bản --</option>
-                    {% for value, label in hinh_thuc_van_ban_choices %}
-                        <option value="{{ value }}" {% if selected_hinh_thuc_van_ban == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+            <div class="filter-grid filter-grid-cols-4">
+                <div class="custom-select-wrap">
+                    <label class="filter-label" for="filterLoaiVanBan">Loại văn bản</label>
+                    <select id="filterLoaiVanBan" name="loai_van_ban">
+                        <option value="">-- Loại văn bản --</option>
+                        {% for value, label in loai_van_ban_choices %}
+                            <option value="{{ value }}" {% if selected_loai_van_ban == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-            <div class="custom-select-wrap">
-                <select name="do_mat">
-                    <option value="">-- Độ mật --</option>
-                    {% for value, label in do_mat_choices %}
-                        <option value="{{ value }}" {% if selected_do_mat == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+                <div class="custom-select-wrap">
+                    <label class="filter-label" for="filterHinhThucVanBan">Hình thức văn bản</label>
+                    <select id="filterHinhThucVanBan" name="hinh_thuc_van_ban">
+                        <option value="">-- Hình thức văn bản --</option>
+                        {% for value, label in hinh_thuc_van_ban_choices %}
+                            <option value="{{ value }}" {% if selected_hinh_thuc_van_ban == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-            <div class="custom-select-wrap">
-                <select name="do_khan">
-                    <option value="">-- Độ khẩn --</option>
-                    {% for value, label in do_khan_choices %}
-                        <option value="{{ value }}" {% if selected_do_khan == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
+                <div class="custom-select-wrap">
+                    <label class="filter-label" for="filterDoMat">Độ mật</label>
+                    <select id="filterDoMat" name="do_mat">
+                        <option value="">-- Độ mật --</option>
+                        {% for value, label in do_mat_choices %}
+                            <option value="{{ value }}" {% if selected_do_mat == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="custom-select-wrap">
+                    <label class="filter-label" for="filterDoKhan">Độ khẩn</label>
+                    <select id="filterDoKhan" name="do_khan">
+                        <option value="">-- Độ khẩn --</option>
+                        {% for value, label in do_khan_choices %}
+                            <option value="{{ value }}" {% if selected_do_khan == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
-        </div>
-    </form>
+        </form>
+    </div>
 </div>
 
-<div class="card" style="padding:0 20px 20px 20px; margin-top:18px;">
-    <div class="vanban-table-wrap">
-        <table class="vanban-table">
+<div class="table-container">
+    <div class="table-scroll">
+        <table class="data-table">
             <thead>
                 <tr>
-                    <th style="width:70px;">STT</th>
-                    <th style="width:150px;">Số ký hiệu</th>
+                    <th class="text-center">STT</th>
+                    <th>Số ký hiệu</th>
                     <th>Trích yếu</th>
-                    <th style="width:130px;">Ngày văn bản</th>
-                    <th style="width:180px;">Đơn vị ban hành</th>
-                    <th style="width:170px;">Độ mật / Độ khẩn</th>
-                    <th style="width:150px;">Trạng thái</th>
+                    <th>Ngày văn bản</th>
+                    <th>Đơn vị ban hành</th>
+                    <th>Độ mật / Độ khẩn</th>
+                    <th>Trạng thái</th>
                 </tr>
             </thead>
             <tbody>
                 {% for vb in ds %}
-                    <tr>
-                        <td class="text-center">{{ forloop.counter }}</td>
-                        <td>
-                            <a href="{% url 'quanlyvanbanden:chi_tiet' vb.pk %}" class="so-ky-hieu-link">
-                                {{ vb.so_ky_hieu }}
-                            </a>
-                        </td>
-                        <td class="trich-yeu-cell">{{ vb.trich_yeu }}</td>
-                        <td>{{ vb.ngay_van_ban|date:"d/m/Y" }}</td>
-                        <td>{{ vb.don_vi_ban_hanh }}</td>
-                        <td>
-                            <div class="mat-khan-block">
-                                {{ vb.get_do_mat_display }} /
-                                <span class="do-khan-text">{{ vb.get_do_khan_display }}</span>
-                            </div>
-                        </td>
-                        <td>
-                            {% if vb.trang_thai == 'CHO_XU_LY' %}
-                                <span class="badge badge-cho-xu-ly">Chờ xử lý</span>
-                            {% elif vb.trang_thai == 'DA_XU_LY' %}
-                                <span class="badge badge-da-xu-ly">Đã xử lý</span>
-                            {% elif vb.trang_thai == 'HOAN_TRA' %}
-                                <span class="badge badge-hoan-tra">Hoàn trả</span>
-                            {% elif vb.trang_thai == 'XEM_DE_BIET' %}
-                                <span class="badge badge-xem-de-biet">Xem để biết</span>
-                            {% else %}
-                                <span class="badge">{{ vb.get_trang_thai_display }}</span>
-                            {% endif %}
-                        </td>
-                    </tr>
+                <tr>
+                    <td class="text-center">{{ ds.start_index|add:forloop.counter0 }}</td>
+                    <td>
+                        <a href="{% url 'quanlyvanbanden:chi_tiet' vb.pk %}">
+                            {{ vb.so_ky_hieu }}
+                        </a>
+                    </td>
+                    <td>{{ vb.trich_yeu }}</td>
+                    <td>{{ vb.ngay_van_ban|date:"d/m/Y" }}</td>
+                    <td>{{ vb.don_vi_ban_hanh }}</td>
+                    <td>
+                        {{ vb.get_do_mat_display }} /
+                        <span class="do-khan-text">{{ vb.get_do_khan_display }}</span>
+                    </td>
+                    <td>
+                        {% if vb.trang_thai == 'CHO_XU_LY' %}
+                            <span class="badge badge-cho-xu-ly">Chờ xử lý</span>
+                        {% elif vb.trang_thai == 'DA_XU_LY' %}
+                            <span class="badge badge-da-xu-ly">Đã xử lý</span>
+                        {% elif vb.trang_thai == 'HOAN_TRA' %}
+                            <span class="badge badge-hoan-tra">Hoàn trả</span>
+                        {% elif vb.trang_thai == 'XEM_DE_BIET' %}
+                            <span class="badge badge-xem-de-biet">Xem để biết</span>
+                        {% else %}
+                            <span class="badge">{{ vb.get_trang_thai_display }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
                 {% empty %}
-                    <tr>
-                        <td colspan="7">
-                            <div class="empty-state">
-                                Không có văn bản nào phù hợp.
-                            </div>
-                        </td>
-                    </tr>
+                <tr>
+                    <td colspan="7" class="text-center">
+                        <div class="empty-state">Không có văn bản nào phù hợp.</div>
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
-    <div class="table-footer">
-        <div>Hiển thị {{ ds|length }} văn bản</div>
-        <div class="pagination-controls">
-            <span class="page-btn-text">Trước</span>
-            <span class="page-btn-num active">1</span>
-            <span class="page-btn-text">Sau</span>
+    <div class="pagination">
+        <span class="pagination-info">
+            Hiển thị {{ ds.start_index }} - {{ ds.end_index }} của {{ ds.paginator.count }} văn bản
+        </span>
+        <div class="pagination-btns">
+            {% if ds.has_previous %}
+                <a href="?page={{ ds.previous_page_number }}{% if selected_trang_thai %}&trang_thai={{ selected_trang_thai|urlencode }}{% endif %}{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_loai_van_ban %}&loai_van_ban={{ selected_loai_van_ban|urlencode }}{% endif %}{% if selected_hinh_thuc_van_ban %}&hinh_thuc_van_ban={{ selected_hinh_thuc_van_ban|urlencode }}{% endif %}{% if selected_do_mat %}&do_mat={{ selected_do_mat|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}" class="page-btn">Trước</a>
+            {% else %}
+                <span class="page-btn disabled" aria-disabled="true">Trước</span>
+            {% endif %}
+
+            <span class="page-btn active">{{ ds.number }}</span>
+
+            {% if ds.has_next %}
+                <a href="?page={{ ds.next_page_number }}{% if selected_trang_thai %}&trang_thai={{ selected_trang_thai|urlencode }}{% endif %}{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_loai_van_ban %}&loai_van_ban={{ selected_loai_van_ban|urlencode }}{% endif %}{% if selected_hinh_thuc_van_ban %}&hinh_thuc_van_ban={{ selected_hinh_thuc_van_ban|urlencode }}{% endif %}{% if selected_do_mat %}&do_mat={{ selected_do_mat|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}" class="page-btn">Sau</a>
+            {% else %}
+                <span class="page-btn disabled" aria-disabled="true">Sau</span>
+            {% endif %}
         </div>
     </div>
 </div>
