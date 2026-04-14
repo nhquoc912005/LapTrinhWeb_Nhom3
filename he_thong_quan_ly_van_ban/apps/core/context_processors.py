@@ -53,10 +53,10 @@ SIDEBAR_MENU_DEFINITIONS = (
     },
     {
         "label": "Văn bản đi",
-        "url_name": "quanlyvanbandi:danh_sach",
+        "url_name": "quanlyvanbandi:van_ban_di",
         "roles": ALL_ROLES,
         "icon_path": "M2.01 21L23 12 2.01 3 2 10l15 2-15 2z",
-        "help_text": "Module van ban di dang o trang thai prototype.",
+        "help_text": "",
     },
     {
         "label": "Quản lý công việc",

@@ -1,0 +1,1806 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Chi tiết văn bản{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+<style>
+  .page-main {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .detail-header-title {
+    border-left: 4px solid var(--primary);
+    padding-left: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+  }
+
+  .detail-info-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 0.9fr;
+    gap: 24px;
+    margin-top: 20px;
+  }
+
+  .detail-col p {
+    margin: 0 0 10px;
+    font-size: 13px;
+    color: var(--text-main);
+    line-height: 1.5;
+  }
+
+  .detail-col strong {
+    font-weight: 700;
+    color: #334155;
+  }
+
+  .detail-note-box {
+    margin-top: 16px;
+    background: #F1F5F9;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--text-main);
+  }
+
+  .status-badge-detail {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #FEF3C7;
+    color: #92400E;
+  }
+
+  .file-pill {
+    border: 1px solid var(--border-color);
+    padding: 8px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  }
+
+  .file-pill.active {
+    border-color: var(--primary);
+    background: #EFF6FF;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+  }
+
+  .file-type-pdf,
+  .file-type-docx,
+  .file-type-xlsx,
+  .file-type-default {
+    font-weight: 700;
+    font-size: 11px;
+    min-width: 36px;
+    text-align: center;
+    background: #F1F5F9;
+  }
+
+  .file-type-pdf {
+    background: #F1F5F9;
+    color: #DC2626;
+  }
+
+  .file-type-docx {
+    color: #2563EB;
+  }
+
+  .file-type-xlsx {
+    color: #16A34A;
+  }
+
+  .file-type-default {
+    color: #475569;
+  }
+
+  .preview-shell {
+    background: #D1D5DB;
+    padding: 18px;
+    min-height: 620px;
+    margin-bottom: 24px;
+    border: 1px solid #CBD5E1;
+  }
+
+  .preview-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .preview-toolbar .toolbar-btn {
+    min-width: 32px;
+    height: 32px;
+    border: 1px solid #CBD5E1;
+    background: #fff;
+    cursor: pointer;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 12px;
+    font-size: 13px;
+    text-decoration: none;
+    color: #111827;
+  }
+
+  .preview-toolbar .toolbar-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .toolbar-btn-download {
+    background: #EFF6FF !important;
+    border-color: #93C5FD !important;
+    color: #1D4ED8 !important;
+  }
+
+  .toolbar-btn-print {
+    background: #F0FDF4 !important;
+    border-color: #86EFAC !important;
+    color: #15803D !important;
+  }
+
+  .preview-page-info {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1E3A8A;
+    min-width: 92px;
+    text-align: center;
+  }
+
+  .preview-open-link {
+    height: 32px;
+    padding: 0 14px;
+    border: 1px solid #CBD5E1;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    color: #111827;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .preview-body {
+    background: #fff;
+    min-height: 520px;
+    max-height: 820px;
+    padding: 0;
+    overflow: auto;
+    border: 1px solid #E5E7EB;
+  }
+
+  .preview-empty,
+  .preview-loading,
+  .preview-error {
+    min-height: 520px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+    color: #64748B;
+    font-size: 14px;
+    text-align: center;
+    padding: 24px;
+  }
+
+  .preview-error {
+    color: #B91C1C;
+  }
+
+  .pdf-canvas {
+    background: #fff;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+  }
+
+  .docx-stage {
+    padding: 36px 42px;
+    max-width: 900px;
+    margin: 0 auto;
+    line-height: 1.7;
+    color: #111827;
+    font-size: 16px;
+  }
+
+  .docx-stage img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .docx-stage table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 16px 0;
+  }
+
+  .docx-stage table,
+  .docx-stage th,
+  .docx-stage td {
+    border: 1px solid #CBD5E1;
+  }
+
+  .docx-stage th,
+  .docx-stage td {
+    padding: 8px 10px;
+  }
+
+  .xlsx-wrap {
+    padding: 20px;
+  }
+
+  .xlsx-sheet-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .xlsx-tab {
+    padding: 8px 12px;
+    border: 1px solid #CBD5E1;
+    background: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .xlsx-tab.active {
+    background: #DBEAFE;
+    border-color: #60A5FA;
+    color: #1D4ED8;
+  }
+
+  .xlsx-table-wrap {
+    overflow: auto;
+  }
+
+  .xlsx-table-wrap table {
+    border-collapse: collapse;
+    min-width: 100%;
+    font-size: 14px;
+  }
+
+  .xlsx-table-wrap th,
+  .xlsx-table-wrap td {
+    border: 1px solid #CBD5E1;
+    padding: 8px 10px;
+    white-space: nowrap;
+  }
+
+  .xlsx-table-wrap th {
+    background: #F8FAFC;
+  }
+
+  .related-files {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .related-file {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid var(--border-color);
+    background: #F8FAFC;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  }
+
+  .related-file.active {
+    border-color: var(--primary);
+    background: #EFF6FF;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+  }
+
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+
+    #print-area,
+    #print-area * {
+      visibility: visible;
+    }
+
+    #print-area {
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      z-index: 9999;
+      overflow: visible;
+      padding: 0;
+    }
+
+    #print-area img {
+      display: block;
+      width: 100%;
+      page-break-after: always;
+    }
+  }
+
+  @media (max-width: 992px) {
+    .detail-info-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .preview-shell {
+      min-height: 480px;
+      padding: 12px;
+    }
+
+    .preview-body,
+    .preview-empty,
+    .preview-loading,
+    .preview-error {
+      min-height: 380px;
+    }
+
+    .docx-stage {
+      padding: 18px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'core:dashboard' %}">
+  <svg width="14" height="14" viewBox="0 0 24 24">
+    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+  </svg>
+  Trang chủ
+</a>
+<span class="breadcrumb-sep">›</span>
+<a href="{% url 'quanlyvanbandi:van_ban_di' %}">Văn bản đi</a>
+<span class="breadcrumb-sep">›</span>
+<span>Chi tiết văn bản</span>
+{% endblock %}
+
+{% block page_wrapper %}
+<div class="page-main">
+
+  <div class="card"
+    style="padding: 24px 32px; border: 1px solid var(--border-color); box-shadow: none; margin-bottom: 24px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+      <div class="detail-header-title">THÔNG TIN VĂN BẢN ĐI</div>
+
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        {# ===== LÃNH ĐẠO ===== #}
+        {% if request.user.role == "LANH_DAO" %}
+        {# Chỉ hiện Phê duyệt / Hoàn trả khi văn bản đang Chờ Xử Lý #}
+        {% if vb.trang_thai == "Chờ Xử Lý" %}
+        <button type="button" class="btn btn-success" style="padding:8px 16px;" id="openApprovalModal">Phê
+          duyệt</button>
+        <button type="button" class="btn btn-warning" style="padding:8px 16px;" id="openReturnModal">Hoàn trả</button>
+        {% endif %}
+        <button class="btn btn-info" style="padding:8px 16px;">Giao việc</button>
+        <button class="btn btn-primary" style="padding:8px 16px;">Lưu hồ sơ</button>
+        {% endif %}
+
+        {# ===== CHUYÊN VIÊN ===== #}
+        {% if request.user.role == "CHUYEN_VIEN" %}
+        {# Chỉnh sửa: chỉ khi Chờ Xử Lý hoặc Hoàn Trả #}
+        {% if vb.trang_thai == "Chờ Xử Lý" or vb.trang_thai == "Hoàn Trả" %}
+        <a href="{% url 'quanlyvanbandi:sua_van_ban_di' vb.pk %}" class="btn btn-primary"
+          style="padding:8px 16px; text-decoration:none; background:#0284C7;">Chỉnh sửa</a>
+        {% endif %}
+        {# Xóa: chỉ khi Chờ Xử Lý (chưa duyệt) #}
+        {% if vb.trang_thai == "Chờ Xử Lý" %}
+        <button class="btn btn-danger" style="padding:8px 16px;">Xóa văn bản</button>
+        {% endif %}
+        <button class="btn btn-primary" style="padding:8px 16px;">Thêm hồ sơ</button>
+        {% endif %}
+
+        {# ===== VĂN THƯ ===== #}
+        {% if request.user.role == "VAN_THU" %}
+        {# Nút Ban hành chỉ hiện khi đang Chờ ban hành #}
+        {% if vb.trang_thai == "Chờ ban hành" %}
+        <button id="openBanHanhModal" class="btn btn-success" style="padding:8px 16px;">Ban hành</button>
+        {% endif %}
+        <button class="btn btn-primary" style="padding:8px 16px;">Thêm hồ sơ</button>
+        {% endif %}
+      </div>
+    </div>
+
+    <hr style="border:none; border-top:1px solid #F1F1F1; margin:12px 0 16px;">
+
+    <div class="detail-info-grid">
+      <div class="detail-col">
+        <p><strong>Trích yếu</strong><br>{{ vb.trich_yeu|default:"-" }}</p>
+        <p><strong>Đơn vị soạn thảo</strong><br>{{ vb.don_vi_soan_thao|default:"-" }}</p>
+        <p><strong>Hình thức</strong><br>{{ vb.hinh_thuc|default:"-" }}</p>
+        <p><strong>Độ khẩn</strong><br>{{ vb.do_khan|default:"-" }}</p>
+      </div>
+
+      <div class="detail-col">
+        <p><strong>Số ký hiệu</strong><br>{{ vb.so_ky_hieu|default:"-" }}</p>
+        <p><strong>Loại văn bản</strong><br>{{ vb.loai_van_ban|default:"-" }}</p>
+        <p><strong>Ngày văn bản</strong><br>{{ vb.ngay_van_ban|date:"d/m/Y"|default:"-" }}</p>
+        <p><strong>Hạn xử lý</strong><br>{{ vb.han_xu_ly|date:"d/m/Y"|default:"-" }}</p>
+      </div>
+
+      <div class="detail-col">
+        <p><strong>Lãnh đạo xử lý</strong><br>{{ vb.lanh_dao_duyet|default:"-" }}</p>
+        <p><strong>Trạng thái</strong><br>
+          <span class="status-badge-detail">{{ hien_thi_trang_thai|default:"-" }}</span>
+        </p>
+
+        {% if hoan_tra %}
+        <p><strong>Ngày hoàn trả</strong><br>
+          <span style="color:#dc2626; font-weight:600;">{{ hoan_tra.ngay_hoan_tra|date:"d/m/Y" }}</span>
+        </p>
+        {% endif %}
+
+        {% if duyet_record %}
+        <p><strong>Ngày duyệt</strong><br>
+          <span style="color:#16a34a; font-weight:600;">{{ duyet_record.ngay_duyet|date:"d/m/Y" }}</span>
+        </p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="detail-note-box" style="border-left: 4px solid #0076A2; background: #F5F5F5">
+      <strong style="color:#000080;">Nội dung trình lãnh đạo:</strong>
+      <div style="margin-top:8px;">{{ vb.noi_dung|default:"-" }}</div>
+    </div>
+
+    {% if hoan_tra %}
+    <div class="detail-note-box" style="margin-top:12px; background:#FEF2F2; border-left: 4px solid #0076A2;">
+      <strong style="color:#9F0736;">Ý kiến xử lý / hoàn trả:</strong>
+      <div style="margin-top:8px;">{{ hoan_tra.noi_dung }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="card" style="padding: 24px 32px; border: 1px solid var(--border-color); box-shadow: none;">
+    <div class="detail-header-title">DANH SÁCH VĂN BẢN</div>
+    <hr style="border:none; border-top:1px solid #F1F1F1; margin:12px 0 20px;">
+
+    <div style="font-size:14px; color:var(--text-secondary); margin-bottom:8px;">File đính kèm:</div>
+    <div class="file-list" style="margin-bottom:20px;">
+      {% if vb.file_dinh_kem %}
+      {% with file_name=vb.file_dinh_kem.name|lower %}
+      <a href="#" class="file-item file-preview-trigger" style="text-decoration:none;"
+        data-file-url="{{ vb.file_dinh_kem.url }}" data-file-name="{{ vb.file_dinh_kem.name|cut:'uploads/' }}"
+        data-file-ext="{{ vb.file_dinh_kem.name|lower }}">
+        {% if ".pdf" in file_name %}
+        <span class="file-item-icon file-icon-pdf">PDF</span>
+        {% elif ".docx" in file_name or ".doc" in file_name %}
+        <span class="file-item-icon file-icon-docx">DOCX</span>
+        {% elif ".xlsx" in file_name or ".xls" in file_name %}
+        <span class="file-item-icon file-icon-xlsx">XLSX</span>
+        {% else %}
+        <span class="file-item-icon" style="background:#64748b;">FILE</span>
+        {% endif %}
+        <div>
+          <div class="file-item-name">{{ vb.file_dinh_kem.name|cut:"uploads/" }}</div>
+          <div class="file-item-type">
+            {% if ".pdf" in file_name %}PDF Document
+            {% elif ".docx" in file_name or ".doc" in file_name %}DOCX Document
+            {% elif ".xlsx" in file_name or ".xls" in file_name %}XLSX Document
+            {% else %}Tệp đính kèm{% endif %}
+          </div>
+        </div>
+      </a>
+      {% endwith %}
+      {% else %}
+      <div style="font-size:13px; color:var(--text-muted);">Không có file đính kèm.</div>
+      {% endif %}
+    </div>
+
+    <div style="font-size:14px; color:var(--text-secondary); margin-bottom:8px;">Xem trước</div>
+
+    <div class="preview-shell" id="smart-preview" {% if vb.file_dinh_kem %} data-file-url="{{ vb.file_dinh_kem.url }}"
+      data-file-name="{{ vb.file_dinh_kem.name|cut:'uploads/' }}" data-file-ext="{{ vb.file_dinh_kem.name|lower }}" {%
+      endif %}>
+      <div class="preview-toolbar">
+        <a id="btn-download" href="#" download class="toolbar-btn toolbar-btn-download" style="display:none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Tải xuống
+        </a>
+
+        <button type="button" id="btn-print" class="toolbar-btn toolbar-btn-print" style="display:none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9" />
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+            <rect x="6" y="14" width="12" height="8" />
+          </svg>
+          In
+        </button>
+
+        <button type="button" id="pdf-prev-btn" class="toolbar-btn" disabled>◀</button>
+        <div class="preview-page-info" id="pdf-page-info">Trang 0 / 0</div>
+        <button type="button" id="pdf-next-btn" class="toolbar-btn" disabled>▶</button>
+
+        {% if vb.file_dinh_kem %}
+        <a href="{{ vb.file_dinh_kem.url }}" target="_blank" class="preview-open-link" id="preview-open-link">Mở tab
+          mới</a>
+        {% endif %}
+      </div>
+
+      <div class="preview-body" id="preview-body">
+        {% if not vb.file_dinh_kem %}
+        <div class="preview-empty">Không có dữ liệu xem trước</div>
+        {% endif %}
+      </div>
+
+      <div id="print-area" style="display:none;"></div>
+    </div>
+
+    <div style="font-size:14px; color:var(--text-secondary); margin-bottom:8px;">Tài liệu liên quan:</div>
+    <div class="file-list">
+      {% if ds_lien_quan %}
+      {% for lq in ds_lien_quan %}
+      {% with file_name=lq.file_van_ban.name|lower %}
+      <a href="#" class="file-item file-preview-trigger" style="text-decoration:none;"
+        data-file-url="{{ lq.file_van_ban.url }}" data-file-name="{{ lq.file_van_ban.name|cut:'uploads/' }}"
+        data-file-ext="{{ lq.file_van_ban.name|lower }}">
+        {% if ".pdf" in file_name %}
+        <span class="file-item-icon file-icon-pdf">PDF</span>
+        {% elif ".docx" in file_name or ".doc" in file_name %}
+        <span class="file-item-icon file-icon-docx">DOCX</span>
+        {% elif ".xlsx" in file_name or ".xls" in file_name %}
+        <span class="file-item-icon file-icon-xlsx">XLSX</span>
+        {% else %}
+        <span class="file-item-icon" style="background:#64748b;">FILE</span>
+        {% endif %}
+        <div>
+          <div class="file-item-name">{{ lq.file_van_ban.name|cut:"uploads/" }}</div>
+          <div class="file-item-type">
+            {% if ".pdf" in file_name %}PDF Document
+            {% elif ".docx" in file_name or ".doc" in file_name %}DOCX Document
+            {% elif ".xlsx" in file_name or ".xls" in file_name %}XLSX Document
+            {% else %}Tài liệu liên quan{% endif %}
+          </div>
+        </div>
+      </a>
+      {% endwith %}
+      {% endfor %}
+      {% else %}
+      <div style="font-size:13px; color:var(--text-muted);">Không có tài liệu liên quan.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% include "vanbandi/popup-phe-duyet-van-ban-di.html" with vb=vb ds_lien_quan=ds_lien_quan ds_van_thu=ds_van_thu
+  approve_action_url=approve_action_url selected_van_thu_id=selected_van_thu_id ghi_chu_mac_dinh=ghi_chu_mac_dinh
+  show_modal=False allow_remove_main_file=False allow_remove_related_file=False %}
+
+  <div id="returnModal"
+    style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.28); z-index:9999; align-items:flex-start; justify-content:center; padding:60px 16px; overflow-y:auto;">
+    <div
+      style="width:100%; max-width:680px; background:#fff; padding:28px 30px 26px; box-shadow:0 14px 40px rgba(0,0,0,0.12);">
+      <h2 style="margin:0 0 22px; font-size:22px; font-weight:700; color:#0077b6;">Hoàn trả văn bản</h2>
+      {% if messages %}
+      {% for message in messages %}
+      <div
+        style="margin-bottom:12px; padding:10px 12px; background:#fee2e2; color:#b91c1c; font-size:14px; border:1px solid #fecaca;">
+        {{ message }}</div>
+      {% endfor %}
+      {% endif %}
+      <div
+        style="width:100%; min-height:30px; border:1px solid #d1d5db; padding:10px 12px; font-size:16px; font-weight:700; color:#2f2f2f; margin-bottom:18px; background:#f9fafb;">
+        Chuyên viên: {{ vb.nguoi_tao.ho_va_ten|default:"-" }}
+      </div>
+      <form method="post" action="{% url 'quanlyvanbandi:hoan_tra_van_ban_di' vb.pk %}">
+        {% csrf_token %}
+        <label for="ly_do" style="display:block; margin-bottom:10px; font-size:16px; font-weight:700; color:#333;">Lý do
+          / Yêu cầu chỉnh sửa</label>
+        <textarea id="ly_do" name="ly_do"
+          style="width:100%; min-height:126px; border:1px solid #d1d5db; padding:14px; font-size:15px; color:#374151; resize:vertical; outline:none; font-family:inherit; box-sizing:border-box;"
+          placeholder="Nhập lý do / Yêu cầu chỉnh sửa..." required></textarea>
+        <div style="margin-top:22px; display:flex; justify-content:flex-end; gap:16px;">
+          <button type="button" id="closeReturnModal"
+            style="min-width:94px; height:46px; border:1px solid #d1d5db; background:#f3f4f6; color:#444; font-size:15px; font-weight:700; cursor:pointer;">
+            Hủy
+          </button>
+          <button type="submit"
+            style="min-width:94px; height:46px; border:none; background:#f59e0b; color:#fff; font-size:15px; font-weight:700; cursor:pointer;">
+            Hoàn trả
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% include "vanbandi/popup-ban-hanh.html" %}
+</div>
+
+<div id="banHanhOverlay" class="bh-overlay">
+  <div class="bh-modal">
+    <h2 class="bh-title">📋 Biểu mẫu Ban hành văn bản</h2>
+
+    <div id="bhMainAlert" class="bh-alert error"></div>
+
+    <div class="bh-section"
+      style="display:grid; grid-template-columns:1fr 1fr; gap:16px; background:#f8fafc; padding:14px 16px; border:1px solid #e5e7eb;">
+      <div>
+        <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase;">Số ký hiệu</div>
+        <div style="font-size:14px; font-weight:700; color:#1e293b; margin-top:3px;">{{ vb.so_ky_hieu|default:"—" }}
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase;">Trạng thái</div>
+        <div style="margin-top:3px;"><span class="status-badge-detail">Chờ ban hành</span></div>
+      </div>
+      <div style="grid-column:1/-1;">
+        <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase;">Trích yếu</div>
+        <div style="font-size:13px; color:#334155; margin-top:3px;">{{ vb.trich_yeu|default:"—" }}</div>
+      </div>
+    </div>
+
+    <div class="bh-section">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div class="bh-subtitle">Danh sách phát hành</div>
+        <div style="display:flex; gap:8px;">
+          <button type="button" class="bh-add-btn" id="openNoiBoPopup">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Thêm đơn vị nội bộ
+          </button>
+          <button type="button" class="bh-add-btn" id="openNgoaiPopup"
+            style="border-color:#d97706; color:#92400e; background:#fffbeb;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Thêm đơn vị ngoài
+          </button>
+        </div>
+      </div>
+
+      <div style="border:1px solid #e5e7eb; overflow:hidden;">
+        <table class="bh-phat-hanh-table">
+          <thead>
+            <tr>
+              <th style="width:40px;">#</th>
+              <th>Đơn vị / Phòng ban</th>
+              <th>Loại</th>
+              <th>Thành viên / Đại diện</th>
+              <th style="width:70px; text-align:center;">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="bhPhatHanhBody">
+            <tr class="bh-empty-row" id="bhEmptyRow">
+              <td colspan="5">Chưa có đơn vị nào. Vui lòng thêm ít nhất 1 đơn vị để ban hành.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="bh-footer">
+      <button type="button" id="closeBanHanhModal"
+        style="min-width:90px; height:40px; border:1px solid #d1d5db; background:#f3f4f6; color:#444; font-size:14px; font-weight:600; cursor:pointer;">
+        Hủy
+      </button>
+      <button type="button" id="btnBanHanhLuu"
+        style="min-width:120px; height:40px; border:none; background:#94a3b8; color:#fff; font-size:14px; font-weight:700; cursor:not-allowed;"
+        disabled>
+        Lưu &amp; Ban hành
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="noiBoOverlay" class="bh-overlay" style="z-index:9500;">
+  <div class="bh-modal bh-modal-sm">
+    <h2 class="bh-title" style="font-size:17px;">Chọn đơn vị nội bộ</h2>
+
+    <div class="pop-filter-row">
+      <select id="noiBoCapTochuc" style="max-width:200px;">
+        <option value="tct">Tổng công ty</option>
+        <option value="cn">Chi nhánh</option>
+      </select>
+      <select id="noiBoChiNhanh" style="max-width:200px; display:none;">
+        <option value="hn">Chi nhánh Hà Nội</option>
+        <option value="hcm">Chi nhánh TP.HCM</option>
+        <option value="dn">Chi nhánh Đà Nẵng</option>
+      </select>
+      <input type="text" id="noiBoSearch" placeholder="Tìm nhanh tên phòng ban, đơn vị...">
+    </div>
+
+    <div class="pop-table-wrap">
+      <table class="pop-table">
+        <thead>
+          <tr>
+            <th style="width:40px;"><input type="checkbox" id="noiBoCheckAll"></th>
+            <th>Đơn vị / Thành viên</th>
+          </tr>
+        </thead>
+        <tbody id="noiBoTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="pop-footer">
+      <div class="pop-footer-count">Đang chọn: <strong id="noiBoCount">0</strong> đơn vị</div>
+      <div class="pop-footer-btns">
+        <button type="button" id="noiBoSave"
+          style="padding:8px 22px; background:#1a7abf; color:#fff; border:none; font-size:14px; font-weight:700; cursor:pointer;">LƯU
+          LẠI</button>
+        <button type="button" id="noiBoCancel"
+          style="padding:8px 20px; background:#9ca3af; color:#fff; border:none; font-size:14px; font-weight:700; cursor:pointer;">HỦY
+          BỎ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="ngoaiOverlay" class="bh-overlay" style="z-index:9500;">
+  <div class="bh-modal bh-modal-sm">
+    <h2 class="bh-title" style="font-size:17px;">Chọn đơn vị ngoài</h2>
+
+    <div class="pop-filter-row">
+      <select style="max-width:200px;">
+        <option>Đơn vị ngoài</option>
+      </select>
+      <input type="text" id="ngoaiSearch" placeholder="Tìm nhanh nhân viên, email hoặc số điện thoại...">
+      <button type="button" id="openAddNgoaiForm"
+        style="padding:8px 14px; background:#1a7abf; color:#fff; border:none; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap; border-radius:2px;">+
+        Thêm đơn vị</button>
+    </div>
+
+    <div class="pop-table-wrap">
+      <table class="pop-table">
+        <thead>
+          <tr>
+            <th style="width:40px;"><input type="checkbox" id="ngoaiCheckAll"></th>
+            <th>Đơn vị / Thành viên</th>
+            <th>Đại diện</th>
+            <th>Số điện thoại</th>
+            <th>Email</th>
+            <th style="width:80px; text-align:center;">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="ngoaiTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="pop-footer">
+      <div class="pop-footer-count">Đang chọn: <strong id="ngoaiCount">0</strong> đơn vị</div>
+      <div class="pop-footer-btns">
+        <button type="button" id="ngoaiSave"
+          style="padding:8px 22px; background:#1a7abf; color:#fff; border:none; font-size:14px; font-weight:700; cursor:pointer;">LƯU
+          LẠI</button>
+        <button type="button" id="ngoaiCancel"
+          style="padding:8px 20px; background:#9ca3af; color:#fff; border:none; font-size:14px; font-weight:700; cursor:pointer;">HỦY
+          BỎ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="addNgoaiOverlay" class="bh-overlay" style="z-index:10000;">
+  <div class="bh-modal bh-modal-xs">
+    <h2 class="bh-title" style="font-size:17px; color:#334155;">Thêm đơn vị ngoại bộ</h2>
+
+    <div id="addNgoaiAlert" class="bh-alert error">Đơn vị ngoại bộ đã tồn tại.</div>
+
+    <div class="bh-section">
+      <div class="bh-form-field" style="margin-bottom:14px;" id="field-ten-don-vi">
+        <label>Tên đơn vị <span class="req">*</span></label>
+        <input type="text" id="addTenDonVi" placeholder="Nhập tên đơn vị ngoại bộ">
+        <div class="bh-field-err">Vui lòng nhập tên đơn vị.</div>
+      </div>
+
+      <div class="bh-form-row">
+        <div class="bh-form-field" id="field-dai-dien">
+          <label>Đại diện <span class="req">*</span></label>
+          <input type="text" id="addDaiDien" placeholder="Nhập tên người đại diện">
+          <div class="bh-field-err">Vui lòng nhập tên đại diện.</div>
+        </div>
+
+        <div class="bh-form-field" id="field-sdt">
+          <label>Số điện thoại <span class="req">*</span></label>
+          <input type="text" id="addSdt" placeholder="Nhập số điện thoại">
+          <div class="bh-field-err">Vui lòng nhập số điện thoại.</div>
+        </div>
+      </div>
+
+      <div class="bh-form-field" style="margin-top:14px;" id="field-email">
+        <label>Email <span class="req">*</span></label>
+        <input type="email" id="addEmail" placeholder="Nhập email">
+        <div class="bh-field-err">Vui lòng nhập email hợp lệ.</div>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:10px; padding-top:14px; border-top:1px solid #e5e7eb;">
+      <button type="button" id="addNgoaiHuy"
+        style="padding:7px 20px; background:#f3f4f6; border:1px solid #d1d5db; color:#374151; font-size:13px; font-weight:600; cursor:pointer;">Hủy</button>
+      <button type="button" id="addNgoaiLuu"
+        style="padding:7px 20px; background:#9ca3af; color:#fff; border:none; font-size:13px; font-weight:700; cursor:pointer;">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<div id="bhSuccessToast" class="bh-success-toast">✅ Ban hành văn bản đi thành công!</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'vendor/pdfjs/pdf.min.js' %}"></script>
+<script src="{% static 'vendor/mammoth/mammoth.browser.min.js' %}"></script>
+<script src="{% static 'vendor/sheetjs/xlsx.full.min.js' %}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const previewRoot = document.getElementById("smart-preview");
+    const previewBody = document.getElementById("preview-body");
+    const openLink = document.getElementById("preview-open-link");
+    const btnDownload = document.getElementById("btn-download");
+    const btnPrint = document.getElementById("btn-print");
+    const printArea = document.getElementById("print-area");
+
+    const pdfPrevBtn = document.getElementById("pdf-prev-btn");
+    const pdfNextBtn = document.getElementById("pdf-next-btn");
+    const pdfPageInfo = document.getElementById("pdf-page-info");
+
+    let currentFileExt = "";
+    let currentPdfDoc = null;
+    let currentPdfPage = 0;
+    let totalPdfPages = 0;
+
+    function showLoading(text = "Đang tải xem trước...") {
+      previewBody.innerHTML = `<div class="preview-loading">${text}</div>`;
+    }
+
+    function hideToolbarBtns() {
+      if (btnDownload) btnDownload.style.display = "none";
+      if (btnPrint) btnPrint.style.display = "none";
+    }
+
+    function resetPdfNav() {
+      currentPdfPage = 0;
+      totalPdfPages = 0;
+
+      if (pdfPageInfo) pdfPageInfo.textContent = "Trang 0 / 0";
+      if (pdfPrevBtn) pdfPrevBtn.disabled = true;
+      if (pdfNextBtn) pdfNextBtn.disabled = true;
+    }
+
+    function showError(text = "Không thể xem trước tệp này.") {
+      previewBody.innerHTML = `<div class="preview-error">${text}</div>`;
+      hideToolbarBtns();
+      resetPdfNav();
+    }
+
+    function showToolbarBtns(fileUrl, fileName) {
+      if (btnDownload) {
+        btnDownload.href = fileUrl;
+        btnDownload.setAttribute("download", fileName || "file");
+        btnDownload.style.display = "inline-flex";
+      }
+
+      if (btnPrint) {
+        btnPrint.style.display = "inline-flex";
+      }
+
+      if (openLink) {
+        openLink.href = fileUrl;
+      }
+    }
+
+    function updatePdfNav() {
+      if (pdfPageInfo) {
+        pdfPageInfo.textContent = `Trang ${currentPdfPage} / ${totalPdfPages}`;
+      }
+
+      if (pdfPrevBtn) {
+        pdfPrevBtn.disabled = currentPdfPage <= 1 || totalPdfPages === 0;
+      }
+
+      if (pdfNextBtn) {
+        pdfNextBtn.disabled = currentPdfPage >= totalPdfPages || totalPdfPages === 0;
+      }
+    }
+
+    function enableGenericNav() {
+      if (pdfPrevBtn) pdfPrevBtn.disabled = false;
+      if (pdfNextBtn) pdfNextBtn.disabled = false;
+      if (pdfPageInfo) pdfPageInfo.textContent = "Cuộn tài liệu";
+    }
+
+    function scrollPreviewByStep(direction) {
+      const step = Math.max(300, Math.floor(previewBody.clientHeight * 0.8));
+      previewBody.scrollBy({
+        top: direction * step,
+        behavior: "smooth"
+      });
+    }
+
+    async function renderPdfPage(pageNumber) {
+      if (!currentPdfDoc || pageNumber < 1 || pageNumber > totalPdfPages) {
+        return;
+      }
+
+      currentPdfPage = pageNumber;
+      updatePdfNav();
+      showLoading(`Đang tải trang ${pageNumber}...`);
+
+      try {
+        const page = await currentPdfDoc.getPage(pageNumber);
+        const containerWidth = Math.max(previewBody.clientWidth - 40, 300);
+        const initialViewport = page.getViewport({ scale: 1 });
+        const scale = Math.min(2, Math.max(1, containerWidth / initialViewport.width));
+        const viewport = page.getViewport({ scale });
+
+        const canvas = document.createElement("canvas");
+        canvas.className = "pdf-canvas";
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        previewBody.innerHTML = "";
+        previewBody.appendChild(canvas);
+
+        await page.render({
+          canvasContext: canvas.getContext("2d"),
+          viewport: viewport
+        }).promise;
+      } catch (error) {
+        console.error("PDF render error:", error);
+        showError("Không thể hiển thị trang PDF này.");
+      }
+    }
+
+    async function loadPdf(fileUrl, fileName) {
+      try {
+        showLoading("Đang tải PDF...");
+
+        if (window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions) {
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+            "{% static 'vendor/pdfjs/pdf.worker.min.js' %}";
+        }
+
+        const response = await fetch(encodeURI(fileUrl), {
+          method: "GET",
+          credentials: "same-origin"
+        });
+
+        if (!response.ok) {
+          throw new Error(`Fetch PDF failed: ${response.status}`);
+        }
+
+        const contentType = (response.headers.get("content-type") || "").toLowerCase();
+        if (
+          contentType &&
+          !contentType.includes("pdf") &&
+          !contentType.includes("octet-stream")
+        ) {
+          throw new Error(`Invalid content-type: ${contentType}`);
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        currentPdfDoc = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        totalPdfPages = currentPdfDoc.numPages;
+        currentPdfPage = 1;
+
+        showToolbarBtns(fileUrl, fileName);
+        await renderPdfPage(1);
+      } catch (error) {
+        console.error("PDF load error:", error);
+        currentPdfDoc = null;
+        showError("Không đọc được file PDF.");
+      }
+    }
+
+    async function renderDocx(fileUrl, fileName) {
+      try {
+        showLoading("Đang tải DOCX...");
+
+        const response = await fetch(fileUrl, { credentials: "same-origin" });
+        if (!response.ok) {
+          throw new Error(`Fetch DOCX failed: ${response.status}`);
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        const result = await window.mammoth.convertToHtml({ arrayBuffer });
+
+        previewBody.innerHTML = `
+        <div class="docx-stage">
+          ${result.value || "<p>Không có nội dung để hiển thị.</p>"}
+        </div>
+      `;
+
+        showToolbarBtns(fileUrl, fileName);
+        enableGenericNav();
+      } catch (error) {
+        console.error("DOCX preview error:", error);
+        showError("Không đọc được file Word.");
+      }
+    }
+
+    function renderSheet(workbook, sheetName) {
+      const html = window.XLSX.utils.sheet_to_html(workbook.Sheets[sheetName]);
+
+      const tabs = workbook.SheetNames.map((name) => `
+      <button type="button" class="xlsx-tab ${name === sheetName ? "active" : ""}" data-sheet="${name}">
+        ${name}
+      </button>
+    `).join("");
+
+      previewBody.innerHTML = `
+      <div class="xlsx-wrap">
+        <div class="xlsx-sheet-tabs">${tabs}</div>
+        <div class="xlsx-table-wrap">${html}</div>
+      </div>
+    `;
+
+      previewBody.querySelectorAll(".xlsx-tab").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          renderSheet(workbook, this.dataset.sheet);
+        });
+      });
+    }
+
+    async function renderXlsx(fileUrl, fileName) {
+      try {
+        showLoading("Đang tải Excel...");
+
+        const response = await fetch(fileUrl, { credentials: "same-origin" });
+        if (!response.ok) {
+          throw new Error(`Fetch XLSX failed: ${response.status}`);
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        const workbook = window.XLSX.read(arrayBuffer, { type: "array" });
+
+        if (!workbook.SheetNames || !workbook.SheetNames.length) {
+          throw new Error("Empty workbook");
+        }
+
+        renderSheet(workbook, workbook.SheetNames[0]);
+        showToolbarBtns(fileUrl, fileName);
+        enableGenericNav();
+      } catch (error) {
+        console.error("XLSX preview error:", error);
+        showError("Không đọc được file Excel.");
+      }
+    }
+
+    function loadPreview(fileUrl, fileName, fileExtRaw) {
+      currentFileExt = (fileExtRaw || "").toLowerCase();
+      currentPdfDoc = null;
+      resetPdfNav();
+      hideToolbarBtns();
+
+      if (currentFileExt.endsWith(".pdf")) {
+        loadPdf(fileUrl, fileName);
+        return;
+      }
+
+      if (currentFileExt.endsWith(".docx") || currentFileExt.endsWith(".doc")) {
+        renderDocx(fileUrl, fileName);
+        return;
+      }
+
+      if (currentFileExt.endsWith(".xlsx") || currentFileExt.endsWith(".xls")) {
+        renderXlsx(fileUrl, fileName);
+        return;
+      }
+
+      showError("Định dạng này chưa hỗ trợ xem trước.");
+    }
+
+    if (btnPrint) {
+      btnPrint.addEventListener("click", function () {
+        const lower = currentFileExt || "";
+        printArea.innerHTML = "";
+
+        if (lower.endsWith(".pdf")) {
+          const canvas = previewBody.querySelector(".pdf-canvas");
+          if (canvas) {
+            const img = document.createElement("img");
+            img.src = canvas.toDataURL("image/png");
+            printArea.appendChild(img);
+          }
+        } else if (lower.endsWith(".docx") || lower.endsWith(".doc")) {
+          const docxEl = previewBody.querySelector(".docx-stage");
+          if (docxEl) printArea.innerHTML = docxEl.outerHTML;
+        } else if (lower.endsWith(".xlsx") || lower.endsWith(".xls")) {
+          const tableWrap = previewBody.querySelector(".xlsx-wrap");
+          if (tableWrap) printArea.innerHTML = tableWrap.outerHTML;
+        }
+
+        printArea.style.display = "block";
+        window.print();
+        printArea.style.display = "none";
+      });
+    }
+
+    if (pdfPrevBtn) {
+      pdfPrevBtn.addEventListener("click", function () {
+        if (currentFileExt.endsWith(".pdf")) {
+          renderPdfPage(currentPdfPage - 1);
+        } else {
+          scrollPreviewByStep(-1);
+        }
+      });
+    }
+
+    if (pdfNextBtn) {
+      pdfNextBtn.addEventListener("click", function () {
+        if (currentFileExt.endsWith(".pdf")) {
+          renderPdfPage(currentPdfPage + 1);
+        } else {
+          scrollPreviewByStep(1);
+        }
+      });
+    }
+
+    document.querySelectorAll(".file-preview-trigger").forEach((trigger) => {
+      trigger.addEventListener("click", function (e) {
+        e.preventDefault();
+
+        document.querySelectorAll(".file-preview-trigger").forEach((el) => {
+          el.classList.remove("active");
+        });
+
+        this.classList.add("active");
+
+        if (previewRoot) {
+          previewRoot.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+        }
+
+        loadPreview(
+          this.dataset.fileUrl,
+          this.dataset.fileName,
+          this.dataset.fileExt
+        );
+      });
+    });
+
+    const firstTrigger = document.querySelector(".file-preview-trigger");
+    if (firstTrigger) {
+      firstTrigger.classList.add("active");
+      loadPreview(
+        firstTrigger.dataset.fileUrl,
+        firstTrigger.dataset.fileName || "",
+        firstTrigger.dataset.fileExt || ""
+      );
+    } else {
+      resetPdfNav();
+    }
+
+    function setupModal(openBtnId, modalId, closeBtnId) {
+      const openBtn = document.getElementById(openBtnId);
+      const modal = document.getElementById(modalId);
+      const closeBtn = document.getElementById(closeBtnId);
+
+      if (!modal) return;
+
+      if (openBtn) {
+        openBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          modal.style.display = "flex";
+          document.body.style.overflow = "hidden";
+        });
+      }
+
+      if (closeBtn) {
+        closeBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          modal.style.display = "none";
+          document.body.style.overflow = "";
+        });
+      }
+
+      modal.addEventListener("click", function (e) {
+        if (e.target === modal) {
+          modal.style.display = "none";
+          document.body.style.overflow = "";
+        }
+      });
+    }
+
+    setupModal("openApprovalModal", "approvalModal", "closeApprovalModal");
+    setupModal("openReturnModal", "returnModal", "closeReturnModal");
+
+    const API_CHI_NHANH = "{% url 'quanlyvanbandi:api_chi_nhanh_phong_ban' %}";
+    const API_DON_VI_NGOAI = "{% url 'quanlyvanbandi:api_don_vi_ngoai' %}";
+    const BAN_HANH_URL = "{{ ban_hanh_url }}";
+
+    let phongBanCache = {};
+    let noiBoCurrentData = [];
+    let selectedNoiBo = [];
+    let selectedNgoai = [];
+    let tempNoiBo = [];
+    let tempNgoai = [];
+    let ngoaiData = [];
+
+    function openOverlay(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add("active");
+        document.body.style.overflow = "hidden";
+      }
+    }
+
+    function closeOverlay(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.remove("active");
+        document.body.style.overflow = "";
+      }
+    }
+
+    function renderPhatHanhTable() {
+      const body = document.getElementById("bhPhatHanhBody");
+      const btnLuu = document.getElementById("btnBanHanhLuu");
+      if (!body || !btnLuu) return;
+
+      const all = [...selectedNoiBo, ...selectedNgoai];
+      if (all.length === 0) {
+        body.innerHTML = `<tr class="bh-empty-row"><td colspan="5">Chưa có đơn vị nào. Vui lòng thêm ít nhất 1 đơn vị để ban hành.</td></tr>`;
+        btnLuu.disabled = true;
+        btnLuu.style.background = "#94a3b8";
+        btnLuu.style.cursor = "not-allowed";
+        return;
+      }
+
+      let html = "";
+      all.forEach((item, idx) => {
+        const isNoiBo = item.loai === "noi_bo";
+        html += `<tr>
+        <td>${idx + 1}</td>
+        <td>${item.ten}</td>
+        <td><span class="bh-type-badge ${isNoiBo ? 'bh-type-noi-bo' : 'bh-type-ngoai'}">${isNoiBo ? 'Nội bộ' : 'Ngoài'}</span></td>
+        <td>${isNoiBo ? (item.so_thanh_vien || 0) + ' thành viên' : (item.daiDien || '—')}</td>
+        <td style="text-align:center;">
+          <button type="button" class="pop-icon-btn del" onclick="removePhatHanh('${item.id}','${item.loai}')" title="Xóa">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-1 14H6L5 6"/>
+              <path d="M10 11v6"/>
+              <path d="M14 11v6"/>
+              <path d="M9 6V4h6v2"/>
+            </svg>
+          </button>
+        </td>
+      </tr>`;
+      });
+
+      body.innerHTML = html;
+      btnLuu.disabled = false;
+      btnLuu.style.background = "#16a34a";
+      btnLuu.style.cursor = "pointer";
+    }
+
+    window.removePhatHanh = function (id, loai) {
+      if (loai === "noi_bo") {
+        selectedNoiBo = selectedNoiBo.filter(x => x.id !== id);
+      } else {
+        selectedNgoai = selectedNgoai.filter(x => x.id !== id);
+      }
+      renderPhatHanhTable();
+    };
+
+    const openBhBtn = document.getElementById("openBanHanhModal");
+    const banHanhOvEl = document.getElementById("banHanhOverlay");
+    const closeBhBtn = document.getElementById("closeBanHanhModal");
+    const btnBhLuu = document.getElementById("btnBanHanhLuu");
+
+    if (openBhBtn) openBhBtn.addEventListener("click", () => openOverlay("banHanhOverlay"));
+    if (closeBhBtn) closeBhBtn.addEventListener("click", () => closeOverlay("banHanhOverlay"));
+    if (banHanhOvEl) {
+      banHanhOvEl.addEventListener("click", e => {
+        if (e.target === banHanhOvEl) closeOverlay("banHanhOverlay");
+      });
+    }
+
+    if (btnBhLuu) {
+      btnBhLuu.addEventListener("click", async function () {
+        if ([...selectedNoiBo, ...selectedNgoai].length === 0) return;
+
+        const fd = new FormData();
+        const csrf = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrf) fd.append("csrfmiddlewaretoken", csrf.value);
+
+        selectedNoiBo.forEach(item => fd.append("phong_ban_ids[]", item.id));
+        selectedNgoai.forEach(item => fd.append("don_vi_ngoai_ids[]", item.id));
+
+        try {
+          const res = await fetch(BAN_HANH_URL, { method: "POST", body: fd });
+          const data = await res.json();
+
+          if (data.ok) {
+            closeOverlay("banHanhOverlay");
+            const toast = document.getElementById("bhSuccessToast");
+            if (toast) {
+              toast.style.display = "block";
+              setTimeout(() => toast.style.display = "none", 3500);
+            }
+
+            document.querySelectorAll(".status-badge-detail").forEach(b => b.textContent = "Đã ban hành");
+            if (openBhBtn) {
+              openBhBtn.disabled = true;
+              openBhBtn.style.opacity = 0.5;
+            }
+          } else {
+            const alertEl = document.getElementById("bhMainAlert");
+            if (alertEl) {
+              alertEl.textContent = data.error || "Có lỗi xảy ra.";
+              alertEl.style.display = "block";
+            }
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      });
+    }
+
+    async function loadChiNhanh() {
+      const selCN = document.getElementById("noiBoChiNhanh");
+      if (!selCN) return;
+
+      try {
+        const res = await fetch(API_CHI_NHANH);
+        const data = await res.json();
+        selCN.innerHTML = `<option value="">-- Chọn chi nhánh --</option>` +
+          (data.chi_nhanh || []).map(cn => `<option value="${cn.id}">${cn.ten}</option>`).join("");
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function loadPhongBan(cnId) {
+      if (!cnId) {
+        noiBoCurrentData = [];
+        renderNoiBoTable("");
+        return;
+      }
+
+      if (phongBanCache[cnId]) {
+        noiBoCurrentData = phongBanCache[cnId];
+        renderNoiBoTable("");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_CHI_NHANH}?chi_nhanh_id=${cnId}`);
+        const data = await res.json();
+        phongBanCache[cnId] = (data.phong_ban || []).map(pb => ({
+          id: String(pb.id),
+          ten: pb.ten,
+          so_thanh_vien: pb.so_thanh_vien
+        }));
+        noiBoCurrentData = phongBanCache[cnId];
+        renderNoiBoTable("");
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function renderNoiBoTable(filterText) {
+      const body = document.getElementById("noiBoTableBody");
+      if (!body) return;
+
+      const ft = (filterText || "").toLowerCase();
+      const filtered = noiBoCurrentData.filter(i => i.ten.toLowerCase().includes(ft));
+
+      if (filtered.length === 0) {
+        body.innerHTML = `<tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:18px;">Không tìm thấy đơn vị.</td></tr>`;
+        return;
+      }
+
+      body.innerHTML = filtered.map(item => {
+        const checked = tempNoiBo.some(t => t.id === item.id) ? "checked" : "";
+        return `<tr>
+        <td><input type="checkbox" class="noibo-cb" data-id="${item.id}" data-ten="${item.ten}" data-tv="${item.so_thanh_vien || 0}" ${checked}></td>
+        <td>${item.ten} <span style="color:#64748b;font-size:12px;">(${String(item.so_thanh_vien || 0).padStart(2, '0')} thành viên)</span></td>
+      </tr>`;
+      }).join("");
+
+      body.querySelectorAll(".noibo-cb").forEach(cb => {
+        cb.addEventListener("change", function () {
+          const id = this.dataset.id;
+          const ten = this.dataset.ten;
+          const tv = parseInt(this.dataset.tv) || 0;
+
+          if (this.checked) {
+            if (!tempNoiBo.some(t => t.id === id)) {
+              tempNoiBo.push({ id, ten, so_thanh_vien: tv, loai: "noi_bo" });
+            }
+          } else {
+            tempNoiBo = tempNoiBo.filter(t => t.id !== id);
+          }
+
+          updateNoiBoCount();
+          syncNoiBoCheckAll(filterText);
+        });
+      });
+    }
+
+    function updateNoiBoCount() {
+      const el = document.getElementById("noiBoCount");
+      if (el) el.textContent = tempNoiBo.length;
+    }
+
+    function syncNoiBoCheckAll(ft) {
+      const filtered = noiBoCurrentData.filter(i => i.ten.toLowerCase().includes((ft || "").toLowerCase()));
+      const cb = document.getElementById("noiBoCheckAll");
+      if (cb) cb.checked = filtered.length > 0 && filtered.every(i => tempNoiBo.some(t => t.id === i.id));
+    }
+
+    const openNoiBoBtn = document.getElementById("openNoiBoPopup");
+    if (openNoiBoBtn) {
+      openNoiBoBtn.addEventListener("click", async function () {
+        tempNoiBo = selectedNoiBo.map(x => ({ ...x }));
+        await loadChiNhanh();
+        noiBoCurrentData = [];
+        renderNoiBoTable("");
+        updateNoiBoCount();
+        openOverlay("noiBoOverlay");
+      });
+    }
+
+    const noiBoCapTochuc = document.getElementById("noiBoCapTochuc");
+    const noiBoChiNhanhEl = document.getElementById("noiBoChiNhanh");
+
+    if (noiBoCapTochuc) {
+      noiBoCapTochuc.addEventListener("change", function () {
+        if (this.value === "cn") {
+          if (noiBoChiNhanhEl) noiBoChiNhanhEl.style.display = "";
+          loadPhongBan(noiBoChiNhanhEl ? noiBoChiNhanhEl.value : "");
+        } else {
+          if (noiBoChiNhanhEl) noiBoChiNhanhEl.style.display = "none";
+          noiBoCurrentData = [];
+          renderNoiBoTable("");
+        }
+
+        const s = document.getElementById("noiBoSearch");
+        if (s) s.value = "";
+      });
+    }
+
+    if (noiBoChiNhanhEl) {
+      noiBoChiNhanhEl.addEventListener("change", function () {
+        loadPhongBan(this.value);
+        const s = document.getElementById("noiBoSearch");
+        if (s) s.value = "";
+      });
+    }
+
+    const noiBoSearchEl = document.getElementById("noiBoSearch");
+    if (noiBoSearchEl) {
+      noiBoSearchEl.addEventListener("input", function () {
+        renderNoiBoTable(this.value);
+      });
+    }
+
+    const noiBoCheckAllEl = document.getElementById("noiBoCheckAll");
+    if (noiBoCheckAllEl) {
+      noiBoCheckAllEl.addEventListener("change", function () {
+        const ft = (noiBoSearchEl?.value || "").toLowerCase();
+        const filtered = noiBoCurrentData.filter(i => i.ten.toLowerCase().includes(ft));
+
+        if (this.checked) {
+          filtered.forEach(i => {
+            if (!tempNoiBo.some(t => t.id === i.id)) {
+              tempNoiBo.push({
+                id: i.id,
+                ten: i.ten,
+                so_thanh_vien: i.so_thanh_vien,
+                loai: "noi_bo"
+              });
+            }
+          });
+        } else {
+          const ids = filtered.map(i => i.id);
+          tempNoiBo = tempNoiBo.filter(t => !ids.includes(t.id));
+        }
+
+        renderNoiBoTable(noiBoSearchEl?.value || "");
+        updateNoiBoCount();
+      });
+    }
+
+    const noiBoSaveEl = document.getElementById("noiBoSave");
+    if (noiBoSaveEl) {
+      noiBoSaveEl.addEventListener("click", () => {
+        selectedNoiBo = tempNoiBo.map(x => ({ ...x }));
+        renderPhatHanhTable();
+        closeOverlay("noiBoOverlay");
+      });
+    }
+
+    const noiBoCancel = document.getElementById("noiBoCancel");
+    if (noiBoCancel) noiBoCancel.addEventListener("click", () => closeOverlay("noiBoOverlay"));
+
+    const noiBoOvEl = document.getElementById("noiBoOverlay");
+    if (noiBoOvEl) {
+      noiBoOvEl.addEventListener("click", e => {
+        if (e.target === noiBoOvEl) closeOverlay("noiBoOverlay");
+      });
+    }
+
+    async function loadDonViNgoai(q) {
+      try {
+        const url = q ? `${API_DON_VI_NGOAI}?q=${encodeURIComponent(q)}` : API_DON_VI_NGOAI;
+        const res = await fetch(url);
+        const data = await res.json();
+        ngoaiData = (data.don_vi_ngoai || []).map(dv => ({
+          id: String(dv.id),
+          ten: dv.ten,
+          daiDien: dv.dia_chi || "",
+          sdt: dv.sdt || "",
+          email: dv.email || ""
+        }));
+        renderNgoaiTable("");
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function renderNgoaiTable(filterText) {
+      const body = document.getElementById("ngoaiTableBody");
+      if (!body) return;
+
+      const ft = (filterText || "").toLowerCase();
+      const filtered = ngoaiData.filter(i =>
+        i.ten.toLowerCase().includes(ft) ||
+        i.email.toLowerCase().includes(ft) ||
+        i.sdt.includes(ft)
+      );
+
+      if (filtered.length === 0) {
+        body.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:18px;">Không tìm thấy đơn vị.</td></tr>`;
+        return;
+      }
+
+      body.innerHTML = filtered.map(item => {
+        const checked = tempNgoai.some(t => t.id === item.id) ? "checked" : "";
+        return `<tr>
+        <td><input type="checkbox" class="ngoai-cb" data-id="${item.id}" ${checked}></td>
+        <td>${item.ten}</td>
+        <td>${item.daiDien}</td>
+        <td>${item.sdt}</td>
+        <td>${item.email}</td>
+        <td style="text-align:center;">
+          <button type="button" class="pop-icon-btn del" onclick="deleteNgoai('${item.id}')" title="Xóa">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-1 14H6L5 6"/>
+              <path d="M10 11v6"/>
+              <path d="M14 11v6"/>
+              <path d="M9 6V4h6v2"/>
+            </svg>
+          </button>
+        </td>
+      </tr>`;
+      }).join("");
+
+      body.querySelectorAll(".ngoai-cb").forEach(cb => {
+        cb.addEventListener("change", function () {
+          const id = this.dataset.id;
+          const item = ngoaiData.find(x => x.id === id);
+          if (!item) return;
+
+          if (this.checked) {
+            if (!tempNgoai.some(t => t.id === id)) {
+              tempNgoai.push({ ...item, loai: "ngoai" });
+            }
+          } else {
+            tempNgoai = tempNgoai.filter(t => t.id !== id);
+          }
+
+          updateNgoaiCount();
+          syncNgoaiCheckAll(filterText);
+        });
+      });
+    }
+
+    function updateNgoaiCount() {
+      const el = document.getElementById("ngoaiCount");
+      if (el) el.textContent = tempNgoai.length;
+    }
+
+    function syncNgoaiCheckAll(ft) {
+      const filtered = ngoaiData.filter(i => i.ten.toLowerCase().includes((ft || "").toLowerCase()));
+      const cb = document.getElementById("ngoaiCheckAll");
+      if (cb) cb.checked = filtered.length > 0 && filtered.every(i => tempNgoai.some(t => t.id === i.id));
+    }
+
+    window.deleteNgoai = function (id) {
+      ngoaiData = ngoaiData.filter(x => x.id !== id);
+      tempNgoai = tempNgoai.filter(x => x.id !== id);
+      const s = document.getElementById("ngoaiSearch");
+      renderNgoaiTable(s ? s.value : "");
+      updateNgoaiCount();
+    };
+
+    const openNgoaiBtn = document.getElementById("openNgoaiPopup");
+    if (openNgoaiBtn) {
+      openNgoaiBtn.addEventListener("click", async function () {
+        tempNgoai = selectedNgoai.map(x => ({ ...x }));
+        await loadDonViNgoai("");
+        updateNgoaiCount();
+        openOverlay("ngoaiOverlay");
+      });
+    }
+
+    const ngoaiSearchEl2 = document.getElementById("ngoaiSearch");
+    let ngoaiSTO;
+    if (ngoaiSearchEl2) {
+      ngoaiSearchEl2.addEventListener("input", function () {
+        clearTimeout(ngoaiSTO);
+        ngoaiSTO = setTimeout(() => loadDonViNgoai(this.value), 300);
+      });
+    }
+
+    const ngoaiCheckAllEl = document.getElementById("ngoaiCheckAll");
+    if (ngoaiCheckAllEl) {
+      ngoaiCheckAllEl.addEventListener("change", function () {
+        const ft = (ngoaiSearchEl2?.value || "").toLowerCase();
+        const filtered = ngoaiData.filter(i =>
+          i.ten.toLowerCase().includes(ft) ||
+          i.email.toLowerCase().includes(ft) ||
+          i.sdt.includes(ft)
+        );
+
+        if (this.checked) {
+          filtered.forEach(i => {
+            if (!tempNgoai.some(t => t.id === i.id)) {
+              tempNgoai.push({ ...i, loai: "ngoai" });
+            }
+          });
+        } else {
+          const ids = filtered.map(i => i.id);
+          tempNgoai = tempNgoai.filter(t => !ids.includes(t.id));
+        }
+
+        renderNgoaiTable(ngoaiSearchEl2?.value || "");
+        updateNgoaiCount();
+      });
+    }
+
+    const ngoaiSaveEl = document.getElementById("ngoaiSave");
+    if (ngoaiSaveEl) {
+      ngoaiSaveEl.addEventListener("click", () => {
+        selectedNgoai = tempNgoai.map(x => ({ ...x }));
+        renderPhatHanhTable();
+        closeOverlay("ngoaiOverlay");
+      });
+    }
+
+    const ngoaiCancelEl = document.getElementById("ngoaiCancel");
+    if (ngoaiCancelEl) ngoaiCancelEl.addEventListener("click", () => closeOverlay("ngoaiOverlay"));
+
+    const ngoaiOvEl = document.getElementById("ngoaiOverlay");
+    if (ngoaiOvEl) {
+      ngoaiOvEl.addEventListener("click", e => {
+        if (e.target === ngoaiOvEl) closeOverlay("ngoaiOverlay");
+      });
+    }
+
+    const openAddNgoaiFormEl = document.getElementById("openAddNgoaiForm");
+    if (openAddNgoaiFormEl) {
+      openAddNgoaiFormEl.addEventListener("click", function () {
+        ["addTenDonVi", "addDaiDien", "addSdt", "addEmail"].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = "";
+        });
+
+        ["field-ten-don-vi", "field-dai-dien", "field-sdt", "field-email"].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.classList.remove("has-error");
+        });
+
+        const alertEl = document.getElementById("addNgoaiAlert");
+        if (alertEl) alertEl.style.display = "none";
+
+        const btnL = document.getElementById("addNgoaiLuu");
+        if (btnL) {
+          delete btnL.dataset.editId;
+          btnL.style.background = "#9ca3af";
+        }
+
+        openOverlay("addNgoaiOverlay");
+      });
+    }
+
+    ["addTenDonVi", "addDaiDien", "addSdt", "addEmail"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener("input", function () {
+          const ok = ["addTenDonVi", "addDaiDien", "addSdt", "addEmail"].every(f => {
+            const e = document.getElementById(f);
+            return e && e.value.trim();
+          });
+
+          const b = document.getElementById("addNgoaiLuu");
+          if (b) b.style.background = ok ? "#1a7abf" : "#9ca3af";
+        });
+      }
+    });
+
+    const addNgoaiLuuEl = document.getElementById("addNgoaiLuu");
+    if (addNgoaiLuuEl) {
+      addNgoaiLuuEl.addEventListener("click", function () {
+        const ten = document.getElementById("addTenDonVi")?.value.trim() || "";
+        const daiDien = document.getElementById("addDaiDien")?.value.trim() || "";
+        const sdt = document.getElementById("addSdt")?.value.trim() || "";
+        const email = document.getElementById("addEmail")?.value.trim() || "";
+
+        let valid = true;
+        [
+          ["field-ten-don-vi", ten],
+          ["field-dai-dien", daiDien],
+          ["field-sdt", sdt],
+          ["field-email", email]
+        ].forEach(([fid, val]) => {
+          const el = document.getElementById(fid);
+          if (!val) {
+            if (el) el.classList.add("has-error");
+            valid = false;
+          } else {
+            if (el) el.classList.remove("has-error");
+          }
+        });
+
+        if (!valid) return;
+
+        const dup = ngoaiData.find(x => x.email === email || x.sdt === sdt);
+        if (dup) {
+          const a = document.getElementById("addNgoaiAlert");
+          if (a) {
+            a.textContent = "Đơn vị ngoại bộ đã tồn tại.";
+            a.style.display = "block";
+          }
+          return;
+        }
+
+        const alertEl = document.getElementById("addNgoaiAlert");
+        if (alertEl) alertEl.style.display = "none";
+
+        ngoaiData.push({ id: "ng" + Date.now(), ten, daiDien, sdt, email });
+        closeOverlay("addNgoaiOverlay");
+
+        const s = document.getElementById("ngoaiSearch");
+        renderNgoaiTable(s ? s.value : "");
+        updateNgoaiCount();
+      });
+    }
+
+    const addNgoaiHuyEl = document.getElementById("addNgoaiHuy");
+    if (addNgoaiHuyEl) addNgoaiHuyEl.addEventListener("click", () => closeOverlay("addNgoaiOverlay"));
+
+    const addNgoaiOvEl = document.getElementById("addNgoaiOverlay");
+    if (addNgoaiOvEl) {
+      addNgoaiOvEl.addEventListener("click", e => {
+        if (e.target === addNgoaiOvEl) closeOverlay("addNgoaiOverlay");
+      });
+    }
+  });
+</script>
+{% endblock %}

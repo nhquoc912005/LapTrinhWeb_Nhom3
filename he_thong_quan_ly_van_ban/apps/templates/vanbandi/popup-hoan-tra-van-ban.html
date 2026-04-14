@@ -1,0 +1,175 @@
+{% load static %}
+  <title>Hoàn trả văn bản</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: rgba(15, 23, 42, 0.18);
+    }
+
+    .return-modal-overlay {
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 48px 16px;
+    }
+
+    .return-modal {
+      width: 100%;
+      max-width: 740px;
+      background: #fff;
+      padding: 28px 30px 26px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .return-title {
+      margin: 0 0 22px;
+      font-size: 22px;
+      font-weight: 700;
+      color: #0077b6;
+    }
+
+    .return-user-box {
+      width: 100%;
+      min-height: 30px;
+      border: 1px solid #d1d5db;
+      padding: 10px 12px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #2f2f2f;
+      margin-bottom: 18px;
+      background: #fff;
+    }
+
+    .return-label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .return-textarea {
+      width: 100%;
+      min-height: 126px;
+      border: 1px solid #d1d5db;
+      padding: 14px 14px;
+      font-size: 16px;
+      color: #374151;
+      resize: vertical;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .return-textarea:focus {
+      border-color: #38bdf8;
+    }
+
+    .return-actions {
+      margin-top: 22px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 16px;
+    }
+
+    .return-btn {
+      min-width: 94px;
+      height: 46px;
+      border: none;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .return-btn-cancel {
+      background: #f3f4f6;
+      color: #444;
+    }
+
+    .return-btn-save {
+      background: #9ca3af;
+      color: #fff;
+    }
+
+    .return-btn-cancel:hover {
+      background: #e5e7eb;
+    }
+
+    .return-btn-save:hover {
+      background: #6b7280;
+    }
+
+    .return-error {
+      margin-bottom: 14px;
+      padding: 10px 12px;
+      background: #fee2e2;
+      color: #b91c1c;
+      font-size: 14px;
+      border: 1px solid #fecaca;
+    }
+
+    @media (max-width: 768px) {
+      .return-modal {
+        padding: 20px 16px;
+      }
+
+      .return-title {
+        font-size: 20px;
+      }
+
+      .return-user-box,
+      .return-label {
+        font-size: 16px;
+      }
+
+      .return-textarea {
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="return-modal-overlay">
+    <div class="return-modal">
+      <h2 class="return-title">Hoàn trả văn bản</h2>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="return-error">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="return-user-box">
+        Chuyên viên : {{ chuyen_vien.ho_va_ten }}
+      </div>
+
+      <form method="post" action="{{ action_url }}">
+        {% csrf_token %}
+
+        <label for="ly_do" class="return-label">Lý do / Yêu cầu chỉnh sửa</label>
+        <textarea
+          id="ly_do"
+          name="ly_do"
+          class="return-textarea"
+          placeholder="Nhập lý do / Yêu cầu chỉnh sửa cho văn thư..."
+          required
+        >{{ ly_do_cu|default:'' }}</textarea>
+
+        <div class="return-actions">
+          <button type="button" class="return-btn return-btn-cancel" onclick="window.history.back();">
+            Hủy
+          </button>
+          <button type="submit" class="return-btn return-btn-save">
+            Lưu
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
