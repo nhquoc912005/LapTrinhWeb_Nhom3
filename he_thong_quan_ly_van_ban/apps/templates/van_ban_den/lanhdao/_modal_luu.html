@@ -1,0 +1,24 @@
+<!-- # MODAL LƯU -->
+<div class="modal-overlay" id="saveModal">
+    <div class="modal-box modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title">Lưu văn bản</h3>
+        </div>
+
+        <div class="modal-body">
+            <div class="save-confirm-box">
+                Sau khi bấm lưu, văn bản sẽ được cập nhật trạng thái thành
+                <strong>"Xem để biết"</strong>.
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn-modal-cancel" onclick="closeModal('saveModal')">Hủy</button>
+
+            <form method="post" action="{% url 'quanlyvanbanden:lanh_dao_luu' vb.pk %}" style="margin:0;">
+                {% csrf_token %}
+                <button type="submit" class="btn-modal-save">Lưu</button>
+            </form>
+        </div>
+    </div>
+</div>
