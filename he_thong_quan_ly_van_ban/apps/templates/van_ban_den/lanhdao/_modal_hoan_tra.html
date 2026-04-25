@@ -1,4 +1,4 @@
-<!-- # MODAL HOÀN TRẢ -->
+<!-- ===== MODAL HOÀN TRẢ ===== -->
 <div class="modal-overlay" id="returnModal">
     <div class="modal-box modal-sm">
         <div class="modal-header">
@@ -10,7 +10,8 @@
 
             <div class="modal-body">
                 <div class="return-note">
-                    <strong>Văn thư:</strong> {{ vb.nguoi_tao.ho_va_ten|default:vb.nguoi_tao.username }}
+                    <strong>Văn thư:</strong>
+                    {{ vb.nguoi_tao.ho_va_ten|default:vb.nguoi_tao.username }}
                 </div>
 
                 <div class="return-note" style="margin-top:14px; font-weight:700; color:#0F172A;">
@@ -23,8 +24,15 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn-modal-cancel" onclick="closeModal('returnModal')">Hủy</button>
-                <button type="submit" class="btn-modal-danger">Lưu</button>
+                <button type="button"
+                        class="btn-modal-cancel"
+                        onclick="closeModal('returnModal')">
+                    Hủy
+                </button>
+
+                <button type="submit" class="btn-modal-danger">
+                    Lưu
+                </button>
             </div>
         </form>
     </div>

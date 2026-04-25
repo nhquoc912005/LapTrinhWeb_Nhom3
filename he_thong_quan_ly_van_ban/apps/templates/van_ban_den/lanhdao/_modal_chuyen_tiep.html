@@ -1,4 +1,4 @@
-<!-- # MODAL CHUYỂN TIẾP -->
+<!-- ===== MODAL CHUYỂN TIẾP ===== -->
 <div class="modal-overlay" id="transferModal">
     <div class="modal-box">
         <div class="modal-header">
@@ -11,6 +11,7 @@
             <div class="modal-body">
                 <div class="staff-toolbar">
                     <div class="staff-branch">VNPT Đà Nẵng</div>
+
                     <input type="text"
                            class="staff-search"
                            id="staffSearchInput"
@@ -27,6 +28,7 @@
                                 <th>Email</th>
                             </tr>
                         </thead>
+
                         <tbody>
                             {% regroup chuyen_viens by phong_ban as phong_ban_groups %}
 
@@ -34,12 +36,27 @@
                                 <tbody class="department-group" data-dept-index="{{ forloop.counter }}">
                                     <tr class="dept-row">
                                         <td colspan="4">
-                                            <button type="button"
-                                                    class="dept-toggle"
-                                                    onclick="toggleDepartment('{{ forloop.counter }}', this)">−</button>
+                                            <div class="dept-header-wrap">
+                                                <button type="button"
+                                                        class="dept-toggle"
+                                                        onclick="toggleDepartment('{{ forloop.counter }}', this)">
+                                                    −
+                                                </button>
 
-                                            {{ group.grouper.ten_phong_ban|default:"Chưa phân phòng" }}
-                                            ({{ group.list|length }})
+                                                <label class="dept-check-label"
+                                                       title="Chọn tất cả nhân viên trong phòng ban này"
+                                                       onclick="event.stopPropagation();">
+                                                    <input type="checkbox"
+                                                           class="dept-select-all"
+                                                           data-dept-index="{{ forloop.counter }}"
+                                                           onchange="toggleDepartmentSelectAll('{{ forloop.counter }}', this)">
+                                                </label>
+
+                                                <span class="dept-name-text">
+                                                    {{ group.grouper.ten_phong_ban|default:"Chưa phân phòng" }}
+                                                    ({{ group.list|length }})
+                                                </span>
+                                            </div>
                                         </td>
                                     </tr>
 
@@ -51,10 +68,13 @@
                                                            class="staff-checkbox"
                                                            name="chuyen_vien_ids"
                                                            value="{{ cv.id }}"
-                                                           onchange="updateSelectedCount()">
+                                                           data-dept-index="{{ forloop.parentloop.counter }}"
+                                                           onchange="updateSelectedCount(); syncDepartmentSelectAll('{{ forloop.parentloop.counter }}');">
+
                                                     <span>{{ cv.ho_va_ten|default:cv.username }}</span>
                                                 </label>
                                             </td>
+
                                             <td>{{ cv.chuc_vu|default:"-" }}</td>
                                             <td>{{ cv.sdt|default:"-" }}</td>
                                             <td>{{ cv.email|default:"-" }}</td>
@@ -78,8 +98,15 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn-modal-cancel" onclick="closeModal('transferModal')">Hủy bỏ</button>
-                <button type="submit" class="btn-modal-save">Lưu lại</button>
+                <button type="button"
+                        class="btn-modal-cancel"
+                        onclick="closeModal('transferModal')">
+                    Hủy bỏ
+                </button>
+
+                <button type="submit" class="btn-modal-save">
+                    Lưu lại
+                </button>
             </div>
         </form>
     </div>
