@@ -22,11 +22,30 @@
 
         <div class="filter-controls-row">
             <div class="tab-filter-group">
-                <a href="#" class="tab-filter-btn active">Tất cả</a>
-                <a href="#" class="tab-filter-btn">Chờ xử lý</a>
-                <a href="#" class="tab-filter-btn">Đã xử lý</a>
-                <a href="#" class="tab-filter-btn">Hoàn trả</a>
-                <a href="#" class="tab-filter-btn">Xem để biết</a>
+                <a href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if selected_loai_van_ban %}loai_van_ban={{ selected_loai_van_ban|urlencode }}&{% endif %}{% if selected_hinh_thuc_van_ban %}hinh_thuc_van_ban={{ selected_hinh_thuc_van_ban|urlencode }}&{% endif %}{% if selected_do_mat %}do_mat={{ selected_do_mat|urlencode }}&{% endif %}{% if selected_do_khan %}do_khan={{ selected_do_khan|urlencode }}{% endif %}"
+                   class="tab-filter-btn {% if not selected_trang_thai %}active{% endif %}">
+                    Tất cả
+                </a>
+
+                <a href="?trang_thai=CHO_XU_LY{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_loai_van_ban %}&loai_van_ban={{ selected_loai_van_ban|urlencode }}{% endif %}{% if selected_hinh_thuc_van_ban %}&hinh_thuc_van_ban={{ selected_hinh_thuc_van_ban|urlencode }}{% endif %}{% if selected_do_mat %}&do_mat={{ selected_do_mat|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}"
+                   class="tab-filter-btn {% if selected_trang_thai == 'CHO_XU_LY' %}active{% endif %}">
+                    Chờ xử lý
+                </a>
+
+                <a href="?trang_thai=DA_XU_LY{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_loai_van_ban %}&loai_van_ban={{ selected_loai_van_ban|urlencode }}{% endif %}{% if selected_hinh_thuc_van_ban %}&hinh_thuc_van_ban={{ selected_hinh_thuc_van_ban|urlencode }}{% endif %}{% if selected_do_mat %}&do_mat={{ selected_do_mat|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}"
+                   class="tab-filter-btn {% if selected_trang_thai == 'DA_XU_LY' %}active{% endif %}">
+                    Đã xử lý
+                </a>
+
+                <a href="?trang_thai=HOAN_TRA{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_loai_van_ban %}&loai_van_ban={{ selected_loai_van_ban|urlencode }}{% endif %}{% if selected_hinh_thuc_van_ban %}&hinh_thuc_van_ban={{ selected_hinh_thuc_van_ban|urlencode }}{% endif %}{% if selected_do_mat %}&do_mat={{ selected_do_mat|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}"
+                   class="tab-filter-btn {% if selected_trang_thai == 'HOAN_TRA' %}active{% endif %}">
+                    Hoàn trả
+                </a>
+
+                <a href="?trang_thai=XEM_DE_BIET{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_loai_van_ban %}&loai_van_ban={{ selected_loai_van_ban|urlencode }}{% endif %}{% if selected_hinh_thuc_van_ban %}&hinh_thuc_van_ban={{ selected_hinh_thuc_van_ban|urlencode }}{% endif %}{% if selected_do_mat %}&do_mat={{ selected_do_mat|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}"
+                   class="tab-filter-btn {% if selected_trang_thai == 'XEM_DE_BIET' %}active{% endif %}">
+                    Xem để biết
+                </a>
             </div>
 
             <a href="{% url 'quanlyvanbanden:them' %}" class="btn btn-primary">
@@ -34,62 +53,64 @@
             </a>
         </div>
 
-    <form method="get" id="filterForm" class="filter-stack">
-        <div class="custom-search-wrap">
-            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-            </svg>
-            <input
-                type="text"
-                name="q"
-                value="{{ q }}"
-                class="custom-search-input"
-                placeholder="Tìm theo số ký hiệu, trích yếu văn bản..."
-            >
-        </div>
+        <form method="get" id="filterForm" class="filter-stack">
+            <input type="hidden" name="trang_thai" value="{{ selected_trang_thai }}">
 
-        <div class="filter-grid filter-grid-cols-4">
-            <div class="custom-select-wrap">
-                <label class="filter-label" for="filterLoaiVanBan">Loại văn bản</label>
-                <select id="filterLoaiVanBan" name="loai_van_ban" onchange="document.getElementById('filterForm').submit()">
-                    <option value="">-- Loại văn bản --</option>
-                    {% for value, label in loai_van_ban_choices %}
-                        <option value="{{ value }}" {% if selected_loai_van_ban == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
+            <div class="custom-search-wrap">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ q }}"
+                    class="custom-search-input"
+                    placeholder="Tìm theo số ký hiệu, trích yếu văn bản..."
+                >
             </div>
 
-            <div class="custom-select-wrap">
-                <label class="filter-label" for="filterHinhThucVanBan">Hình thức văn bản</label>
-                <select id="filterHinhThucVanBan" name="hinh_thuc_van_ban" onchange="document.getElementById('filterForm').submit()">
-                    <option value="">-- Hình thức văn bản --</option>
-                    {% for value, label in hinh_thuc_van_ban_choices %}
-                        <option value="{{ value }}" {% if selected_hinh_thuc_van_ban == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+            <div class="filter-grid filter-grid-cols-4">
+                <div class="custom-select-wrap">
+                    <label class="filter-label" for="filterLoaiVanBan">Loại văn bản</label>
+                    <select id="filterLoaiVanBan" name="loai_van_ban" onchange="document.getElementById('filterForm').submit()">
+                        <option value="">-- Loại văn bản --</option>
+                        {% for value, label in loai_van_ban_choices %}
+                            <option value="{{ value }}" {% if selected_loai_van_ban == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-            <div class="custom-select-wrap">
-                <label class="filter-label" for="filterDoMat">Độ mật</label>
-                <select id="filterDoMat" name="do_mat" onchange="document.getElementById('filterForm').submit()">
-                    <option value="">-- Độ mật --</option>
-                    {% for value, label in do_mat_choices %}
-                        <option value="{{ value }}" {% if selected_do_mat == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+                <div class="custom-select-wrap">
+                    <label class="filter-label" for="filterHinhThucVanBan">Hình thức văn bản</label>
+                    <select id="filterHinhThucVanBan" name="hinh_thuc_van_ban" onchange="document.getElementById('filterForm').submit()">
+                        <option value="">-- Hình thức văn bản --</option>
+                        {% for value, label in hinh_thuc_van_ban_choices %}
+                            <option value="{{ value }}" {% if selected_hinh_thuc_van_ban == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-            <div class="custom-select-wrap">
-                <label class="filter-label" for="filterDoKhan">Độ khẩn</label>
-                <select id="filterDoKhan" name="do_khan" onchange="document.getElementById('filterForm').submit()">
-                    <option value="">-- Độ khẩn --</option>
-                    {% for value, label in do_khan_choices %}
-                        <option value="{{ value }}" {% if selected_do_khan == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
+                <div class="custom-select-wrap">
+                    <label class="filter-label" for="filterDoMat">Độ mật</label>
+                    <select id="filterDoMat" name="do_mat" onchange="document.getElementById('filterForm').submit()">
+                        <option value="">-- Độ mật --</option>
+                        {% for value, label in do_mat_choices %}
+                            <option value="{{ value }}" {% if selected_do_mat == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="custom-select-wrap">
+                    <label class="filter-label" for="filterDoKhan">Độ khẩn</label>
+                    <select id="filterDoKhan" name="do_khan" onchange="document.getElementById('filterForm').submit()">
+                        <option value="">-- Độ khẩn --</option>
+                        {% for value, label in do_khan_choices %}
+                            <option value="{{ value }}" {% if selected_do_khan == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
-        </div>
-    </form>
+        </form>
     </div>
 </div>
 
@@ -150,9 +171,10 @@
         <span class="pagination-info">
             Hiển thị {{ ds.start_index }} - {{ ds.end_index }} của {{ ds.paginator.count }} văn bản
         </span>
+
         <div class="pagination-btns">
             {% if ds.has_previous %}
-                <a href="?page={{ ds.previous_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_loai_van_ban %}&loai_van_ban={{ selected_loai_van_ban|urlencode }}{% endif %}{% if selected_hinh_thuc_van_ban %}&hinh_thuc_van_ban={{ selected_hinh_thuc_van_ban|urlencode }}{% endif %}{% if selected_do_mat %}&do_mat={{ selected_do_mat|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}" class="page-btn">Trước</a>
+                <a href="?page={{ ds.previous_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_loai_van_ban %}&loai_van_ban={{ selected_loai_van_ban|urlencode }}{% endif %}{% if selected_hinh_thuc_van_ban %}&hinh_thuc_van_ban={{ selected_hinh_thuc_van_ban|urlencode }}{% endif %}{% if selected_do_mat %}&do_mat={{ selected_do_mat|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}{% if selected_trang_thai %}&trang_thai={{ selected_trang_thai|urlencode }}{% endif %}" class="page-btn">Trước</a>
             {% else %}
                 <span class="page-btn disabled" aria-disabled="true">Trước</span>
             {% endif %}
@@ -160,7 +182,7 @@
             <span class="page-btn active">{{ ds.number }}</span>
 
             {% if ds.has_next %}
-                <a href="?page={{ ds.next_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_loai_van_ban %}&loai_van_ban={{ selected_loai_van_ban|urlencode }}{% endif %}{% if selected_hinh_thuc_van_ban %}&hinh_thuc_van_ban={{ selected_hinh_thuc_van_ban|urlencode }}{% endif %}{% if selected_do_mat %}&do_mat={{ selected_do_mat|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}" class="page-btn">Sau</a>
+                <a href="?page={{ ds.next_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_loai_van_ban %}&loai_van_ban={{ selected_loai_van_ban|urlencode }}{% endif %}{% if selected_hinh_thuc_van_ban %}&hinh_thuc_van_ban={{ selected_hinh_thuc_van_ban|urlencode }}{% endif %}{% if selected_do_mat %}&do_mat={{ selected_do_mat|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}{% if selected_trang_thai %}&trang_thai={{ selected_trang_thai|urlencode }}{% endif %}" class="page-btn">Sau</a>
             {% else %}
                 <span class="page-btn disabled" aria-disabled="true">Sau</span>
             {% endif %}
