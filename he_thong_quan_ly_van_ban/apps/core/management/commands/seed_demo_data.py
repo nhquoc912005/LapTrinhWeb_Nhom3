@@ -37,7 +37,7 @@ from apps.quanlyvanbanden.models import TepVanBanDen, VanBanDen, VanBanDenChuyen
 
 User = get_user_model()
 
-DEMO_PASSWORD = "Admin@123"
+DEMO_PASSWORD = "123"
 SEED_FILE_PREFIX = "seed"
 DEFAULT_RECORD_COUNT = 7
 DEFAULT_OUTGOING_COUNT = 11
