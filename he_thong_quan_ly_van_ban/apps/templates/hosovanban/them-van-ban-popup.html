@@ -1,0 +1,203 @@
+<style>
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        display: none;
+        align-items: flex-start;
+        justify-content: center;
+        z-index: 9999;
+        padding-top: 80px;
+    }
+    .modal-overlay.active {
+        display: flex;
+    }
+    .modal-content-box {
+        background: #fff;
+        width: 100%;
+        max-width: 680px;
+        border-radius: 4px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        overflow: hidden;
+        font-family: inherit;
+    }
+    .modal-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .modal-header h3 {
+        margin: 0;
+        font-size: 20px;
+        color: #0284c7;
+        font-weight: 700;
+    }
+    .modal-close-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #000;
+        line-height: 1;
+        padding: 0;
+        font-weight: bold;
+    }
+    .modal-body {
+        padding: 24px;
+    }
+    .modal-body label {
+        display: block;
+        font-weight: 700;
+        margin-bottom: 8px;
+        font-size: 15px;
+        color: #0f172a;
+    }
+    .modal-body label span {
+        color: #ef4444;
+    }
+    .modal-body select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 2px;
+        font-size: 15px;
+        color: #334155;
+        appearance: none;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2364748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>') no-repeat right 12px center;
+        background-color: #fff;
+    }
+    .modal-body select:focus {
+        outline: none;
+        border-color: #0284c7;
+        box-shadow: 0 0 0 1px #0284c7;
+    }
+    .add-new-profile-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #0284c7;
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 2px;
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 600;
+        margin-top: 20px;
+        transition: background 0.2s;
+    }
+    .add-new-profile-btn:hover {
+        background: #0369a1;
+        color: #fff;
+    }
+    .add-new-profile-btn.secondary-action {
+        border: none;
+        cursor: pointer;
+    }
+    .modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: flex-end;
+        gap: 16px;
+    }
+    .modal-footer button {
+        padding: 10px 32px;
+        font-size: 15px;
+        font-weight: 600;
+        border-radius: 2px;
+        cursor: pointer;
+    }
+    .modal-btn-cancel {
+        background: #fff;
+        border: 1px solid #cbd5e1;
+        color: #0f172a;
+    }
+    .modal-btn-cancel:hover {
+        background: #f8fafc;
+    }
+    .modal-btn-save {
+        background: #9ca3af;
+        border: 1px solid #9ca3af;
+        color: #fff;
+    }
+    .modal-btn-save.active-save {
+        background: #0284c7;
+        border-color: #0284c7;
+    }
+    .modal-btn-save.active-save:hover {
+        background: #0369a1;
+    }
+</style>
+
+<div class="modal-overlay" id="themVanBanPopup" onclick="checkCloseModal(event)">
+    <div class="modal-content-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Thêm văn bản vào hồ sơ</h3>
+            <button class="modal-close-btn" onclick="closeThemVanBanPopup()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <label>Hồ sơ văn bản <span>*</span></label>
+            <select id="hoSoSelect" onchange="toggleSaveButton()">
+                <option value="">-- Tìm kiếm hoặc chọn tiêu đề hồ sơ --</option>
+                {% if ds_ho_so %}
+                    {% for hs in ds_ho_so %}
+                        <option value="{{ hs.pk }}">{{ hs.tieu_de_ho_so }}</option>
+                    {% endfor %}
+                {% endif %}
+            </select>
+            
+            <a href="{% url 'hosovanban:them_ho_so_van_ban' %}" class="add-new-profile-btn secondary-action">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                Thêm mới hồ sơ
+            </a>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn-cancel" onclick="closeThemVanBanPopup()">Hủy</button>
+            <button class="modal-btn-save" id="btnSaveThemVanBan" onclick="saveThemVanBan()">Lưu</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openThemVanBanPopup() {
+        document.getElementById('themVanBanPopup').classList.add('active');
+        document.getElementById('hoSoSelect').value = '';
+        toggleSaveButton();
+    }
+
+    function closeThemVanBanPopup() {
+        document.getElementById('themVanBanPopup').classList.remove('active');
+    }
+
+    function checkCloseModal(e) {
+        if (e.target.id === 'themVanBanPopup') {
+            closeThemVanBanPopup();
+        }
+    }
+
+    function toggleSaveButton() {
+        const select = document.getElementById('hoSoSelect');
+        const btnSave = document.getElementById('btnSaveThemVanBan');
+        if (select.value) {
+            btnSave.classList.add('active-save');
+        } else {
+            btnSave.classList.remove('active-save');
+        }
+    }
+
+    function saveThemVanBan() {
+        const select = document.getElementById('hoSoSelect');
+        if (!select.value) {
+            return; // Do nothing if not selected (acts as disabled)
+        }
+        // Demo action handling
+        alert('Đã thêm văn bản vào hồ sơ thành công. Hồ sơ đã chọn: ' + select.options[select.selectedIndex].text);
+        closeThemVanBanPopup();
+    }
+</script>

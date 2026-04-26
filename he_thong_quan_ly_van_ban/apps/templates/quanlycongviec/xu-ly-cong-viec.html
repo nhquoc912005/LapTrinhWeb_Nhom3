@@ -1,0 +1,412 @@
+{% extends "base.html" %}
+
+{% block title %}Xử lý công việc - Hệ thống quản lý văn bản{% endblock %}
+
+{% block extra_css %}
+<style>
+    .process-card {
+        margin-top: 16px;
+        background: #fff;
+        border: 1px solid #d6dee7;
+        padding: 28px 40px 32px;
+    }
+
+    .process-title {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 34px;
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.2;
+        text-transform: uppercase;
+        color: #202938;
+    }
+
+    .process-title::before {
+        content: "";
+        width: 4px;
+        height: 26px;
+        background: #1e7fe9;
+    }
+
+    .process-top-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 280px;
+        gap: 36px 80px;
+        margin: 0 20px 26px;
+    }
+
+    .process-info-group {
+        min-width: 0;
+    }
+
+    .process-label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 13px;
+        font-weight: 400;
+        color: #6d7785;
+    }
+
+    .process-value {
+        font-size: 15px;
+        line-height: 1.6;
+        color: #344255;
+    }
+
+    .process-attachment {
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        margin-top: 4px;
+        text-decoration: none;
+    }
+
+    .process-file-icon {
+        width: 52px;
+        height: 52px;
+        border: 1px solid #e4e9ef;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 700;
+        text-transform: uppercase;
+        box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+    }
+
+    .process-file-icon.pdf {
+        color: #ef5350;
+    }
+
+    .process-file-text strong {
+        display: block;
+        font-size: 15px;
+        line-height: 1.3;
+        color: #1f2937;
+    }
+
+    .process-file-text span {
+        display: block;
+        margin-top: 2px;
+        font-size: 11px;
+        color: #9aa3af;
+        font-weight: 600;
+    }
+
+    .process-section {
+        margin-top: 10px;
+    }
+
+    .process-section-header {
+        padding-top: 14px;
+        border-top: 1px solid #e6ebf1;
+        margin-bottom: 18px;
+        font-size: 16px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #202938;
+    }
+
+    .process-section-header .required {
+        color: #ef4444;
+    }
+
+    .process-form-label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 13px;
+        color: #526072;
+    }
+
+    .process-form-label strong {
+        font-size: 15px;
+        color: #445163;
+        font-weight: 400;
+    }
+
+    .process-form-label .required {
+        color: #ef4444;
+    }
+
+    .process-textarea {
+        min-height: 176px;
+        border: 1px solid #d8e1ea;
+        font-size: 15px;
+        color: #374151;
+        padding: 14px 16px;
+        box-shadow: none;
+    }
+
+    .process-textarea::placeholder {
+        color: #a0a7b4;
+    }
+
+    .upload-zone {
+        position: relative;
+        border: 1px dashed #ccd6df;
+        background: #fff;
+        min-height: 132px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 24px 18px;
+    }
+
+    .upload-zone input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .upload-zone strong {
+        color: #0d7db8;
+        font-weight: 700;
+    }
+
+    .upload-zone p {
+        margin: 0;
+        font-size: 15px;
+        color: #5c6572;
+    }
+
+    .upload-zone small {
+        display: block;
+        margin-top: 8px;
+        font-size: 12px;
+        color: #9ba4af;
+    }
+
+    .selected-files {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+    }
+
+    .selected-file-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border: 1px solid #e3e9ef;
+        background: #f8fbfd;
+    }
+
+    .selected-file-item strong {
+        display: block;
+        font-size: 14px;
+        color: #243243;
+    }
+
+    .selected-file-item span {
+        display: block;
+        margin-top: 2px;
+        font-size: 11px;
+        color: #98a2af;
+    }
+
+    .process-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 16px;
+        margin-top: 28px;
+    }
+
+    .process-btn {
+        min-width: 116px;
+        height: 42px;
+        padding: 0 18px;
+        border: none;
+        font-size: 15px;
+        font-weight: 700;
+        border-radius: 0;
+    }
+
+    .process-btn.cancel {
+        background: #f3f4f6;
+        color: #4b5563;
+        border: 1px solid #e5e7eb;
+    }
+
+    .process-btn.submit {
+        background: #8e8e8e;
+        color: #fff;
+    }
+
+    .process-btn.submit:hover {
+        background: #0076a2;
+    }
+
+    .process-errors {
+        margin-top: 8px;
+        font-size: 13px;
+        color: #dc2626;
+    }
+
+    @media (max-width: 960px) {
+        .process-card {
+            padding: 24px 20px 28px;
+        }
+
+        .process-top-grid {
+            grid-template-columns: 1fr;
+            gap: 18px;
+            margin: 0 0 24px;
+        }
+
+        .process-actions {
+            flex-wrap: wrap;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url task_list_url %}">Quản lý công việc</a>
+<span class="breadcrumb-sep">›</span>
+<a href="{% url 'quanlycongviec:task_detail' task.pk %}">Thông tin chi tiết công việc</a>
+<span class="breadcrumb-sep">›</span>
+<span>Xử lý công việc</span>
+{% endblock %}
+
+{% block content %}
+<div class="process-card">
+    <div class="process-title">{{ template_title }}</div>
+
+    <div class="process-top-grid">
+        <div class="process-info-group">
+            <span class="process-label">Tên công việc</span>
+            <div class="process-value">{{ task.ten_cong_viec }}</div>
+        </div>
+        <div class="process-info-group">
+            <span class="process-label">Hạn hoàn thành</span>
+            <div class="process-value">{{ task.han_xu_ly|date:"d/m/Y" }}</div>
+        </div>
+
+        <div class="process-info-group" style="grid-column: 1 / -1;">
+            <span class="process-label">Nội dung công việc (Yêu cầu xử lý)</span>
+            <div class="process-value">{{ task.noi_dung_cong_viec|linebreaksbr }}</div>
+        </div>
+
+        <div class="process-info-group" style="grid-column: 1 / -1;">
+            <span class="process-label">Tài liệu liên quan</span>
+            {% if main_attachment %}
+            <a class="process-attachment" href="{{ main_attachment.file_van_ban.url }}" target="_blank">
+                {% with ext=main_attachment.file_van_ban.name|lower %}
+                <span class="process-file-icon {% if '.pdf' in ext %}pdf{% endif %}">
+                    {% if '.pdf' in ext %}PDF{% elif '.docx' in ext or '.doc' in ext %}DOC{% elif '.xlsx' in ext or '.xls' in ext %}XLS{% else %}FILE{% endif %}
+                </span>
+                <span class="process-file-text">
+                    <strong>{{ main_attachment.file_van_ban.name|cut:"file_cv_lien_quan/" }}</strong>
+                    <span>{% if '.pdf' in ext %}PDF Document{% elif '.docx' in ext or '.doc' in ext %}Word Document{% elif '.xlsx' in ext or '.xls' in ext %}Excel Document{% else %}Tài liệu liên quan{% endif %}</span>
+                </span>
+                {% endwith %}
+            </a>
+            {% elif related_files %}
+                {% for attachment in related_files %}
+                <a class="process-attachment" href="{{ attachment.file_van_ban.url }}" target="_blank">
+                    {% with ext=attachment.file_van_ban.name|lower %}
+                    <span class="process-file-icon {% if '.pdf' in ext %}pdf{% endif %}">
+                        {% if '.pdf' in ext %}PDF{% elif '.docx' in ext or '.doc' in ext %}DOC{% elif '.xlsx' in ext or '.xls' in ext %}XLS{% else %}FILE{% endif %}
+                    </span>
+                    <span class="process-file-text">
+                        <strong>{{ attachment.file_van_ban.name|cut:"file_cv_lien_quan/" }}</strong>
+                        <span>{% if '.pdf' in ext %}PDF Document{% elif '.docx' in ext or '.doc' in ext %}Word Document{% elif '.xlsx' in ext or '.xls' in ext %}Excel Document{% else %}Tài liệu liên quan{% endif %}</span>
+                    </span>
+                    {% endwith %}
+                </a>
+                {% endfor %}
+            {% else %}
+            <div class="process-value">Không có tài liệu liên quan.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="process-section">
+            <div class="process-section-header">Kết quả xử lý</div>
+            <label class="process-form-label" for="{{ form.ket_qua_xu_ly.id_for_label }}">
+                <strong>Mô tả kết quả xử lý</strong> <span class="required">*</span>
+            </label>
+            {{ form.ket_qua_xu_ly }}
+            {% if form.ket_qua_xu_ly.errors %}
+            <div class="process-errors">{{ form.ket_qua_xu_ly.errors|join:", " }}</div>
+            {% endif %}
+        </div>
+
+        <div class="process-section">
+            <div class="process-section-header">File đính kèm <span class="required">*</span></div>
+            <label class="upload-zone">
+                {{ form.tep_ket_qua }}
+                <div>
+                    <p>Kéo thả file hoặc <strong>chọn file</strong></p>
+                    <small>PDF, DOC, DOCX, XLS, XLSX (Tối đa 50MB/1 file)</small>
+                </div>
+            </label>
+            <div id="selectedFiles" class="selected-files"></div>
+            {% if form.tep_ket_qua.errors %}
+            <div class="process-errors">{{ form.tep_ket_qua.errors|join:", " }}</div>
+            {% endif %}
+        </div>
+
+        <div class="process-section">
+            <div class="process-section-header">Ghi chú</div>
+            {{ form.ghi_chu }}
+            {% if form.ghi_chu.errors %}
+            <div class="process-errors">{{ form.ghi_chu.errors|join:", " }}</div>
+            {% endif %}
+        </div>
+
+        <div class="process-actions">
+            <a href="{% url 'quanlycongviec:task_detail' task.pk %}" class="process-btn cancel">Hủy</a>
+            <button type="submit" class="process-btn submit">{{ submit_label }}</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const resultTextarea = document.getElementById("id_ket_qua_xu_ly");
+        const noteTextarea = document.getElementById("id_ghi_chu");
+        const fileInput = document.getElementById("id_tep_ket_qua");
+        const selectedFiles = document.getElementById("selectedFiles");
+
+        if (resultTextarea) {
+            resultTextarea.classList.add("form-control", "process-textarea");
+        }
+
+        if (noteTextarea) {
+            noteTextarea.classList.add("form-control", "process-textarea");
+            noteTextarea.style.minHeight = "120px";
+        }
+
+        if (!fileInput || !selectedFiles) {
+            return;
+        }
+
+        fileInput.addEventListener("change", function () {
+            selectedFiles.innerHTML = "";
+            Array.from(this.files).forEach((file) => {
+                const item = document.createElement("div");
+                item.className = "selected-file-item";
+                item.innerHTML = `
+                    <span class="process-file-icon">${file.name.split(".").pop().toUpperCase()}</span>
+                    <span>
+                        <strong>${file.name}</strong>
+                        <span>${(file.size / (1024 * 1024)).toFixed(2)} MB</span>
+                    </span>
+                `;
+                selectedFiles.appendChild(item);
+            });
+        });
+    });
+</script>
+{% endblock %}

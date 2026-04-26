@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Báo cáo thống kê - QLVB{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'core:dashboard' %}">
+  <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+  </svg>
+  Trang chủ
+</a>
+<span class="breadcrumb-sep">›</span>
+<span>Báo cáo thống kê</span>
+{% endblock %}
+
+{% block content %}
+<div class="filter-card">
+  <div class="filter-stack">
+    <div class="filter-controls-row">
+      <div class="tab-filter-group" id="reportTabs">
+        <button type="button" class="filter-tab active" data-report-tab="van-ban">
+          Thống kê tình hình xử lý văn bản
+        </button>
+        <button type="button" class="filter-tab" data-report-tab="cong-viec">
+          Thống kê kết quả thực hiện công việc
+        </button>
+      </div>
+    </div>
+
+    <div class="filter-grid filter-grid-cols-4">
+      <div class="custom-select-wrap">
+        <label class="filter-label" for="reportUnit">Đơn vị</label>
+        <select id="reportUnit" class="form-control">
+          <option>Toàn công ty</option>
+          <option>Trụ sở Hà Nội</option>
+          <option>Chi nhánh TP.HCM</option>
+        </select>
+      </div>
+      <div class="custom-select-wrap">
+        <label class="filter-label" for="reportFrom">Từ ngày</label>
+        <input id="reportFrom" type="date" class="form-control">
+      </div>
+      <div class="custom-select-wrap">
+        <label class="filter-label" for="reportTo">Đến ngày</label>
+        <input id="reportTo" type="date" class="form-control">
+      </div>
+      <div class="custom-select-wrap">
+        <label class="filter-label" for="reportStatus">Trạng thái</label>
+        <select id="reportStatus" class="form-control">
+          <option>Tất cả trạng thái</option>
+          <option>Chờ xử lý</option>
+          <option>Đã xử lý</option>
+          <option>Hoàn trả</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-primary" id="btnViewReport">Xem thống kê</button>
+    </div>
+  </div>
+</div>
+
+<div id="reportStatsGrid" class="summary-grid">
+  <div class="card">
+    <div class="card-body">
+      <div class="stat-label">Tổng văn bản</div>
+      <div class="stat-value">128</div>
+      <div class="stat-meta">Trong kỳ thống kê</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <div class="stat-label">Đã xử lý</div>
+      <div class="stat-value">96</div>
+      <div class="stat-meta">75% tổng số</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <div class="stat-label">Chờ xử lý</div>
+      <div class="stat-value">24</div>
+      <div class="stat-meta">Cần theo dõi</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <div class="stat-label">Quá hạn</div>
+      <div class="stat-value">8</div>
+      <div class="stat-meta">Ưu tiên xử lý</div>
+    </div>
+  </div>
+</div>
+
+<div class="report-grid">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title" id="leftChartTitle">Thống kê tổng hợp</div>
+    </div>
+    <div class="card-body">
+      <div class="report-bars" aria-label="Biểu đồ thống kê tổng hợp">
+        <div class="report-bar-item">
+          <span class="report-bar" style="--bar-height: 78%;"></span>
+          <span>Văn bản đến</span>
+        </div>
+        <div class="report-bar-item">
+          <span class="report-bar report-bar--outgoing" style="--bar-height: 62%;"></span>
+          <span>Văn bản đi</span>
+        </div>
+        <div class="report-bar-item">
+          <span class="report-bar report-bar--task" style="--bar-height: 54%;"></span>
+          <span>Công việc</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title" id="rightChartTitle">Tỷ lệ trạng thái xử lý</div>
+    </div>
+    <div class="card-body">
+      <div class="report-status-list">
+        <div class="status-chart__row">
+          <span class="status-chart__dot" style="--dot-color:#0f80a9;"></span>
+          <span>Đã xử lý</span>
+          <span class="status-chart__meta"><strong>75%</strong></span>
+        </div>
+        <div class="status-chart__row">
+          <span class="status-chart__dot" style="--dot-color:#f6b10a;"></span>
+          <span>Chờ xử lý</span>
+          <span class="status-chart__meta"><strong>19%</strong></span>
+        </div>
+        <div class="status-chart__row">
+          <span class="status-chart__dot" style="--dot-color:#ef4444;"></span>
+          <span>Quá hạn</span>
+          <span class="status-chart__meta"><strong>6%</strong></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="table-container">
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Nhóm báo cáo</th>
+          <th>Tổng số</th>
+          <th>Đã xử lý</th>
+          <th>Chờ xử lý</th>
+          <th>Quá hạn</th>
+          <th>Tỷ lệ hoàn thành</th>
+        </tr>
+      </thead>
+      <tbody id="reportTableBody">
+        <tr>
+          <td>Văn bản đến</td>
+          <td>58</td>
+          <td>45</td>
+          <td>10</td>
+          <td>3</td>
+          <td>77.6%</td>
+        </tr>
+        <tr>
+          <td>Văn bản đi</td>
+          <td>42</td>
+          <td>34</td>
+          <td>6</td>
+          <td>2</td>
+          <td>80.9%</td>
+        </tr>
+        <tr>
+          <td>Công việc</td>
+          <td>28</td>
+          <td>17</td>
+          <td>8</td>
+          <td>3</td>
+          <td>60.7%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const tabs = document.querySelectorAll("[data-report-tab]");
+    tabs.forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        tabs.forEach(function (item) { item.classList.remove("active"); });
+        tab.classList.add("active");
+      });
+    });
+  });
+</script>
+{% endblock %}

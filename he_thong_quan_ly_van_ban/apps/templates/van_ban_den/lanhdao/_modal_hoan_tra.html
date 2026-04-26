@@ -1,0 +1,31 @@
+<!-- # MODAL HOÀN TRẢ -->
+<div class="modal-overlay" id="returnModal">
+    <div class="modal-box modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title-return">Hoàn trả văn bản</h3>
+        </div>
+
+        <form method="post" action="{% url 'quanlyvanbanden:lanh_dao_hoan_tra' vb.pk %}">
+            {% csrf_token %}
+
+            <div class="modal-body">
+                <div class="return-note">
+                    <strong>Văn thư:</strong> {{ vb.nguoi_tao.ho_va_ten|default:vb.nguoi_tao.username }}
+                </div>
+
+                <div class="return-note" style="margin-top:14px; font-weight:700; color:#0F172A;">
+                    Ý kiến xử lý/hoàn trả
+                </div>
+
+                <textarea name="ly_do_hoan_tra"
+                          class="return-textarea"
+                          placeholder="Nhập ý kiến xử lý / hoàn trả cho văn thư..."></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-modal-cancel" onclick="closeModal('returnModal')">Hủy</button>
+                <button type="submit" class="btn-modal-danger">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
