@@ -1,5 +1,6 @@
 import unicodedata
 
+from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
@@ -11,6 +12,10 @@ from apps.core.models import ChiNhanh, PhongBan
 User = get_user_model()
 
 DEFAULT_PASSWORD = "123"
+SPECIALIST_COUNT = 50
+LEADER_COUNT = 5
+CLERK_COUNT = 10
+LEGACY_CLERK_COUNT = 40
 
 BRANCH_SPECS = [
     {
@@ -181,7 +186,10 @@ class Command(BaseCommand):
             "departments_created": 0,
             "users_created": 0,
             "users_updated": 0,
+            "users_deleted": 0,
             "core_profiles_synced": 0,
+            "core_profiles_deleted": 0,
+            "core_profiles_kept": 0,
         }
         self.sample_accounts = []
 
@@ -192,6 +200,7 @@ class Command(BaseCommand):
             self.branches = self._ensure_branches()
             self.departments = self._ensure_departments()
             self._seed_users()
+            self._delete_extra_clerk_accounts()
             self._assign_department_heads()
 
         self.stdout.write(self.style.SUCCESS("Seed tài khoản mẫu hoàn tất."))
@@ -205,12 +214,11 @@ class Command(BaseCommand):
                 stream.reconfigure(encoding="utf-8", errors="backslashreplace")
 
     def _find_existing_by_aliases(self, objects, field_name, aliases):
-        normalized_aliases = [normalize_label(alias) for alias in aliases]
+        normalized_aliases = {normalize_label(alias) for alias in aliases}
         for obj in objects:
             obj_label = normalize_label(getattr(obj, field_name))
-            for alias in normalized_aliases:
-                if obj_label == alias or alias in obj_label or obj_label in alias:
-                    return obj
+            if obj_label in normalized_aliases:
+                return obj
         return None
 
     def _ensure_branches(self):
@@ -295,6 +303,49 @@ class Command(BaseCommand):
             self.stats["core_profiles_synced"] += 1
             self.sample_accounts.append(user)
 
+    def _delete_extra_clerk_accounts(self):
+        stale_usernames = [
+            f"vanthu{index:02d}"
+            for index in range(CLERK_COUNT + 1, LEGACY_CLERK_COUNT + 1)
+        ]
+        stale_users = list(
+            User.objects.filter(
+                username__in=stale_usernames,
+                email__iendswith="@atax.demo",
+            )
+        )
+
+        for user in stale_users:
+            core_profile = getattr(user, "nguoi_dung_core", None)
+            if core_profile and not self._core_profile_has_business_references(
+                core_profile
+            ):
+                core_profile.delete()
+                self.stats["core_profiles_deleted"] += 1
+            elif core_profile:
+                self.stats["core_profiles_kept"] += 1
+
+            user.delete()
+            self.stats["users_deleted"] += 1
+
+    def _core_profile_has_business_references(self, core_profile):
+        nguoi_dung_model = apps.get_model("core", "NguoiDung")
+
+        for model in apps.get_models():
+            for field in model._meta.get_fields():
+                if not getattr(field, "remote_field", None):
+                    continue
+                if field.remote_field.model is not nguoi_dung_model:
+                    continue
+                if not hasattr(field, "attname"):
+                    continue
+                if model is nguoi_dung_model and field.name == "tai_khoan":
+                    continue
+                if model.objects.filter(**{field.attname: core_profile.pk}).exists():
+                    return True
+
+        return False
+
     def _build_account_specs(self):
         full_names = self._full_name_pool()
         name_index = 0
@@ -311,7 +362,7 @@ class Command(BaseCommand):
             phone_number += 1
             return identity
 
-        for index in range(1, 51):
+        for index in range(1, SPECIALIST_COUNT + 1):
             department_key = SPECIALIST_DEPARTMENT_KEYS[
                 (index - 1) % len(SPECIALIST_DEPARTMENT_KEYS)
             ]
@@ -330,7 +381,7 @@ class Command(BaseCommand):
                 }
             )
 
-        for index in range(1, 6):
+        for index in range(1, LEADER_COUNT + 1):
             branch_key = LEADER_BRANCH_KEYS[index - 1]
             department = self.departments[(branch_key, "ban_giam_doc")]
             identity = next_identity()
@@ -346,7 +397,7 @@ class Command(BaseCommand):
                 }
             )
 
-        for index in range(1, 41):
+        for index in range(1, CLERK_COUNT + 1):
             branch_key = BRANCH_KEYS[(index - 1) % len(BRANCH_KEYS)]
             department = self.departments[(branch_key, "van_thu")]
             identity = next_identity()
@@ -365,7 +416,7 @@ class Command(BaseCommand):
         return account_specs
 
     def _full_name_pool(self):
-        required_count = 95
+        required_count = SPECIALIST_COUNT + LEADER_COUNT + CLERK_COUNT
         full_names = []
 
         for index in range(required_count):
@@ -407,8 +458,15 @@ class Command(BaseCommand):
         self.stdout.write(f" - PhongBan tạo mới: {self.stats['departments_created']}")
         self.stdout.write(f" - User tạo mới: {self.stats['users_created']}")
         self.stdout.write(f" - User cập nhật: {self.stats['users_updated']}")
+        self.stdout.write(f" - User demo dư đã xóa: {self.stats['users_deleted']}")
         self.stdout.write(
             f" - Hồ sơ core đã đồng bộ: {self.stats['core_profiles_synced']}"
+        )
+        self.stdout.write(
+            f" - Hồ sơ core demo dư đã xóa: {self.stats['core_profiles_deleted']}"
+        )
+        self.stdout.write(
+            f" - Hồ sơ core demo dư còn giữ do có liên kết: {self.stats['core_profiles_kept']}"
         )
 
     def _print_accounts(self):
