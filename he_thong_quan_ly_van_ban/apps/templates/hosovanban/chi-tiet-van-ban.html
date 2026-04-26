@@ -9,27 +9,17 @@
         </svg>Trang chủ
     </a>
     <span class="breadcrumb-sep">›</span>
-    <a href="{% url 'hosovanban:danh_sach' %}">Hồ sơ văn bản</a>
+    <a href="{% url 'hosovanban:danh_sach' %}">Quản lý hồ sơ</a>
     <span class="breadcrumb-sep">›</span>
     <a href="{% url 'hosovanban:chi_tiet' ho_so.pk %}">{{ ho_so.tieu_de_ho_so|truncatechars:30 }}</a>
     <span class="breadcrumb-sep">›</span>
     <span>Chi tiết văn bản</span>
 {% endblock %}
 
-{% block page_wrapper %}
-<div class="page-main" >
-    <!-- Messages -->
-    {% if messages %}
-        <div class="messages" style="margin-bottom:12px;">
-            {% for message in messages %}
-                <div class="message {{ message.tags }}" style="padding:8px; background:#d1fae5; color:#065f46; border-radius:4px;">{{ message }}</div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
+{% block content %}
     <!-- Profile Header -->
     <div style="background:#fff; padding:20px; border-bottom:1px solid #e5e7eb; margin-bottom: 0px">
-        <h2 style="margin:0 0 8px 0; font-size:20px; font-weight:700; color:#0f172a;">Hồ sơ văn bản</h2>
+        <h2 style="margin:0 0 8px 0; font-size:20px; font-weight:700; color:#0f172a;">Quản lý hồ sơ</h2>
         <div style="color:#64748b; font-size:14px;">{{ ho_so.tieu_de_ho_so }}</div>
     </div>
 
@@ -205,7 +195,6 @@
                 </div>
             </div>
         </div>
-    </div>
 </div>
 </div>
 {% endblock %}

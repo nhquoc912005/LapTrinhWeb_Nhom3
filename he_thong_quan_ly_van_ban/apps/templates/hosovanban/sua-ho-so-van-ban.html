@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Chỉnh sửa hồ sơ văn bản{% endblock %}
+{% block title %}Chỉnh sửa hồ sơ{% endblock %}
 
 {% block breadcrumb %}
 <a href="{% url 'core:dashboard' %}">
@@ -11,9 +11,9 @@
     Trang chủ
 </a>
 <span class="breadcrumb-sep">›</span>
-<a href="{% url 'hosovanban:danh_sach' %}">Hồ sơ văn bản</a>
+<a href="{% url 'hosovanban:danh_sach' %}">Quản lý hồ sơ</a>
 <span class="breadcrumb-sep">›</span>
-<span>Chỉnh sửa hồ sơ văn bản</span>
+<span>Chỉnh sửa hồ sơ</span>
 {% endblock %}
 
 {% block content %}
