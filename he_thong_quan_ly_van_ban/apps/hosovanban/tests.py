@@ -19,4 +19,4 @@ class HoSoVanBanViewTests(TestCase):
         response = self.client.get(reverse("hosovanban:danh_sach"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Hồ sơ Văn bản", html=False)
+        self.assertContains(response, "Quản lý hồ sơ", html=False)

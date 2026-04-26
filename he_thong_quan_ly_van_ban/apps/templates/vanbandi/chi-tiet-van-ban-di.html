@@ -4,7 +4,6 @@
 {% block title %}Chi tiết văn bản{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
 <style>
   .page-main {
     max-width: 100% !important;
@@ -404,8 +403,7 @@
 <span>Chi tiết văn bản</span>
 {% endblock %}
 
-{% block page_wrapper %}
-<div class="page-main">
+{% block content %}
 
   <div class="card"
     style="padding: 24px 32px; border: 1px solid var(--border-color); box-shadow: none; margin-bottom: 24px;">
@@ -681,8 +679,6 @@
   })();
   </script>
   {% endif %}
-
-</div>
 {% endblock %}
 
 {% block extra_js %}
