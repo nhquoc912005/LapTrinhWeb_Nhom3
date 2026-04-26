@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Hoàn trả công việc - Hệ thống quản lý văn bản{% endblock %}
+
+{% block extra_css %}
+<style>
+    .return-card {
+        background: #fff;
+        border: 1px solid #dce5ec;
+        padding: 32px;
+        margin-top: 16px;
+        max-width: 920px;
+    }
+
+    .return-title {
+        font-size: 18px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #1f2d3d;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .return-title::before {
+        content: "";
+        width: 4px;
+        height: 24px;
+        background: #0d8dd6;
+    }
+
+    .info-box {
+        padding: 18px 20px;
+        margin-bottom: 24px;
+        background: #f8fbfd;
+        border: 1px solid #dce5ec;
+    }
+
+    .label {
+        margin-bottom: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #607385;
+    }
+
+    .value {
+        font-size: 16px;
+        color: #22313f;
+        font-weight: 700;
+    }
+
+    .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding-top: 20px;
+        border-top: 1px solid #dce5ec;
+    }
+
+    .inline-errors {
+        margin-top: 8px;
+        color: #c0392b;
+        font-size: 13px;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url task_list_url %}">Quản lý công việc</a>
+<span class="breadcrumb-sep">›</span>
+<a href="{% url 'quanlycongviec:task_detail' task.pk %}">Thông tin chi tiết công việc</a>
+<span class="breadcrumb-sep">›</span>
+<span>Hoàn trả công việc</span>
+{% endblock %}
+
+{% block content %}
+<div class="return-card">
+    <div class="return-title">Hoàn trả công việc</div>
+
+    <div class="info-box">
+        <div class="label">{{ receiver_label }}</div>
+        <div class="value">{{ receiver_name }}</div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="label">{{ form.noi_dung.label }} *</div>
+        {{ form.noi_dung }}
+        {% if form.noi_dung.errors %}
+        <div class="inline-errors">{{ form.noi_dung.errors|join:", " }}</div>
+        {% endif %}
+
+        <div class="actions">
+            <a href="{% url 'quanlycongviec:task_detail' task.pk %}" class="btn btn-secondary">Hủy</a>
+            <button type="submit" class="btn btn-primary">Lưu</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
