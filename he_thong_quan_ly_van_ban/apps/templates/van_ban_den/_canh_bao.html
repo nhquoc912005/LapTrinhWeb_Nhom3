@@ -1,0 +1,236 @@
+{% if canh_bao_van_ban_sap_het_han %}
+<style>
+    .deadline-alert-card{
+        background:#FFF7ED;
+        border:1px solid #FDBA74;
+        border-left:6px solid #F97316;
+        margin-bottom:18px;
+        box-shadow:0 2px 8px rgba(15,23,42,.04);
+    }
+
+    .deadline-alert-header{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        padding:12px 16px;
+        border-bottom:1px solid #FED7AA;
+        background:#FFF7ED;
+    }
+
+    .deadline-alert-left{
+        display:flex;
+        align-items:center;
+        gap:10px;
+        min-width:0;
+    }
+
+    .deadline-alert-icon{
+        width:28px;
+        height:28px;
+        background:#F97316;
+        color:#fff;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-weight:800;
+        font-size:17px;
+        flex-shrink:0;
+    }
+
+    .deadline-alert-title{
+        font-size:15px;
+        font-weight:800;
+        color:#9A3412;
+        line-height:1.3;
+    }
+
+    .deadline-alert-desc{
+        margin-top:3px;
+        font-size:13px;
+        color:#9A3412;
+        font-weight:600;
+    }
+
+    .deadline-alert-summary{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        padding:6px 10px;
+        background:#FFEDD5;
+        color:#9A3412;
+        font-size:13px;
+        font-weight:800;
+        white-space:nowrap;
+    }
+
+    .deadline-alert-list{
+        max-height:150px;
+        overflow-y:auto;
+        padding:10px 14px;
+        background:#FFFDF9;
+    }
+
+    .deadline-alert-list::-webkit-scrollbar{
+        width:8px;
+    }
+
+    .deadline-alert-list::-webkit-scrollbar-thumb{
+        background:#FDBA74;
+    }
+
+    .deadline-alert-list::-webkit-scrollbar-track{
+        background:#FFEDD5;
+    }
+
+    .deadline-alert-item{
+        display:grid;
+        grid-template-columns:minmax(190px, 240px) minmax(0, 1fr) 130px 95px;
+        align-items:center;
+        gap:14px;
+        background:#fff;
+        border:1px solid #FED7AA;
+        padding:9px 10px;
+        text-decoration:none;
+        color:#1F2937;
+        margin-bottom:8px;
+    }
+
+    .deadline-alert-item:last-child{
+        margin-bottom:0;
+    }
+
+    .deadline-alert-item:hover{
+        background:#FFF7ED;
+        border-color:#FB923C;
+    }
+
+    .deadline-alert-code{
+        font-weight:800;
+        color:#0076A2;
+        font-size:14px;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        min-width:0;
+    }
+
+    .deadline-alert-text{
+        color:#334155;
+        font-size:14px;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        min-width:0;
+    }
+
+    .deadline-badge{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        padding:6px 10px;
+        font-size:12px;
+        font-weight:800;
+        white-space:nowrap;
+    }
+
+    .deadline-soon{
+        background:#FEF3C7;
+        color:#B45309;
+    }
+
+    .deadline-today{
+        background:#FEE2E2;
+        color:#B91C1C;
+    }
+
+    .deadline-overdue{
+        background:#DC2626;
+        color:#fff;
+    }
+
+    .deadline-date{
+        font-size:13px;
+        color:#64748B;
+        font-weight:700;
+        white-space:nowrap;
+        text-align:right;
+    }
+
+    @media (max-width:900px){
+        .deadline-alert-header{
+            align-items:flex-start;
+            flex-direction:column;
+        }
+
+        .deadline-alert-item{
+            grid-template-columns:1fr;
+            gap:6px;
+        }
+
+        .deadline-date{
+            text-align:left;
+        }
+
+        .deadline-alert-code,
+        .deadline-alert-text{
+            white-space:normal;
+        }
+    }
+</style>
+
+<div class="deadline-alert-card">
+    <div class="deadline-alert-header">
+        <div class="deadline-alert-left">
+            <div class="deadline-alert-icon">!</div>
+
+            <div>
+                <div class="deadline-alert-title">
+                    Cảnh báo văn bản sắp đến hạn
+                </div>
+                <div class="deadline-alert-desc">
+                    Các văn bản cần xử lý hoặc theo dõi trong thời gian gần.
+                </div>
+            </div>
+        </div>
+
+        <div class="deadline-alert-summary">
+            {{ canh_bao_van_ban_sap_het_han|length }} văn bản
+        </div>
+    </div>
+
+    <div class="deadline-alert-list">
+        {% for item in canh_bao_van_ban_sap_het_han %}
+            <a href="{% url 'quanlyvanbanden:chi_tiet' item.pk %}" class="deadline-alert-item">
+                <div class="deadline-alert-code" title="{{ item.so_ky_hieu }}">
+                    {{ item.so_ky_hieu }}
+                </div>
+
+                <div class="deadline-alert-text" title="{{ item.trich_yeu }}">
+                    {{ item.trich_yeu }}
+                </div>
+
+                <div>
+                    {% if item.so_ngay_con_lai < 0 %}
+                        <span class="deadline-badge deadline-overdue">
+                            Quá hạn {{ item.so_ngay_qua_han }} ngày
+                        </span>
+                    {% elif item.so_ngay_con_lai == 0 %}
+                        <span class="deadline-badge deadline-today">
+                            Hạn hôm nay
+                        </span>
+                    {% else %}
+                        <span class="deadline-badge deadline-soon">
+                            Còn {{ item.so_ngay_con_lai }} ngày
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="deadline-date">
+                    {{ item.han_xu_ly|date:"d/m/Y" }}
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}

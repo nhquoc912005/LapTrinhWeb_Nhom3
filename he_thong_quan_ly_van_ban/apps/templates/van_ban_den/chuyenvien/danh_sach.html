@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block title %}Văn bản đến{% endblock %}
-{% block nav_van_ban_den_active %}active{% endblock %}
 
 {% block breadcrumb %}
 <a href="{% url 'core:dashboard' %}">
@@ -86,7 +85,7 @@
         </form>
     </div>
 </div>
-
+{% include "van_ban_den/_canh_bao.html" %}
 <div class="table-container">
     <div class="table-scroll">
         <table class="data-table">

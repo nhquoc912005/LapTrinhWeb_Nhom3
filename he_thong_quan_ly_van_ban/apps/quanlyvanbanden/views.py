@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from datetime import timedelta
+
 from django.utils import timezone
 
 from apps.accounts.decorators import role_required
@@ -27,6 +29,21 @@ def _chuyen_vien_duoc_phan_cong(vb, user):
     return user.is_chuyen_vien and vb.ds_chuyen_tiep.filter(chuyen_vien=user).exists()
 
 
+def gan_thong_tin_canh_bao_han_xu_ly(ds_van_ban):
+    today = timezone.localdate()
+
+    for vb in ds_van_ban:
+        if vb.han_xu_ly:
+            so_ngay_con_lai = (vb.han_xu_ly - today).days
+            vb.so_ngay_con_lai = so_ngay_con_lai
+            vb.so_ngay_qua_han = abs(so_ngay_con_lai) if so_ngay_con_lai < 0 else 0
+        else:
+            vb.so_ngay_con_lai = None
+            vb.so_ngay_qua_han = 0
+
+    return ds_van_ban
+
+
 @login_required
 @role_required(Customer.Role.VAN_THU, Customer.Role.LANH_DAO, Customer.Role.CHUYEN_VIEN)
 def danh_sach_van_ban_den(request):
@@ -43,13 +60,47 @@ def danh_sach_van_ban_den(request):
     do_khan = request.GET.get('do_khan', '').strip()
     trang_thai = request.GET.get('trang_thai', '').strip()
 
+    # ===== CẢNH BÁO VĂN BẢN SẮP HẾT HẠN =====
+    today = timezone.localdate()
+    han_canh_bao = today + timedelta(days=3)
+
+    canh_bao_qs = VanBanDen.objects.select_related(
+        'nguoi_tao',
+        'lanh_dao_xu_ly'
+    ).filter(
+        han_xu_ly__isnull=False,
+        han_xu_ly__lte=han_canh_bao,
+        trang_thai__in=[
+            VanBanDen.TrangThai.CHO_XU_LY,
+            VanBanDen.TrangThai.HOAN_TRA,
+        ]
+    )
+
+    canh_bao_van_ban_sap_het_han = []
+
     # ===== LÃNH ĐẠO =====
     if request.user.is_lanh_dao:
         ds = ds.filter(lanh_dao_xu_ly=request.user)
 
+        canh_bao_van_ban_sap_het_han = canh_bao_qs.filter(
+            lanh_dao_xu_ly=request.user
+        ).order_by('han_xu_ly')[:20]
+
     # ===== CHUYÊN VIÊN =====
     elif request.user.is_chuyen_vien:
         ds = ds.filter(ds_chuyen_tiep__chuyen_vien=request.user).distinct()
+
+        canh_bao_van_ban_sap_het_han = canh_bao_qs.filter(
+            ds_chuyen_tiep__chuyen_vien=request.user
+        ).distinct().order_by('han_xu_ly')[:20]
+
+    # ===== VĂN THƯ =====
+    elif request.user.is_van_thu:
+        canh_bao_van_ban_sap_het_han = canh_bao_qs.order_by('han_xu_ly')[:20]
+
+    canh_bao_van_ban_sap_het_han = gan_thong_tin_canh_bao_han_xu_ly(
+        canh_bao_van_ban_sap_het_han
+    )
 
     # ===== BỘ LỌC DÙNG CHUNG =====
     if q:
@@ -92,6 +143,7 @@ def danh_sach_van_ban_den(request):
         'do_mat_choices': VanBanDen.DoMat.choices,
         'do_khan_choices': VanBanDen.DoKhan.choices,
         'trang_thai_choices': VanBanDen.TrangThai.choices,
+        'canh_bao_van_ban_sap_het_han': canh_bao_van_ban_sap_het_han,
     }
 
     if request.user.is_lanh_dao:
@@ -216,6 +268,17 @@ def them_van_ban_den(request):
 def sua_van_ban_den(request, pk):
     User = get_user_model()
     vb = get_object_or_404(VanBanDen, pk=pk)
+
+    if vb.trang_thai in [
+        VanBanDen.TrangThai.DA_XU_LY,
+        VanBanDen.TrangThai.XEM_DE_BIET,
+    ]:
+        messages.error(
+            request,
+            'Văn bản này đã được lãnh đạo lưu hoặc chuyển tiếp nên văn thư không thể chỉnh sửa.'
+        )
+        return redirect('quanlyvanbanden:chi_tiet', pk=vb.pk)
+
     lanh_daos = User.objects.filter(role='LANH_DAO')
 
     # ===== ghi nhớ trạng thái cũ =====
@@ -347,6 +410,13 @@ def lanh_dao_chuyen_tiep_van_ban_den(request, pk):
     if not _lanh_dao_co_quyen_xu_ly(vb, request.user):
         messages.error(request, 'Bạn không có quyền xử lý văn bản này.')
         return redirect('quanlyvanbanden:danh_sach')
+
+    if vb.trang_thai != VanBanDen.TrangThai.XEM_DE_BIET:
+        messages.error(
+            request,
+            'Bạn cần bấm "Lưu" văn bản trước khi chuyển tiếp cho chuyên viên.'
+        )
+        return redirect('quanlyvanbanden:chi_tiet', pk=vb.pk)
 
     if request.method == 'POST':
         chuyen_vien_ids = request.POST.getlist('chuyen_vien_ids')
