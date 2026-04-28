@@ -59,9 +59,19 @@
         color:#fff;
     }
 
+    .btn-gray{
+        background:#8B8B8B;
+        color:#fff;
+    }
+
     .btn-red{
         background:#EF4444;
         color:#fff;
+    }
+
+    .btn-local[disabled]{
+        opacity:.75;
+        cursor:not-allowed;
     }
 
     .info-grid{
@@ -504,8 +514,23 @@
         </div>
 
         <div class="action-btns">
-            <a href="#" class="btn-local btn-blue">Lưu hồ sơ</a>
-            <a href="{% url 'quanlyvanbanden:sua' vb.pk %}" class="btn-local btn-blue">Chỉnh sửa</a>
+            <button type="button" class="btn-local btn-blue">
+                Lưu hồ sơ
+            </button>
+
+            {% if vb.trang_thai == 'CHO_XU_LY' or vb.trang_thai == 'HOAN_TRA' %}
+                <a href="{% url 'quanlyvanbanden:sua' vb.pk %}" class="btn-local btn-blue">
+                    Chỉnh sửa
+                </a>
+            {% else %}
+                <button type="button"
+                        class="btn-local btn-gray"
+                        disabled
+                        title="Văn bản đã được lãnh đạo lưu hoặc chuyển tiếp nên không thể chỉnh sửa">
+                    Chỉnh sửa
+                </button>
+            {% endif %}
+
             <button type="button" class="btn-local btn-red" onclick="openDeleteModal()">Xóa</button>
         </div>
     </div>

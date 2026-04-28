@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block title %}Chi tiết văn bản đến{% endblock %}
-{% block nav_van_ban_den_active %}active{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -226,6 +225,42 @@
         height:auto;
     }
 
+    .excel-preview-wrap{
+        background:#fff;
+        border:1px solid #D1D5DC;
+        overflow:auto;
+        max-height:680px;
+    }
+
+    .excel-preview-table{
+        width:100%;
+        border-collapse:collapse;
+        font-size:14px;
+        background:#fff;
+    }
+
+    .excel-preview-table th,
+    .excel-preview-table td{
+        border:1px solid #CBD5E1;
+        padding:8px 10px;
+        color:#111827;
+        white-space:nowrap;
+    }
+
+    .excel-preview-table th{
+        background:#F1F5F9;
+        font-weight:700;
+        position:sticky;
+        top:0;
+        z-index:1;
+    }
+
+    .excel-sheet-name{
+        font-weight:700;
+        color:#0076A2;
+        margin-bottom:10px;
+    }
+
     .doc-box{
         background:#fff;
         border:1px solid #D1D5DC;
@@ -413,6 +448,7 @@
 {% block extra_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+<script src="{% static 'vendor/sheetjs/xlsx.full.min.js' %}"></script>
 
 <script>
     if (window.pdfjsLib) {
@@ -578,6 +614,72 @@
         `;
     }
 
+    async function renderExcelViewer(url, filename) {
+        const previewArea = document.getElementById("previewArea");
+
+        previewArea.innerHTML = `
+            <div class="pdf-toolbar">
+                <a href="${url}" target="_blank">Mở tab mới</a>
+            </div>
+            <div class="doc-box">
+                <div class="doc-box-title">Đang tải nội dung Excel...</div>
+                <div class="doc-box-name">${filename}</div>
+            </div>
+        `;
+
+        try {
+            if (typeof XLSX === "undefined") {
+                throw new Error("Thư viện SheetJS chưa được tải");
+            }
+
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error("Không tải được file Excel");
+            }
+
+            const arrayBuffer = await response.arrayBuffer();
+            const workbook = XLSX.read(arrayBuffer, { type: "array" });
+
+            if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+                throw new Error("File Excel không có sheet nào");
+            }
+
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const htmlTable = XLSX.utils.sheet_to_html(worksheet, {
+                id: "excelPreviewTable"
+            });
+
+            previewArea.innerHTML = `
+                <div class="pdf-toolbar">
+                    <a href="${url}" target="_blank">Mở tab mới</a>
+                </div>
+
+                <div class="excel-sheet-name">
+                    Sheet đang xem: ${firstSheetName}
+                </div>
+
+                <div class="excel-preview-wrap">
+                    ${htmlTable}
+                </div>
+            `;
+
+            const table = document.getElementById("excelPreviewTable");
+
+            if (table) {
+                table.classList.add("excel-preview-table");
+            }
+
+        } catch (error) {
+            renderOtherViewer(
+                url,
+                filename,
+                error.message || "Không thể hiển thị file Excel"
+            );
+        }
+    }
+
     function renderPreview(url, filename) {
         const lower = filename.toLowerCase();
 
@@ -602,7 +704,7 @@
         }
 
         if (lower.endsWith(".xls") || lower.endsWith(".xlsx")) {
-            renderOtherViewer(url, filename, "Không hỗ trợ xem trực tiếp file Excel trên local");
+            renderExcelViewer(url, filename);
             return;
         }
 
