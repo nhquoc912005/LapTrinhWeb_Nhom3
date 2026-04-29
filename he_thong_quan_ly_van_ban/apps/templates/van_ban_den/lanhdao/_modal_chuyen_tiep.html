@@ -1,4 +1,264 @@
-<!-- # MODAL CHUYỂN TIẾP -->
+<!-- ===== MODAL CHUYỂN TIẾP ===== -->
+<style>
+    #transferModal {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.55);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 24px;
+    }
+
+    #transferModal .modal-box {
+        width: 780px;
+        max-width: 94vw;
+        max-height: 88vh;
+        background: #fff;
+        border: 1px solid #D1D5DC;
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.22);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    #transferModal .modal-header {
+        flex: 0 0 auto;
+        padding: 16px 20px;
+        border-bottom: 1px solid #D1D5DC;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    #transferModal .modal-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0076A2;
+        border-left: 4px solid #0076A2;
+        padding-left: 10px;
+    }
+
+    #transferModal form {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        flex: 1;
+    }
+
+    #transferModal .modal-body {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: hidden;
+        padding: 16px 20px;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #transferModal .staff-toolbar {
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    #transferModal .staff-branch {
+        font-size: 15px;
+        font-weight: 700;
+        color: #334155;
+        background: #F1F5F9;
+        border: 1px solid #D1D5DC;
+        padding: 9px 12px;
+    }
+
+    #transferModal .staff-search {
+        width: 100%;
+        height: 38px;
+        border: 1px solid #D1D5DC;
+        padding: 0 12px;
+        font-size: 14px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    #transferModal .staff-search:focus {
+        border-color: #0076A2;
+        box-shadow: 0 0 0 2px rgba(0, 118, 162, 0.12);
+    }
+
+    #transferModal .staff-table-wrap {
+        flex: 1 1 auto;
+        min-height: 220px;
+        max-height: 52vh;
+        overflow: auto;
+        border: 1px solid #D1D5DC;
+        background: #fff;
+    }
+
+    #transferModal .staff-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        background: #fff;
+    }
+
+    #transferModal .staff-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        background: #F8FAFC;
+        border-bottom: 1px solid #D1D5DC;
+        color: #334155;
+        text-align: left;
+        padding: 10px 12px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    #transferModal .staff-table td {
+        border-bottom: 1px solid #E5E7EB;
+        padding: 9px 12px;
+        color: #334155;
+        vertical-align: middle;
+    }
+
+    #transferModal .department-group {
+        border-bottom: 1px solid #E5E7EB;
+    }
+
+    #transferModal .dept-row td {
+        background: #F1F5F9;
+        font-weight: 700;
+        color: #334155;
+        padding: 8px 12px;
+        border-bottom: 1px solid #D1D5DC;
+    }
+
+    #transferModal .dept-header-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    #transferModal .dept-toggle {
+        width: 22px;
+        height: 22px;
+        border: 1px solid #CBD5E1;
+        background: #fff;
+        color: #334155;
+        cursor: pointer;
+        line-height: 1;
+        font-weight: 700;
+    }
+
+    #transferModal .dept-check-label {
+        display: inline-flex;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    #transferModal .dept-select-all,
+    #transferModal .staff-checkbox {
+        width: 15px;
+        height: 15px;
+        cursor: pointer;
+    }
+
+    #transferModal .dept-name-text {
+        font-weight: 700;
+        color: #334155;
+    }
+
+    #transferModal .staff-row:hover {
+        background: #F8FAFC;
+    }
+
+    #transferModal .staff-row.is-hidden {
+        display: none;
+    }
+
+    #transferModal .staff-row td {
+        word-break: break-word;
+    }
+
+    #transferModal .selected-count {
+        flex: 0 0 auto;
+        margin-top: 10px;
+        color: #475569;
+        font-size: 14px;
+        background: #F8FAFC;
+        border: 1px solid #E5E7EB;
+        padding: 8px 10px;
+    }
+
+    #transferModal .selected-count strong {
+        color: #0076A2;
+    }
+
+    #transferModal .modal-footer {
+        flex: 0 0 auto;
+        padding: 14px 20px;
+        border-top: 1px solid #D1D5DC;
+        background: #fff;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    #transferModal .btn-modal-cancel,
+    #transferModal .btn-modal-save {
+        border: none;
+        padding: 9px 16px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: 'Arimo', sans-serif;
+    }
+
+    #transferModal .btn-modal-cancel {
+        background: #E5E7EB;
+        color: #334155;
+    }
+
+    #transferModal .btn-modal-save {
+        background: #0076A2;
+        color: #fff;
+    }
+
+    #transferModal .btn-modal-cancel:hover {
+        background: #CBD5E1;
+    }
+
+    #transferModal .btn-modal-save:hover {
+        background: #005F82;
+    }
+
+    @media (max-width: 768px) {
+        #transferModal {
+            padding: 12px;
+        }
+
+        #transferModal .modal-box {
+            width: 96vw;
+            max-height: 90vh;
+        }
+
+        #transferModal .staff-table {
+            min-width: 720px;
+        }
+
+        #transferModal .staff-table-wrap {
+            max-height: 54vh;
+        }
+    }
+</style>
+
 <div class="modal-overlay" id="transferModal">
     <div class="modal-box">
         <div class="modal-header">
@@ -11,6 +271,7 @@
             <div class="modal-body">
                 <div class="staff-toolbar">
                     <div class="staff-branch">VNPT Đà Nẵng</div>
+
                     <input type="text"
                            class="staff-search"
                            id="staffSearchInput"
@@ -27,48 +288,67 @@
                                 <th>Email</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {% regroup chuyen_viens by phong_ban as phong_ban_groups %}
 
-                            {% for group in phong_ban_groups %}
-                                <tbody class="department-group" data-dept-index="{{ forloop.counter }}">
-                                    <tr class="dept-row">
-                                        <td colspan="4">
+                        {% regroup chuyen_viens by phong_ban as phong_ban_groups %}
+
+                        {% for group in phong_ban_groups %}
+                            <tbody class="department-group" data-dept-index="{{ forloop.counter }}">
+                                <tr class="dept-row">
+                                    <td colspan="4">
+                                        <div class="dept-header-wrap">
                                             <button type="button"
                                                     class="dept-toggle"
-                                                    onclick="toggleDepartment('{{ forloop.counter }}', this)">−</button>
+                                                    onclick="toggleDepartment('{{ forloop.counter }}', this)">
+                                                −
+                                            </button>
 
-                                            {{ group.grouper.ten_phong_ban|default:"Chưa phân phòng" }}
-                                            ({{ group.list|length }})
+                                            <label class="dept-check-label"
+                                                   title="Chọn tất cả nhân viên trong phòng ban này"
+                                                   onclick="event.stopPropagation();">
+                                                <input type="checkbox"
+                                                       class="dept-select-all"
+                                                       data-dept-index="{{ forloop.counter }}"
+                                                       onchange="toggleDepartmentSelectAll('{{ forloop.counter }}', this)">
+                                            </label>
+
+                                            <span class="dept-name-text">
+                                                {{ group.grouper.ten_phong_ban|default:"Chưa phân phòng" }}
+                                                ({{ group.list|length }})
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                {% for cv in group.list %}
+                                    <tr class="staff-row dept-{{ forloop.parentloop.counter }}">
+                                        <td>
+                                            <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                                                <input type="checkbox"
+                                                       class="staff-checkbox"
+                                                       name="chuyen_vien_ids"
+                                                       value="{{ cv.id }}"
+                                                       data-dept-index="{{ forloop.parentloop.counter }}"
+                                                       onchange="updateSelectedCount(); syncDepartmentSelectAll('{{ forloop.parentloop.counter }}');">
+
+                                                <span>{{ cv.ho_va_ten|default:cv.username }}</span>
+                                            </label>
                                         </td>
-                                    </tr>
 
-                                    {% for cv in group.list %}
-                                        <tr class="staff-row dept-{{ forloop.parentloop.counter }}">
-                                            <td>
-                                                <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
-                                                    <input type="checkbox"
-                                                           class="staff-checkbox"
-                                                           name="chuyen_vien_ids"
-                                                           value="{{ cv.id }}"
-                                                           onchange="updateSelectedCount()">
-                                                    <span>{{ cv.ho_va_ten|default:cv.username }}</span>
-                                                </label>
-                                            </td>
-                                            <td>{{ cv.chuc_vu|default:"-" }}</td>
-                                            <td>{{ cv.sdt|default:"-" }}</td>
-                                            <td>{{ cv.email|default:"-" }}</td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            {% empty %}
+                                        <td>{{ cv.chuc_vu|default:"-" }}</td>
+                                        <td>{{ cv.sdt|default:"-" }}</td>
+                                        <td>{{ cv.email|default:"-" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        {% empty %}
+                            <tbody>
                                 <tr>
                                     <td colspan="4" style="padding:18px 12px; color:#64748B;">
                                         Không có chuyên viên để chuyển tiếp.
                                     </td>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
+                            </tbody>
+                        {% endfor %}
                     </table>
                 </div>
 
@@ -78,8 +358,15 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn-modal-cancel" onclick="closeModal('transferModal')">Hủy bỏ</button>
-                <button type="submit" class="btn-modal-save">Lưu lại</button>
+                <button type="button"
+                        class="btn-modal-cancel"
+                        onclick="closeModal('transferModal')">
+                    Hủy bỏ
+                </button>
+
+                <button type="submit" class="btn-modal-save">
+                    Lưu lại
+                </button>
             </div>
         </form>
     </div>
