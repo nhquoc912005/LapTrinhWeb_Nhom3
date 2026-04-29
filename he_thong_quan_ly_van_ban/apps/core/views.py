@@ -1,41 +1,58 @@
 from datetime import timedelta
 
+from django.db.models import Q
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils import timezone
 
 from apps.accounts.decorators import role_required
 from apps.accounts.models import Customer
-from apps.quanlyvanbanden.models import VanBanDen
 
-from .models import CongViec, HoSoVanBan, VanBan
+from .models import (
+    ChuyenTiepChiTiet,
+    CongViec,
+    HoSoVanBan,
+    NguoiDung,
+    VanBan,
+)
 
-OUTGOING_KIND = VanBan.PHAN_LOAI_CHOICES[0][0]
-OUTGOING_STATUS_CHO_XU_LY = VanBan.TRANG_THAI_CHOICES[0][0]
-OUTGOING_STATUS_DA_XU_LY = VanBan.TRANG_THAI_CHOICES[1][0]
-OUTGOING_STATUS_HOAN_TRA = VanBan.TRANG_THAI_CHOICES[2][0]
-OUTGOING_STATUS_XEM_DE_BIET = VanBan.TRANG_THAI_CHOICES[3][0]
-OUTGOING_STATUS_CHO_BAN_HANH = VanBan.TRANG_THAI_CHOICES[4][0]
-OUTGOING_STATUS_DA_BAN_HANH = VanBan.TRANG_THAI_CHOICES[5][0]
+
+# =========================================================
+# HẰNG SỐ VĂN BẢN
+# =========================================================
+
+INCOMING_KIND = "Văn bản đến"
+OUTGOING_KIND = "Văn bản đi"
+
+STATUS_CHO_XU_LY = "Chờ Xử Lý"
+STATUS_DA_XU_LY = "Đã Xử Lý"
+STATUS_HOAN_TRA = "Hoàn Trả"
+STATUS_XEM_DE_BIET = "Xem Để Biết"
+STATUS_CHO_BAN_HANH = "Chờ ban hành"
+STATUS_DA_BAN_HANH = "Đã ban hành"
 
 CLERK_VISIBLE_OUTGOING_STATUSES = [
-    OUTGOING_STATUS_CHO_BAN_HANH,
-    OUTGOING_STATUS_DA_BAN_HANH,
-    OUTGOING_STATUS_XEM_DE_BIET,
+    STATUS_CHO_BAN_HANH,
+    STATUS_DA_BAN_HANH,
+    STATUS_XEM_DE_BIET,
 ]
+
 OUTGOING_COMPLETED_STATUSES = [
-    OUTGOING_STATUS_DA_XU_LY,
-    OUTGOING_STATUS_DA_BAN_HANH,
-    OUTGOING_STATUS_XEM_DE_BIET,
+    STATUS_DA_XU_LY,
+    STATUS_DA_BAN_HANH,
+    STATUS_XEM_DE_BIET,
 ]
+
 INCOMING_COMPLETED_STATUSES = [
-    VanBanDen.TrangThai.DA_XU_LY,
-    VanBanDen.TrangThai.XEM_DE_BIET,
+    STATUS_DA_XU_LY,
+    STATUS_XEM_DE_BIET,
 ]
+
 TASK_RETURNED_STATUSES = [
     CongViec.TrangThai.HOAN_TRA_CV,
     CongViec.TrangThai.HOAN_TRA_LD,
 ]
+
 TASK_ACTIVE_STATUSES = [
     CongViec.TrangThai.CHO_XU_LY,
     CongViec.TrangThai.CHO_DUYET,
@@ -43,8 +60,35 @@ TASK_ACTIVE_STATUSES = [
 ]
 
 
+# =========================================================
+# HÀM HỖ TRỢ USER CORE
+# =========================================================
+
+def _lay_nguoi_dung_core(user):
+    """
+    Lấy hồ sơ NguoiDung trong app core từ tài khoản đăng nhập.
+
+    Model chung VanBan/CongViec dùng core.NguoiDung,
+    không dùng trực tiếp accounts.Customer.
+    """
+    if not user or not user.is_authenticated:
+        return None
+
+    nguoi_dung = NguoiDung.objects.filter(tai_khoan=user).first()
+
+    if not nguoi_dung and getattr(user, "email", None):
+        nguoi_dung = NguoiDung.objects.filter(email=user.email).first()
+
+    return nguoi_dung
+
+
+# =========================================================
+# HÀM VẼ BIỂU ĐỒ / THỐNG KÊ
+# =========================================================
+
 def _build_status_gradient(items):
     total = sum(item["count"] for item in items)
+
     if total <= 0:
         return "conic-gradient(#e5e7eb 0 100%)", []
 
@@ -55,8 +99,13 @@ def _build_status_gradient(items):
     for item in items:
         percentage = round((item["count"] / total) * 100, 1)
         end = start + percentage
+
         segments.append(f"{item['color']} {start:.1f}% {end:.1f}%")
-        enriched_items.append({**item, "percentage": percentage})
+        enriched_items.append({
+            **item,
+            "percentage": percentage,
+        })
+
         start = end
 
     if start < 100:
@@ -67,8 +116,10 @@ def _build_status_gradient(items):
 
 def _build_weekly_chart(series):
     max_value = max(
-        max(item["incoming"], item["outgoing"], item["tasks"]) for item in series
+        max(item["incoming"], item["outgoing"], item["tasks"])
+        for item in series
     )
+
     if max_value <= 0:
         return [
             {
@@ -81,24 +132,27 @@ def _build_weekly_chart(series):
         ]
 
     chart = []
+
     for item in series:
-        chart.append(
-            {
-                **item,
-                "incoming_height": round((item["incoming"] / max_value) * 100, 1),
-                "outgoing_height": round((item["outgoing"] / max_value) * 100, 1),
-                "tasks_height": round((item["tasks"] / max_value) * 100, 1),
-            }
-        )
+        chart.append({
+            **item,
+            "incoming_height": round((item["incoming"] / max_value) * 100, 1),
+            "outgoing_height": round((item["outgoing"] / max_value) * 100, 1),
+            "tasks_height": round((item["tasks"] / max_value) * 100, 1),
+        })
+
     return chart
 
 
 def _build_trend(current, previous):
     delta = current - previous
+
     if delta > 0:
         return f"+{delta}", "up"
+
     if delta < 0:
         return str(delta), "down"
+
     return "0", "neutral"
 
 
@@ -112,11 +166,13 @@ def _window_totals(parts, current_start, current_end, previous_start, previous_e
             f"{date_lookup}__lt": current_end,
             **filters,
         }
+
         previous_filters = {
             f"{date_lookup}__gte": previous_start,
             f"{date_lookup}__lt": previous_end,
             **filters,
         }
+
         current_total += queryset.filter(**current_filters).count()
         previous_total += queryset.filter(**previous_filters).count()
 
@@ -125,72 +181,146 @@ def _window_totals(parts, current_start, current_end, previous_start, previous_e
 
 def _document_status_badge(status_label):
     normalized = (status_label or "").lower()
+
     if "đã" in normalized or "hoàn thành" in normalized:
         return "badge-da-xu-ly"
+
     if "chờ" in normalized:
         return "badge-cho-xu-ly"
+
     return "badge-dang-xu-ly"
 
 
 def _task_priority_meta(task, today):
     remaining_days = (task.han_xu_ly.date() - today).days
+
     if remaining_days < 0:
         return "Quá hạn", "priority-high"
+
     if remaining_days <= 2:
         return "Cao", "priority-high"
+
     return "Trung bình", "priority-medium"
 
 
+# =========================================================
+# QUERYSET THEO QUYỀN
+# =========================================================
+
 def _incoming_queryset_for_user(user):
-    queryset = VanBanDen.objects.select_related("nguoi_tao", "lanh_dao_xu_ly").all()
+    """
+    Văn bản đến bây giờ dùng model chung VanBan,
+    lọc bằng phan_loai = 'Văn bản đến'.
+    """
+    queryset = VanBan.objects.select_related(
+        "nguoi_tao",
+        "lanh_dao_duyet",
+        "ho_so_van_ban",
+    ).filter(
+        phan_loai=INCOMING_KIND
+    )
+
+    nguoi_dung_core = _lay_nguoi_dung_core(user)
 
     if user.has_role(Customer.Role.ADMIN, Customer.Role.VAN_THU):
         return queryset
+
     if user.is_lanh_dao:
-        return queryset.filter(lanh_dao_xu_ly=user)
+        if not nguoi_dung_core:
+            return queryset.none()
+
+        return queryset.filter(lanh_dao_duyet=nguoi_dung_core)
+
     if user.is_chuyen_vien:
-        return queryset.filter(ds_chuyen_tiep__chuyen_vien=user).distinct()
+        if not nguoi_dung_core:
+            return queryset.none()
+
+        return queryset.filter(
+            vanbanduyet__chuyentiep__chuyentiepchitiet__nguoi_dung=nguoi_dung_core
+        ).distinct()
+
     return queryset.none()
 
 
 def _outgoing_queryset_for_user(user):
-    queryset = VanBan.objects.select_related("nguoi_tao", "lanh_dao_duyet", "ho_so_van_ban").filter(
+    queryset = VanBan.objects.select_related(
+        "nguoi_tao",
+        "lanh_dao_duyet",
+        "ho_so_van_ban",
+    ).filter(
         phan_loai=OUTGOING_KIND
     )
 
+    nguoi_dung_core = _lay_nguoi_dung_core(user)
+
     if user.has_role(Customer.Role.ADMIN):
         return queryset
+
     if user.is_van_thu:
         return queryset.filter(trang_thai__in=CLERK_VISIBLE_OUTGOING_STATUSES)
+
     if user.is_lanh_dao:
-        return queryset.filter(lanh_dao_duyet=user.core_profile)
+        if not nguoi_dung_core:
+            return queryset.none()
+
+        return queryset.filter(lanh_dao_duyet=nguoi_dung_core)
+
     if user.is_chuyen_vien:
-        return queryset.filter(nguoi_tao=user.core_profile)
+        if not nguoi_dung_core:
+            return queryset.none()
+
+        return queryset.filter(nguoi_tao=nguoi_dung_core)
+
     return queryset.none()
 
 
 def _task_queryset_for_user(user):
-    queryset = CongViec.objects.select_related("nguoi_giao", "nguoi_thuc_hien", "van_ban")
+    queryset = CongViec.objects.select_related(
+        "nguoi_giao",
+        "nguoi_thuc_hien",
+        "van_ban",
+    )
+
+    nguoi_dung_core = _lay_nguoi_dung_core(user)
 
     if user.has_role(Customer.Role.ADMIN, Customer.Role.VAN_THU):
         return queryset
+
     if user.is_lanh_dao:
-        return queryset.filter(nguoi_giao=user.core_profile)
+        if not nguoi_dung_core:
+            return queryset.none()
+
+        return queryset.filter(nguoi_giao=nguoi_dung_core)
+
     if user.is_chuyen_vien:
-        return queryset.filter(nguoi_thuc_hien=user.core_profile)
+        if not nguoi_dung_core:
+            return queryset.none()
+
+        return queryset.filter(nguoi_thuc_hien=nguoi_dung_core)
+
     return queryset.none()
 
 
+# =========================================================
+# BUILD DATA DASHBOARD
+# =========================================================
+
 def _build_weekly_series(today, incoming_queryset, outgoing_queryset, task_queryset):
-    week_days = [today - timedelta(days=offset) for offset in range(6, -1, -1)]
+    week_days = [
+        today - timedelta(days=offset)
+        for offset in range(6, -1, -1)
+    ]
+
     incoming_counts = {
         day: incoming_queryset.filter(ngay_den=day).count()
         for day in week_days
     }
+
     outgoing_counts = {
         day: outgoing_queryset.filter(ngay_van_ban=day).count()
         for day in week_days
     }
+
     task_counts = {
         day: task_queryset.filter(ngay_bat_dau=day).count()
         for day in week_days
@@ -198,7 +328,14 @@ def _build_weekly_series(today, incoming_queryset, outgoing_queryset, task_query
 
     return [
         {
-            "label": day.strftime("%a").replace("Mon", "T2").replace("Tue", "T3").replace("Wed", "T4").replace("Thu", "T5").replace("Fri", "T6").replace("Sat", "T7").replace("Sun", "CN"),
+            "label": day.strftime("%a")
+            .replace("Mon", "T2")
+            .replace("Tue", "T3")
+            .replace("Wed", "T4")
+            .replace("Thu", "T5")
+            .replace("Fri", "T6")
+            .replace("Sat", "T7")
+            .replace("Sun", "CN"),
             "incoming": incoming_counts[day],
             "outgoing": outgoing_counts[day],
             "tasks": task_counts[day],
@@ -209,19 +346,22 @@ def _build_weekly_series(today, incoming_queryset, outgoing_queryset, task_query
 
 def _build_status_breakdown(incoming_queryset, outgoing_queryset, task_queryset):
     pending_count = (
-        incoming_queryset.filter(trang_thai=VanBanDen.TrangThai.CHO_XU_LY).count()
-        + outgoing_queryset.filter(trang_thai=OUTGOING_STATUS_CHO_XU_LY).count()
+        incoming_queryset.filter(trang_thai=STATUS_CHO_XU_LY).count()
+        + outgoing_queryset.filter(trang_thai=STATUS_CHO_XU_LY).count()
         + task_queryset.filter(trang_thai=CongViec.TrangThai.CHO_XU_LY).count()
     )
+
     waiting_approval_count = (
-        outgoing_queryset.filter(trang_thai=OUTGOING_STATUS_CHO_BAN_HANH).count()
+        outgoing_queryset.filter(trang_thai=STATUS_CHO_BAN_HANH).count()
         + task_queryset.filter(trang_thai=CongViec.TrangThai.CHO_DUYET).count()
     )
+
     returned_count = (
-        incoming_queryset.filter(trang_thai=VanBanDen.TrangThai.HOAN_TRA).count()
-        + outgoing_queryset.filter(trang_thai=OUTGOING_STATUS_HOAN_TRA).count()
+        incoming_queryset.filter(trang_thai=STATUS_HOAN_TRA).count()
+        + outgoing_queryset.filter(trang_thai=STATUS_HOAN_TRA).count()
         + task_queryset.filter(trang_thai__in=TASK_RETURNED_STATUSES).count()
     )
+
     completed_count = (
         incoming_queryset.filter(trang_thai__in=INCOMING_COMPLETED_STATUSES).count()
         + outgoing_queryset.filter(trang_thai__in=OUTGOING_COMPLETED_STATUSES).count()
@@ -229,76 +369,110 @@ def _build_status_breakdown(incoming_queryset, outgoing_queryset, task_queryset)
     )
 
     return [
-        {"label": "Chờ xử lý", "count": pending_count, "color": "#f6b10a"},
-        {"label": "Chờ duyệt", "count": waiting_approval_count, "color": "#7c78d5"},
-        {"label": "Hoàn trả", "count": returned_count, "color": "#ef4444"},
-        {"label": "Hoàn thành", "count": completed_count, "color": "#67c46a"},
+        {
+            "label": "Chờ xử lý",
+            "count": pending_count,
+            "color": "#f6b10a",
+        },
+        {
+            "label": "Chờ duyệt",
+            "count": waiting_approval_count,
+            "color": "#7c78d5",
+        },
+        {
+            "label": "Hoàn trả",
+            "count": returned_count,
+            "color": "#ef4444",
+        },
+        {
+            "label": "Hoàn thành",
+            "count": completed_count,
+            "color": "#67c46a",
+        },
     ]
 
 
 def _build_recent_documents(incoming_queryset, outgoing_queryset):
     documents = []
 
-    for item in incoming_queryset.order_by("-created_at")[:6]:
-        documents.append(
-            {
-                "sort_date": item.created_at.date(),
-                "code": item.so_ky_hieu,
-                "title": f"[Đến] {item.trich_yeu}",
-                "date": (item.ngay_den or timezone.localdate()).strftime("%d/%m/%Y"),
-                "status_label": item.get_trang_thai_display(),
-                "status_class": _document_status_badge(item.get_trang_thai_display()),
-            }
-        )
-
-    for item in outgoing_queryset.order_by("-ngay_cap_nhat")[:6]:
+    for item in incoming_queryset.order_by("-ngay_cap_nhat", "-van_ban_id")[:6]:
         status_label = item.get_trang_thai_display()
-        documents.append(
-            {
-                "sort_date": item.ngay_cap_nhat,
-                "code": item.so_ky_hieu,
-                "title": f"[Đi] {item.trich_yeu}",
-                "date": (item.ngay_van_ban or timezone.localdate()).strftime("%d/%m/%Y"),
-                "status_label": status_label,
-                "status_class": _document_status_badge(status_label),
-            }
-        )
+
+        documents.append({
+            "sort_date": item.ngay_cap_nhat,
+            "code": item.so_ky_hieu,
+            "title": f"[Đến] {item.trich_yeu}",
+            "date": (item.ngay_den or timezone.localdate()).strftime("%d/%m/%Y"),
+            "status_label": status_label,
+            "status_class": _document_status_badge(status_label),
+        })
+
+    for item in outgoing_queryset.order_by("-ngay_cap_nhat", "-van_ban_id")[:6]:
+        status_label = item.get_trang_thai_display()
+
+        documents.append({
+            "sort_date": item.ngay_cap_nhat,
+            "code": item.so_ky_hieu,
+            "title": f"[Đi] {item.trich_yeu}",
+            "date": (item.ngay_van_ban or timezone.localdate()).strftime("%d/%m/%Y"),
+            "status_label": status_label,
+            "status_class": _document_status_badge(status_label),
+        })
 
     documents.sort(key=lambda item: item["sort_date"], reverse=True)
+
     for item in documents:
         item.pop("sort_date", None)
+
     return documents[:5]
 
 
 def _build_urgent_tasks(task_queryset, today):
     urgent_tasks = []
-    for task in task_queryset.exclude(trang_thai=CongViec.TrangThai.DA_HOAN_THANH).order_by("han_xu_ly")[:5]:
+
+    for task in task_queryset.exclude(
+        trang_thai=CongViec.TrangThai.DA_HOAN_THANH
+    ).order_by("han_xu_ly")[:5]:
         priority_label, priority_class = _task_priority_meta(task, today)
-        urgent_tasks.append(
-            {
-                "title": task.ten_cong_viec,
-                "assignee": task.nguoi_thuc_hien.ho_va_ten,
-                "deadline": task.han_xu_ly.strftime("%d/%m/%Y"),
-                "priority_label": priority_label,
-                "priority_class": priority_class,
-            }
-        )
+
+        urgent_tasks.append({
+            "title": task.ten_cong_viec,
+            "assignee": task.nguoi_thuc_hien.ho_va_ten,
+            "deadline": task.han_xu_ly.strftime("%d/%m/%Y"),
+            "priority_label": priority_label,
+            "priority_class": priority_class,
+        })
+
     return urgent_tasks
 
 
 def _dashboard_metrics(today, incoming_queryset, outgoing_queryset, task_queryset, record_queryset):
     total_documents = incoming_queryset.count() + outgoing_queryset.count()
-    incoming_pending = incoming_queryset.filter(trang_thai=VanBanDen.TrangThai.CHO_XU_LY).count()
-    outgoing_waiting = outgoing_queryset.filter(trang_thai=OUTGOING_STATUS_CHO_BAN_HANH).count()
-    active_tasks = task_queryset.filter(trang_thai__in=TASK_ACTIVE_STATUSES).count()
-    pending_total = incoming_pending + outgoing_queryset.filter(trang_thai=OUTGOING_STATUS_CHO_XU_LY).count() + task_queryset.filter(
-        trang_thai=CongViec.TrangThai.CHO_XU_LY
+
+    incoming_pending = incoming_queryset.filter(
+        trang_thai=STATUS_CHO_XU_LY
     ).count()
+
+    outgoing_waiting = outgoing_queryset.filter(
+        trang_thai=STATUS_CHO_BAN_HANH
+    ).count()
+
+    active_tasks = task_queryset.filter(
+        trang_thai__in=TASK_ACTIVE_STATUSES
+    ).count()
+
+    pending_total = (
+        incoming_pending
+        + outgoing_queryset.filter(trang_thai=STATUS_CHO_XU_LY).count()
+        + task_queryset.filter(trang_thai=CongViec.TrangThai.CHO_XU_LY).count()
+    )
+
     returned_total = (
-        incoming_queryset.filter(trang_thai=VanBanDen.TrangThai.HOAN_TRA).count()
-        + outgoing_queryset.filter(trang_thai=OUTGOING_STATUS_HOAN_TRA).count()
+        incoming_queryset.filter(trang_thai=STATUS_HOAN_TRA).count()
+        + outgoing_queryset.filter(trang_thai=STATUS_HOAN_TRA).count()
         + task_queryset.filter(trang_thai__in=TASK_RETURNED_STATUSES).count()
     )
+
     completed_total = (
         incoming_queryset.filter(trang_thai__in=INCOMING_COMPLETED_STATUSES).count()
         + outgoing_queryset.filter(trang_thai__in=OUTGOING_COMPLETED_STATUSES).count()
@@ -306,12 +480,31 @@ def _dashboard_metrics(today, incoming_queryset, outgoing_queryset, task_queryse
     )
 
     overdue_total = (
-        incoming_queryset.exclude(trang_thai__in=INCOMING_COMPLETED_STATUSES).filter(han_xu_ly__lt=today).count()
-        + outgoing_queryset.exclude(trang_thai__in=OUTGOING_COMPLETED_STATUSES).filter(han_xu_ly__lt=today).count()
-        + task_queryset.exclude(trang_thai=CongViec.TrangThai.DA_HOAN_THANH).filter(han_xu_ly__date__lt=today).count()
+        incoming_queryset.exclude(
+            trang_thai__in=INCOMING_COMPLETED_STATUSES
+        ).filter(
+            han_xu_ly__lt=today
+        ).count()
+        + outgoing_queryset.exclude(
+            trang_thai__in=OUTGOING_COMPLETED_STATUSES
+        ).filter(
+            han_xu_ly__lt=today
+        ).count()
+        + task_queryset.exclude(
+            trang_thai=CongViec.TrangThai.DA_HOAN_THANH
+        ).filter(
+            han_xu_ly__date__lt=today
+        ).count()
     )
-    active_records = record_queryset.filter(trang_thai=HoSoVanBan.TRANG_THAI_CHOICES[0][0]).count()
-    completion_rate = round((completed_total / (pending_total + returned_total + completed_total)) * 100, 1) if (pending_total + returned_total + completed_total) else 0
+
+    active_records = record_queryset.filter(
+        trang_thai=HoSoVanBan.TRANG_THAI_CHOICES[0][0]
+    ).count()
+
+    completion_rate = round(
+        (completed_total / (pending_total + returned_total + completed_total)) * 100,
+        1
+    ) if (pending_total + returned_total + completed_total) else 0
 
     current_end = today + timedelta(days=1)
     current_start = today - timedelta(days=29)
@@ -320,7 +513,7 @@ def _dashboard_metrics(today, incoming_queryset, outgoing_queryset, task_queryse
 
     total_documents_trend = _window_totals(
         [
-            (incoming_queryset, "created_at__date", {}),
+            (incoming_queryset, "ngay_cap_nhat", {}),
             (outgoing_queryset, "ngay_van_ban", {}),
         ],
         current_start,
@@ -328,31 +521,41 @@ def _dashboard_metrics(today, incoming_queryset, outgoing_queryset, task_queryse
         previous_start,
         previous_end,
     )
+
     incoming_trend = _window_totals(
-        [(incoming_queryset, "created_at__date", {})],
+        [
+            (incoming_queryset, "ngay_cap_nhat", {}),
+        ],
         current_start,
         current_end,
         previous_start,
         previous_end,
     )
+
     outgoing_trend = _window_totals(
-        [(outgoing_queryset, "ngay_van_ban", {})],
+        [
+            (outgoing_queryset, "ngay_van_ban", {}),
+        ],
         current_start,
         current_end,
         previous_start,
         previous_end,
     )
+
     task_trend = _window_totals(
-        [(task_queryset, "ngay_bat_dau", {})],
+        [
+            (task_queryset, "ngay_bat_dau", {}),
+        ],
         current_start,
         current_end,
         previous_start,
         previous_end,
     )
+
     pending_trend = _window_totals(
         [
-            (incoming_queryset, "created_at__date", {"trang_thai": VanBanDen.TrangThai.CHO_XU_LY}),
-            (outgoing_queryset, "ngay_cap_nhat", {"trang_thai": OUTGOING_STATUS_CHO_XU_LY}),
+            (incoming_queryset, "ngay_cap_nhat", {"trang_thai": STATUS_CHO_XU_LY}),
+            (outgoing_queryset, "ngay_cap_nhat", {"trang_thai": STATUS_CHO_XU_LY}),
             (task_queryset, "last_activity__date", {"trang_thai": CongViec.TrangThai.CHO_XU_LY}),
         ],
         current_start,
@@ -360,9 +563,10 @@ def _dashboard_metrics(today, incoming_queryset, outgoing_queryset, task_queryse
         previous_start,
         previous_end,
     )
+
     completed_trend = _window_totals(
         [
-            (incoming_queryset, "updated_at__date", {"trang_thai__in": INCOMING_COMPLETED_STATUSES}),
+            (incoming_queryset, "ngay_cap_nhat", {"trang_thai__in": INCOMING_COMPLETED_STATUSES}),
             (outgoing_queryset, "ngay_cap_nhat", {"trang_thai__in": OUTGOING_COMPLETED_STATUSES}),
             (task_queryset, "last_activity__date", {"trang_thai": CongViec.TrangThai.DA_HOAN_THANH}),
         ],
@@ -433,24 +637,36 @@ def _dashboard_metrics(today, incoming_queryset, outgoing_queryset, task_queryse
 def _recent_documents_url(user):
     if user.has_role(Customer.Role.ADMIN):
         return reverse("quanlyvanbandi:van_ban_di")
+
     return reverse("quanlyvanbanden:danh_sach")
 
 
 def _urgent_tasks_url(user):
     if user.is_chuyen_vien:
         return reverse("quanlycongviec:xu_ly_cong_viec")
+
     return reverse("quanlycongviec:giao_viec")
 
+
+# =========================================================
+# DASHBOARD
+# =========================================================
 
 @role_required(*Customer.Role.values)
 def dashboard(request):
     today = timezone.localdate()
+
     incoming_queryset = _incoming_queryset_for_user(request.user)
     outgoing_queryset = _outgoing_queryset_for_user(request.user)
     task_queryset = _task_queryset_for_user(request.user)
     record_queryset = HoSoVanBan.objects.all()
 
-    status_items = _build_status_breakdown(incoming_queryset, outgoing_queryset, task_queryset)
+    status_items = _build_status_breakdown(
+        incoming_queryset,
+        outgoing_queryset,
+        task_queryset,
+    )
+
     status_gradient, status_breakdown = _build_status_gradient(status_items)
 
     context = {
@@ -462,13 +678,21 @@ def dashboard(request):
             record_queryset,
         ),
         "weekly_chart": _build_weekly_chart(
-            _build_weekly_series(today, incoming_queryset, outgoing_queryset, task_queryset)
+            _build_weekly_series(
+                today,
+                incoming_queryset,
+                outgoing_queryset,
+                task_queryset,
+            )
         ),
         "status_breakdown": status_breakdown,
         "status_gradient": status_gradient,
         "status_total": sum(item["count"] for item in status_items),
         "status_total_label": "đầu việc",
-        "recent_documents": _build_recent_documents(incoming_queryset, outgoing_queryset),
+        "recent_documents": _build_recent_documents(
+            incoming_queryset,
+            outgoing_queryset,
+        ),
         "recent_documents_url": _recent_documents_url(request.user),
         "urgent_tasks": _build_urgent_tasks(task_queryset, today),
         "urgent_tasks_url": _urgent_tasks_url(request.user),
@@ -477,6 +701,7 @@ def dashboard(request):
             trang_thai=HoSoVanBan.TRANG_THAI_CHOICES[0][0]
         ).count(),
     }
+
     return render(request, "core/dashboard.html", context)
 
 
