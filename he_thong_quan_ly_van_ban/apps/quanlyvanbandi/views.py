@@ -14,6 +14,7 @@ from ..accounts.models import Customer
 from ..core.models import (
     VanBan, VanBanLienQuan, NguoiDung, VanBanDuyet, VanBanHoanTra,
     ChiNhanh, PhongBan, DonViNgoai, BanHanh, BanHanhChiTiep,
+    HoSoVanBan,
 )
 from .forms import VanBanDiForm, validate_file_size, validate_file_extension
 from django.core.paginator import Paginator
@@ -256,6 +257,10 @@ def chi_tiet_van_ban_di(request, id):
 
     ds_chi_nhanh = ChiNhanh.objects.order_by("ten_chi_nhanh")
 
+    # ===== Dữ liệu cho popup thêm văn bản vào hồ sơ =====
+    ds_ho_so = HoSoVanBan.objects.filter(trang_thai=1).order_by('-ho_so_van_ban_id')
+    is_van_thu = user.has_role(Customer.Role.VAN_THU)
+
     return render(request, "vanbandi/chi-tiet-van-ban-di.html", {
         "vb":                  vb,
         "ds_lien_quan":        ds_lien_quan,
@@ -271,6 +276,8 @@ def chi_tiet_van_ban_di(request, id):
         "hien_thi_trang_thai":      hien_thi_trang_thai,
         "allow_remove_main_file":    False,
         "allow_remove_related_file": False,
+        "ds_ho_so":            ds_ho_so,
+        "is_van_thu":          is_van_thu,
     })
 
 @require_POST
