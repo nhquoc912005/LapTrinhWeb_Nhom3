@@ -1,11 +1,11 @@
+from datetime import timedelta
+
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
-from datetime import timedelta
-
 from django.utils import timezone
 
 from apps.accounts.decorators import role_required
@@ -16,6 +16,7 @@ from .models import VanBanDen, TepVanBanDen, VanBanDenChuyenTiep
 
 
 # ===== DÙNG CHUNG =====
+
 def _xoa_file_vat_ly(tep_obj):
     if tep_obj and tep_obj.tep:
         tep_obj.tep.delete(save=False)
@@ -30,6 +31,13 @@ def _chuyen_vien_duoc_phan_cong(vb, user):
 
 
 def gan_thong_tin_canh_bao_han_xu_ly(ds_van_ban):
+    """
+    Gắn thêm thông tin số ngày còn lại/quá hạn cho từng văn bản
+    để template hiển thị:
+    - Còn X ngày
+    - Hôm nay
+    - Quá hạn X ngày
+    """
     today = timezone.localdate()
 
     for vb in ds_van_ban:
@@ -44,10 +52,14 @@ def gan_thong_tin_canh_bao_han_xu_ly(ds_van_ban):
     return ds_van_ban
 
 
+# =========================================================
+# DANH SÁCH VĂN BẢN ĐẾN
+# =========================================================
+
 @login_required
 @role_required(Customer.Role.VAN_THU, Customer.Role.LANH_DAO, Customer.Role.CHUYEN_VIEN)
 def danh_sach_van_ban_den(request):
-    # ===== DÙNG CHUNG =====
+    # ===== DANH SÁCH CHÍNH =====
     ds = VanBanDen.objects.select_related(
         'nguoi_tao',
         'lanh_dao_xu_ly'
@@ -60,7 +72,7 @@ def danh_sach_van_ban_den(request):
     do_khan = request.GET.get('do_khan', '').strip()
     trang_thai = request.GET.get('trang_thai', '').strip()
 
-    # ===== CẢNH BÁO VĂN BẢN SẮP HẾT HẠN =====
+    # ===== CẢNH BÁO VĂN BẢN SẮP HẾT HẠN / QUÁ HẠN =====
     today = timezone.localdate()
     han_canh_bao = today + timedelta(days=3)
 
@@ -73,6 +85,7 @@ def danh_sach_van_ban_den(request):
         trang_thai__in=[
             VanBanDen.TrangThai.CHO_XU_LY,
             VanBanDen.TrangThai.HOAN_TRA,
+            VanBanDen.TrangThai.XEM_DE_BIET,
         ]
     )
 
@@ -88,7 +101,9 @@ def danh_sach_van_ban_den(request):
 
     # ===== CHUYÊN VIÊN =====
     elif request.user.is_chuyen_vien:
-        ds = ds.filter(ds_chuyen_tiep__chuyen_vien=request.user).distinct()
+        ds = ds.filter(
+            ds_chuyen_tiep__chuyen_vien=request.user
+        ).distinct()
 
         canh_bao_van_ban_sap_het_han = canh_bao_qs.filter(
             ds_chuyen_tiep__chuyen_vien=request.user
@@ -148,11 +163,16 @@ def danh_sach_van_ban_den(request):
 
     if request.user.is_lanh_dao:
         return render(request, 'van_ban_den/lanhdao/danh_sach.html', context)
-    elif request.user.is_chuyen_vien:
+
+    if request.user.is_chuyen_vien:
         return render(request, 'van_ban_den/chuyenvien/danh_sach.html', context)
 
     return render(request, 'van_ban_den/vanthu/danh_sach.html', context)
 
+
+# =========================================================
+# CHI TIẾT VĂN BẢN ĐẾN
+# =========================================================
 
 @login_required
 @role_required(Customer.Role.VAN_THU, Customer.Role.LANH_DAO, Customer.Role.CHUYEN_VIEN)
@@ -189,7 +209,9 @@ def chi_tiet_van_ban_den(request, pk):
     if request.user.is_lanh_dao:
         User = get_user_model()
 
-        chuyen_viens = User.objects.filter(role='CHUYEN_VIEN').order_by('id')
+        chuyen_viens = User.objects.filter(
+            role=Customer.Role.CHUYEN_VIEN
+        ).order_by('id')
 
         ds_chuyen_tiep = vb.ds_chuyen_tiep.select_related(
             'chuyen_vien',
@@ -200,6 +222,7 @@ def chi_tiet_van_ban_den(request, pk):
             'chuyen_viens': chuyen_viens,
             'ds_chuyen_tiep': ds_chuyen_tiep,
         })
+
         template_name = 'van_ban_den/lanhdao/chi_tiet.html'
 
     elif request.user.is_chuyen_vien:
@@ -211,6 +234,7 @@ def chi_tiet_van_ban_den(request, pk):
         context.update({
             'ds_chuyen_tiep': ds_chuyen_tiep,
         })
+
         template_name = 'van_ban_den/chuyenvien/chi_tiet.html'
 
     else:
@@ -219,15 +243,19 @@ def chi_tiet_van_ban_den(request, pk):
     return render(request, template_name, context)
 
 
-# ===== VĂN THƯ =====
+# =========================================================
+# VĂN THƯ - THÊM VĂN BẢN ĐẾN
+# =========================================================
+
 @login_required
 @role_required(Customer.Role.VAN_THU)
 def them_van_ban_den(request):
     User = get_user_model()
-    lanh_daos = User.objects.filter(role='LANH_DAO')
+    lanh_daos = User.objects.filter(role=Customer.Role.LANH_DAO)
 
     if request.method == 'POST':
         form = VanBanDenForm(request.POST, request.FILES)
+
         if form.is_valid():
             vb = form.save(commit=False)
 
@@ -262,7 +290,10 @@ def them_van_ban_den(request):
     })
 
 
-# ===== VĂN THƯ =====
+# =========================================================
+# VĂN THƯ - SỬA VĂN BẢN ĐẾN
+# =========================================================
+
 @login_required
 @role_required(Customer.Role.VAN_THU)
 def sua_van_ban_den(request, pk):
@@ -279,9 +310,8 @@ def sua_van_ban_den(request, pk):
         )
         return redirect('quanlyvanbanden:chi_tiet', pk=vb.pk)
 
-    lanh_daos = User.objects.filter(role='LANH_DAO')
+    lanh_daos = User.objects.filter(role=Customer.Role.LANH_DAO)
 
-    # ===== ghi nhớ trạng thái cũ =====
     old_trang_thai = vb.trang_thai
 
     if request.method == 'POST':
@@ -290,8 +320,6 @@ def sua_van_ban_den(request, pk):
         if form.is_valid():
             vb = form.save(commit=False)
 
-            # ===== nếu văn bản đang HOÀN TRẢ mà văn thư cập nhật lại
-            # thì đưa về CHỜ XỬ LÝ =====
             if old_trang_thai == VanBanDen.TrangThai.HOAN_TRA:
                 vb.trang_thai = VanBanDen.TrangThai.CHO_XU_LY
                 vb.ly_do_hoan_tra = ''
@@ -306,6 +334,7 @@ def sua_van_ban_den(request, pk):
                     van_ban_den=vb,
                     loai=TepVanBanDen.LoaiTep.DINH_KEM
                 )
+
                 for tep in tep_xoa:
                     _xoa_file_vat_ly(tep)
                     tep.delete()
@@ -317,6 +346,7 @@ def sua_van_ban_den(request, pk):
                     van_ban_den=vb,
                     loai=TepVanBanDen.LoaiTep.LIEN_QUAN
                 )
+
                 for tep in tep_xoa:
                     _xoa_file_vat_ly(tep)
                     tep.delete()
@@ -357,7 +387,10 @@ def sua_van_ban_den(request, pk):
     })
 
 
-# ===== VĂN THƯ =====
+# =========================================================
+# VĂN THƯ - XÓA VĂN BẢN ĐẾN
+# =========================================================
+
 @login_required
 @role_required(Customer.Role.VAN_THU)
 def xoa_van_ban_den(request, pk):
@@ -366,7 +399,9 @@ def xoa_van_ban_den(request, pk):
     if request.method == 'POST':
         for tep in vb.tep_tin.all():
             _xoa_file_vat_ly(tep)
+
         vb.delete()
+
         messages.success(request, 'Xóa văn bản đến thành công.')
         return redirect('quanlyvanbanden:danh_sach')
 
@@ -375,7 +410,10 @@ def xoa_van_ban_den(request, pk):
     })
 
 
-# ===== LÃNH ĐẠO =====
+# =========================================================
+# LÃNH ĐẠO - LƯU / XEM ĐỂ BIẾT
+# =========================================================
+
 @login_required
 @role_required(Customer.Role.LANH_DAO)
 def lanh_dao_luu_van_ban_den(request, pk):
@@ -401,7 +439,10 @@ def lanh_dao_luu_van_ban_den(request, pk):
 lanh_dao_xem_de_biet_van_ban_den = lanh_dao_luu_van_ban_den
 
 
-# ===== LÃNH ĐẠO =====
+# =========================================================
+# LÃNH ĐẠO - CHUYỂN TIẾP
+# =========================================================
+
 @login_required
 @role_required(Customer.Role.LANH_DAO)
 def lanh_dao_chuyen_tiep_van_ban_den(request, pk):
@@ -428,7 +469,7 @@ def lanh_dao_chuyen_tiep_van_ban_den(request, pk):
         User = get_user_model()
         ds_chuyen_vien = User.objects.filter(
             id__in=chuyen_vien_ids,
-            role='CHUYEN_VIEN'
+            role=Customer.Role.CHUYEN_VIEN
         )
 
         if not ds_chuyen_vien.exists():
@@ -455,7 +496,10 @@ def lanh_dao_chuyen_tiep_van_ban_den(request, pk):
     return redirect('quanlyvanbanden:chi_tiet', pk=vb.pk)
 
 
-# ===== LÃNH ĐẠO =====
+# =========================================================
+# LÃNH ĐẠO - HOÀN TRẢ
+# =========================================================
+
 @login_required
 @role_required(Customer.Role.LANH_DAO)
 def lanh_dao_hoan_tra_van_ban_den(request, pk):
