@@ -733,7 +733,11 @@
 
         <div class="action-btns">
             <!-- # GIAO VIỆC: CHỈ HIỂN THỊ -->
-            <button type="button" class="btn-local btn-blue">+ Giao việc</button>
+            {% if task %}
+                <a href="{% url 'quanlycongviec:task_detail' task.pk %}" class="btn-local btn-blue">Xem công việc</a>
+            {% else %}
+                <a href="{% url 'quanlycongviec:giao_viec' %}?van_ban_den_id={{ vb.pk }}&nguon_giao=Văn bản đến&ten_cv={{ vb.trich_yeu|urlencode }}" class="btn-local btn-blue">+ Giao việc</a>
+            {% endif %}
 
             <!-- # CHUYỂN TIẾP -->
             <button type="button" class="btn-local btn-blue" onclick="openModal('transferModal')">✈ Chuyển tiếp</button>
