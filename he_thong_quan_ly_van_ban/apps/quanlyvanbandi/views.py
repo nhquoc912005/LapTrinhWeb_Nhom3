@@ -278,6 +278,7 @@ def chi_tiet_van_ban_di(request, id):
         "allow_remove_related_file": False,
         "ds_ho_so":            ds_ho_so,
         "is_van_thu":          is_van_thu,
+        "task": CongViec.objects.filter(van_ban=vb).first(),
     })
 
 @require_POST
