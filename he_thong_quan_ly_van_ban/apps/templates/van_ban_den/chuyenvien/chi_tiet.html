@@ -59,11 +59,29 @@
         justify-content:center;
         padding:7px 14px;
         border-radius:10px;
-        background:#DCFCE7;
-        color:#15803D;
         font-weight:700;
         font-size:13px;
         white-space:nowrap;
+    }
+
+    .badge-cho-xu-ly{
+        background:#FEF3C7;
+        color:#B45309;
+    }
+
+    .badge-da-xu-ly{
+        background:#DBEAFE;
+        color:#1D4ED8;
+    }
+
+    .badge-hoan-tra{
+        background:#FEE2E2;
+        color:#B91C1C;
+    }
+
+    .badge-xem-de-biet{
+        background:#DCFCE7;
+        color:#15803D;
     }
 
     .note-box{
@@ -225,6 +243,42 @@
         height:auto;
     }
 
+    .excel-preview-wrap{
+        background:#fff;
+        border:1px solid #D1D5DC;
+        overflow:auto;
+        max-height:680px;
+    }
+
+    .excel-preview-table{
+        width:100%;
+        border-collapse:collapse;
+        font-size:14px;
+        background:#fff;
+    }
+
+    .excel-preview-table th,
+    .excel-preview-table td{
+        border:1px solid #CBD5E1;
+        padding:8px 10px;
+        color:#111827;
+        white-space:nowrap;
+    }
+
+    .excel-preview-table th{
+        background:#F1F5F9;
+        font-weight:700;
+        position:sticky;
+        top:0;
+        z-index:1;
+    }
+
+    .excel-sheet-name{
+        font-weight:700;
+        color:#0076A2;
+        margin-bottom:10px;
+    }
+
     .doc-box{
         background:#fff;
         border:1px solid #D1D5DC;
@@ -298,22 +352,27 @@
     <div class="info-grid">
         <div>
             <div class="field"><div class="label">Trích yếu</div><div class="value">{{ vb.trich_yeu }}</div></div>
-            <div class="field"><div class="label">Đơn vị ban hành</div><div class="value">{{ vb.don_vi_ban_hanh }}</div></div>
+            <div class="field"><div class="label">Đơn vị ban hành</div><div class="value">{{ vb.don_vi_ban_hanh|default:'-' }}</div></div>
             <div class="field"><div class="label">Ngày đến</div><div class="value">{{ vb.ngay_den|date:"d/m/Y" }}</div></div>
-            <div class="field"><div class="label">Độ mật</div><div class="value">{{ vb.get_do_mat_display }}</div></div>
+            <div class="field"><div class="label">Độ mật</div><div class="value">{{ vb.get_do_mat_display|default:vb.do_mat }}</div></div>
         </div>
 
         <div>
             <div class="field"><div class="label">Số ký hiệu</div><div class="value">{{ vb.so_ky_hieu }}</div></div>
             <div class="field"><div class="label">Loại văn bản</div><div class="value">{{ vb.get_loai_van_ban_display|default:vb.loai_van_ban }}</div></div>
-            <div class="field"><div class="label">Hình thức văn bản</div><div class="value">{{ vb.get_hinh_thuc_van_ban_display|default:vb.hinh_thuc_van_ban }}</div></div>
+            <div class="field"><div class="label">Hình thức văn bản</div><div class="value">{{ vb.get_hinh_thuc_display|default:vb.hinh_thuc }}</div></div>
             <div class="field"><div class="label">Hạn xử lý</div><div class="value">{% if vb.han_xu_ly %}{{ vb.han_xu_ly|date:"d/m/Y" }}{% else %}-{% endif %}</div></div>
-            <div class="field"><div class="label">Độ khẩn</div><div class="value">{{ vb.get_do_khan_display }}</div></div>
+            <div class="field"><div class="label">Độ khẩn</div><div class="value">{{ vb.get_do_khan_display|default:vb.do_khan }}</div></div>
         </div>
 
         <div>
-            <div class="field"><div class="label">Người gửi</div><div class="value">{{ vb.lanh_dao_xu_ly.ho_va_ten|default:vb.lanh_dao_xu_ly.username }}</div></div>
-            <div class="field"><div class="label">Trạng thái</div><div class="value"><span class="badge">Xem để biết</span></div></div>
+            <div class="field"><div class="label">Người gửi</div><div class="value">{{ vb.lanh_dao_xu_ly.ho_va_ten|default:vb.lanh_dao_xu_ly.email }}</div></div>
+            <div class="field">
+                <div class="label">Trạng thái</div>
+                <div class="value">
+                    <span class="badge badge-xem-de-biet">Xem để biết</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -412,6 +471,7 @@
 {% block extra_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+<script src="{% static 'vendor/sheetjs/xlsx.full.min.js' %}"></script>
 
 <script>
     if (window.pdfjsLib) {
@@ -577,6 +637,72 @@
         `;
     }
 
+    async function renderExcelViewer(url, filename) {
+        const previewArea = document.getElementById("previewArea");
+
+        previewArea.innerHTML = `
+            <div class="pdf-toolbar">
+                <a href="${url}" target="_blank">Mở tab mới</a>
+            </div>
+            <div class="doc-box">
+                <div class="doc-box-title">Đang tải nội dung Excel...</div>
+                <div class="doc-box-name">${filename}</div>
+            </div>
+        `;
+
+        try {
+            if (typeof XLSX === "undefined") {
+                throw new Error("Thư viện SheetJS chưa được tải");
+            }
+
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error("Không tải được file Excel");
+            }
+
+            const arrayBuffer = await response.arrayBuffer();
+            const workbook = XLSX.read(arrayBuffer, { type: "array" });
+
+            if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+                throw new Error("File Excel không có sheet nào");
+            }
+
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const htmlTable = XLSX.utils.sheet_to_html(worksheet, {
+                id: "excelPreviewTable"
+            });
+
+            previewArea.innerHTML = `
+                <div class="pdf-toolbar">
+                    <a href="${url}" target="_blank">Mở tab mới</a>
+                </div>
+
+                <div class="excel-sheet-name">
+                    Sheet đang xem: ${firstSheetName}
+                </div>
+
+                <div class="excel-preview-wrap">
+                    ${htmlTable}
+                </div>
+            `;
+
+            const table = document.getElementById("excelPreviewTable");
+
+            if (table) {
+                table.classList.add("excel-preview-table");
+            }
+
+        } catch (error) {
+            renderOtherViewer(
+                url,
+                filename,
+                error.message || "Không thể hiển thị file Excel"
+            );
+        }
+    }
+
     function renderPreview(url, filename) {
         const lower = filename.toLowerCase();
 
@@ -601,7 +727,7 @@
         }
 
         if (lower.endsWith(".xls") || lower.endsWith(".xlsx")) {
-            renderOtherViewer(url, filename, "Không hỗ trợ xem trực tiếp file Excel trên local");
+            renderExcelViewer(url, filename);
             return;
         }
 
