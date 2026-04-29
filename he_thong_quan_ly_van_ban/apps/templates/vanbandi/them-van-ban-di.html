@@ -4,8 +4,6 @@
 {% block title %}Soạn thảo văn bản đi{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
-
 <style>
 /* ===== Trang soạn thảo văn bản đi ===== */
 .vbdi-create-page {
@@ -329,8 +327,8 @@
 <span>{% if is_edit %}Chỉnh sửa văn bản đi{% else %}Soạn thảo văn bản đi{% endif %}</span>
 {% endblock %}
 
-{% block page_wrapper %}
-<div class="page-main vbdi-create-page">
+{% block content %}
+<div class="vbdi-create-page">
   <div class="vbdi-create-card">
     <h2 class="vbdi-section-title">
       {% if is_edit %}Chỉnh sửa văn bản đi{% else %}Soạn thảo văn bản đi{% endif %}

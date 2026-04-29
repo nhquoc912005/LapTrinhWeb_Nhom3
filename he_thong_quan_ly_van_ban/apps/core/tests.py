@@ -71,6 +71,8 @@ class NavigationMenuTests(TestCase):
             item for item in context["sidebar_menu_items"] if item["label"] == "Báo cáo thống kê"
         )
 
+        self.assertNotIn("Tổng quan", labels)
+        self.assertIn("Quản lý hồ sơ", labels)
         self.assertIn("Báo cáo thống kê", labels)
         self.assertTrue(report_item["is_enabled"])
 

@@ -1,4 +1,4 @@
-{% extends "core/base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Trang chủ điều hành{% endblock %}
 
@@ -454,16 +454,7 @@
     </a>
 {% endblock %}
 
-{% block page_wrapper %}
-    <div class="page-main">
-        {% if messages %}
-            <div class="messages messages-inline">
-                {% for message in messages %}
-                    <div class="message">{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
-
+{% block content %}
         <div class="dashboard-home">
             <section class="dashboard-home__hero" aria-label="Tong quan he thong">
                 <p class="dashboard-home__eyebrow">Trang chủ điều hành</p>
@@ -614,5 +605,4 @@
                 </div>
             </section>
         </div>
-    </div>
 {% endblock %}

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Chi tiết hồ sơ văn bản - QLVB{% endblock %}
+{% block title %}Chi tiết hồ sơ - QLVB{% endblock %}
 
 {% block breadcrumb %}
     <a href="{% url 'core:dashboard' %}">
@@ -9,21 +9,12 @@
         </svg>Trang chủ
     </a>
     <span class="breadcrumb-sep">›</span>
-    <a href="{% url 'hosovanban:danh_sach' %}">Hồ sơ văn bản</a>
+    <a href="{% url 'hosovanban:danh_sach' %}">Quản lý hồ sơ</a>
     <span class="breadcrumb-sep">›</span>
-    <span>Chi tiết hồ sơ văn bản</span>
+    <span>Chi tiết hồ sơ</span>
 {% endblock %}
 
-{% block page_wrapper %}
-<div class="page-main">
-    {% if messages %}
-        <div class="messages" style="margin-bottom:16px;">
-            {% for message in messages %}
-                <div class="message {{ message.tags }}" style="padding:10px; background:#d1fae5; color:#065f46; border-radius:4px;">{{ message }}</div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
+{% block content %}
     <div class="filter-card" style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:24px; margin-bottom:24px; position:relative;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
             <h3 style="color:#0f172a; font-size:16px; font-weight:700; border-left:4px solid #0284C7; padding-left:12px; margin:0; text-transform:uppercase;">
@@ -168,5 +159,4 @@
             </div>
         </div>
     </div>
-</div>
 {% endblock %}
