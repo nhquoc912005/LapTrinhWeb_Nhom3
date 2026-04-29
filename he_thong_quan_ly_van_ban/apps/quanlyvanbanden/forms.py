@@ -1,70 +1,128 @@
 from django import forms
-from .models import VanBanDen
+
+from apps.core.models import NguoiDung, VanBan
 
 
 class VanBanDenForm(forms.ModelForm):
-    # ===== VĂN THƯ =====
-    # Hạn xử lý có thể để trống
+    """
+    Form văn bản đến dùng MODEL CHUNG: apps.core.models.VanBan
+
+    Mapping tên cũ -> tên mới:
+    - hinh_thuc_van_ban -> hinh_thuc
+    - noi_dung_xu_ly -> noi_dung
+    - lanh_dao_xu_ly -> lanh_dao_duyet
+    """
+
     han_xu_ly = forms.DateField(
         required=False,
-        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date'
+        })
+    )
+
+    hinh_thuc_van_ban = forms.ChoiceField(
+        choices=VanBan.HINH_THUC_CHOICES,
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label='Hình thức văn bản'
+    )
+
+    noi_dung_xu_ly = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control textarea-nice',
+            'rows': 5,
+            'placeholder': 'Nhập nội dung trình lãnh đạo xem xét...'
+        }),
+        label='Nội dung trình lãnh đạo'
+    )
+
+    lanh_dao_xu_ly = forms.ModelChoiceField(
+        queryset=NguoiDung.objects.none(),
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label='Lãnh đạo xử lý'
     )
 
     class Meta:
-        model = VanBanDen
+        model = VanBan
         fields = [
-            # ===== THÔNG TIN VĂN BẢN =====
             'so_ky_hieu',
             'don_vi_ban_hanh',
             'trich_yeu',
             'loai_van_ban',
-            'hinh_thuc_van_ban',
             'ngay_van_ban',
             'ngay_den',
             'han_xu_ly',
             'do_mat',
             'do_khan',
-
-            # ===== VĂN THƯ =====
-            # Field này dùng để nhập nội dung trình lên lãnh đạo
-            'noi_dung_xu_ly',
-
-            # ===== VĂN THƯ =====
-            # Chọn lãnh đạo xử lý
-            'lanh_dao_xu_ly',
         ]
+
         widgets = {
             'so_ky_hieu': forms.TextInput(attrs={'class': 'form-control'}),
             'don_vi_ban_hanh': forms.TextInput(attrs={'class': 'form-control'}),
-            'trich_yeu': forms.Textarea(attrs={'class': 'form-control textarea-nice', 'rows': 4}),
+            'trich_yeu': forms.Textarea(attrs={
+                'class': 'form-control textarea-nice',
+                'rows': 4
+            }),
             'loai_van_ban': forms.Select(attrs={'class': 'form-control'}),
-            'hinh_thuc_van_ban': forms.Select(attrs={'class': 'form-control'}),
-            'ngay_van_ban': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'ngay_den': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'ngay_van_ban': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'ngay_den': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
             'do_mat': forms.Select(attrs={'class': 'form-control'}),
             'do_khan': forms.Select(attrs={'class': 'form-control'}),
-            'noi_dung_xu_ly': forms.Textarea(attrs={
-                'class': 'form-control textarea-nice',
-                'rows': 5,
-                'placeholder': 'Nhập nội dung trình lãnh đạo xem xét...'
-            }),
-            'lanh_dao_xu_ly': forms.Select(attrs={'class': 'form-control'}),
         }
+
         labels = {
             'so_ky_hieu': 'Số ký hiệu',
             'don_vi_ban_hanh': 'Đơn vị ban hành',
             'trich_yeu': 'Trích yếu',
             'loai_van_ban': 'Loại văn bản',
-            'hinh_thuc_van_ban': 'Hình thức văn bản',
             'ngay_van_ban': 'Ngày văn bản',
             'ngay_den': 'Ngày đến',
             'han_xu_ly': 'Hạn xử lý',
             'do_mat': 'Độ mật',
             'do_khan': 'Độ khẩn',
-
-            # ===== VĂN THƯ =====
-            'noi_dung_xu_ly': 'Nội dung trình lãnh đạo',
-
-            # ===== VĂN THƯ =====
-            'lanh_dao_xu_ly': 'Lãnh đạo xử lý',
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Chỉ lấy người dùng lõi có chức vụ Lãnh Đạo
+        self.fields['lanh_dao_xu_ly'].queryset = NguoiDung.objects.filter(
+            chuc_vu=NguoiDung.ChucVu.LANH_DAO
+        ).order_by('ho_va_ten')
+
+        # Khi sửa dữ liệu cũ, đổ dữ liệu từ field thật sang field alias
+        if self.instance and self.instance.pk:
+            self.fields['hinh_thuc_van_ban'].initial = self.instance.hinh_thuc
+            self.fields['noi_dung_xu_ly'].initial = self.instance.noi_dung
+            self.fields['lanh_dao_xu_ly'].initial = self.instance.lanh_dao_duyet
+
+    def save(self, commit=True):
+        vb = super().save(commit=False)
+
+        # Map field giao diện cũ sang model chung
+        vb.hinh_thuc = self.cleaned_data.get('hinh_thuc_van_ban')
+        vb.noi_dung = self.cleaned_data.get('noi_dung_xu_ly')
+        vb.lanh_dao_duyet = self.cleaned_data.get('lanh_dao_xu_ly')
+
+        # Văn bản đến luôn phải có phan_loai này
+        vb.phan_loai = 'Văn bản đến'
+
+        # Model chung bắt buộc có don_vi_soan_thao.
+        # Với văn bản đến, field này không quan trọng bằng don_vi_ban_hanh,
+        # nên tạm gán mặc định để không lỗi NOT NULL.
+        if not vb.don_vi_soan_thao:
+            vb.don_vi_soan_thao = 'Ban Giám Đốc'
+
+        if commit:
+            vb.save()
+
+        return vb

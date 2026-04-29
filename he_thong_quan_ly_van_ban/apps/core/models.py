@@ -282,6 +282,7 @@ class VanBan(models.Model):
         null=False,
         choices=DON_VI_SOAN_THAO_CHOICES,
     )
+    don_vi_ban_hanh = models.CharField(max_length=255, null=True, blank=True)
     ngay_van_ban = models.DateField(null=False)
     ngay_den = models.DateField(null=True)
     han_xu_ly = models.DateField(null=True, blank=True)

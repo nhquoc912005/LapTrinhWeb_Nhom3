@@ -2,6 +2,25 @@
 {% load static %}
 
 {% block title %}Văn bản đến{% endblock %}
+{% block extra_css %}
+<style>
+    .badge{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        padding:7px 14px;
+        border-radius:10px;
+        font-weight:700;
+        font-size:13px;
+        white-space:nowrap;
+    }
+    .badge-cho-xu-ly{background:#FEF3C7;color:#B45309}
+    .badge-da-xu-ly{background:#DBEAFE;color:#1D4ED8}
+    .badge-hoan-tra{background:#FEE2E2;color:#B91C1C}
+    .badge-xem-de-biet{background:#DCFCE7;color:#15803D}
+</style>
+{% endblock %}
+
 
 {% block breadcrumb %}
 <a href="{% url 'core:dashboard' %}">
@@ -111,10 +130,10 @@
                     </td>
                     <td>{{ vb.trich_yeu }}</td>
                     <td>{{ vb.ngay_den|date:"d/m/Y" }}</td>
-                    <td>{{ vb.don_vi_ban_hanh }}</td>
+                    <td>{{ vb.don_vi_ban_hanh|default:'-' }}</td>
                     <td>
-                        {{ vb.get_do_mat_display }} /
-                        <span class="do-khan-text">{{ vb.get_do_khan_display }}</span>
+                        {{ vb.get_do_mat_display|default:vb.do_mat }} /
+                        <span class="do-khan-text">{{ vb.get_do_khan_display|default:vb.do_khan }}</span>
                     </td>
                     <td>
                         <span class="badge badge-xem-de-biet">Xem để biết</span>

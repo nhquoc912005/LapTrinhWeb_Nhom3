@@ -59,11 +59,29 @@
         justify-content:center;
         padding:7px 14px;
         border-radius:10px;
-        background:#DCFCE7;
-        color:#15803D;
         font-weight:700;
         font-size:13px;
         white-space:nowrap;
+    }
+
+    .badge-cho-xu-ly{
+        background:#FEF3C7;
+        color:#B45309;
+    }
+
+    .badge-da-xu-ly{
+        background:#DBEAFE;
+        color:#1D4ED8;
+    }
+
+    .badge-hoan-tra{
+        background:#FEE2E2;
+        color:#B91C1C;
+    }
+
+    .badge-xem-de-biet{
+        background:#DCFCE7;
+        color:#15803D;
     }
 
     .note-box{
@@ -334,22 +352,27 @@
     <div class="info-grid">
         <div>
             <div class="field"><div class="label">Trích yếu</div><div class="value">{{ vb.trich_yeu }}</div></div>
-            <div class="field"><div class="label">Đơn vị ban hành</div><div class="value">{{ vb.don_vi_ban_hanh }}</div></div>
+            <div class="field"><div class="label">Đơn vị ban hành</div><div class="value">{{ vb.don_vi_ban_hanh|default:'-' }}</div></div>
             <div class="field"><div class="label">Ngày đến</div><div class="value">{{ vb.ngay_den|date:"d/m/Y" }}</div></div>
-            <div class="field"><div class="label">Độ mật</div><div class="value">{{ vb.get_do_mat_display }}</div></div>
+            <div class="field"><div class="label">Độ mật</div><div class="value">{{ vb.get_do_mat_display|default:vb.do_mat }}</div></div>
         </div>
 
         <div>
             <div class="field"><div class="label">Số ký hiệu</div><div class="value">{{ vb.so_ky_hieu }}</div></div>
             <div class="field"><div class="label">Loại văn bản</div><div class="value">{{ vb.get_loai_van_ban_display|default:vb.loai_van_ban }}</div></div>
-            <div class="field"><div class="label">Hình thức văn bản</div><div class="value">{{ vb.get_hinh_thuc_van_ban_display|default:vb.hinh_thuc_van_ban }}</div></div>
+            <div class="field"><div class="label">Hình thức văn bản</div><div class="value">{{ vb.get_hinh_thuc_display|default:vb.hinh_thuc }}</div></div>
             <div class="field"><div class="label">Hạn xử lý</div><div class="value">{% if vb.han_xu_ly %}{{ vb.han_xu_ly|date:"d/m/Y" }}{% else %}-{% endif %}</div></div>
-            <div class="field"><div class="label">Độ khẩn</div><div class="value">{{ vb.get_do_khan_display }}</div></div>
+            <div class="field"><div class="label">Độ khẩn</div><div class="value">{{ vb.get_do_khan_display|default:vb.do_khan }}</div></div>
         </div>
 
         <div>
-            <div class="field"><div class="label">Người gửi</div><div class="value">{{ vb.lanh_dao_xu_ly.ho_va_ten|default:vb.lanh_dao_xu_ly.username }}</div></div>
-            <div class="field"><div class="label">Trạng thái</div><div class="value"><span class="badge">Xem để biết</span></div></div>
+            <div class="field"><div class="label">Người gửi</div><div class="value">{{ vb.lanh_dao_xu_ly.ho_va_ten|default:vb.lanh_dao_xu_ly.email }}</div></div>
+            <div class="field">
+                <div class="label">Trạng thái</div>
+                <div class="value">
+                    <span class="badge badge-xem-de-biet">Xem để biết</span>
+                </div>
+            </div>
         </div>
     </div>
 
