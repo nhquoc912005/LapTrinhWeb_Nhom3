@@ -419,6 +419,8 @@
           duyệt</button>
         <button type="button" class="btn btn-warning" style="padding:8px 16px;" id="openReturnModal">Hoàn trả</button>
         {% endif %}
+        <button class="btn btn-info" style="padding:8px 16px;">Giao việc</button>
+        <button class="btn btn-primary" style="padding:8px 16px;" onclick="openThemVanBanPopup()">Lưu hồ sơ</button>
         {% if task %}
         <a href="{% url 'quanlycongviec:task_detail' task.pk %}" class="btn btn-info" style="padding:8px 16px; text-decoration:none;">Xem công việc</a>
         {% else %}
@@ -438,7 +440,7 @@
         {% if vb.trang_thai == "Chờ Xử Lý" %}
         <button type="button" id="btnOpenDeleteModal" class="btn btn-danger" style="padding:8px 16px;">Xóa văn bản</button>
         {% endif %}
-        <button class="btn btn-primary" style="padding:8px 16px;">Thêm hồ sơ</button>
+        <button class="btn btn-primary" style="padding:8px 16px;" onclick="openThemVanBanPopup()">Thêm hồ sơ</button>
         {% endif %}
 
         {# ===== VĂN THƯ ===== #}
@@ -447,7 +449,7 @@
         {% if vb.trang_thai == "Chờ ban hành" %}
         <button id="openBanHanhModal" class="btn btn-success" style="padding:8px 16px;">Ban hành</button>
         {% endif %}
-        <button class="btn btn-primary" style="padding:8px 16px;">Thêm hồ sơ</button>
+        <button class="btn btn-primary" style="padding:8px 16px;" onclick="openThemVanBanPopup()">Thêm hồ sơ</button>
         {% endif %}
       </div>
     </div>
@@ -683,6 +685,10 @@
   })();
   </script>
   {% endif %}
+
+  {% csrf_token %}
+  <script>var popupVanBanId = {{ vb.pk }}; var popupVanBanType = 'van_ban_di';</script>
+  {% include "hosovanban/them-van-ban-popup.html" %}
 {% endblock %}
 
 {% block extra_js %}
