@@ -1554,6 +1554,10 @@ td.td-truncate {
   box-shadow: 0 1px 4px rgba(15, 23, 42, 0.14);
 }
 
+.app-content {
+  background: linear-gradient(180deg, #f8fafc 0%, #eef3f8 100%);
+}
+
 .header-nav {
   background: #085f7d;
 }
@@ -1603,6 +1607,71 @@ td.td-truncate {
 
 .page-main > .messages {
   margin-bottom: 0;
+}
+
+.summary-grid,
+.report-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.summary-grid {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.report-grid {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.stat-meta {
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 12.5px;
+}
+
+.report-bars {
+  min-height: 260px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: end;
+  padding: 18px 10px 4px;
+}
+
+.report-bar-item {
+  height: 100%;
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.report-bar {
+  width: min(56px, 60%);
+  height: var(--bar-height, 50%);
+  min-height: 28px;
+  border-radius: 4px 4px 0 0;
+  background: #0f80a9;
+}
+
+.report-bar--outgoing {
+  background: #5ab85e;
+}
+
+.report-bar--task {
+  background: #f6b10a;
+}
+
+.report-status-list {
+  display: grid;
+  gap: 14px;
+  padding: 16px 4px;
 }
 
 .filter-card,
