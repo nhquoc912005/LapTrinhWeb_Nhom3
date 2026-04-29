@@ -15,9 +15,8 @@
             <div class="tab-filter-group" id="filterTabs">
                 <button type="button" class="filter-tab active" data-status="">Tất cả</button>
                 <button type="button" class="filter-tab" data-status="Chờ xử lý">Chờ xử lý</button>
-                <button type="button" class="filter-tab" data-status="Hoàn trả_CV">Hoàn trả CV</button>
+                <button type="button" class="filter-tab" data-status="Hoàn trả">Hoàn trả</button>
                 <button type="button" class="filter-tab" data-status="Chờ duyệt">Chờ duyệt</button>
-                <button type="button" class="filter-tab" data-status="Hoàn trả_LĐ">Hoàn trả LĐ</button>
                 <button type="button" class="filter-tab" data-status="Đã hoàn thành">Đã hoàn thành</button>
             </div>
         </div>
@@ -146,7 +145,7 @@
                 const assigner = normalizeText(row.cells[2]?.innerText || "");
                 const sourceText = normalizeText(row.cells[5]?.innerText || "");
                 const matchesKeyword = !keyword || taskName.includes(keyword) || assigner.includes(keyword) || sourceText.includes(keyword);
-                const matchesStatus = !activeStatus || row.dataset.status === activeStatus;
+                const matchesStatus = !activeStatus || row.dataset.status === activeStatus || (activeStatus === 'Hoàn trả' && (row.dataset.status === 'Hoàn trả_CV' || row.dataset.status === 'Hoàn trả_LĐ'));
                 const matchesSource = !source || row.dataset.source === source;
                 row.style.display = matchesKeyword && matchesStatus && matchesSource ? "" : "none";
             });

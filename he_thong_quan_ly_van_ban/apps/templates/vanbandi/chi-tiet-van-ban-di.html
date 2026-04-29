@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% load static %}
 
 {% block title %}Chi tiết văn bản{% endblock %}
@@ -419,7 +419,11 @@
           duyệt</button>
         <button type="button" class="btn btn-warning" style="padding:8px 16px;" id="openReturnModal">Hoàn trả</button>
         {% endif %}
-        <button class="btn btn-info" style="padding:8px 16px;">Giao việc</button>
+        {% if task %}
+        <a href="{% url 'quanlycongviec:task_detail' task.pk %}" class="btn btn-info" style="padding:8px 16px; text-decoration:none;">Xem công việc</a>
+        {% else %}
+        <a href="{% url 'quanlycongviec:giao_viec' %}?van_ban_id={{ vb.pk }}&nguon_giao=Văn bản đi&ten_cv={{ vb.trich_yeu|urlencode }}" class="btn btn-info" style="padding:8px 16px; text-decoration:none;">Giao việc</a>
+        {% endif %}
         <button class="btn btn-primary" style="padding:8px 16px;">Lưu hồ sơ</button>
         {% endif %}
 

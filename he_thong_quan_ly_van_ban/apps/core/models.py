@@ -478,8 +478,8 @@ class CongViec(models.Model):
     class TrangThai(models.TextChoices):
         CHO_XU_LY = "Chờ xử lý", "Chờ xử lý"
         DA_HOAN_THANH = "Đã hoàn thành", "Đã hoàn thành"
-        HOAN_TRA_CV = "Hoàn trả_CV", "Hoàn trả CV"
-        HOAN_TRA_LD = "Hoàn trả_LĐ", "Hoàn trả LĐ"
+        HOAN_TRA_CV = "Hoàn trả_CV", "Hoàn trả"
+        HOAN_TRA_LD = "Hoàn trả_LĐ", "Hoàn trả"
         CHO_DUYET = "Chờ duyệt", "Chờ duyệt"
 
     cong_viec_id = models.AutoField(primary_key=True)
@@ -489,6 +489,13 @@ class CongViec(models.Model):
         db_column="van_ban_id",
         null=True,
         blank=True,
+    )
+    van_ban_den = models.ForeignKey(
+        "quanlyvanbanden.VanBanDen",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="cong_viec_lien_quan",
     )
     ten_cong_viec = models.CharField(max_length=255, null=False)
     noi_dung_cong_viec = models.TextField(null=False)
