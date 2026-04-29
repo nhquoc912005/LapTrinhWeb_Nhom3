@@ -27,9 +27,8 @@
                 <div class="tab-filter-group" id="filterTabs">
                     <button class="filter-tab active" data-tab="all">Tất cả</button>
                     <button class="filter-tab" data-tab="Chờ xử lý">Chờ xử lý</button>
-                    <button class="filter-tab" data-tab="Hoàn trả_CV">Hoàn trả CV</button>
+                    <button class="filter-tab" data-tab="Hoàn trả">Hoàn trả</button>
                     <button class="filter-tab" data-tab="Chờ duyệt">Chờ duyệt</button>
-                    <button class="filter-tab" data-tab="Hoàn trả_LĐ">Hoàn trả LĐ</button>
                     <button class="filter-tab" data-tab="Đã hoàn thành">Đã hoàn thành</button>
                 </div>
 
@@ -133,6 +132,8 @@
             {% csrf_token %}
             <input type="hidden" id="gvId" name="task_id">
             <input type="hidden" id="deleteFilesInput" name="delete_files" value="">
+            <input type="hidden" id="vanBanId" name="van_ban_id">
+            <input type="hidden" id="vanBanDenId" name="van_ban_den_id">
 
             <h2 id="gvFormTitle" class="section-title">Giao công việc mới</h2>
 
@@ -404,7 +405,7 @@
                 const taskStatus = row.getAttribute('data-status') || row.cells[6].innerText.trim();
                 const taskSource = row.cells[5].innerText.trim();
 
-                const matchesTab = (activeTab === 'all' || taskStatus === activeTab);
+                const matchesTab = (activeTab === 'all' || taskStatus === activeTab || (activeTab === 'Hoàn trả' && (taskStatus === 'Hoàn trả_CV' || taskStatus === 'Hoàn trả_LĐ')));
                 const matchesKeyword = !keyword || taskName.includes(keyword) || assignee.includes(keyword) || taskSourceText.includes(keyword);
                 const matchesSource = (source === '' || taskSource === source);
 
@@ -473,6 +474,28 @@
         const editId = urlParams.get('edit');
         if (editId) {
             editTask(editId);
+        }
+
+        // Handle pre-fill from Document Detail
+        const vbId = urlParams.get('van_ban_id');
+        const vbDenId = urlParams.get('van_ban_den_id');
+        const nguonGiao = urlParams.get('nguon_giao');
+        const tenCv = urlParams.get('ten_cv');
+
+        if (nguonGiao || vbId || vbDenId) {
+            showForm();
+            if (nguonGiao) {
+                document.querySelector('select[name="nguon_giao"]').value = nguonGiao;
+            }
+            if (vbId) {
+                document.getElementById('vanBanId').value = vbId;
+            }
+            if (vbDenId) {
+                document.getElementById('vanBanDenId').value = vbDenId;
+            }
+            if (tenCv) {
+                document.querySelector('input[name="ten_cv"]').value = tenCv;
+            }
         }
     });
 

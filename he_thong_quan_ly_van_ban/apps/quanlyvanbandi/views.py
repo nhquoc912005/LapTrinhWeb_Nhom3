@@ -271,6 +271,7 @@ def chi_tiet_van_ban_di(request, id):
         "hien_thi_trang_thai":      hien_thi_trang_thai,
         "allow_remove_main_file":    False,
         "allow_remove_related_file": False,
+        "task": CongViec.objects.filter(van_ban=vb).first(),
     })
 
 @require_POST
