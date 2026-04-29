@@ -54,7 +54,7 @@
                     value="{{ current_q }}"
                     class="custom-search-input"
                     placeholder="Tìm theo tiêu đề hoặc ký hiệu hồ sơ..."
-                    onkeypress="if(event.key === 'Enter') this.form.submit();"
+                    id="searchInputHoSo"
                 >
             </div>
 
@@ -131,6 +131,7 @@
         <table class="data-table">
             <thead>
                 <tr>
+                    <th style="width:60px;text-align:center;">STT</th>
                     <th>Tiêu đề hồ sơ</th>
                     <th>Ký hiệu hồ sơ</th>
                     <th>Năm hình thành</th>
@@ -142,6 +143,7 @@
             <tbody id="hoSoBody">
                 {% for hs in ds_ho_so %}
                 <tr onclick="window.location.href='{% url 'hosovanban:chi_tiet' hs.pk %}';">
+                    <td style="text-align:center;font-weight:600;color:#64748b;">{{ forloop.counter }}</td>
                     <td>
                         <a href="{% url 'hosovanban:chi_tiet' hs.pk %}" onclick="event.stopPropagation();">
                             {{ hs.tieu_de_ho_so }}
@@ -167,7 +169,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center">
+                    <td colspan="7" class="text-center">
                         <div class="empty-state">Không có hồ sơ nào.</div>
                     </td>
                 </tr>
@@ -200,4 +202,49 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var searchInput = document.getElementById('searchInputHoSo');
+    if (!searchInput) return;
+
+    var tbody = document.getElementById('hoSoBody');
+    var rows = tbody ? tbody.querySelectorAll('tr[onclick]') : [];
+
+    // Tìm kiếm nhanh client-side: ẩn/hiện dòng ngay lập tức
+    searchInput.addEventListener('input', function() {
+        var keyword = this.value.toLowerCase().trim();
+        var visibleCount = 0;
+
+        for (var i = 0; i < rows.length; i++) {
+            var text = rows[i].textContent.toLowerCase();
+            if (!keyword || text.indexOf(keyword) !== -1) {
+                rows[i].style.display = '';
+                visibleCount++;
+                // Cập nhật lại STT
+                var sttCell = rows[i].querySelector('td:first-child');
+                if (sttCell) sttCell.textContent = visibleCount;
+            } else {
+                rows[i].style.display = 'none';
+            }
+        }
+
+        // Cập nhật info phân trang
+        var paginationInfo = document.getElementById('paginationInfo');
+        if (paginationInfo && keyword) {
+            paginationInfo.textContent = 'Tìm thấy ' + visibleCount + ' kết quả';
+        }
+    });
+
+    // Enter vẫn submit form để tìm kiếm server-side (hỗ trợ phân trang)
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('filterForm').submit();
+        }
+    });
+})();
+</script>
 {% endblock %}

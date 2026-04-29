@@ -1,5 +1,5 @@
 <style>
-    .modal-overlay {
+    .modal-overlay-hsvb {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
         background: rgba(0, 0, 0, 0.4);
@@ -9,10 +9,10 @@
         z-index: 9999;
         padding-top: 80px;
     }
-    .modal-overlay.active {
+    .modal-overlay-hsvb.active {
         display: flex;
     }
-    .modal-content-box {
+    .modal-content-box-hsvb {
         background: #fff;
         width: 100%;
         max-width: 680px;
@@ -21,20 +21,20 @@
         overflow: hidden;
         font-family: inherit;
     }
-    .modal-header {
+    .modal-header-hsvb {
         padding: 20px 24px;
         border-bottom: 1px solid #e2e8f0;
         display: flex;
         justify-content: space-between;
         align-items: center;
     }
-    .modal-header h3 {
+    .modal-header-hsvb h3 {
         margin: 0;
         font-size: 20px;
         color: #0284c7;
         font-weight: 700;
     }
-    .modal-close-btn {
+    .modal-close-btn-hsvb {
         background: none;
         border: none;
         font-size: 24px;
@@ -44,20 +44,20 @@
         padding: 0;
         font-weight: bold;
     }
-    .modal-body {
+    .modal-body-hsvb {
         padding: 24px;
     }
-    .modal-body label {
+    .modal-body-hsvb label {
         display: block;
         font-weight: 700;
         margin-bottom: 8px;
         font-size: 15px;
         color: #0f172a;
     }
-    .modal-body label span {
+    .modal-body-hsvb label span {
         color: #ef4444;
     }
-    .modal-body select {
+    .modal-body-hsvb select {
         width: 100%;
         padding: 12px;
         border: 1px solid #cbd5e1;
@@ -68,12 +68,12 @@
         background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2364748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>') no-repeat right 12px center;
         background-color: #fff;
     }
-    .modal-body select:focus {
+    .modal-body-hsvb select:focus {
         outline: none;
         border-color: #0284c7;
         box-shadow: 0 0 0 1px #0284c7;
     }
-    .add-new-profile-btn {
+    .add-new-profile-btn-hsvb {
         display: inline-flex;
         align-items: center;
         gap: 8px;
@@ -87,59 +87,80 @@
         margin-top: 20px;
         transition: background 0.2s;
     }
-    .add-new-profile-btn:hover {
+    .add-new-profile-btn-hsvb:hover {
         background: #0369a1;
         color: #fff;
     }
-    .add-new-profile-btn.secondary-action {
+    .add-new-profile-btn-hsvb.secondary-action {
         border: none;
         cursor: pointer;
     }
-    .modal-footer {
+    .modal-footer-hsvb {
         padding: 16px 24px;
         border-top: 1px solid #e2e8f0;
         display: flex;
         justify-content: flex-end;
         gap: 16px;
     }
-    .modal-footer button {
+    .modal-footer-hsvb button {
         padding: 10px 32px;
         font-size: 15px;
         font-weight: 600;
         border-radius: 2px;
         cursor: pointer;
     }
-    .modal-btn-cancel {
+    .modal-btn-cancel-hsvb {
         background: #fff;
         border: 1px solid #cbd5e1;
         color: #0f172a;
     }
-    .modal-btn-cancel:hover {
+    .modal-btn-cancel-hsvb:hover {
         background: #f8fafc;
     }
-    .modal-btn-save {
+    .modal-btn-save-hsvb {
         background: #9ca3af;
         border: 1px solid #9ca3af;
         color: #fff;
     }
-    .modal-btn-save.active-save {
+    .modal-btn-save-hsvb.active-save {
         background: #0284c7;
         border-color: #0284c7;
     }
-    .modal-btn-save.active-save:hover {
+    .modal-btn-save-hsvb.active-save:hover {
         background: #0369a1;
+    }
+    .toast-msg-hsvb {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        z-index: 10001;
+        padding: 14px 24px;
+        border-radius: 4px;
+        font-size: 15px;
+        font-weight: 600;
+        color: #fff;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+        display: none;
+        max-width: 480px;
+    }
+    .toast-msg-hsvb.toast-success { background: #16a34a; }
+    .toast-msg-hsvb.toast-error { background: #dc2626; }
+    .toast-msg-hsvb.show { display: block; animation: slideInRight .3s ease; }
+    @keyframes slideInRight {
+        from { transform: translateX(60px); opacity: 0; }
+        to   { transform: translateX(0); opacity: 1; }
     }
 </style>
 
-<div class="modal-overlay" id="themVanBanPopup" onclick="checkCloseModal(event)">
-    <div class="modal-content-box" onclick="event.stopPropagation()">
-        <div class="modal-header">
+<div class="modal-overlay-hsvb" id="themVanBanPopup" onclick="checkCloseModalHSVB(event)">
+    <div class="modal-content-box-hsvb" onclick="event.stopPropagation()">
+        <div class="modal-header-hsvb">
             <h3>Thêm văn bản vào hồ sơ</h3>
-            <button class="modal-close-btn" onclick="closeThemVanBanPopup()">&times;</button>
+            <button class="modal-close-btn-hsvb" onclick="closeThemVanBanPopup()">&times;</button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body-hsvb">
             <label>Hồ sơ văn bản <span>*</span></label>
-            <select id="hoSoSelect" onchange="toggleSaveButton()">
+            <select id="hoSoSelect" onchange="toggleSaveButtonHSVB()">
                 <option value="">-- Tìm kiếm hoặc chọn tiêu đề hồ sơ --</option>
                 {% if ds_ho_so %}
                     {% for hs in ds_ho_so %}
@@ -147,8 +168,9 @@
                     {% endfor %}
                 {% endif %}
             </select>
-            
-            <a href="{% url 'hosovanban:them_ho_so_van_ban' %}" class="add-new-profile-btn secondary-action">
+
+            {% if is_van_thu %}
+            <a href="{% url 'hosovanban:them_ho_so_van_ban' %}" class="add-new-profile-btn-hsvb secondary-action">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"></circle>
                     <line x1="12" y1="8" x2="12" y2="16"></line>
@@ -156,34 +178,41 @@
                 </svg>
                 Thêm mới hồ sơ
             </a>
+            {% endif %}
         </div>
-        <div class="modal-footer">
-            <button class="modal-btn-cancel" onclick="closeThemVanBanPopup()">Hủy</button>
-            <button class="modal-btn-save" id="btnSaveThemVanBan" onclick="saveThemVanBan()">Lưu</button>
+        <div class="modal-footer-hsvb">
+            <button class="modal-btn-cancel-hsvb" onclick="closeThemVanBanPopup()">Hủy</button>
+            <button class="modal-btn-save-hsvb" id="btnSaveThemVanBan" onclick="saveThemVanBan()">Lưu</button>
         </div>
     </div>
 </div>
 
+<div class="toast-msg-hsvb" id="toastMsgHSVB"></div>
+
 <script>
+    // ID và loại văn bản hiện tại (được set từ template cha)
+    var _popupVanBanId = typeof popupVanBanId !== 'undefined' ? popupVanBanId : null;
+    var _popupVanBanType = typeof popupVanBanType !== 'undefined' ? popupVanBanType : 'van_ban_di';
+
     function openThemVanBanPopup() {
         document.getElementById('themVanBanPopup').classList.add('active');
         document.getElementById('hoSoSelect').value = '';
-        toggleSaveButton();
+        toggleSaveButtonHSVB();
     }
 
     function closeThemVanBanPopup() {
         document.getElementById('themVanBanPopup').classList.remove('active');
     }
 
-    function checkCloseModal(e) {
+    function checkCloseModalHSVB(e) {
         if (e.target.id === 'themVanBanPopup') {
             closeThemVanBanPopup();
         }
     }
 
-    function toggleSaveButton() {
-        const select = document.getElementById('hoSoSelect');
-        const btnSave = document.getElementById('btnSaveThemVanBan');
+    function toggleSaveButtonHSVB() {
+        var select = document.getElementById('hoSoSelect');
+        var btnSave = document.getElementById('btnSaveThemVanBan');
         if (select.value) {
             btnSave.classList.add('active-save');
         } else {
@@ -191,13 +220,76 @@
         }
     }
 
+    function showToastHSVB(message, type) {
+        var toast = document.getElementById('toastMsgHSVB');
+        toast.textContent = message;
+        toast.className = 'toast-msg-hsvb toast-' + type + ' show';
+        setTimeout(function() {
+            toast.classList.remove('show');
+        }, 4000);
+    }
+
     function saveThemVanBan() {
-        const select = document.getElementById('hoSoSelect');
-        if (!select.value) {
-            return; // Do nothing if not selected (acts as disabled)
+        var select = document.getElementById('hoSoSelect');
+        if (!select.value) return;
+
+        if (!_popupVanBanId) {
+            showToastHSVB('Không xác định được văn bản. Vui lòng tải lại trang.', 'error');
+            return;
         }
-        // Demo action handling
-        alert('Đã thêm văn bản vào hồ sơ thành công. Hồ sơ đã chọn: ' + select.options[select.selectedIndex].text);
-        closeThemVanBanPopup();
+
+        var btnSave = document.getElementById('btnSaveThemVanBan');
+        btnSave.disabled = true;
+        btnSave.textContent = 'Đang lưu...';
+
+        var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (!csrfToken) {
+            // Fallback: lấy từ cookie
+            var cookieValue = null;
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, 'csrftoken='.length) === 'csrftoken=') {
+                    cookieValue = cookie.substring('csrftoken='.length);
+                    break;
+                }
+            }
+            if (cookieValue) {
+                csrfToken = { value: cookieValue };
+            }
+        }
+
+        var formData = new FormData();
+        formData.append('ho_so_id', select.value);
+        formData.append('van_ban_id', _popupVanBanId);
+        formData.append('van_ban_type', _popupVanBanType);
+        if (csrfToken) {
+            formData.append('csrfmiddlewaretoken', csrfToken.value);
+        }
+
+        fetch("{% url 'hosovanban:api_them_van_ban_vao_ho_so' %}", {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin',
+            headers: {
+                'X-CSRFToken': csrfToken ? csrfToken.value : '',
+            }
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            btnSave.disabled = false;
+            btnSave.textContent = 'Lưu';
+            if (data.ok) {
+                closeThemVanBanPopup();
+                showToastHSVB(data.message, 'success');
+            } else {
+                showToastHSVB(data.error || 'Có lỗi xảy ra.', 'error');
+            }
+        })
+        .catch(function(err) {
+            btnSave.disabled = false;
+            btnSave.textContent = 'Lưu';
+            showToastHSVB('Lỗi kết nối. Vui lòng thử lại.', 'error');
+        });
     }
 </script>
