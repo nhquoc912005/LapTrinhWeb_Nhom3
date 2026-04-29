@@ -135,9 +135,25 @@
         </div>
         <div class="action-btns">
             <button type="button" class="btn-local btn-blue">+ Giao việc</button>
-            <button type="button" class="btn-local btn-blue" onclick="openModal('transferModal')">✈ Chuyển tiếp</button>
-            <button type="button" class="btn-local btn-gray" onclick="openModal('saveModal')">💾 Lưu</button>
-            <button type="button" class="btn-local btn-red" onclick="openModal('returnModal')">↩ Hoàn trả</button>
+
+            {% if vb.trang_thai == 'Xem Để Biết' %}
+                <button type="button" class="btn-local btn-blue" onclick="openModal('transferModal')">✈ Chuyển tiếp</button>
+            {% else %}
+                <button type="button"
+                        class="btn-local btn-gray"
+                        disabled
+                        title="Cần lưu văn bản sang trạng thái Xem để biết trước khi chuyển tiếp">
+                    ✈ Chuyển tiếp
+                </button>
+            {% endif %}
+
+            {% if vb.trang_thai == 'Chờ Xử Lý' or vb.trang_thai == 'Hoàn Trả' %}
+                <button type="button" class="btn-local btn-gray" onclick="openModal('saveModal')">💾 Lưu</button>
+                <button type="button" class="btn-local btn-red" onclick="openModal('returnModal')">↩ Hoàn trả</button>
+            {% else %}
+                <button type="button" class="btn-local btn-gray" disabled title="Văn bản đã được xử lý">💾 Lưu</button>
+                <button type="button" class="btn-local btn-gray" disabled title="Văn bản đã được xử lý">↩ Hoàn trả</button>
+            {% endif %}
         </div>
     </div>
     <div class="info-grid">
@@ -148,7 +164,7 @@
             </div>
             <div class="field">
                 <div class="label">Đơn vị ban hành</div>
-                <div class="value">{{ vb.don_vi_ban_hanh }}</div>
+                <div class="value">{{ vb.don_vi_ban_hanh|default:'-' }}</div>
             </div>
             <div class="field">
                 <div class="label">Ngày đến</div>
@@ -156,7 +172,7 @@
             </div>
             <div class="field">
                 <div class="label">Độ mật</div>
-                <div class="value">{{ vb.get_do_mat_display }}</div>
+                <div class="value">{{ vb.get_do_mat_display|default:vb.do_mat }}</div>
             </div>
         </div>
         <div>
@@ -170,7 +186,7 @@
             </div>
             <div class="field">
                 <div class="label">Hình thức văn bản</div>
-                <div class="value">{{ vb.get_hinh_thuc_van_ban_display|default:vb.hinh_thuc_van_ban }}</div>
+                <div class="value">{{ vb.get_hinh_thuc_display|default:vb.hinh_thuc }}</div>
             </div>
             <div class="field">
                 <div class="label">Hạn xử lý</div>
@@ -182,27 +198,27 @@
         <div>
             <div class="field">
                 <div class="label">Người gửi</div>
-                <div class="value">{{ vb.nguoi_tao.ho_va_ten|default:vb.nguoi_tao.username }}</div>
+                <div class="value">{{ vb.nguoi_tao.ho_va_ten|default:vb.nguoi_tao.email }}</div>
             </div>
             <div class="field">
                 <div class="label">Trạng thái</div>
                 <div class="value">
-                    {% if vb.trang_thai == 'CHO_XU_LY' %}
+                    {% if vb.trang_thai == 'Chờ Xử Lý' %}
                         <span class="badge badge-cho-xu-ly">Chờ xử lý</span>
-                    {% elif vb.trang_thai == 'DA_XU_LY' %}
+                    {% elif vb.trang_thai == 'Đã Xử Lý' %}
                         <span class="badge badge-da-xu-ly">Đã xử lý</span>
-                    {% elif vb.trang_thai == 'HOAN_TRA' %}
+                    {% elif vb.trang_thai == 'Hoàn Trả' %}
                         <span class="badge badge-hoan-tra">Hoàn trả</span>
-                    {% elif vb.trang_thai == 'XEM_DE_BIET' %}
+                    {% elif vb.trang_thai == 'Xem Để Biết' %}
                         <span class="badge badge-xem-de-biet">Xem để biết</span>
                     {% else %}
-                        <span class="badge">{{ vb.get_trang_thai_display }}</span>
+                        <span class="badge">{{ vb.trang_thai }}</span>
                     {% endif %}
                 </div>
             </div>
             <div class="field">
                 <div class="label">Độ khẩn</div>
-                <div class="value">{{ vb.get_do_khan_display }}</div>
+                <div class="value">{{ vb.get_do_khan_display|default:vb.do_khan }}</div>
             </div>
             {% if vb.ngay_hoan_tra %}
             <div class="field">
@@ -231,11 +247,11 @@
                 {% for item in ds_chuyen_tiep %}
                     <div class="staff-receive-item">
                         <div class="staff-avatar">
-                            {{ item.chuyen_vien.ho_va_ten|default:item.chuyen_vien.username|slice:":1" }}
+                            {{ item.chuyen_vien.ho_va_ten|default:item.chuyen_vien.email|slice:":1" }}
                         </div>
                         <div class="staff-info">
                             <div class="staff-name">
-                                {{ item.chuyen_vien.ho_va_ten|default:item.chuyen_vien.username }}
+                                {{ item.chuyen_vien.ho_va_ten|default:item.chuyen_vien.email }}
                             </div>
                             <div class="staff-role">
                                 {{ item.chuyen_vien.chuc_vu|default:"Chuyên viên" }}
@@ -351,7 +367,7 @@
     // ===== DỮ LIỆU CHUYÊN VIÊN ĐÃ CHỌN =====
     const selectedChuyenVienIds = [
         {% for item in ds_chuyen_tiep %}
-            {{ item.chuyen_vien_id }}{% if not forloop.last %},{% endif %}
+            {{ item.chuyen_vien.id }}{% if not forloop.last %},{% endif %}
         {% endfor %}
     ];
     // ===== MODAL =====

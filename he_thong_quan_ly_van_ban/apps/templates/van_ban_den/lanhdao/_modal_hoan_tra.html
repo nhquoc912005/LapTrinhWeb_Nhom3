@@ -11,7 +11,7 @@
             <div class="modal-body">
                 <div class="return-note">
                     <strong>Văn thư:</strong>
-                    {{ vb.nguoi_tao.ho_va_ten|default:vb.nguoi_tao.username }}
+                    {{ vb.nguoi_tao.ho_va_ten|default:vb.nguoi_tao.email }}
                 </div>
 
                 <div class="return-note" style="margin-top:14px; font-weight:700; color:#0F172A;">
@@ -20,6 +20,7 @@
 
                 <textarea name="ly_do_hoan_tra"
                           class="return-textarea"
+                          required
                           placeholder="Nhập ý kiến xử lý / hoàn trả cho văn thư..."></textarea>
             </div>
 
