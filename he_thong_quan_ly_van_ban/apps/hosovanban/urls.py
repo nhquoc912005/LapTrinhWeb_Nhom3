@@ -6,6 +6,8 @@ from .views import sua_ho_so_van_ban
 from .views import xoa_ho_so_van_ban
 from .views import chi_tiet_van_ban_trong_ho_so
 from .views import xoa_van_ban_khoi_ho_so
+from .views import api_ds_ho_so_hien_hanh
+from .views import api_them_van_ban_vao_ho_so
 app_name = "hosovanban"
 urlpatterns = [
     path("hosovanban/ho-so-van-ban.html", danh_sach, name="danh_sach"),
@@ -15,4 +17,8 @@ urlpatterns = [
     path("hosovanban/xoa/<int:pk>/", xoa_ho_so_van_ban, name="xoa"),
     path("hosovanban/chi-tiet/<int:ho_so_id>/van-ban/<int:vb_id>/", chi_tiet_van_ban_trong_ho_so, name="chi_tiet_van_ban"),
     path("hosovanban/chi-tiet/<int:ho_so_id>/van-ban/<int:vb_id>/xoa/", xoa_van_ban_khoi_ho_so, name="xoa_van_ban_khoi_ho_so"),
+
+    # API endpoints cho popup thêm văn bản vào hồ sơ
+    path("api/ho-so-hien-hanh/", api_ds_ho_so_hien_hanh, name="api_ds_ho_so_hien_hanh"),
+    path("api/them-van-ban-vao-ho-so/", api_them_van_ban_vao_ho_so, name="api_them_van_ban_vao_ho_so"),
 ]

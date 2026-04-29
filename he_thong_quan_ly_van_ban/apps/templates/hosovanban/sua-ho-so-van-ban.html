@@ -3,6 +3,9 @@
 
 {% block title %}Chỉnh sửa hồ sơ{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/css/them-ho-so-van-ban.css' %}">
+{% endblock %}
 {% block breadcrumb %}
 <a href="{% url 'core:dashboard' %}">
     <svg width="14" height="14" viewBox="0 0 24 24">
