@@ -11,6 +11,7 @@ from apps.accounts.models import Customer
 
 from .forms import VanBanDenForm
 from .models import VanBanDen, TepVanBanDen, VanBanDenChuyenTiep
+from apps.core.models import CongViec
 
 
 # ===== DÙNG CHUNG =====
@@ -132,6 +133,7 @@ def chi_tiet_van_ban_den(request, pk):
         'vb': vb,
         'file_dinh_kem_list': file_dinh_kem_list,
         'tai_lieu_lien_quan_list': tai_lieu_lien_quan_list,
+        'task': CongViec.objects.filter(van_ban_den=vb).first(),
     }
 
     if request.user.is_lanh_dao:

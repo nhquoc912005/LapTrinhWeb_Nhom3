@@ -204,6 +204,8 @@ def add_task(request):
         noi_dung = (request.POST.get("noi_dung") or "").strip()
         ghi_chu = (request.POST.get("ghi_chu") or "").strip()
         yeu_cau_phe_duyet = request.POST.get("yeu_cau_phe_duyet") == "on"
+        van_ban_id = request.POST.get("van_ban_id")
+        van_ban_den_id = request.POST.get("van_ban_den_id")
 
         if not all([ten_cv, nguoi_thuc_hien_id, ngay_bat_dau_str, han_xu_ly_str, noi_dung]):
             messages.error(request, "Vui lòng nhập đầy đủ các trường bắt buộc.")
@@ -234,6 +236,8 @@ def add_task(request):
                 han_xu_ly=han_xu_ly,
                 ghi_chu=ghi_chu,
                 yeu_cau_phe_duyet=yeu_cau_phe_duyet,
+                van_ban_id=van_ban_id if van_ban_id else None,
+                van_ban_den_id=van_ban_den_id if van_ban_den_id else None,
             )
 
             _create_assignment_files(
