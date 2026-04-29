@@ -47,7 +47,6 @@
     .status-badge {
         display: inline-flex;
         padding: 6px 14px;
-        margin-top: 16px;
         border-radius: 999px;
         font-size: 13px;
         font-weight: 700;
@@ -142,9 +141,159 @@
 
     .preview-frame {
         width: 100%;
-        min-height: 720px;
+        min-height: 800px;
+        border: none;
+        background: #fff;
+    }
+
+    /* New styles for Document Section */
+    .doc-section {
+        background: #fff;
+        padding: 20px;
         border: 1px solid #dce5ec;
-        background: #4b5157;
+        margin-top: 24px;
+    }
+
+    .doc-section-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        color: #006e9f;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+    }
+
+    .doc-section-title::before {
+        content: "";
+        width: 4px;
+        height: 20px;
+        background: #006e9f;
+    }
+
+    .doc-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #607385;
+        margin-bottom: 8px;
+    }
+
+    .doc-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 20px;
+        background: #f8fbff;
+        border: 1px solid #add1e9;
+        margin-bottom: 16px;
+        transition: all 0.2s;
+    }
+
+    .doc-card:hover {
+        background: #f0f7ff;
+        border-color: #006e9f;
+    }
+
+    .doc-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .doc-icon img {
+        width: 32px;
+        height: 32px;
+    }
+
+    .doc-info {
+        flex-grow: 1;
+        overflow: hidden;
+    }
+
+    .doc-name {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1f2d3d;
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+        text-decoration: none;
+    }
+
+    .doc-type {
+        font-size: 11px;
+        color: #7f90a0;
+        text-transform: uppercase;
+    }
+
+    .preview-wrapper {
+        background: #f0f2f5;
+        padding: 16px;
+        border: 1px solid #dce5ec;
+        margin-top: 10px;
+    }
+
+    .preview-header {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        padding: 8px 16px;
+        background: #fff;
+        border-bottom: 1px solid #dce5ec;
+        gap: 12px;
+    }
+
+    .preview-nav {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 4px 8px;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+    }
+
+    .nav-btn {
+        background: none;
+        border: none;
+        color: #495057;
+        padding: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+
+    .nav-btn:hover {
+        color: #006e9f;
+    }
+
+    .page-info {
+        font-size: 13px;
+        color: #495057;
+        font-weight: 600;
+    }
+
+    .btn-open-new {
+        background: #fff;
+        border: 1px solid #dce5ec;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #1f2d3d;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .btn-open-new:hover {
+        background: #f8f9fa;
+        border-color: #ced4da;
     }
 
     @media (max-width: 900px) {
@@ -164,9 +313,27 @@
 {% endblock %}
 
 {% block breadcrumb %}
-<a href="{% url task_list_url %}">Quản lý công việc</a>
-<span class="breadcrumb-sep">›</span>
-<span>Thông tin chi tiết công việc</span>
+{% if task.van_ban_den %}
+    <a href="/">Trang chủ</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="{% url 'quanlyvanbanden:danh_sach' %}">Văn bản đến</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="{% url 'quanlyvanbanden:chi_tiet' task.van_ban_den.pk %}">Chi tiết văn bản</a>
+    <span class="breadcrumb-sep">›</span>
+    <span>Xem công việc</span>
+{% elif task.van_ban %}
+    <a href="/">Trang chủ</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="{% url 'quanlyvanbandi:van_ban_di' %}">Văn bản đi</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="{% url 'quanlyvanbandi:chi_tiet_van_ban_di' task.van_ban.pk %}">Chi tiết văn bản</a>
+    <span class="breadcrumb-sep">›</span>
+    <span>Xem công việc</span>
+{% else %}
+    <a href="{% url task_list_url %}">Quản lý công việc</a>
+    <span class="breadcrumb-sep">›</span>
+    <span>Thông tin chi tiết công việc</span>
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -174,47 +341,52 @@
     <div class="detail-header">
         <div>
             <div class="detail-title">Thông tin chi tiết công việc</div>
-            {% if task.trang_thai == "Chờ xử lý" %}
-            <span class="status-badge status-cho-xu-ly">{{ task.get_trang_thai_display }}</span>
-            {% elif task.trang_thai == "Chờ duyệt" %}
-            <span class="status-badge status-cho-duyet">{{ task.get_trang_thai_display }}</span>
-            {% elif task.trang_thai == "Đã hoàn thành" %}
-            <span class="status-badge status-da-hoan-thanh">{{ task.get_trang_thai_display }}</span>
-            {% else %}
-            <span class="status-badge status-hoan-tra">{{ task.get_trang_thai_display }}</span>
-            {% endif %}
         </div>
 
-        <div class="action-group">
-            {% if can_edit %}
-            <a href="{% url 'quanlycongviec:giao_viec' %}?edit={{ task.pk }}" class="btn btn-primary">Chỉnh sửa</a>
-            {% endif %}
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 12px;">
+            <div class="action-group" style="align-items: center;">
+                {% if can_edit %}
+                <a href="{% url 'quanlycongviec:giao_viec' %}?edit={{ task.pk }}" class="btn btn-primary">Chỉnh sửa</a>
+                {% endif %}
 
-            {% if can_process %}
-            <a href="{% url 'quanlycongviec:process_task' task.pk %}" class="btn btn-primary">Xử lý</a>
-            {% endif %}
+                {% if can_process %}
+                <a href="{% url 'quanlycongviec:process_task' task.pk %}" class="btn btn-primary">Xử lý</a>
+                {% endif %}
 
-            {% if can_update_result %}
-            <a href="{% url 'quanlycongviec:update_task_result' task.pk %}" class="btn btn-primary">Cập nhật xử lý</a>
-            {% endif %}
+                {% if can_update_result %}
+                <a href="{% url 'quanlycongviec:update_task_result' task.pk %}" class="btn btn-primary">Cập nhật xử lý</a>
+                {% endif %}
 
-            {% if can_approve %}
-            <form method="post" action="{% url 'quanlycongviec:approve_task' task.pk %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-success">Phê duyệt</button>
-            </form>
-            {% endif %}
+                {% if can_approve %}
+                <form method="post" action="{% url 'quanlycongviec:approve_task' task.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">Phê duyệt</button>
+                </form>
+                {% endif %}
 
-            {% if can_return %}
-            <a href="{% url 'quanlycongviec:return_task' task.pk %}" class="btn btn-danger">Hoàn trả công việc</a>
-            {% endif %}
+                {% if can_return %}
+                <a href="{% url 'quanlycongviec:return_task' task.pk %}" class="btn btn-danger">Hoàn trả công việc</a>
+                {% endif %}
 
-            {% if can_delete %}
-            <form method="post" id="deleteTaskForm" action="{% url 'quanlycongviec:delete_task' task.pk %}">
-                {% csrf_token %}
-                <button type="button" class="btn btn-danger" id="btnDeleteTask">Xóa công việc</button>
-            </form>
-            {% endif %}
+                {% if can_delete %}
+                <form method="post" id="deleteTaskForm" action="{% url 'quanlycongviec:delete_task' task.pk %}">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-danger" id="btnDeleteTask">Xóa công việc</button>
+                </form>
+                {% endif %}
+            </div>
+
+            <div class="status-wrap">
+                {% if task.trang_thai == "Chờ xử lý" %}
+                <span class="status-badge status-cho-xu-ly">{{ task.get_trang_thai_display }}</span>
+                {% elif task.trang_thai == "Chờ duyệt" %}
+                <span class="status-badge status-cho-duyet">{{ task.get_trang_thai_display }}</span>
+                {% elif task.trang_thai == "Đã hoàn thành" %}
+                <span class="status-badge status-da-hoan-thanh">{{ task.get_trang_thai_display }}</span>
+                {% else %}
+                <span class="status-badge status-hoan-tra">{{ task.get_trang_thai_display }}</span>
+                {% endif %}
+            </div>
         </div>
     </div>
 
@@ -277,63 +449,6 @@
         <div class="content-box">{{ task.ghi_chu|default:"Không có ghi chú."|linebreaksbr }}</div>
     </div>
 
-    {% if task.ket_qua_xu_ly %}
-    <div class="section">
-        <h3>Kết quả xử lý</h3>
-        <div class="content-box">{{ task.ket_qua_xu_ly|linebreaksbr }}</div>
-    </div>
-    {% endif %}
-
-    <div class="section">
-        <h3>File gốc lãnh đạo giao</h3>
-        <div class="file-list">
-            {% if main_attachment %}
-            <div class="file-card">
-                <div>
-                    <a href="{{ main_attachment.file_van_ban.url }}" target="_blank" style="font-weight:700; color:#006e9f;">
-                        {{ main_attachment.file_van_ban.name|cut:"file_cv_lien_quan/" }}
-                    </a>
-                    <div style="margin-top:4px; font-size:12px; color:#7f90a0;">File chính</div>
-                </div>
-            </div>
-            {% endif %}
-            {% for attachment in related_files %}
-            <div class="file-card">
-                <div>
-                    <a href="{{ attachment.file_van_ban.url }}" target="_blank" style="font-weight:700; color:#006e9f;">
-                        {{ attachment.file_van_ban.name|cut:"file_cv_lien_quan/" }}
-                    </a>
-                    <div style="margin-top:4px; font-size:12px; color:#7f90a0;">Tài liệu liên quan</div>
-                </div>
-            </div>
-            {% empty %}
-            {% if not main_attachment %}
-            <div class="content-box">Không có file gốc.</div>
-            {% endif %}
-            {% endfor %}
-        </div>
-    </div>
-
-    {% if result_files %}
-    <div class="section">
-        <h3>File kết quả xử lý</h3>
-        <div class="file-list">
-            {% for attachment in result_files %}
-            <div class="file-card">
-                <div>
-                    <a href="{{ attachment.file_van_ban.url }}" target="_blank" style="font-weight:700; color:#006e9f;">
-                        {{ attachment.file_van_ban.name|cut:"file_cv_lien_quan/" }}
-                    </a>
-                    <div style="margin-top:4px; font-size:12px; color:#7f90a0;">
-                        Upload bởi {{ attachment.nguoi_tai_len.ho_va_ten|default:"Chuyên viên" }}
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-
     {% if return_records %}
     <div class="section">
         <h3>Lịch sử hoàn trả</h3>
@@ -360,12 +475,97 @@
     </div>
     {% endif %}
 
-    {% if main_attachment and ".pdf" in main_attachment.file_van_ban.name|lower %}
+    <!-- DANH SÁCH VĂN BẢN Section -->
+    <div class="doc-section">
+        <div class="doc-section-title">Danh sách văn bản</div>
+        
+        <div class="doc-label">File đính kèm:</div>
+        {% if main_attachment %}
+        <div class="doc-card">
+            <div class="doc-icon">
+                {% if ".pdf" in main_attachment.file_van_ban.name|lower %}
+                <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg" alt="PDF">
+                {% elif ".doc" in main_attachment.file_van_ban.name|lower or ".docx" in main_attachment.file_van_ban.name|lower %}
+                <img src="https://upload.wikimedia.org/wikipedia/commons/f/fb/Microsoft_Office_Word_%282019%E2%80%93present%29.svg" alt="Word">
+                {% else %}
+                <img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/File_alt_font_awesome.svg" alt="File">
+                {% endif %}
+            </div>
+            <div class="doc-info">
+                <a href="{{ main_attachment.file_van_ban.url }}" class="doc-name" target="_blank">{{ main_attachment.file_van_ban.name|cut:"file_cv_lien_quan/" }}</a>
+                <div class="doc-type">
+                    {% if ".pdf" in main_attachment.file_van_ban.name|lower %}PDF Document{% else %}Document{% endif %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="content-box" style="margin-bottom: 16px;">Không có file đính kèm chính.</div>
+        {% endif %}
+
+        <div class="doc-label" style="margin-top: 20px;">Xem trước:</div>
+        {% if main_attachment and ".pdf" in main_attachment.file_van_ban.name|lower %}
+        <div class="preview-wrapper">
+            <div class="preview-header">
+                <div class="preview-nav">
+                    <button class="nav-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+                    <span class="page-info">Trang 1 / 1</span>
+                    <button class="nav-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+                </div>
+                <a href="{{ main_attachment.file_van_ban.url }}" target="_blank" class="btn-open-new">Mở tab mới</a>
+            </div>
+            <iframe class="preview-frame" src="{{ main_attachment.file_van_ban.url }}#toolbar=0"></iframe>
+        </div>
+        {% else %}
+        <div class="content-box">Không hỗ trợ xem trước cho tệp này hoặc không có tệp.</div>
+        {% endif %}
+
+        <div class="doc-label" style="margin-top: 24px;">Tài liệu liên quan:</div>
+        {% for attachment in related_files %}
+        <div class="doc-card">
+            <div class="doc-icon">
+                {% if ".pdf" in attachment.file_van_ban.name|lower %}
+                <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg" alt="PDF">
+                {% elif ".doc" in attachment.file_van_ban.name|lower or ".docx" in attachment.file_van_ban.name|lower %}
+                <img src="https://upload.wikimedia.org/wikipedia/commons/f/fb/Microsoft_Office_Word_%282019%E2%80%93present%29.svg" alt="Word">
+                {% else %}
+                <img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/File_alt_font_awesome.svg" alt="File">
+                {% endif %}
+            </div>
+            <div class="doc-info">
+                <a href="{{ attachment.file_van_ban.url }}" class="doc-name" target="_blank">{{ attachment.file_van_ban.name|cut:"file_cv_lien_quan/" }}</a>
+                <div class="doc-type">
+                    {% if ".pdf" in attachment.file_van_ban.name|lower %}PDF Document{% else %}Document{% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="content-box" style="border:none; padding-left:0; background:transparent; font-size:14px; color:#1f2d3d;">Không có tài liệu liên quan.</div>
+        {% endfor %}
+    </div>
+
+    {% if result_files %}
     <div class="section">
-        <h3>Xem trước file chính</h3>
-        <iframe class="preview-frame" src="{{ main_attachment.file_van_ban.url }}#toolbar=0"></iframe>
+        <h3>File kết quả xử lý</h3>
+        <div class="file-list">
+            {% for attachment in result_files %}
+            <div class="file-card">
+                <div>
+                    <a href="{{ attachment.file_van_ban.url }}" target="_blank" style="font-weight:700; color:#006e9f;">
+                        {{ attachment.file_van_ban.name|cut:"file_cv_lien_quan/" }}
+                    </a>
+                    <div style="margin-top:4px; font-size:12px; color:#7f90a0;">
+                        Upload bởi {{ attachment.nguoi_tai_len.ho_va_ten|default:"Chuyên viên" }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
     {% endif %}
+
+
+
+
 </div>
 {% endblock %}
 
