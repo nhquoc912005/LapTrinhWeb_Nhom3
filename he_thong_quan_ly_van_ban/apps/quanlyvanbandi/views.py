@@ -12,7 +12,7 @@ from django.http import JsonResponse
 from ..accounts.decorators import role_required
 from ..accounts.models import Customer
 from ..core.models import (
-    VanBan, VanBanLienQuan, NguoiDung, VanBanDuyet, VanBanHoanTra,
+    CongViec, VanBan, VanBanLienQuan, NguoiDung, VanBanDuyet, VanBanHoanTra,
     ChiNhanh, PhongBan, DonViNgoai, BanHanh, BanHanhChiTiep,
     HoSoVanBan,
 )

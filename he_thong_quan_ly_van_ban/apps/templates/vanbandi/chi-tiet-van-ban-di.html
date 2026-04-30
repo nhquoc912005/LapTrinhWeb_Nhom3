@@ -419,14 +419,17 @@
           duyệt</button>
         <button type="button" class="btn btn-warning" style="padding:8px 16px;" id="openReturnModal">Hoàn trả</button>
         {% endif %}
-        <button class="btn btn-info" style="padding:8px 16px;">Giao việc</button>
+        {% if vb.ho_so_van_ban %}
+        <a href="{% url 'hosovanban:chi_tiet' vb.ho_so_van_ban.pk %}" class="btn btn-primary" style="padding:8px 16px; text-decoration:none;">Xem hồ sơ</a>
+        {% else %}
         <button class="btn btn-primary" style="padding:8px 16px;" onclick="openThemVanBanPopup()">Lưu hồ sơ</button>
+        {% endif %}
+        
         {% if task %}
         <a href="{% url 'quanlycongviec:task_detail' task.pk %}" class="btn btn-info" style="padding:8px 16px; text-decoration:none;">Xem công việc</a>
         {% else %}
         <a href="{% url 'quanlycongviec:giao_viec' %}?van_ban_id={{ vb.pk }}&nguon_giao=Văn bản đi&ten_cv={{ vb.trich_yeu|urlencode }}" class="btn btn-info" style="padding:8px 16px; text-decoration:none;">Giao việc</a>
         {% endif %}
-        <button class="btn btn-primary" style="padding:8px 16px;">Lưu hồ sơ</button>
         {% endif %}
 
         {# ===== CHUYÊN VIÊN ===== #}
@@ -440,7 +443,11 @@
         {% if vb.trang_thai == "Chờ Xử Lý" %}
         <button type="button" id="btnOpenDeleteModal" class="btn btn-danger" style="padding:8px 16px;">Xóa văn bản</button>
         {% endif %}
+        {% if vb.ho_so_van_ban %}
+        <a href="{% url 'hosovanban:chi_tiet' vb.ho_so_van_ban.pk %}" class="btn btn-primary" style="padding:8px 16px; text-decoration:none;">Xem hồ sơ</a>
+        {% else %}
         <button class="btn btn-primary" style="padding:8px 16px;" onclick="openThemVanBanPopup()">Thêm hồ sơ</button>
+        {% endif %}
         {% endif %}
 
         {# ===== VĂN THƯ ===== #}
@@ -449,7 +456,11 @@
         {% if vb.trang_thai == "Chờ ban hành" %}
         <button id="openBanHanhModal" class="btn btn-success" style="padding:8px 16px;">Ban hành</button>
         {% endif %}
+        {% if vb.ho_so_van_ban %}
+        <a href="{% url 'hosovanban:chi_tiet' vb.ho_so_van_ban.pk %}" class="btn btn-primary" style="padding:8px 16px; text-decoration:none;">Xem hồ sơ</a>
+        {% else %}
         <button class="btn btn-primary" style="padding:8px 16px;" onclick="openThemVanBanPopup()">Thêm hồ sơ</button>
+        {% endif %}
         {% endif %}
       </div>
     </div>

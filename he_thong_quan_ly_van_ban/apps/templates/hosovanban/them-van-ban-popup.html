@@ -282,6 +282,23 @@
             if (data.ok) {
                 closeThemVanBanPopup();
                 showToastHSVB(data.message, 'success');
+                
+                // Cập nhật giao diện: thay đổi nút Thêm hồ sơ thành Xem hồ sơ
+                var hoSoId = select.value;
+                var urlXemHoSo = "{% url 'hosovanban:chi_tiet' 0 %}".replace('0', hoSoId);
+                
+                // Tìm nút Thêm hồ sơ trong .action-btns (văn bản đến) hoặc trong div cha
+                var btnThem = document.querySelector('button[onclick="openThemVanBanPopup()"]');
+                if (btnThem && btnThem.parentNode) {
+                    var aXem = document.createElement('a');
+                    aXem.href = urlXemHoSo;
+                    aXem.className = btnThem.className; // copy class name
+                    aXem.style.textDecoration = "none";
+                    aXem.textContent = "Xem hồ sơ";
+                    btnThem.parentNode.replaceChild(aXem, btnThem);
+                } else {
+                    setTimeout(function() { location.reload(); }, 1500);
+                }
             } else {
                 showToastHSVB(data.error || 'Có lỗi xảy ra.', 'error');
             }

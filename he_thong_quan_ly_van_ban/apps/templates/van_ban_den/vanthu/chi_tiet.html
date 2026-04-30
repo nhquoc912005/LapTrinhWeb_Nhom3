@@ -514,9 +514,11 @@
         </div>
 
         <div class="action-btns">
-            <button type="button" class="btn-local btn-blue">
-                Lưu hồ sơ
-            </button>
+            {% if vb.ho_so_van_ban %}
+                <a href="{% url 'hosovanban:chi_tiet' vb.ho_so_van_ban.pk %}" class="btn-local btn-blue" style="text-decoration:none;">Xem hồ sơ</a>
+            {% else %}
+                <button type="button" class="btn-local btn-blue" onclick="openThemVanBanPopup()">Thêm hồ sơ</button>
+            {% endif %}
 
             {% if vb.trang_thai == 'Chờ Xử Lý' or vb.trang_thai == 'Hoàn Trả' %}
                 <a href="{% url 'quanlyvanbanden:sua' vb.pk %}" class="btn-local btn-blue">
@@ -715,6 +717,13 @@
         </div>
     </div>
 </div>
+
+<script>
+    var popupVanBanId = {{ vb.pk }};
+    var popupVanBanType = 'van_ban_den';
+</script>
+{% include "hosovanban/them-van-ban-popup.html" %}
+
 {% endblock %}
 
 {% block extra_js %}
