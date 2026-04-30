@@ -9,6 +9,7 @@ __pycache__/
 venv/
 
 # Django
+.env
 db.sqlite3
 media/
 staticfiles/
