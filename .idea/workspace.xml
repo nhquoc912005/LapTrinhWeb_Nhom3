@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d87cf155-31b9-45eb-a8a9-4ac10dcb7621" name="Changes" comment="cập nhật">
-      <change beforePath="$PROJECT_DIR$/he_thong_quan_ly_van_ban/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/he_thong_quan_ly_van_ban/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,7 +20,7 @@
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/he_thong_quan_ly_van_ban" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="ROOT_SYNC" value="SYNC" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -37,12 +37,12 @@
     &quot;reviewState&quot;: &quot;REQUIRED&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/nhquoc912005/LapTrinhWeb_Nhom3&quot;,
-    &quot;accountId&quot;: &quot;03d592b3-e946-4350-8d31-a8bd40995614&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/nhquoc912005/LapTrinhWeb_Nhom3.git",
+    "accountId": "03d592b3-e946-4350-8d31-a8bd40995614"
   }
-}</component>
+}]]></component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />

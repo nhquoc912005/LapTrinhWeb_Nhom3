@@ -492,7 +492,7 @@ class CongViec(models.Model):
         blank=True,
     )
     van_ban_den = models.ForeignKey(
-        "quanlyvanbanden.VanBanDen",
+        "core.VanBan",
         on_delete=models.CASCADE,
         null=True,
         blank=True,
