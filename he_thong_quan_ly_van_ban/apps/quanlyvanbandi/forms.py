@@ -36,7 +36,6 @@ class VanBanDiForm(forms.ModelForm):
         model = VanBan
         fields = [
             "so_ky_hieu",
-            "don_vi_soan_thao",
             "loai_van_ban",
             "hinh_thuc",
             "trich_yeu",
@@ -52,7 +51,6 @@ class VanBanDiForm(forms.ModelForm):
                 "class": "vbdi-input",
                 "placeholder": "VD: 123/UBND",
             }),
-            "don_vi_soan_thao": forms.Select(attrs={"class": "vbdi-select"}),
             "loai_van_ban": forms.Select(attrs={"class": "vbdi-select"}),
             "hinh_thuc": forms.Select(attrs={"class": "vbdi-select"}),
             "trich_yeu": forms.Textarea(attrs={
@@ -89,14 +87,9 @@ class VanBanDiForm(forms.ModelForm):
         if self.instance and self.instance.pk and self.instance.ngay_van_ban:
             self.fields["ngay_van_ban"].initial = self.instance.ngay_van_ban
 
-        self.fields["don_vi_soan_thao"].required = False
         self.fields["han_xu_ly"].required = False
         self.fields["do_khan"].required = False
         self.fields["noi_dung"].required = False
-
-        self.fields["don_vi_soan_thao"].choices = [
-            ("", "-- Chọn đơn vị soạn thảo --")
-        ] + list(VanBan.DON_VI_SOAN_THAO_CHOICES)
 
         self.fields["loai_van_ban"].choices = [
             ("", "-- Chọn loại văn bản --")

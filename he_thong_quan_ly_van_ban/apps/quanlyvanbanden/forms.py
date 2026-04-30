@@ -81,7 +81,6 @@ class VanBanDenForm(forms.ModelForm):
 
         labels = {
             'so_ky_hieu': 'Số ký hiệu',
-            'don_vi_ban_hanh': 'Đơn vị ban hành',
             'trich_yeu': 'Trích yếu',
             'loai_van_ban': 'Loại văn bản',
             'ngay_van_ban': 'Ngày văn bản',
