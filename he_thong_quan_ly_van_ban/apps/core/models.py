@@ -712,6 +712,8 @@ class LichSuKySo(models.Model):
     )
 
     hash_tai_lieu = models.CharField(max_length=255, null=False)
+    file_hash = models.CharField(max_length=64, null=True, blank=True)
+    hash_algorithm = models.CharField(max_length=20, default="SHA-256")
 
     file_da_ky = models.FileField(
         upload_to="file_da_ky/",
@@ -719,13 +721,21 @@ class LichSuKySo(models.Model):
         blank=True,
     )
 
+    signature_image = models.ImageField(
+        upload_to="chu_ky_so/",
+        null=True,
+        blank=True,
+    )
+
+    verified = models.BooleanField(default=True)
+
     thoi_gian_ky = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "LichSuKySo"
         constraints = [
             models.CheckConstraint(
-                check=(
+                condition=(
                     (
                         models.Q(van_ban__isnull=False)
                         & models.Q(cong_viec__isnull=True)

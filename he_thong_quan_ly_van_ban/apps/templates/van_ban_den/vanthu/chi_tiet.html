@@ -373,7 +373,7 @@
         display:none;
         align-items:center;
         justify-content:center;
-        z-index:9999;
+        z-index:var(--z-modal, 1000);
     }
 
     .delete-modal{
@@ -514,10 +514,6 @@
         </div>
 
         <div class="action-btns">
-            <button type="button" class="btn-local btn-blue">
-                Lưu hồ sơ
-            </button>
-
             {% if vb.trang_thai == 'Chờ Xử Lý' or vb.trang_thai == 'Hoàn Trả' %}
                 <a href="{% url 'quanlyvanbanden:sua' vb.pk %}" class="btn-local btn-blue">
                     Chỉnh sửa

@@ -134,8 +134,7 @@
             THÔNG TIN VĂN BẢN ĐẾN
         </div>
         <div class="action-btns">
-            <button type="button" class="btn-local btn-blue">+ Giao việc</button>
-            <!-- # GIAO VIỆC: CHỈ HIỂN THỊ -->
+            <!-- GIAO VIỆC -->
             {% if task %}
                 <a href="{% url 'quanlycongviec:task_detail' task.pk %}" class="btn-local btn-blue">Xem công việc</a>
             {% else %}
