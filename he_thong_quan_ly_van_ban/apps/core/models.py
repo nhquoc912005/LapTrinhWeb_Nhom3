@@ -234,15 +234,7 @@ class VanBan(models.Model):
         ("Văn bản đi", "Văn bản đi"),
         ("Văn bản đến", "Văn bản đến"),
     )
-    
-    DON_VI_SOAN_THAO_CHOICES = (
-        ("Ban Giám Đốc", "Ban Giám Đốc"),
-        ("Phòng Kế Toán", "Phòng Kế Toán"),
-        ("Phòng Kiểm Toán", "Phòng Kiểm Toán"),
-        ("Phòng Tư Vấn Thuế", "Phòng Tư Vấn Thuế"),
-        ("Phòng Hành Chính/Nhân sự", "Phòng Hành Chính/Nhân sự"),
-        ("Phòng Đào Tạo Chất Lượng", "Phòng Đào Tạo Chất Lượng"),
-    )
+
 
     van_ban_id = models.AutoField(primary_key=True)
     lanh_dao_duyet = models.ForeignKey(
@@ -276,11 +268,6 @@ class VanBan(models.Model):
         max_length=255,
         null=False,
         choices=LOAI_VAN_BAN_CHOICES,
-    )
-    don_vi_soan_thao = models.CharField(
-        max_length=255,
-        null=False,
-        choices=DON_VI_SOAN_THAO_CHOICES,
     )
     don_vi_ban_hanh = models.CharField(max_length=255, null=True, blank=True)
     ngay_van_ban = models.DateField(null=False)
@@ -320,6 +307,38 @@ class VanBan(models.Model):
         return self.so_ky_hieu
 
 
+class NoiNhanVanBan(models.Model):
+    noi_nhan_id = models.AutoField(primary_key=True)
+
+    van_ban = models.ForeignKey(
+        "core.VanBan",
+        on_delete=models.CASCADE,
+        db_column="van_ban_id",
+        null=False,
+    )
+
+    phong_ban = models.ForeignKey(
+        "core.PhongBan",
+        on_delete=models.CASCADE,
+        db_column="phong_ban_id",
+        null=True,
+        blank=True,
+    )
+
+    don_vi_ngoai = models.ForeignKey(
+        "core.DonViNgoai",
+        on_delete=models.CASCADE,
+        db_column="don_vi_ngoai_id",
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        db_table = "NoiNhanVanBan"
+
+    def __str__(self):
+        return f"Nơi nhận văn bản {self.noi_nhan_id}"
+
 class VanBanLienQuan(models.Model):
     van_ban_lien_quan_id = models.AutoField(primary_key=True)
     van_ban = models.ForeignKey(
@@ -340,7 +359,7 @@ class VanBanLienQuan(models.Model):
 
 class VanBanDuyet(models.Model):
     van_ban_duyet_id = models.AutoField(primary_key=True)
-    van_ban = models.ForeignKey(
+    van_ban = models.OneToOneField(
         "core.VanBan",
         on_delete=models.CASCADE,
         db_column="van_ban_id",
@@ -408,7 +427,7 @@ class ChuyenTiepChiTiet(models.Model):
 
 class BanHanh(models.Model):
     ban_hanh_id = models.AutoField(primary_key=True)
-    van_ban = models.ForeignKey(
+    van_ban = models.OneToOneField(
         "core.VanBan",
         on_delete=models.CASCADE,
         db_column="van_ban_id",
@@ -422,35 +441,6 @@ class BanHanh(models.Model):
     def __str__(self):
         return f"Ban hành {self.ban_hanh_id}"
 
-
-class BanHanhChiTiep(models.Model):
-    ban_hanh_ct_id = models.AutoField(primary_key=True)
-    ban_hanh = models.ForeignKey(
-        "core.BanHanh",
-        on_delete=models.CASCADE,
-        db_column="ban_hanh_id",
-        null=False,
-    )
-    phong_ban = models.ForeignKey(
-        "core.PhongBan",
-        on_delete=models.CASCADE,
-        db_column="phong_ban_id",
-        null=True,
-        blank=True,
-    )
-    don_vi_ngoai = models.ForeignKey(
-        "core.DonViNgoai",
-        on_delete=models.CASCADE,
-        db_column="don_vi_ngoai_id",
-        null=True,
-        blank=True,
-    )
-
-    class Meta:
-        db_table = "BanHanhChiTiep"
-
-    def __str__(self):
-        return f"Ban hành chi tiết {self.ban_hanh_ct_id}"
 
 
 class VanBanHoanTra(models.Model):
@@ -665,3 +655,150 @@ class PheDuyetCongViec(models.Model):
 
     def __str__(self):
         return f"Phê duyệt công việc {self.phe_duyet_cv_id}"
+
+class ChuKySo(models.Model):
+    chu_ky_so_id = models.AutoField(primary_key=True)
+
+    nguoi_dung = models.OneToOneField(
+        "core.NguoiDung",
+        on_delete=models.CASCADE,
+        db_column="nguoi_dung_id",
+        related_name="chu_ky_so",
+        null=False,
+    )
+
+    anh_chu_ky = models.ImageField(
+        upload_to="anh_chu_ky/",
+        null=True,
+        blank=True,
+    )
+
+    ngay_tao = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "ChuKySo"
+
+    def __str__(self):
+        return f"Chữ ký số của {self.nguoi_dung}"
+
+
+class LichSuKySo(models.Model):
+    lich_su_ky_so_id = models.AutoField(primary_key=True)
+
+    chu_ky_so = models.ForeignKey(
+        "core.ChuKySo",
+        on_delete=models.CASCADE,
+        db_column="chu_ky_so_id",
+        related_name="lich_su_ky_so",
+        null=False,
+    )
+
+    van_ban = models.OneToOneField(
+        "core.VanBan",
+        on_delete=models.CASCADE,
+        db_column="van_ban_id",
+        null=True,
+        blank=True,
+        related_name="lich_su_ky_so",
+    )
+
+    cong_viec = models.OneToOneField(
+        "core.CongViec",
+        on_delete=models.CASCADE,
+        db_column="cong_viec_id",
+        null=True,
+        blank=True,
+        related_name="lich_su_ky_so",
+    )
+
+    hash_tai_lieu = models.CharField(max_length=255, null=False)
+
+    file_da_ky = models.FileField(
+        upload_to="file_da_ky/",
+        null=True,
+        blank=True,
+    )
+
+    thoi_gian_ky = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "LichSuKySo"
+        constraints = [
+            models.CheckConstraint(
+                check=(
+                    (
+                        models.Q(van_ban__isnull=False)
+                        & models.Q(cong_viec__isnull=True)
+                    )
+                    |
+                    (
+                        models.Q(van_ban__isnull=True)
+                        & models.Q(cong_viec__isnull=False)
+                    )
+                ),
+                name="ck_lich_su_ky_so_chi_mot_doi_tuong",
+            )
+        ]
+
+    def __str__(self):
+        return f"Lịch sử ký số {self.lich_su_ky_so_id}"
+
+
+class LichSuHoatDong(models.Model):
+    class DoiTuongLoai(models.TextChoices):
+        VAN_BAN = "VAN_BAN", "Văn bản"
+        CONG_VIEC = "CONG_VIEC", "Công việc"
+        HO_SO = "HO_SO", "Hồ sơ văn bản"
+
+    class HanhDong(models.TextChoices):
+        TAO = "TAO", "Tạo"
+        SUA = "SUA", "Sửa"
+        XOA = "XOA", "Xóa"
+        DUYET = "DUYET", "Duyệt"
+        HOAN_TRA = "HOAN_TRA", "Hoàn trả"
+        CHUYEN_TIEP = "CHUYEN_TIEP", "Chuyển tiếp"
+        BAN_HANH = "BAN_HANH", "Ban hành"
+        KY_SO = "KY_SO", "Ký số"
+
+    lich_su_id = models.AutoField(primary_key=True)
+
+    doi_tuong_loai = models.CharField(
+        max_length=50,
+        choices=DoiTuongLoai.choices,
+        null=False,
+    )
+
+    doi_tuong_id = models.PositiveIntegerField(null=False)
+
+    nguoi_thuc_hien = models.ForeignKey(
+        "core.NguoiDung",
+        on_delete=models.SET_NULL,
+        db_column="nguoi_thuc_hien_id",
+        null=True,
+        blank=True,
+        related_name="lich_su_hoat_dong",
+    )
+
+    hanh_dong = models.CharField(
+        max_length=50,
+        choices=HanhDong.choices,
+        null=False,
+    )
+
+    truoc_thay_doi = models.JSONField(null=True, blank=True)
+    sau_thay_doi = models.JSONField(null=True, blank=True)
+
+    thoi_gian_thuc_hien = models.DateTimeField(auto_now_add=True)
+
+    mo_ta = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = "LichSuHoatDong"
+        indexes = [
+            models.Index(fields=["doi_tuong_loai", "doi_tuong_id"]),
+            models.Index(fields=["hanh_dong"]),
+            models.Index(fields=["thoi_gian_thuc_hien"]),
+        ]
+
+    def __str__(self):
+        return f"{self.doi_tuong_loai} - {self.hanh_dong}"
