@@ -13,8 +13,8 @@ from ..accounts.decorators import role_required
 from ..accounts.models import Customer
 from ..core.models import (
     VanBan, VanBanLienQuan, NguoiDung, VanBanDuyet, VanBanHoanTra,
-    ChiNhanh, PhongBan, DonViNgoai, BanHanh, BanHanhChiTiep,
-    HoSoVanBan,
+    ChiNhanh, PhongBan, DonViNgoai, BanHanh,
+    HoSoVanBan, CongViec
 )
 from .forms import VanBanDiForm, validate_file_size, validate_file_extension
 from django.core.paginator import Paginator
@@ -37,7 +37,6 @@ def _user_is_assigned_approver(request, van_ban):
 def van_ban_di(request):
     trang_thai = request.GET.get("trang_thai", "").strip()
     keyword    = request.GET.get("keyword", "").strip()
-    don_vi     = request.GET.get("don_vi_soan_thao", "").strip()
     loai_vb    = request.GET.get("loai_van_ban", "").strip()
     hinh_thuc  = request.GET.get("hinh_thuc", "").strip()
     do_khan    = request.GET.get("do_khan", "").strip()
@@ -103,8 +102,6 @@ def van_ban_di(request):
         ds_van_ban_di_list = ds_van_ban_di_list.filter(
             Q(so_ky_hieu__icontains=keyword) | Q(trich_yeu__icontains=keyword)
         )
-    if don_vi:
-        ds_van_ban_di_list = ds_van_ban_di_list.filter(don_vi_soan_thao=don_vi)
     if loai_vb:
         ds_van_ban_di_list = ds_van_ban_di_list.filter(loai_van_ban=loai_vb)
     if hinh_thuc:
@@ -118,13 +115,11 @@ def van_ban_di(request):
 
     context = {
         "ds_van_ban_di": ds_van_ban_di,
-        "filter_don_vi_choices":    VanBan.DON_VI_SOAN_THAO_CHOICES,
         "filter_loai_choices":      VanBan.LOAI_VAN_BAN_CHOICES,
         "filter_hinh_thuc_choices": VanBan.HINH_THUC_CHOICES,
         "filter_do_khan_choices":   VanBan.DO_KHAN_CHOICES,
         "filter_trang_thai_choices": trang_thai_filter_choices,
         "selected_trang_thai": trang_thai,
-        "selected_don_vi":   don_vi,
         "selected_loai_vb": loai_vb,
         "selected_hinh_thuc": hinh_thuc,
         "selected_do_khan": do_khan,
@@ -246,7 +241,6 @@ def chi_tiet_van_ban_di(request, id):
     ).order_by("ho_va_ten")
 
     hoan_tra     = vb.vanbanhoantra_set.order_by("-ngay_hoan_tra").first()
-    duyet_record = vb.vanbanduyet_set.order_by("-ngay_duyet").first()
 
     # ── Hiển thị trạng thái theo role ──
     # CV và LĐ thấy “Đã Xử Lý” khi status thực là “Chờ ban hành” hoặc “Đã ban hành”
@@ -270,9 +264,8 @@ def chi_tiet_van_ban_di(request, id):
         "ghi_chu_mac_dinh":    "",
         "show_approval_modal": False,
         "hoan_tra":            hoan_tra,
-        "duyet_record":        duyet_record,
         "ds_chi_nhanh":        ds_chi_nhanh,
-        "ban_hanh_url":        reverse("quanlyvanbandi:ban_hanh_van_ban", args=[vb.pk]),
+        #"ban_hanh_url":        reverse("quanlyvanbandi:ban_hanh_van_ban", args=[vb.pk]),
         "hien_thi_trang_thai":      hien_thi_trang_thai,
         "allow_remove_main_file":    False,
         "allow_remove_related_file": False,
@@ -469,63 +462,59 @@ def api_don_vi_ngoai(request):
 # ACTION: Ban hành văn bản
 # POST /van-ban-di/<pk>/ban-hanh/
 # ─────────────────────────────────────────
-@require_POST
-@role_required(Customer.Role.VAN_THU)
-def ban_hanh_van_ban(request, vb_pk):
-    """Thực hiện ban hành văn bản đi."""
-    vb = get_object_or_404(VanBan, pk=vb_pk, phan_loai="Văn bản đi")
-
-    if vb.trang_thai != "Chờ ban hành":
-        return JsonResponse(
-            {"ok": False, "error": "Văn bản không ở trạng thái Chờ ban hành."},
-            status=400
-        )
-
-    phong_ban_ids = request.POST.getlist("phong_ban_ids[]")
-    don_vi_ngoai_ids = request.POST.getlist("don_vi_ngoai_ids[]")
-
-    if not phong_ban_ids and not don_vi_ngoai_ids:
-        return JsonResponse(
-            {"ok": False, "error": "Danh sách phát hành không được để trống."},
-            status=400
-        )
-
-    # Tạo bản ghi BanHanh
-    ban_hanh = BanHanh.objects.create(van_ban=vb)
-
-    # Tạo chi tiết — phòng ban nội bộ
-    for pb_id in phong_ban_ids:
-        try:
-            pb = PhongBan.objects.get(pk=pb_id)
-            # BanHanhChiTiep yêu cầu cả phong_ban lẫn don_vi_ngoai không null,
-            # tuy nhiên model hiện tại để cả 2 non-null. Dùng phong_ban, skip don_vi_ngoai.
-            # Để tương thích, tạo riêng từng trường hợp:
-            BanHanhChiTiep.objects.create(
-                ban_hanh=ban_hanh,
-                phong_ban=pb,
-                don_vi_ngoai_id=None,
-            )
-        except (PhongBan.DoesNotExist, Exception):
-            pass
-
-    # Tạo chi tiết — đơn vị ngoài
-    for dv_id in don_vi_ngoai_ids:
-        try:
-            dv = DonViNgoai.objects.get(pk=dv_id)
-            BanHanhChiTiep.objects.create(
-                ban_hanh=ban_hanh,
-                phong_ban=None,
-                don_vi_ngoai=dv,
-            )
-        except (DonViNgoai.DoesNotExist, Exception):
-            pass
-
-    # Đổi trạng thái văn bản
-    vb.trang_thai = "Đã ban hành"
-    vb.save(update_fields=["trang_thai"])
-
-    return JsonResponse({"ok": True, "message": "Ban hành văn bản đi thành công!"})
-
+# @require_POST
+# @role_required(Customer.Role.VAN_THU)
+# def ban_hanh_van_ban(request, vb_pk):
+#     """Thực hiện ban hành văn bản đi."""
+#     vb = get_object_or_404(VanBan, pk=vb_pk, phan_loai="Văn bản đi")
+#
+#     if vb.trang_thai != "Chờ ban hành":
+#         return JsonResponse(
+#             {"ok": False, "error": "Văn bản không ở trạng thái Chờ ban hành."},
+#             status=400
+#         )
+#
+#     phong_ban_ids = request.POST.getlist("phong_ban_ids[]")
+#     don_vi_ngoai_ids = request.POST.getlist("don_vi_ngoai_ids[]")
+#
+#     if not phong_ban_ids and not don_vi_ngoai_ids:
+#         return JsonResponse(
+#             {"ok": False, "error": "Danh sách phát hành không được để trống."},
+#             status=400
+#         )
+#
+#     # Tạo bản ghi BanHanh
+#     ban_hanh = BanHanh.objects.create(van_ban=vb)
+#
+#     # Tạo chi tiết — phòng ban nội bộ
+#     for pb_id in phong_ban_ids:
+#         try:
+#             pb = PhongBan.objects.get(pk=pb_id)
+#             # BanHanhChiTiep yêu cầu cả phong_ban lẫn don_vi_ngoai không null,
+#             # tuy nhiên model hiện tại để cả 2 non-null. Dùng phong_ban, skip don_vi_ngoai.
+#             # Để tương thích, tạo riêng từng trường hợp:
+#
+#         except (PhongBan.DoesNotExist, Exception):
+#             pass
+#
+#     # Tạo chi tiết — đơn vị ngoài
+#     for dv_id in don_vi_ngoai_ids:
+#         try:
+#             dv = DonViNgoai.objects.get(pk=dv_id)
+#             BanHanhChiTiep.objects.create(
+#                 ban_hanh=ban_hanh,
+#                 phong_ban=None,
+#                 don_vi_ngoai=dv,
+#             )
+#         except (DonViNgoai.DoesNotExist, Exception):
+#             pass
+#
+#     # Đổi trạng thái văn bản
+#     vb.trang_thai = "Đã ban hành"
+#     vb.save(update_fields=["trang_thai"])
+#
+#     return JsonResponse({"ok": True, "message": "Ban hành văn bản đi thành công!"})
+#
 
 # ─────────────────────────────────────────
 # ACTION: Xóa văn bản đi
