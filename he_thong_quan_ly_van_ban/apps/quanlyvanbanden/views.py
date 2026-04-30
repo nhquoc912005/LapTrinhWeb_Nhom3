@@ -22,7 +22,6 @@ from apps.core.models import (
 )
 
 from .forms import VanBanDenForm
-from .models import VanBanDen, TepVanBanDen, VanBanDenChuyenTiep
 from apps.core.models import CongViec
 
 
