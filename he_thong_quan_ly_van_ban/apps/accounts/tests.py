@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.conf import settings
+from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.core.models import NguoiDung
@@ -20,6 +21,24 @@ class LoginViewTests(TestCase):
         response = self.client.post(
             reverse("accounts:login"),
             {"username": "vanthu", "password": "StrongPassword123"},
+        )
+
+        self.assertRedirects(response, reverse("core:dashboard"))
+
+    def test_login_success_with_real_csrf_checks(self):
+        client = Client(enforce_csrf_checks=True, HTTP_HOST="127.0.0.1:8000")
+        login_url = reverse("accounts:login")
+        response = client.get(login_url)
+        csrf_token = client.cookies[settings.CSRF_COOKIE_NAME].value
+
+        response = client.post(
+            login_url,
+            {
+                "username": "vanthu",
+                "password": "StrongPassword123",
+                "csrfmiddlewaretoken": csrf_token,
+            },
+            HTTP_ORIGIN="http://127.0.0.1:8000",
         )
 
         self.assertRedirects(response, reverse("core:dashboard"))

@@ -8,7 +8,7 @@
   position: fixed;
   inset: 0;
   background: rgba(15,23,42,0.45);
-  z-index: 9000;
+  z-index: var(--z-modal, 1000);
   align-items: center;
   justify-content: center;
   padding: 32px 16px;
@@ -216,7 +216,7 @@
   position: fixed;
   inset: 0;
   background: rgba(15,23,42,0.55);
-  z-index: 9500;
+  z-index: var(--z-modal-nested, 1100);
   align-items: center;
   justify-content: center;
   padding: 32px 16px;
@@ -316,7 +316,7 @@
   font-size: 15px;
   font-weight: 600;
   border-radius: 4px;
-  z-index: 99999;
+  z-index: var(--z-toast, 2000);
   box-shadow: 0 4px 20px rgba(0,0,0,0.18);
   display: none;
 }

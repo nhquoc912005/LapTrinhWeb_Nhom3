@@ -1,0 +1,2918 @@
+[
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$vIMjpy1ztfQRFQpnWFDImw$ujMdminW5e6OeNTgcWELMO0CAcTNwyQ7nIccNNxiubM=",
+    "last_login": "2026-04-30T15:12:04.988Z",
+    "is_superuser": false,
+    "username": "chuyenvien01",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:33:52.376Z",
+    "email": "chuyenvien01@atax.demo",
+    "ho_va_ten": "Nguyễn Văn An",
+    "chuc_vu": "Chuyên viên Kế toán",
+    "sdt": "0901000001",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 1,
+    "phong_ban": 3,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$SiyCybvs7xA3H0kn4fjDlU$dGXYk3id49+fjXYiSw+plmwOYrzFIg3MOcVs8bIfnCQ=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien02",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:33:55.715Z",
+    "email": "chuyenvien02@atax.demo",
+    "ho_va_ten": "Trần Văn Duy",
+    "chuc_vu": "Chuyên viên Kiểm toán",
+    "sdt": "0901000002",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 2,
+    "phong_ban": 11,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$iMJF10Ki4hZJPepi2bZRHo$9ubHvVcdyT2HqRxoc6B3D4e3Qq2y5fq8bcnF9ptKudE=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien03",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:33:58.831Z",
+    "email": "chuyenvien03@atax.demo",
+    "ho_va_ten": "Lê Văn Long",
+    "chuc_vu": "Chuyên viên Tư vấn thuế",
+    "sdt": "0901000003",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 3,
+    "phong_ban": 19,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$Y9LWBa6JtalqeKUmT8Et4C$nsrjJhIPGn4/kqqzd6jMvf3it3cFTKfO0FnTPv/y8vI=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien04",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:01.953Z",
+    "email": "chuyenvien04@atax.demo",
+    "ho_va_ten": "Phạm Văn Nhật",
+    "chuc_vu": "Chuyên viên Hành chính",
+    "sdt": "0901000004",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 1,
+    "phong_ban": 6,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$BWZzNjd5fVBA6beZDjpO40$LDaonq0m7PkZRdKyVhAbJEnSeNwDbLYN7PZEbo0po4Q=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien05",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:05.056Z",
+    "email": "chuyenvien05@atax.demo",
+    "ho_va_ten": "Hoàng Văn Huy",
+    "chuc_vu": "Chuyên viên Đào tạo",
+    "sdt": "0901000005",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 2,
+    "phong_ban": 14,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$4Vi65OEjhZ1lF13DUZbLXs$7f+Cr8x+FBxPEKWUVxF+Yoj8w9zwFZ5a4SWet4/F578=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien06",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:08.156Z",
+    "email": "chuyenvien06@atax.demo",
+    "ho_va_ten": "Phan Văn Bảo",
+    "chuc_vu": "Chuyên viên Kế toán",
+    "sdt": "0901000006",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 3,
+    "phong_ban": 17,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$Nb9v9FKOC0KlGuJCoHWdIB$tB5RaSivq+ZFLg3Q7gOySVVXY1tdyqJrPeWSYJbqNh0=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien07",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:11.254Z",
+    "email": "chuyenvien07@atax.demo",
+    "ho_va_ten": "Vũ Văn Hạnh",
+    "chuc_vu": "Chuyên viên Kiểm toán",
+    "sdt": "0901000007",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 1,
+    "phong_ban": 4,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$SkHMRlIUTvlGIXEcLph9a2$OHQ2pWa6jBx+Dh2T61oYHDJ1Thk0WsI46ugJvVCYjR0=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien08",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:14.358Z",
+    "email": "chuyenvien08@atax.demo",
+    "ho_va_ten": "Đặng Văn Đạt",
+    "chuc_vu": "Chuyên viên Tư vấn thuế",
+    "sdt": "0901000008",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 2,
+    "phong_ban": 12,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$w8DqIcAeMyHmRjC2OJBpgF$gFY8nN04cwzCJuVSwgbxLTPgXg4v2QwoxkeNUwnbzYU=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien09",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:17.481Z",
+    "email": "chuyenvien09@atax.demo",
+    "ho_va_ten": "Bùi Văn Trang",
+    "chuc_vu": "Chuyên viên Hành chính",
+    "sdt": "0901000009",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 3,
+    "phong_ban": 20,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$piQF0XnrVaQORYzoWH4XAe$hhXUFC+HmtKdrTYrfq8JXJ9rnP+ycaFzUZMfPLRAIZ4=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien10",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:20.587Z",
+    "email": "chuyenvien10@atax.demo",
+    "ho_va_ten": "Đỗ Văn Vy",
+    "chuc_vu": "Chuyên viên Đào tạo",
+    "sdt": "0901000010",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 1,
+    "phong_ban": 7,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$4ebft1kIBZiEowolfuxdb3$Po+m7IyHUUNByjhvTY0GF6WJ6WSTM47hfO5fmq5RTU4=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien11",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:23.709Z",
+    "email": "chuyenvien11@atax.demo",
+    "ho_va_ten": "Hồ Văn Tâm",
+    "chuc_vu": "Chuyên viên Kế toán",
+    "sdt": "0901000011",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 2,
+    "phong_ban": 10,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$4szMlVfnkU1uRTAdvz7FDT$opCdnp0IRSSJKWIB2ARRmussCbav7vAT/IMH6Twn6YY=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien12",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:26.809Z",
+    "email": "chuyenvien12@atax.demo",
+    "ho_va_ten": "Ngô Văn Hà",
+    "chuc_vu": "Chuyên viên Kiểm toán",
+    "sdt": "0901000012",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 3,
+    "phong_ban": 18,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$a7FS9BEjCDlGGRGzYYAyHv$XDl9r67h16yqQMqUHZpZN7a/uZMgW6Lqj/s1Xtl4eLs=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien13",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:29.838Z",
+    "email": "chuyenvien13@atax.demo",
+    "ho_va_ten": "Nguyễn Minh Mai",
+    "chuc_vu": "Chuyên viên Tư vấn thuế",
+    "sdt": "0901000013",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 1,
+    "phong_ban": 5,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$CdyYOUtIDr31Oj7Yk8DEzy$GqznxI4nPVRPSUxp7H0VxaWdxjwaKGK/zxXzYiA++ao=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien14",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:33.004Z",
+    "email": "chuyenvien14@atax.demo",
+    "ho_va_ten": "Trần Minh Sơn",
+    "chuc_vu": "Chuyên viên Hành chính",
+    "sdt": "0901000014",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 2,
+    "phong_ban": 13,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$VutGaWyVrT4yUlkCJeTE2g$uN5X4oWBnSDMaTfS0KIOWRqC3HfJ+YJFJ5RR+6NAxVk=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien15",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:35.748Z",
+    "email": "chuyenvien15@atax.demo",
+    "ho_va_ten": "Lê Minh Hương",
+    "chuc_vu": "Chuyên viên Đào tạo",
+    "sdt": "0901000015",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 3,
+    "phong_ban": 21,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$vwKJn90bVH3xhsb6jEXMyp$T9Aid0rRDJtMfxSHZFUhRlHS9xjEpTnwXX+E6vd4yP4=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien16",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:38.478Z",
+    "email": "chuyenvien16@atax.demo",
+    "ho_va_ten": "Phạm Minh Nam",
+    "chuc_vu": "Chuyên viên Kế toán",
+    "sdt": "0901000016",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 1,
+    "phong_ban": 3,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$0ZvCBD79pyz5N1mT6i0Uwk$onzHGINuljUh+cyEMGiFG2xkw96RUlIHaVGCTatGgmE=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien17",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:41.182Z",
+    "email": "chuyenvien17@atax.demo",
+    "ho_va_ten": "Hoàng Minh Tuấn",
+    "chuc_vu": "Chuyên viên Kiểm toán",
+    "sdt": "0901000017",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 2,
+    "phong_ban": 11,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$S4v72xVHrY1mV2HBbCb8wQ$Q2D+Zm0zGL305UZspf6jmdpbee6pF/yd70xJ+mGI3Qs=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien18",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:43.926Z",
+    "email": "chuyenvien18@atax.demo",
+    "ho_va_ten": "Phan Minh Yến",
+    "chuc_vu": "Chuyên viên Tư vấn thuế",
+    "sdt": "0901000018",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 3,
+    "phong_ban": 19,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$0YS81RAnY2vFGts8xw7rCp$9I6LAxxOk6i+bQdolrnsJRGtxHP1VHX+lE8RdHxpM60=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien19",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:46.670Z",
+    "email": "chuyenvien19@atax.demo",
+    "ho_va_ten": "Vũ Minh Khoa",
+    "chuc_vu": "Chuyên viên Hành chính",
+    "sdt": "0901000019",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 1,
+    "phong_ban": 6,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$gpeyEy6lZtD47Gn4fxjncq$eASuuNjBDJr8DtvKvYf91KWSz0tt242JHxSYFHufJeQ=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien20",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:49.386Z",
+    "email": "chuyenvien20@atax.demo",
+    "ho_va_ten": "Đặng Minh Phúc",
+    "chuc_vu": "Chuyên viên Đào tạo",
+    "sdt": "0901000020",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 2,
+    "phong_ban": 14,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$1PGAk4ib5NyE2M3DxacwF2$N+DjVKnME1fKo9KBVveMpM/ww9zxpCgROmbeRvxiTAU=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien21",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:52.105Z",
+    "email": "chuyenvien21@atax.demo",
+    "ho_va_ten": "Bùi Minh Thảo",
+    "chuc_vu": "Chuyên viên Kế toán",
+    "sdt": "0901000021",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 3,
+    "phong_ban": 17,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$W9jxc2nbJbMuTFr09SNAaY$zGF+LXdIxptcIbnQ+Y6MMhWPcmNe3SXPIbUs0bSyxng=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien22",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:54.846Z",
+    "email": "chuyenvien22@atax.demo",
+    "ho_va_ten": "Đỗ Minh Quân",
+    "chuc_vu": "Chuyên viên Kiểm toán",
+    "sdt": "0901000022",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 1,
+    "phong_ban": 4,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$K1ZoRl9Y2UL19bBn7W6yGG$fVmgalOULIxRg2Yk4PYoVXb57ZBf/v1rO1s9YV715R0=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien23",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:34:57.598Z",
+    "email": "chuyenvien23@atax.demo",
+    "ho_va_ten": "Hồ Minh Linh",
+    "chuc_vu": "Chuyên viên Tư vấn thuế",
+    "sdt": "0901000023",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 2,
+    "phong_ban": 12,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$Bqw6L6isDkQc8hes4tzgLF$gNQgagPJVOvm6svCliF0qpLL6jcsvVAYZmQCi4l/AbA=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien24",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:00.310Z",
+    "email": "chuyenvien24@atax.demo",
+    "ho_va_ten": "Ngô Minh Nhi",
+    "chuc_vu": "Chuyên viên Hành chính",
+    "sdt": "0901000024",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 3,
+    "phong_ban": 20,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$La6yzquqqNWqvUi1yUP1VO$ThrZsqh1WNQPF1zSAhspdUr8Y637lOinaimHm2R3P3E=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien25",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:03.039Z",
+    "email": "chuyenvien25@atax.demo",
+    "ho_va_ten": "Nguyễn Thu Kiên",
+    "chuc_vu": "Chuyên viên Đào tạo",
+    "sdt": "0901000025",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 1,
+    "phong_ban": 7,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$61b19cSMHfyZCTIlnV03Jv$CACiKDb281TwXYHxtHKt2RAA9Up614UFSd6xOYGJADM=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien26",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:05.788Z",
+    "email": "chuyenvien26@atax.demo",
+    "ho_va_ten": "Trần Thu An",
+    "chuc_vu": "Chuyên viên Kế toán",
+    "sdt": "0901000026",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 2,
+    "phong_ban": 10,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$LrdWCBsSW4tB8U7b37FGCU$VDwV4qFAQ8PDvIWda8buXS0e/QK+D8wS2gkzO3i3aVE=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien27",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:08.501Z",
+    "email": "chuyenvien27@atax.demo",
+    "ho_va_ten": "Lê Thu Duy",
+    "chuc_vu": "Chuyên viên Kiểm toán",
+    "sdt": "0901000027",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 3,
+    "phong_ban": 18,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$CFY20cBvhsauuhwcWdu55S$aV/zfnPPaKjfEC0TratL50yGcYG0q1iv3exNY2B1E30=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien28",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:11.252Z",
+    "email": "chuyenvien28@atax.demo",
+    "ho_va_ten": "Phạm Thu Long",
+    "chuc_vu": "Chuyên viên Tư vấn thuế",
+    "sdt": "0901000028",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 1,
+    "phong_ban": 5,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$oG1ZtRVJyzjGHRvuAgJR3n$AMHVDQZuLrbeWXulHPbV/lkOQ9b8qoHLhi1m/vm1p08=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien29",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:13.969Z",
+    "email": "chuyenvien29@atax.demo",
+    "ho_va_ten": "Hoàng Thu Nhật",
+    "chuc_vu": "Chuyên viên Hành chính",
+    "sdt": "0901000029",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 2,
+    "phong_ban": 13,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$fIgOhZe8lDhoLgW5we15nV$1IQqFXEj2/tmUiwDvEOQBvvlnYLQQzXuvdMOD3kB660=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien30",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:16.693Z",
+    "email": "chuyenvien30@atax.demo",
+    "ho_va_ten": "Phan Thu Huy",
+    "chuc_vu": "Chuyên viên Đào tạo",
+    "sdt": "0901000030",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 3,
+    "phong_ban": 21,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$s8wPfwyU8F1d8Tt5N7wops$JqxCR3evXUFrjzGxhYKPqV953oQu/dm4GbA+lNUdJt4=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien31",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:19.440Z",
+    "email": "chuyenvien31@atax.demo",
+    "ho_va_ten": "Vũ Thu Bảo",
+    "chuc_vu": "Chuyên viên Kế toán",
+    "sdt": "0901000031",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 1,
+    "phong_ban": 3,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$s6zH0ztOSXzMEYD4ibP8z0$6FqwEdQBp92YoQbySawCWUDlgQGBH/M3oQM8MHfAwh8=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien32",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:22.170Z",
+    "email": "chuyenvien32@atax.demo",
+    "ho_va_ten": "Đặng Thu Hạnh",
+    "chuc_vu": "Chuyên viên Kiểm toán",
+    "sdt": "0901000032",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 2,
+    "phong_ban": 11,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$nxdQxRccEgALOZYziaS0Ph$75crZC2dXvJts+8JKF82Uwp9X9qNc7wlEemNRZhovRc=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien33",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:24.878Z",
+    "email": "chuyenvien33@atax.demo",
+    "ho_va_ten": "Bùi Thu Đạt",
+    "chuc_vu": "Chuyên viên Tư vấn thuế",
+    "sdt": "0901000033",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 3,
+    "phong_ban": 19,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$rkN9jeYcxOBNB8gKK0GM4o$IzYlLfWAPHlQJcWjkFocugKE6n8kg2nvatH2gcOBO6k=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien34",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:27.606Z",
+    "email": "chuyenvien34@atax.demo",
+    "ho_va_ten": "Đỗ Thu Trang",
+    "chuc_vu": "Chuyên viên Hành chính",
+    "sdt": "0901000034",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 1,
+    "phong_ban": 6,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$9g8fsAxVdPFbuTTkHKwo7f$uFgwJRqyhb6YCvQCOr/7aClSvKdL6kwSisoIPAUjTZU=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien35",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:30.330Z",
+    "email": "chuyenvien35@atax.demo",
+    "ho_va_ten": "Hồ Thu Vy",
+    "chuc_vu": "Chuyên viên Đào tạo",
+    "sdt": "0901000035",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 2,
+    "phong_ban": 14,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$z0JeZ7QQrfwGkWsSBKwM6s$FWXY90lXKhzgxOSD1PmWpHPKlxZZPp6dx2gPUEohsL0=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien36",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:33.033Z",
+    "email": "chuyenvien36@atax.demo",
+    "ho_va_ten": "Ngô Thu Tâm",
+    "chuc_vu": "Chuyên viên Kế toán",
+    "sdt": "0901000036",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 3,
+    "phong_ban": 17,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$rREgG4eFy9GjHYXKv8ub28$Mk+cnljzHebR8Aisfl0mREQp65G1eJ8gkU+Mtw6eBtM=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien37",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:35.763Z",
+    "email": "chuyenvien37@atax.demo",
+    "ho_va_ten": "Nguyễn Quang Hà",
+    "chuc_vu": "Chuyên viên Kiểm toán",
+    "sdt": "0901000037",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 1,
+    "phong_ban": 4,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$1S4LP8tP2KwARAgV2h2sWM$T4gADmnupuBQUmZKqU1VAuuU4xjdP7rww8Gbsq1R5z8=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien38",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:38.683Z",
+    "email": "chuyenvien38@atax.demo",
+    "ho_va_ten": "Trần Quang Mai",
+    "chuc_vu": "Chuyên viên Tư vấn thuế",
+    "sdt": "0901000038",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 2,
+    "phong_ban": 12,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$XQwVgu8faMI1k96bgNCo0Z$Qw74y4COFESgv3ta7IHEO8pQ13VUKcDbhAs8XIZj/VI=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien39",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:41.401Z",
+    "email": "chuyenvien39@atax.demo",
+    "ho_va_ten": "Lê Quang Sơn",
+    "chuc_vu": "Chuyên viên Hành chính",
+    "sdt": "0901000039",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 3,
+    "phong_ban": 20,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$MA0f39m3OPIGW9eATDKl2g$fphKS3SFtksHz8BFUzbQzaYmJ3aeFjBh98n0ceiz4Qc=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien40",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:44.104Z",
+    "email": "chuyenvien40@atax.demo",
+    "ho_va_ten": "Phạm Quang Hương",
+    "chuc_vu": "Chuyên viên Đào tạo",
+    "sdt": "0901000040",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 1,
+    "phong_ban": 7,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$kNoVyyBnt2hSTxYTmZHeIa$+5ZF/O41IWhS1/6o5cwXEoabYD/Fy3Pv2Z0t/vXP+qg=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien41",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:46.833Z",
+    "email": "chuyenvien41@atax.demo",
+    "ho_va_ten": "Hoàng Quang Nam",
+    "chuc_vu": "Chuyên viên Kế toán",
+    "sdt": "0901000041",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 2,
+    "phong_ban": 10,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$Jj2tFRdxHRFcw4Cm3oMHeI$OwYYhDw/fSBLlRq+ZSXR7/PAQN3n9KtILUvJ0ChlPRA=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien42",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:49.544Z",
+    "email": "chuyenvien42@atax.demo",
+    "ho_va_ten": "Phan Quang Tuấn",
+    "chuc_vu": "Chuyên viên Kiểm toán",
+    "sdt": "0901000042",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 3,
+    "phong_ban": 18,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$Bczql2HGqy0Iy8uHjs3YIJ$XL5CXObN3TRGL9+W4/JGameris0prnQvcSHHlWSXuXY=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien43",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:52.254Z",
+    "email": "chuyenvien43@atax.demo",
+    "ho_va_ten": "Vũ Quang Yến",
+    "chuc_vu": "Chuyên viên Tư vấn thuế",
+    "sdt": "0901000043",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 1,
+    "phong_ban": 5,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$UVudibv8oeJsidCsE1klEX$JfotjRU6XgwUR0dvzCGQWyuD6jCW1zFO7+hjOGiNsPY=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien44",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:54.957Z",
+    "email": "chuyenvien44@atax.demo",
+    "ho_va_ten": "Đặng Quang Khoa",
+    "chuc_vu": "Chuyên viên Hành chính",
+    "sdt": "0901000044",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 2,
+    "phong_ban": 13,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$2TmLxHHqW13YlQFzeTHr71$jjuyKfylb0WrvNSDQqYzrsJiZ96fwJ+38FtyjB9dsKM=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien45",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:35:57.692Z",
+    "email": "chuyenvien45@atax.demo",
+    "ho_va_ten": "Bùi Quang Phúc",
+    "chuc_vu": "Chuyên viên Đào tạo",
+    "sdt": "0901000045",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 3,
+    "phong_ban": 21,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$sHHsT14UGly5JNP7bwAktS$wl6tSgS5umDePTCDu1rJJy5/rbheDdj7/sc4IpyA/Ns=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien46",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:00.407Z",
+    "email": "chuyenvien46@atax.demo",
+    "ho_va_ten": "Đỗ Quang Thảo",
+    "chuc_vu": "Chuyên viên Kế toán",
+    "sdt": "0901000046",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 1,
+    "phong_ban": 3,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$uWTgEX2cnED1Z7qnrlRNSP$5MsB9mbPhqhF8xvJVXlMvAJc1S8Ffw1CYCPnUq+OoPQ=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien47",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:03.425Z",
+    "email": "chuyenvien47@atax.demo",
+    "ho_va_ten": "Hồ Quang Quân",
+    "chuc_vu": "Chuyên viên Kiểm toán",
+    "sdt": "0901000047",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 2,
+    "phong_ban": 11,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$z0LqeuSpGD28Y1XWzsqtBV$Vruz15edhHacMWAvx9dzBOPT11qa2apJLPB43ntYCJg=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien48",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:06.153Z",
+    "email": "chuyenvien48@atax.demo",
+    "ho_va_ten": "Ngô Quang Linh",
+    "chuc_vu": "Chuyên viên Tư vấn thuế",
+    "sdt": "0901000048",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 3,
+    "phong_ban": 19,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$IG4VxzVpvQONtMZGX1RJV0$+NhH68zyHiRLPg1TuhVq3I5Q4XBtUMbCTvRSBUKbMI8=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien49",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:08.868Z",
+    "email": "chuyenvien49@atax.demo",
+    "ho_va_ten": "Nguyễn Hoài Nhi",
+    "chuc_vu": "Chuyên viên Hành chính",
+    "sdt": "0901000049",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 1,
+    "phong_ban": 6,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$jZ60dUBZ2TFnwQfoZjLrGI$9ppMYj44DtAD27g4auSPSX0QUF3IUyNCC1g5ozrKYbo=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "chuyenvien50",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:11.595Z",
+    "email": "chuyenvien50@atax.demo",
+    "ho_va_ten": "Trần Hoài Kiên",
+    "chuc_vu": "Chuyên viên Đào tạo",
+    "sdt": "0901000050",
+    "role": "CHUYEN_VIEN",
+    "chi_nhanh": 2,
+    "phong_ban": 14,
+    "groups": [
+      [
+        "CHUYEN_VIEN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$GLbXSBz6nZNKHRO9PmET6X$AD1CuKfi2YBXDs/wif6RJTn+6PD/nd4aQbCRS1zNzk0=",
+    "last_login": "2026-04-30T15:12:34.490Z",
+    "is_superuser": false,
+    "username": "lanhdao01",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:14.300Z",
+    "email": "lanhdao01@atax.demo",
+    "ho_va_ten": "Lê Hoài An",
+    "chuc_vu": "Lãnh đạo Ban Giám đốc",
+    "sdt": "0901000051",
+    "role": "LANH_DAO",
+    "chi_nhanh": 1,
+    "phong_ban": 1,
+    "groups": [
+      [
+        "LANH_DAO"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$PR94ehLDLwIbbv3MZ8P33W$sL97RY8MaVK3O000NW1DzfUFqV4/iB3kWUCaI20TEt8=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "lanhdao02",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:17.045Z",
+    "email": "lanhdao02@atax.demo",
+    "ho_va_ten": "Phạm Hoài Duy",
+    "chuc_vu": "Lãnh đạo Ban Giám đốc",
+    "sdt": "0901000052",
+    "role": "LANH_DAO",
+    "chi_nhanh": 3,
+    "phong_ban": 15,
+    "groups": [
+      [
+        "LANH_DAO"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$KSMCjFw5jjD0NE6OJ13ZmX$Re12LZC1V/gq7rkzJsU2qz07qcQdv3ZvuM1J31a6FBg=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "lanhdao03",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:19.789Z",
+    "email": "lanhdao03@atax.demo",
+    "ho_va_ten": "Hoàng Hoài Long",
+    "chuc_vu": "Lãnh đạo Ban Giám đốc",
+    "sdt": "0901000053",
+    "role": "LANH_DAO",
+    "chi_nhanh": 2,
+    "phong_ban": 8,
+    "groups": [
+      [
+        "LANH_DAO"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$LPzG27zuPmwmHTjJgXObu4$oKvScPKpNEPAmdPv+A7uSg9lEw+ZUum4l6uLjzfT/0E=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "lanhdao04",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:22.532Z",
+    "email": "lanhdao04@atax.demo",
+    "ho_va_ten": "Phan Hoài Nhật",
+    "chuc_vu": "Lãnh đạo Ban Giám đốc",
+    "sdt": "0901000054",
+    "role": "LANH_DAO",
+    "chi_nhanh": 1,
+    "phong_ban": 1,
+    "groups": [
+      [
+        "LANH_DAO"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$3MpiKixLy8do73boRhmha7$pHLV1OLocyaV9mOLxYAwRSKctBmgzu6p0KAI7Xgpjis=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "lanhdao05",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:25.261Z",
+    "email": "lanhdao05@atax.demo",
+    "ho_va_ten": "Vũ Hoài Huy",
+    "chuc_vu": "Lãnh đạo Ban Giám đốc",
+    "sdt": "0901000055",
+    "role": "LANH_DAO",
+    "chi_nhanh": 3,
+    "phong_ban": 15,
+    "groups": [
+      [
+        "LANH_DAO"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$eJNXbxF5KKtfTTIYMdWSlM$+DdSAFbf2bs90Y215fTbes9y/Gg+hpGU6ia4SjJ2aSA=",
+    "last_login": "2026-04-30T15:11:17.004Z",
+    "is_superuser": false,
+    "username": "vanthu01",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:27.976Z",
+    "email": "vanthu01@atax.demo",
+    "ho_va_ten": "Đặng Hoài Bảo",
+    "chuc_vu": "Văn thư",
+    "sdt": "0901000056",
+    "role": "VAN_THU",
+    "chi_nhanh": 1,
+    "phong_ban": 2,
+    "groups": [
+      [
+        "VAN_THU"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$6KETjYxk8P32OfSGCZvNS0$ji2g6csZ4PP54nIpNRlWk/yswrCu0eq9WitOk+u7Ooc=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "vanthu02",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:30.693Z",
+    "email": "vanthu02@atax.demo",
+    "ho_va_ten": "Bùi Hoài Hạnh",
+    "chuc_vu": "Văn thư",
+    "sdt": "0901000057",
+    "role": "VAN_THU",
+    "chi_nhanh": 2,
+    "phong_ban": 9,
+    "groups": [
+      [
+        "VAN_THU"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$o99lUX0xcUkvaGFHpDJrLu$0sPIuPfHLi9bwEuuWv8u1IXO21egnz/tAxHcItc5hyg=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "vanthu03",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:33.428Z",
+    "email": "vanthu03@atax.demo",
+    "ho_va_ten": "Đỗ Hoài Đạt",
+    "chuc_vu": "Văn thư",
+    "sdt": "0901000058",
+    "role": "VAN_THU",
+    "chi_nhanh": 3,
+    "phong_ban": 16,
+    "groups": [
+      [
+        "VAN_THU"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$ogW1tyYqUnjk5OID8gcqN4$ZGBycRKQzAJcXsAG5HcADyYgr0t9+gGwjSskVLtPaRc=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "vanthu04",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:36.175Z",
+    "email": "vanthu04@atax.demo",
+    "ho_va_ten": "Hồ Hoài Trang",
+    "chuc_vu": "Văn thư",
+    "sdt": "0901000059",
+    "role": "VAN_THU",
+    "chi_nhanh": 1,
+    "phong_ban": 2,
+    "groups": [
+      [
+        "VAN_THU"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$BOD2cUTQLO3LbayV7VFxsn$6Tup9s1fYiI0dbL7xP5P22eNjX6mKoX4pBApp9+RHhk=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "vanthu05",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:38.886Z",
+    "email": "vanthu05@atax.demo",
+    "ho_va_ten": "Ngô Hoài Vy",
+    "chuc_vu": "Văn thư",
+    "sdt": "0901000060",
+    "role": "VAN_THU",
+    "chi_nhanh": 2,
+    "phong_ban": 9,
+    "groups": [
+      [
+        "VAN_THU"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$ADEzcGQ3J5jvxeO8AeEW31$hN+RBb84FnuwRKDEBLHgXXXj7+nfJ7z67CjI+0fduMs=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "vanthu06",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:41.603Z",
+    "email": "vanthu06@atax.demo",
+    "ho_va_ten": "Nguyễn Thanh Tâm",
+    "chuc_vu": "Văn thư",
+    "sdt": "0901000061",
+    "role": "VAN_THU",
+    "chi_nhanh": 3,
+    "phong_ban": 16,
+    "groups": [
+      [
+        "VAN_THU"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$vS04cKcUpgEjmUS058lPzD$+VTdUeJtmhP3jJKCNHtFP4Pxq4Xu8nSFfjjiN4vB9Z0=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "vanthu07",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:44.338Z",
+    "email": "vanthu07@atax.demo",
+    "ho_va_ten": "Trần Thanh Hà",
+    "chuc_vu": "Văn thư",
+    "sdt": "0901000062",
+    "role": "VAN_THU",
+    "chi_nhanh": 1,
+    "phong_ban": 2,
+    "groups": [
+      [
+        "VAN_THU"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$pi6LkKFtux0DKiI8f7ahqN$2bzWPAnQuFVMWYowwNn20QDZCIlTHedoFGv4Wclcpi4=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "vanthu08",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:47.076Z",
+    "email": "vanthu08@atax.demo",
+    "ho_va_ten": "Lê Thanh Mai",
+    "chuc_vu": "Văn thư",
+    "sdt": "0901000063",
+    "role": "VAN_THU",
+    "chi_nhanh": 2,
+    "phong_ban": 9,
+    "groups": [
+      [
+        "VAN_THU"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$z9OSa6fjowQ5UOkU3IHTcu$FrvvZFzuC+l2harxGY69YG43TbE9d59DEywRpD5Lpbo=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "vanthu09",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:49.808Z",
+    "email": "vanthu09@atax.demo",
+    "ho_va_ten": "Phạm Thanh Sơn",
+    "chuc_vu": "Văn thư",
+    "sdt": "0901000064",
+    "role": "VAN_THU",
+    "chi_nhanh": 3,
+    "phong_ban": 16,
+    "groups": [
+      [
+        "VAN_THU"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$g3vyPfUdhOXEqLVfkxm7ud$/aB8DvPShRnFoXHcuaEB2K7RYqgNRApjZUFf5Ln0Gc0=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "vanthu10",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-30T14:36:52.569Z",
+    "email": "vanthu10@atax.demo",
+    "ho_va_ten": "Hoàng Thanh Hương",
+    "chuc_vu": "Văn thư",
+    "sdt": "0901000065",
+    "role": "VAN_THU",
+    "chi_nhanh": 1,
+    "phong_ban": 2,
+    "groups": [
+      [
+        "VAN_THU"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.customer",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$w1frK4Tt8ZYgxgo1XBt2eX$pqLmUY7uBuSqjiyvAkEGMTDFGPpR5L8EbvBxyd8i1UE=",
+    "last_login": "2026-04-30T15:15:47.754Z",
+    "is_superuser": true,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-04-30T15:15:21.985Z",
+    "email": "admin@qlvb.local",
+    "ho_va_ten": "Quản trị hệ thống",
+    "chuc_vu": "Quản trị hệ thống",
+    "sdt": "",
+    "role": "ADMIN",
+    "chi_nhanh": null,
+    "phong_ban": null,
+    "groups": [
+      [
+        "ADMIN"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "core.chinhanh",
+  "pk": 1,
+  "fields": {
+    "ten_chi_nhanh": "Trụ sở Hà Nội"
+  }
+},
+{
+  "model": "core.chinhanh",
+  "pk": 2,
+  "fields": {
+    "ten_chi_nhanh": "Chi nhánh Đà Nẵng"
+  }
+},
+{
+  "model": "core.chinhanh",
+  "pk": 3,
+  "fields": {
+    "ten_chi_nhanh": "Chi nhánh TP.HCM"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 1,
+  "fields": {
+    "chi_nhanh": 1,
+    "truong_phong": 51,
+    "ten_phong_ban": "Ban Giám đốc"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 2,
+  "fields": {
+    "chi_nhanh": 1,
+    "truong_phong": 51,
+    "ten_phong_ban": "Văn thư"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 3,
+  "fields": {
+    "chi_nhanh": 1,
+    "truong_phong": 51,
+    "ten_phong_ban": "Kế toán"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 4,
+  "fields": {
+    "chi_nhanh": 1,
+    "truong_phong": 51,
+    "ten_phong_ban": "Kiểm toán"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 5,
+  "fields": {
+    "chi_nhanh": 1,
+    "truong_phong": 51,
+    "ten_phong_ban": "Tư vấn thuế"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 6,
+  "fields": {
+    "chi_nhanh": 1,
+    "truong_phong": 51,
+    "ten_phong_ban": "Hành chính"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 7,
+  "fields": {
+    "chi_nhanh": 1,
+    "truong_phong": 51,
+    "ten_phong_ban": "Đào tạo"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 8,
+  "fields": {
+    "chi_nhanh": 2,
+    "truong_phong": 53,
+    "ten_phong_ban": "Ban Giám đốc"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 9,
+  "fields": {
+    "chi_nhanh": 2,
+    "truong_phong": 53,
+    "ten_phong_ban": "Văn thư"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 10,
+  "fields": {
+    "chi_nhanh": 2,
+    "truong_phong": 53,
+    "ten_phong_ban": "Kế toán"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 11,
+  "fields": {
+    "chi_nhanh": 2,
+    "truong_phong": 53,
+    "ten_phong_ban": "Kiểm toán"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 12,
+  "fields": {
+    "chi_nhanh": 2,
+    "truong_phong": 53,
+    "ten_phong_ban": "Tư vấn thuế"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 13,
+  "fields": {
+    "chi_nhanh": 2,
+    "truong_phong": 53,
+    "ten_phong_ban": "Hành chính"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 14,
+  "fields": {
+    "chi_nhanh": 2,
+    "truong_phong": 53,
+    "ten_phong_ban": "Đào tạo"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 15,
+  "fields": {
+    "chi_nhanh": 3,
+    "truong_phong": 52,
+    "ten_phong_ban": "Ban Giám đốc"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 16,
+  "fields": {
+    "chi_nhanh": 3,
+    "truong_phong": 52,
+    "ten_phong_ban": "Văn thư"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 17,
+  "fields": {
+    "chi_nhanh": 3,
+    "truong_phong": 52,
+    "ten_phong_ban": "Kế toán"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 18,
+  "fields": {
+    "chi_nhanh": 3,
+    "truong_phong": 52,
+    "ten_phong_ban": "Kiểm toán"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 19,
+  "fields": {
+    "chi_nhanh": 3,
+    "truong_phong": 52,
+    "ten_phong_ban": "Tư vấn thuế"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 20,
+  "fields": {
+    "chi_nhanh": 3,
+    "truong_phong": 52,
+    "ten_phong_ban": "Hành chính"
+  }
+},
+{
+  "model": "core.phongban",
+  "pk": 21,
+  "fields": {
+    "chi_nhanh": 3,
+    "truong_phong": 52,
+    "ten_phong_ban": "Đào tạo"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 1,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien01"
+    ],
+    "phong_ban": 3,
+    "ho_va_ten": "Nguyễn Văn An",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien01@atax.demo",
+    "sdt": "0901000001"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 2,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien02"
+    ],
+    "phong_ban": 11,
+    "ho_va_ten": "Trần Văn Duy",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien02@atax.demo",
+    "sdt": "0901000002"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 3,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien03"
+    ],
+    "phong_ban": 19,
+    "ho_va_ten": "Lê Văn Long",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien03@atax.demo",
+    "sdt": "0901000003"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 4,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien04"
+    ],
+    "phong_ban": 6,
+    "ho_va_ten": "Phạm Văn Nhật",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien04@atax.demo",
+    "sdt": "0901000004"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 5,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien05"
+    ],
+    "phong_ban": 14,
+    "ho_va_ten": "Hoàng Văn Huy",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien05@atax.demo",
+    "sdt": "0901000005"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 6,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien06"
+    ],
+    "phong_ban": 17,
+    "ho_va_ten": "Phan Văn Bảo",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien06@atax.demo",
+    "sdt": "0901000006"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 7,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien07"
+    ],
+    "phong_ban": 4,
+    "ho_va_ten": "Vũ Văn Hạnh",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien07@atax.demo",
+    "sdt": "0901000007"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 8,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien08"
+    ],
+    "phong_ban": 12,
+    "ho_va_ten": "Đặng Văn Đạt",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien08@atax.demo",
+    "sdt": "0901000008"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 9,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien09"
+    ],
+    "phong_ban": 20,
+    "ho_va_ten": "Bùi Văn Trang",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien09@atax.demo",
+    "sdt": "0901000009"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 10,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien10"
+    ],
+    "phong_ban": 7,
+    "ho_va_ten": "Đỗ Văn Vy",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien10@atax.demo",
+    "sdt": "0901000010"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 11,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien11"
+    ],
+    "phong_ban": 10,
+    "ho_va_ten": "Hồ Văn Tâm",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien11@atax.demo",
+    "sdt": "0901000011"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 12,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien12"
+    ],
+    "phong_ban": 18,
+    "ho_va_ten": "Ngô Văn Hà",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien12@atax.demo",
+    "sdt": "0901000012"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 13,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien13"
+    ],
+    "phong_ban": 5,
+    "ho_va_ten": "Nguyễn Minh Mai",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien13@atax.demo",
+    "sdt": "0901000013"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 14,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien14"
+    ],
+    "phong_ban": 13,
+    "ho_va_ten": "Trần Minh Sơn",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien14@atax.demo",
+    "sdt": "0901000014"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 15,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien15"
+    ],
+    "phong_ban": 21,
+    "ho_va_ten": "Lê Minh Hương",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien15@atax.demo",
+    "sdt": "0901000015"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 16,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien16"
+    ],
+    "phong_ban": 3,
+    "ho_va_ten": "Phạm Minh Nam",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien16@atax.demo",
+    "sdt": "0901000016"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 17,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien17"
+    ],
+    "phong_ban": 11,
+    "ho_va_ten": "Hoàng Minh Tuấn",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien17@atax.demo",
+    "sdt": "0901000017"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 18,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien18"
+    ],
+    "phong_ban": 19,
+    "ho_va_ten": "Phan Minh Yến",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien18@atax.demo",
+    "sdt": "0901000018"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 19,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien19"
+    ],
+    "phong_ban": 6,
+    "ho_va_ten": "Vũ Minh Khoa",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien19@atax.demo",
+    "sdt": "0901000019"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 20,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien20"
+    ],
+    "phong_ban": 14,
+    "ho_va_ten": "Đặng Minh Phúc",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien20@atax.demo",
+    "sdt": "0901000020"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 21,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien21"
+    ],
+    "phong_ban": 17,
+    "ho_va_ten": "Bùi Minh Thảo",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien21@atax.demo",
+    "sdt": "0901000021"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 22,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien22"
+    ],
+    "phong_ban": 4,
+    "ho_va_ten": "Đỗ Minh Quân",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien22@atax.demo",
+    "sdt": "0901000022"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 23,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien23"
+    ],
+    "phong_ban": 12,
+    "ho_va_ten": "Hồ Minh Linh",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien23@atax.demo",
+    "sdt": "0901000023"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 24,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien24"
+    ],
+    "phong_ban": 20,
+    "ho_va_ten": "Ngô Minh Nhi",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien24@atax.demo",
+    "sdt": "0901000024"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 25,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien25"
+    ],
+    "phong_ban": 7,
+    "ho_va_ten": "Nguyễn Thu Kiên",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien25@atax.demo",
+    "sdt": "0901000025"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 26,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien26"
+    ],
+    "phong_ban": 10,
+    "ho_va_ten": "Trần Thu An",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien26@atax.demo",
+    "sdt": "0901000026"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 27,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien27"
+    ],
+    "phong_ban": 18,
+    "ho_va_ten": "Lê Thu Duy",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien27@atax.demo",
+    "sdt": "0901000027"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 28,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien28"
+    ],
+    "phong_ban": 5,
+    "ho_va_ten": "Phạm Thu Long",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien28@atax.demo",
+    "sdt": "0901000028"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 29,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien29"
+    ],
+    "phong_ban": 13,
+    "ho_va_ten": "Hoàng Thu Nhật",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien29@atax.demo",
+    "sdt": "0901000029"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 30,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien30"
+    ],
+    "phong_ban": 21,
+    "ho_va_ten": "Phan Thu Huy",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien30@atax.demo",
+    "sdt": "0901000030"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 31,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien31"
+    ],
+    "phong_ban": 3,
+    "ho_va_ten": "Vũ Thu Bảo",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien31@atax.demo",
+    "sdt": "0901000031"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 32,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien32"
+    ],
+    "phong_ban": 11,
+    "ho_va_ten": "Đặng Thu Hạnh",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien32@atax.demo",
+    "sdt": "0901000032"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 33,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien33"
+    ],
+    "phong_ban": 19,
+    "ho_va_ten": "Bùi Thu Đạt",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien33@atax.demo",
+    "sdt": "0901000033"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 34,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien34"
+    ],
+    "phong_ban": 6,
+    "ho_va_ten": "Đỗ Thu Trang",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien34@atax.demo",
+    "sdt": "0901000034"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 35,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien35"
+    ],
+    "phong_ban": 14,
+    "ho_va_ten": "Hồ Thu Vy",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien35@atax.demo",
+    "sdt": "0901000035"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 36,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien36"
+    ],
+    "phong_ban": 17,
+    "ho_va_ten": "Ngô Thu Tâm",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien36@atax.demo",
+    "sdt": "0901000036"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 37,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien37"
+    ],
+    "phong_ban": 4,
+    "ho_va_ten": "Nguyễn Quang Hà",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien37@atax.demo",
+    "sdt": "0901000037"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 38,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien38"
+    ],
+    "phong_ban": 12,
+    "ho_va_ten": "Trần Quang Mai",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien38@atax.demo",
+    "sdt": "0901000038"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 39,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien39"
+    ],
+    "phong_ban": 20,
+    "ho_va_ten": "Lê Quang Sơn",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien39@atax.demo",
+    "sdt": "0901000039"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 40,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien40"
+    ],
+    "phong_ban": 7,
+    "ho_va_ten": "Phạm Quang Hương",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien40@atax.demo",
+    "sdt": "0901000040"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 41,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien41"
+    ],
+    "phong_ban": 10,
+    "ho_va_ten": "Hoàng Quang Nam",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien41@atax.demo",
+    "sdt": "0901000041"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 42,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien42"
+    ],
+    "phong_ban": 18,
+    "ho_va_ten": "Phan Quang Tuấn",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien42@atax.demo",
+    "sdt": "0901000042"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 43,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien43"
+    ],
+    "phong_ban": 5,
+    "ho_va_ten": "Vũ Quang Yến",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien43@atax.demo",
+    "sdt": "0901000043"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 44,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien44"
+    ],
+    "phong_ban": 13,
+    "ho_va_ten": "Đặng Quang Khoa",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien44@atax.demo",
+    "sdt": "0901000044"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 45,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien45"
+    ],
+    "phong_ban": 21,
+    "ho_va_ten": "Bùi Quang Phúc",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien45@atax.demo",
+    "sdt": "0901000045"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 46,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien46"
+    ],
+    "phong_ban": 3,
+    "ho_va_ten": "Đỗ Quang Thảo",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien46@atax.demo",
+    "sdt": "0901000046"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 47,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien47"
+    ],
+    "phong_ban": 11,
+    "ho_va_ten": "Hồ Quang Quân",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien47@atax.demo",
+    "sdt": "0901000047"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 48,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien48"
+    ],
+    "phong_ban": 19,
+    "ho_va_ten": "Ngô Quang Linh",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien48@atax.demo",
+    "sdt": "0901000048"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 49,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien49"
+    ],
+    "phong_ban": 6,
+    "ho_va_ten": "Nguyễn Hoài Nhi",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien49@atax.demo",
+    "sdt": "0901000049"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 50,
+  "fields": {
+    "tai_khoan": [
+      "chuyenvien50"
+    ],
+    "phong_ban": 14,
+    "ho_va_ten": "Trần Hoài Kiên",
+    "chuc_vu": "Chuyên Viên",
+    "email": "chuyenvien50@atax.demo",
+    "sdt": "0901000050"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 51,
+  "fields": {
+    "tai_khoan": [
+      "lanhdao01"
+    ],
+    "phong_ban": 1,
+    "ho_va_ten": "Lê Hoài An",
+    "chuc_vu": "Lãnh Đạo",
+    "email": "lanhdao01@atax.demo",
+    "sdt": "0901000051"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 52,
+  "fields": {
+    "tai_khoan": [
+      "lanhdao02"
+    ],
+    "phong_ban": 15,
+    "ho_va_ten": "Phạm Hoài Duy",
+    "chuc_vu": "Lãnh Đạo",
+    "email": "lanhdao02@atax.demo",
+    "sdt": "0901000052"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 53,
+  "fields": {
+    "tai_khoan": [
+      "lanhdao03"
+    ],
+    "phong_ban": 8,
+    "ho_va_ten": "Hoàng Hoài Long",
+    "chuc_vu": "Lãnh Đạo",
+    "email": "lanhdao03@atax.demo",
+    "sdt": "0901000053"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 54,
+  "fields": {
+    "tai_khoan": [
+      "lanhdao04"
+    ],
+    "phong_ban": 1,
+    "ho_va_ten": "Phan Hoài Nhật",
+    "chuc_vu": "Lãnh Đạo",
+    "email": "lanhdao04@atax.demo",
+    "sdt": "0901000054"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 55,
+  "fields": {
+    "tai_khoan": [
+      "lanhdao05"
+    ],
+    "phong_ban": 15,
+    "ho_va_ten": "Vũ Hoài Huy",
+    "chuc_vu": "Lãnh Đạo",
+    "email": "lanhdao05@atax.demo",
+    "sdt": "0901000055"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 56,
+  "fields": {
+    "tai_khoan": [
+      "vanthu01"
+    ],
+    "phong_ban": 2,
+    "ho_va_ten": "Đặng Hoài Bảo",
+    "chuc_vu": "Văn Thư",
+    "email": "vanthu01@atax.demo",
+    "sdt": "0901000056"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 57,
+  "fields": {
+    "tai_khoan": [
+      "vanthu02"
+    ],
+    "phong_ban": 9,
+    "ho_va_ten": "Bùi Hoài Hạnh",
+    "chuc_vu": "Văn Thư",
+    "email": "vanthu02@atax.demo",
+    "sdt": "0901000057"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 58,
+  "fields": {
+    "tai_khoan": [
+      "vanthu03"
+    ],
+    "phong_ban": 16,
+    "ho_va_ten": "Đỗ Hoài Đạt",
+    "chuc_vu": "Văn Thư",
+    "email": "vanthu03@atax.demo",
+    "sdt": "0901000058"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 59,
+  "fields": {
+    "tai_khoan": [
+      "vanthu04"
+    ],
+    "phong_ban": 2,
+    "ho_va_ten": "Hồ Hoài Trang",
+    "chuc_vu": "Văn Thư",
+    "email": "vanthu04@atax.demo",
+    "sdt": "0901000059"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 60,
+  "fields": {
+    "tai_khoan": [
+      "vanthu05"
+    ],
+    "phong_ban": 9,
+    "ho_va_ten": "Ngô Hoài Vy",
+    "chuc_vu": "Văn Thư",
+    "email": "vanthu05@atax.demo",
+    "sdt": "0901000060"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 61,
+  "fields": {
+    "tai_khoan": [
+      "vanthu06"
+    ],
+    "phong_ban": 16,
+    "ho_va_ten": "Nguyễn Thanh Tâm",
+    "chuc_vu": "Văn Thư",
+    "email": "vanthu06@atax.demo",
+    "sdt": "0901000061"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 62,
+  "fields": {
+    "tai_khoan": [
+      "vanthu07"
+    ],
+    "phong_ban": 2,
+    "ho_va_ten": "Trần Thanh Hà",
+    "chuc_vu": "Văn Thư",
+    "email": "vanthu07@atax.demo",
+    "sdt": "0901000062"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 63,
+  "fields": {
+    "tai_khoan": [
+      "vanthu08"
+    ],
+    "phong_ban": 9,
+    "ho_va_ten": "Lê Thanh Mai",
+    "chuc_vu": "Văn Thư",
+    "email": "vanthu08@atax.demo",
+    "sdt": "0901000063"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 64,
+  "fields": {
+    "tai_khoan": [
+      "vanthu09"
+    ],
+    "phong_ban": 16,
+    "ho_va_ten": "Phạm Thanh Sơn",
+    "chuc_vu": "Văn Thư",
+    "email": "vanthu09@atax.demo",
+    "sdt": "0901000064"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 65,
+  "fields": {
+    "tai_khoan": [
+      "vanthu10"
+    ],
+    "phong_ban": 2,
+    "ho_va_ten": "Hoàng Thanh Hương",
+    "chuc_vu": "Văn Thư",
+    "email": "vanthu10@atax.demo",
+    "sdt": "0901000065"
+  }
+},
+{
+  "model": "core.nguoidung",
+  "pk": 66,
+  "fields": {
+    "tai_khoan": [
+      "admin"
+    ],
+    "phong_ban": null,
+    "ho_va_ten": "Quản trị hệ thống",
+    "chuc_vu": "Quản Trị Hệ Thống",
+    "email": "admin@qlvb.local",
+    "sdt": ""
+  }
+}
+]

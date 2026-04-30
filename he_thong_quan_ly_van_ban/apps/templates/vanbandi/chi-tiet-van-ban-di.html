@@ -353,7 +353,7 @@
       position: fixed;
       inset: 0;
       background: #fff;
-      z-index: 9999;
+      z-index: var(--z-modal, 1000);
       overflow: visible;
       padding: 0;
     }
@@ -419,14 +419,12 @@
           duyệt</button>
         <button type="button" class="btn btn-warning" style="padding:8px 16px;" id="openReturnModal">Hoàn trả</button>
         {% endif %}
-        <button class="btn btn-info" style="padding:8px 16px;">Giao việc</button>
         <button class="btn btn-primary" style="padding:8px 16px;" onclick="openThemVanBanPopup()">Lưu hồ sơ</button>
         {% if task %}
         <a href="{% url 'quanlycongviec:task_detail' task.pk %}" class="btn btn-info" style="padding:8px 16px; text-decoration:none;">Xem công việc</a>
         {% else %}
         <a href="{% url 'quanlycongviec:giao_viec' %}?van_ban_id={{ vb.pk }}&nguon_giao=Văn bản đi&ten_cv={{ vb.trich_yeu|urlencode }}" class="btn btn-info" style="padding:8px 16px; text-decoration:none;">Giao việc</a>
         {% endif %}
-        <button class="btn btn-primary" style="padding:8px 16px;">Lưu hồ sơ</button>
         {% endif %}
 
         {# ===== CHUYÊN VIÊN ===== #}
@@ -642,7 +640,7 @@
 
   <!-- Popup xác nhận xóa văn bản -->
   {% if request.user.role == "CHUYEN_VIEN" and vb.trang_thai == "Chờ Xử Lý" %}
-  <div id="deleteModal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.45); z-index:9999; align-items:center; justify-content:center;">
+  <div id="deleteModal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.45); z-index:var(--z-modal, 1000); align-items:center; justify-content:center;">
     <div style="width:100%; max-width:480px; background:#fff; box-shadow:0 8px 40px rgba(0,0,0,0.2); padding:32px 36px 28px; text-align:center;">
       <div style="margin-bottom:20px;">
         <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
