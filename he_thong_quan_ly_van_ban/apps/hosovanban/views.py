@@ -366,7 +366,7 @@ def xoa_van_ban_khoi_ho_so(request, ho_so_id, vb_id):
 # ===== API: Danh sách hồ sơ hiện hành (cho popup dropdown) =====
 @login_required
 @require_GET
-@role_required(Customer.Role.VAN_THU, Customer.Role.CHUYEN_VIEN)
+@role_required(Customer.Role.VAN_THU, Customer.Role.CHUYEN_VIEN, Customer.Role.LANH_DAO)
 def api_ds_ho_so_hien_hanh(request):
     if hasattr(request.user, "nguoi_dung_core") and request.user.nguoi_dung_core:
         nd = request.user.nguoi_dung_core
@@ -402,7 +402,7 @@ def api_ds_ho_so_hien_hanh(request):
 # ===== API: Thêm văn bản vào hồ sơ =====
 @login_required
 @require_POST
-@role_required(Customer.Role.VAN_THU, Customer.Role.CHUYEN_VIEN)
+@role_required(Customer.Role.VAN_THU, Customer.Role.CHUYEN_VIEN, Customer.Role.LANH_DAO)
 def api_them_van_ban_vao_ho_so(request):
     """Liên kết một VanBan (core) vào một HoSoVanBan."""
     ho_so_id = request.POST.get("ho_so_id")
