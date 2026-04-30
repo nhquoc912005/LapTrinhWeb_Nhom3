@@ -107,6 +107,7 @@ SPECIALIST_DEPARTMENT_KEYS = [
 ]
 BRANCH_KEYS = [spec["key"] for spec in BRANCH_SPECS]
 LEADER_BRANCH_KEYS = ["hn", "hcm", "dn", "hn", "hcm"]
+CLERK_DEPARTMENT_KEY = "hanh_chinh"
 
 FAMILY_NAMES = [
     "Nguyễn",
@@ -399,7 +400,7 @@ class Command(BaseCommand):
 
         for index in range(1, CLERK_COUNT + 1):
             branch_key = BRANCH_KEYS[(index - 1) % len(BRANCH_KEYS)]
-            department = self.departments[(branch_key, "van_thu")]
+            department = self.departments[(branch_key, CLERK_DEPARTMENT_KEY)]
             identity = next_identity()
             account_specs.append(
                 {

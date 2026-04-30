@@ -13,7 +13,7 @@ from ..accounts.decorators import role_required
 from ..accounts.models import Customer
 from ..core.models import (
     VanBan, VanBanLienQuan, NguoiDung, VanBanDuyet, VanBanHoanTra,
-    ChiNhanh, PhongBan, DonViNgoai, BanHanh,
+    ChiNhanh, PhongBan, DonViNgoai, BanHanh, BanHanhChiTiep,
     HoSoVanBan, CongViec
 )
 from .forms import VanBanDiForm, validate_file_size, validate_file_extension

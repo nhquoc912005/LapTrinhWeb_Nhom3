@@ -92,6 +92,7 @@ DEPARTMENT_LABELS = {
     "hanh_chinh": DEPT_HANH_CHINH,
     "dao_tao": DEPT_DAO_TAO,
 }
+CLERK_DEPARTMENT_KEY = "hanh_chinh"
 
 BRANCH_SPECS = {
     "hn": {
@@ -176,7 +177,7 @@ USER_SPECS = [
         "phone": "0909000004",
         "role": User.Role.VAN_THU,
         "branch": "hn",
-        "department": "van_thu",
+        "department": CLERK_DEPARTMENT_KEY,
         "job_title": "Văn thư tổng hợp Hà Nội",
     },
     {
@@ -187,7 +188,7 @@ USER_SPECS = [
         "phone": "0909000005",
         "role": User.Role.VAN_THU,
         "branch": "hcm",
-        "department": "van_thu",
+        "department": CLERK_DEPARTMENT_KEY,
         "job_title": "Văn thư tổng hợp TP.HCM",
     },
     {
@@ -209,7 +210,7 @@ USER_SPECS = [
         "phone": "0909000013",
         "role": User.Role.VAN_THU,
         "branch": "dn",
-        "department": "van_thu",
+        "department": CLERK_DEPARTMENT_KEY,
         "job_title": "Văn thư tổng hợp Đà Nẵng",
     },
     {
@@ -498,17 +499,17 @@ class Command(BaseCommand):
     def _assign_department_heads(self):
         head_specs = [
             (("hn", "ban_giam_doc"), "lanhdao_hn"),
-            (("hn", "van_thu"), "vanthu_hn"),
+            (("hn", "van_thu"), "lanhdao_hn"),
             (("hn", "ke_toan"), "lanhdao_hn"),
             (("hn", "kiem_toan"), "lanhdao_hn"),
             (("hn", "hanh_chinh"), "lanhdao_hn"),
             (("hcm", "ban_giam_doc"), "lanhdao_hcm"),
-            (("hcm", "van_thu"), "vanthu_hcm"),
+            (("hcm", "van_thu"), "lanhdao_hcm"),
             (("hcm", "tu_van_thue"), "lanhdao_hcm"),
             (("hcm", "ke_toan"), "lanhdao_hcm"),
             (("hcm", "dao_tao"), "lanhdao_hcm"),
             (("dn", "ban_giam_doc"), "lanhdao_dn"),
-            (("dn", "van_thu"), "vanthu_dn"),
+            (("dn", "van_thu"), "lanhdao_dn"),
             (("dn", "kiem_toan"), "lanhdao_dn"),
             (("dn", "hanh_chinh"), "lanhdao_dn"),
         ]
