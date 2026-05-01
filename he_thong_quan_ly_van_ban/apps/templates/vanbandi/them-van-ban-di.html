@@ -46,6 +46,17 @@
   background: #0076A2;
 }
 
+/* ===== Tiêu đề phụ ===== */
+.vbdi-subsection-title{
+  margin: 18px 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a2332;
+  letter-spacing: 0.3px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #E2E8F0;
+}
+
 /* ===== Form spacing ===== */
 .vbdi-create-card form > div {
   margin-bottom: 16px;
@@ -341,15 +352,11 @@
         <div class="alert alert-danger">{{ form.non_field_errors }}</div>
       {% endif %}
 
-      <div class="vbdi-form-grid-4">
+      <div class="vbdi-form-grid-3">
         <div>
           <label>Số ký hiệu <span class="required">*</span></label>
           {{ form.so_ky_hieu }}
           {{ form.so_ky_hieu.errors }}
-        </div>
-        <div>
-          <label>Đơn vị soạn thảo</label>
-          {{ form.don_vi_soan_thao }}
         </div>
         <div>
           <label>Loại văn bản <span class="required">*</span></label>
@@ -491,8 +498,10 @@
             <div class="vbdi-upload-sub">PDF, DOCX, XLSX (≤ 50MB) — Chọn nhiều file</div>
           </div>
         </div>
-        <div id="related-file-preview-list"></div>
+      <div id="related-file-preview-list"></div>
       </div>
+
+      <div class="vbdi-subsection-title">Thông tin xử lý</div>
 
       <div>
         <label>Lãnh đạo xử lý <span class="required">*</span></label>
@@ -504,6 +513,7 @@
         <label>Nội dung xử lý</label>
         {{ form.noi_dung }}
       </div>
+      {% include "vanbandi/popup-ban-hanh.html" %}
 
       <div class="vbdi-action-row">
         <a href="{% url 'quanlyvanbandi:van_ban_di' %}">Hủy</a>
