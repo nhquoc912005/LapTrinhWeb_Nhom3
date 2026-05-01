@@ -57,44 +57,6 @@
     .modal-body-hsvb label span {
         color: #ef4444;
     }
-    .modal-body-hsvb select {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #cbd5e1;
-        border-radius: 2px;
-        font-size: 15px;
-        color: #334155;
-        appearance: none;
-        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2364748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>') no-repeat right 12px center;
-        background-color: #fff;
-    }
-    .modal-body-hsvb select:focus {
-        outline: none;
-        border-color: #0284c7;
-        box-shadow: 0 0 0 1px #0284c7;
-    }
-    .add-new-profile-btn-hsvb {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: #0284c7;
-        color: #fff;
-        padding: 10px 16px;
-        border-radius: 2px;
-        text-decoration: none;
-        font-size: 15px;
-        font-weight: 600;
-        margin-top: 20px;
-        transition: background 0.2s;
-    }
-    .add-new-profile-btn-hsvb:hover {
-        background: #0369a1;
-        color: #fff;
-    }
-    .add-new-profile-btn-hsvb.secondary-action {
-        border: none;
-        cursor: pointer;
-    }
     .modal-footer-hsvb {
         padding: 16px 24px;
         border-top: 1px solid #e2e8f0;
@@ -150,6 +112,81 @@
         from { transform: translateX(60px); opacity: 0; }
         to   { transform: translateX(0); opacity: 1; }
     }
+    /* Searchable Dropdown Styles */
+    .search-select-container-hsvb {
+        position: relative;
+        width: 100%;
+    }
+    .search-input-hsvb {
+        width: 100%;
+        padding: 12px 40px 12px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        font-size: 15px;
+        color: #334155;
+        background: #fff;
+        transition: all 0.2s;
+    }
+    .search-input-hsvb:focus {
+        outline: none;
+        border-color: #0284c7;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+    }
+    .search-icon-hsvb {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #64748b;
+        pointer-events: none;
+    }
+    .search-results-hsvb {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        max-height: 280px;
+        overflow-y: auto;
+        display: none;
+        z-index: 100;
+    }
+    .search-results-hsvb.active {
+        display: block;
+    }
+    .search-item-hsvb {
+        padding: 10px 14px;
+        cursor: pointer;
+        transition: background 0.2s;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .search-item-hsvb:last-child {
+        border-bottom: none;
+    }
+    .search-item-hsvb:hover {
+        background: #f0f9ff;
+    }
+    .search-item-hsvb .item-title {
+        display: block;
+        font-weight: 600;
+        color: #0f172a;
+        font-size: 14px;
+        margin-bottom: 2px;
+    }
+    .search-item-hsvb .item-sub {
+        display: block;
+        font-size: 12px;
+        color: #64748b;
+    }
+    .search-empty-hsvb {
+        padding: 16px;
+        text-align: center;
+        color: #64748b;
+        font-size: 14px;
+    }
 </style>
 
 <div class="modal-overlay-hsvb" id="themVanBanPopup" onclick="checkCloseModalHSVB(event)">
@@ -160,14 +197,26 @@
         </div>
         <div class="modal-body-hsvb">
             <label>Hồ sơ văn bản <span>*</span></label>
-            <select id="hoSoSelect" onchange="toggleSaveButtonHSVB()">
-                <option value="">-- Tìm kiếm hoặc chọn tiêu đề hồ sơ --</option>
-                {% if ds_ho_so %}
-                    {% for hs in ds_ho_so %}
-                        <option value="{{ hs.pk }}">{{ hs.tieu_de_ho_so }}</option>
-                    {% endfor %}
-                {% endif %}
-            </select>
+            
+            <div class="search-select-container-hsvb">
+                <input type="text" 
+                       id="hoSoSearchInput" 
+                       class="search-input-hsvb" 
+                       placeholder="Nhập tiêu đề hoặc ký hiệu để tìm hồ sơ..."
+                       autocomplete="off"
+                       onfocus="fetchAndShowHoSo()"
+                       oninput="filterHoSo()">
+                <div class="search-icon-hsvb">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </div>
+                <div id="hoSoSearchResults" class="search-results-hsvb">
+                    <!-- Kết quả tìm kiếm sẽ hiện ở đây -->
+                </div>
+                <input type="hidden" id="hoSoSelectedId" value="">
+            </div>
 
             {% if is_van_thu %}
             <a href="{% url 'hosovanban:them_ho_so_van_ban' %}" class="add-new-profile-btn-hsvb secondary-action">
@@ -190,13 +239,15 @@
 <div class="toast-msg-hsvb" id="toastMsgHSVB"></div>
 
 <script>
-    // ID và loại văn bản hiện tại (được set từ template cha)
     var _popupVanBanId = typeof popupVanBanId !== 'undefined' ? popupVanBanId : null;
     var _popupVanBanType = typeof popupVanBanType !== 'undefined' ? popupVanBanType : 'van_ban_di';
+    var _searchTimer = null;
 
     function openThemVanBanPopup() {
         document.getElementById('themVanBanPopup').classList.add('active');
-        document.getElementById('hoSoSelect').value = '';
+        document.getElementById('hoSoSearchInput').value = '';
+        document.getElementById('hoSoSelectedId').value = '';
+        document.getElementById('hoSoSearchResults').classList.remove('active');
         toggleSaveButtonHSVB();
     }
 
@@ -211,13 +262,69 @@
     }
 
     function toggleSaveButtonHSVB() {
-        var select = document.getElementById('hoSoSelect');
+        var selectedId = document.getElementById('hoSoSelectedId').value;
         var btnSave = document.getElementById('btnSaveThemVanBan');
-        if (select.value) {
+        if (selectedId) {
             btnSave.classList.add('active-save');
         } else {
             btnSave.classList.remove('active-save');
         }
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-select-container-hsvb')) {
+            document.getElementById('hoSoSearchResults').classList.remove('active');
+        }
+    });
+
+    function fetchAndShowHoSo() {
+        var query = document.getElementById('hoSoSearchInput').value;
+        var resultsBox = document.getElementById('hoSoSearchResults');
+        resultsBox.innerHTML = '<div class="search-empty-hsvb">Đang tải...</div>';
+        resultsBox.classList.add('active');
+
+        fetch("{% url 'hosovanban:api_ds_ho_so_hien_hanh' %}?q=" + encodeURIComponent(query))
+            .then(res => res.json())
+            .then(data => {
+                renderResults(data.ho_so);
+            })
+            .catch(err => {
+                resultsBox.innerHTML = '<div class="search-empty-hsvb">Lỗi tải dữ liệu.</div>';
+            });
+    }
+
+    function filterHoSo() {
+        clearTimeout(_searchTimer);
+        _searchTimer = setTimeout(function() {
+            fetchAndShowHoSo();
+        }, 300);
+        document.getElementById('hoSoSelectedId').value = '';
+        toggleSaveButtonHSVB();
+    }
+
+    function renderResults(list) {
+        var resultsBox = document.getElementById('hoSoSearchResults');
+        if (!list || list.length === 0) {
+            resultsBox.innerHTML = '<div class="search-empty-hsvb">Không tìm thấy hồ sơ phù hợp.</div>';
+            return;
+        }
+        var html = '';
+        list.forEach(item => {
+            html += `
+                <div class="search-item-hsvb" onclick="selectHoSo('${item.id}', '${item.tieu_de.replace(/'/g, "\\'")}', '${item.ky_hieu}')">
+                    <span class="item-title">${item.tieu_de}</span>
+                    <span class="item-sub">Ký hiệu: ${item.ky_hieu}</span>
+                </div>
+            `;
+        });
+        resultsBox.innerHTML = html;
+    }
+
+    function selectHoSo(id, title, ky_hieu) {
+        document.getElementById('hoSoSelectedId').value = id;
+        document.getElementById('hoSoSearchInput').value = title;
+        document.getElementById('hoSoSearchResults').classList.remove('active');
+        toggleSaveButtonHSVB();
     }
 
     function showToastHSVB(message, type) {
@@ -230,83 +337,60 @@
     }
 
     function saveThemVanBan() {
-        var select = document.getElementById('hoSoSelect');
-        if (!select.value) return;
-
+        var hoSoId = document.getElementById('hoSoSelectedId').value;
+        if (!hoSoId) {
+            showToastHSVB('Vui lòng chọn một hồ sơ.', 'error');
+            return;
+        }
         if (!_popupVanBanId) {
-            showToastHSVB('Không xác định được văn bản. Vui lòng tải lại trang.', 'error');
+            showToastHSVB('Không xác định được văn bản.', 'error');
             return;
         }
 
         var btnSave = document.getElementById('btnSaveThemVanBan');
+        if (btnSave.disabled) return;
         btnSave.disabled = true;
         btnSave.textContent = 'Đang lưu...';
 
         var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
-        if (!csrfToken) {
-            // Fallback: lấy từ cookie
-            var cookieValue = null;
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = cookies[i].trim();
-                if (cookie.substring(0, 'csrftoken='.length) === 'csrftoken=') {
-                    cookieValue = cookie.substring('csrftoken='.length);
-                    break;
-                }
-            }
-            if (cookieValue) {
-                csrfToken = { value: cookieValue };
-            }
-        }
+        var token = csrfToken ? csrfToken.value : '';
 
         var formData = new FormData();
-        formData.append('ho_so_id', select.value);
+        formData.append('ho_so_id', hoSoId);
         formData.append('van_ban_id', _popupVanBanId);
         formData.append('van_ban_type', _popupVanBanType);
-        if (csrfToken) {
-            formData.append('csrfmiddlewaretoken', csrfToken.value);
-        }
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
 
         fetch("{% url 'hosovanban:api_them_van_ban_vao_ho_so' %}", {
             method: 'POST',
             body: formData,
-            credentials: 'same-origin',
-            headers: {
-                'X-CSRFToken': csrfToken ? csrfToken.value : '',
-            }
+            signal: controller.signal,
+            headers: { 'X-CSRFToken': token }
         })
-        .then(function(response) { return response.json(); })
+        .then(function(response) { 
+            clearTimeout(timeoutId);
+            if (!response.ok) return response.text().then(text => { throw new Error(text) });
+            return response.json(); 
+        })
         .then(function(data) {
-            btnSave.disabled = false;
-            btnSave.textContent = 'Lưu';
             if (data.ok) {
                 closeThemVanBanPopup();
                 showToastHSVB(data.message, 'success');
-                
-                // Cập nhật giao diện: thay đổi nút Thêm hồ sơ thành Xem hồ sơ
-                var hoSoId = select.value;
-                var urlXemHoSo = "{% url 'hosovanban:chi_tiet' 0 %}".replace('0', hoSoId);
-                
-                // Tìm nút Thêm hồ sơ trong .action-btns (văn bản đến) hoặc trong div cha
-                var btnThem = document.querySelector('button[onclick="openThemVanBanPopup()"]');
-                if (btnThem && btnThem.parentNode) {
-                    var aXem = document.createElement('a');
-                    aXem.href = urlXemHoSo;
-                    aXem.className = btnThem.className; // copy class name
-                    aXem.style.textDecoration = "none";
-                    aXem.textContent = "Xem hồ sơ";
-                    btnThem.parentNode.replaceChild(aXem, btnThem);
-                } else {
-                    setTimeout(function() { location.reload(); }, 1500);
-                }
+                setTimeout(function() { location.reload(); }, 500);
             } else {
-                showToastHSVB(data.error || 'Có lỗi xảy ra.', 'error');
+                throw new Error(data.error || 'Có lỗi xảy ra.');
             }
         })
         .catch(function(err) {
+            clearTimeout(timeoutId);
             btnSave.disabled = false;
             btnSave.textContent = 'Lưu';
-            showToastHSVB('Lỗi kết nối. Vui lòng thử lại.', 'error');
+            var msg = 'Lỗi kết nối hoặc hệ thống bận. Vui lòng thử lại.';
+            if (err.name === 'AbortError') msg = 'Yêu cầu quá hạn (timeout). Vui lòng thử lại.';
+            else if (err.message) msg = err.message.length > 100 ? err.message.substring(0, 100) + '...' : err.message;
+            showToastHSVB(msg, 'error');
         });
     }
 </script>
