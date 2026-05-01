@@ -372,6 +372,7 @@ class VanBanDuyet(models.Model):
         null=False,
     )
     ngay_duyet = models.DateField(auto_now_add=True)
+    ghi_chu = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "VanBanDuyet"
@@ -452,6 +453,7 @@ class VanBanHoanTra(models.Model):
         null=False,
     )
     ngay_hoan_tra = models.DateField(auto_now_add=True)
+    han_xu_ly_hoan_tra = models.DateField(null=True, blank=True)
     noi_dung = models.TextField(null=False)
 
     class Meta:

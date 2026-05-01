@@ -102,6 +102,7 @@
 </div>
 
 <div class="table-container">
+  {% include "vanbandi/_canh_bao.html" %}
   <div class="table-scroll">
     <table class="data-table">
       <thead>
@@ -109,7 +110,9 @@
           <th class="text-center">STT</th>
           <th>Số ký hiệu</th>
           <th>Trích yếu</th>
+          <th>Nơi nhận</th>
           <th>Ngày văn bản</th>
+          <th>Hạn xử lý</th>
           <th>Đơn vị soạn thảo</th>
           <th>Độ khẩn</th>
           <th>Trạng thái</th>
@@ -124,8 +127,31 @@
               <a href="javascript:void(0)">{{ vb.so_ky_hieu }}</a>
             </td>
             <td>{{ vb.trich_yeu }}</td>
+            <td>
+              {% for noinhan in vb.noinhanvanban_set.all %}
+                {% if noinhan.phong_ban %}{{ noinhan.phong_ban.ten_phong_ban }}{% endif %}
+                {% if noinhan.don_vi_ngoai %}{{ noinhan.don_vi_ngoai.ten_don_vi }}{% endif %}
+                {% if not forloop.last %}, {% endif %}
+              {% empty %}
+                -
+              {% endfor %}
+            </td>
             <td>{{ vb.ngay_van_ban|date:"d/m/Y" }}</td>
-            <td>{{ vb.don_vi_soan_thao }}</td>
+            <td>
+              {% if vb.han_xu_ly %}
+                {{ vb.han_xu_ly|date:"d/m/Y" }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td>
+              {% if vb.nguoi_tao %}
+                {% if vb.nguoi_tao.phong_ban %}{{ vb.nguoi_tao.phong_ban.ten_phong_ban }} - {% endif %}
+                {{ vb.nguoi_tao.ho_va_ten|default:"-" }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
             <td>
               {% if vb.do_khan %}
                 {% if vb.do_khan|lower == 'hỏa tốc' or vb.do_khan|lower == 'hoa toc' or vb.do_khan|lower == 'hoa_toc' %}
@@ -140,18 +166,24 @@
               {% endif %}
             </td>
             <td>
-              {% if not request.user.is_van_thu and vb.trang_thai == "Chờ ban hành" %}
-                <span class="badge badge-da-xu-ly">Đã xử lý</span>
-              {% elif not request.user.is_van_thu and vb.trang_thai == "Đã ban hành" %}
-                <span class="badge badge-da-xu-ly">Đã xử lý</span>
+              {% if vb.trang_thai == "Đã ban hành" or vb.trang_thai == "Xem Để Biết" %}
+                {% if request.user.core_profile.pk == vb.nguoi_tao_id or request.user.core_profile.pk == vb.lanh_dao_duyet_id %}
+                  <span class="badge badge-da-xu-ly">Đã xử lý</span>
+                {% elif request.user.is_van_thu %}
+                  <span class="badge badge-da-ban-hanh">Đã ban hành</span>
+                {% else %}
+                  <span class="badge badge-xem-de-biet">Xem để biết</span>
+                {% endif %}
+              {% elif vb.trang_thai == "Chờ ban hành" %}
+                {% if request.user.is_van_thu %}
+                  <span class="badge badge-cho-ban-hanh">Chờ ban hành</span>
+                {% else %}
+                  <span class="badge badge-da-xu-ly">Đã xử lý</span>
+                {% endif %}
               {% elif vb.trang_thai|lower == "chờ xử lý" %}
                 <span class="badge badge-cho-xu-ly">{{ vb.trang_thai }}</span>
               {% elif vb.trang_thai|lower == "đã xử lý" %}
                 <span class="badge badge-da-xu-ly">{{ vb.trang_thai }}</span>
-              {% elif vb.trang_thai|lower == "chờ ban hành" %}
-                <span class="badge badge-cho-ban-hanh">{{ vb.trang_thai }}</span>
-              {% elif vb.trang_thai|lower == "đã ban hành" %}
-                <span class="badge badge-da-ban-hanh">{{ vb.trang_thai }}</span>
               {% elif vb.trang_thai|lower == "hoàn trả" %}
                 <span class="badge badge-hoan-tra">{{ vb.trang_thai }}</span>
               {% else %}
@@ -161,7 +193,7 @@
           </tr>
         {% empty %}
           <tr>
-            <td colspan="7" class="text-center">
+            <td colspan="9" class="text-center">
               <div class="empty-state">Không có văn bản đi phù hợp.</div>
             </td>
           </tr>
