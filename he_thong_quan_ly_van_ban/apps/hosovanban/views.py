@@ -33,11 +33,15 @@ def danh_sach(request):
 
     if nd:
         from django.db.models import Q
-        ds_ho_so = HoSoVanBan.objects.filter(
-            Q(nguoi_tao=nd) | 
-            Q(nguoixulyhoso__nguoi_xu_ly=nd) | 
-            Q(phongxemhoso__phong_ban=nd.phong_ban)
-        ).distinct().order_by("-ho_so_van_ban_id")
+        if request.user.is_van_thu or request.user.is_lanh_dao:
+            # Văn thư và Lãnh đạo: Xem tất cả hồ sơ
+            ds_ho_so = HoSoVanBan.objects.all().order_by("-ho_so_van_ban_id")
+        else:
+            # Chuyên viên: Xem nếu được gán xử lý HOẶC thuộc phòng ban được xem
+            ds_ho_so = HoSoVanBan.objects.filter(
+                Q(nguoixulyhoso__nguoi_xu_ly=nd) |
+                Q(phongxemhoso__phong_ban=nd.phong_ban)
+            ).distinct().order_by("-ho_so_van_ban_id")
     else:
         ds_ho_so = HoSoVanBan.objects.none()
     
@@ -186,11 +190,14 @@ def chi_tiet_ho_so_van_ban(request, pk):
 
     can_view = False
     if nd:
-        if ho_so.nguoi_tao == nd:
+        if request.user.is_van_thu or request.user.is_lanh_dao:
+            # Văn thư và Lãnh đạo được xem tất cả
             can_view = True
         elif ho_so.nguoixulyhoso_set.filter(nguoi_xu_ly=nd).exists():
+            # Người xử lý được xem
             can_view = True
         elif ho_so.phongxemhoso_set.filter(phong_ban=nd.phong_ban).exists():
+            # Người thuộc phòng ban được gán xem cũng được xem
             can_view = True
 
     if not can_view:
@@ -201,26 +208,24 @@ def chi_tiet_ho_so_van_ban(request, pk):
     ds_phong_ban = ho_so.phongxemhoso_set.select_related("phong_ban")
     ds_nguoi_xu_ly = ho_so.nguoixulyhoso_set.select_related("nguoi_xu_ly")
     
-    has_permission = False
-    if hasattr(request.user, "nguoi_dung_core") and request.user.nguoi_dung_core:
-        if ho_so.nguoi_tao == request.user.nguoi_dung_core:
-            has_permission = True
-        elif ds_nguoi_xu_ly.filter(nguoi_xu_ly=request.user.nguoi_dung_core).exists():
-            has_permission = True
-    elif hasattr(request.user, "core_profile") and request.user.core_profile:
-        if ho_so.nguoi_tao == request.user.core_profile:
-            has_permission = True
-        elif ds_nguoi_xu_ly.filter(nguoi_xu_ly=request.user.core_profile).exists():
-            has_permission = True
+    # Quyền thêm văn bản vào hồ sơ
+    has_permission = False 
+    if request.user.is_van_thu:
+        has_permission = True
+    elif nd and ho_so.nguoixulyhoso_set.filter(nguoi_xu_ly=nd).exists():
+        has_permission = True
 
-    can_delete = False
-    if has_permission:
-        if ds_van_ban.count() == 0 or ho_so.trang_thai == 2:
-            can_delete = True
+    # Quyền gỡ văn bản (Chỉ Văn thư)
+    can_remove_doc = request.user.is_van_thu
 
     can_edit = False
-    if has_permission and ho_so.trang_thai == 1:
+    if request.user.is_van_thu and ho_so.nguoi_tao == nd and ho_so.trang_thai == 1:
         can_edit = True
+
+    can_delete = False
+    if request.user.is_van_thu and ho_so.nguoi_tao == nd:
+        if ds_van_ban.count() == 0 or ho_so.trang_thai == 2:
+            can_delete = True
 
     return render(
         request,
@@ -233,26 +238,37 @@ def chi_tiet_ho_so_van_ban(request, pk):
             "can_edit": can_edit,
             "can_delete": can_delete,
             "has_permission": has_permission,
+            "can_remove_doc": can_remove_doc,
         },
     )
 
 def check_ho_so_permission(request, ho_so):
+    """Kiểm tra quyền thêm văn bản vào hồ sơ."""
+    if request.user.is_van_thu:
+        return True
+        
     if hasattr(request.user, "nguoi_dung_core") and request.user.nguoi_dung_core:
-        if ho_so.nguoi_tao == request.user.nguoi_dung_core:
-            return True
-        if ho_so.nguoixulyhoso_set.filter(nguoi_xu_ly=request.user.nguoi_dung_core).exists():
-            return True
+        nd = request.user.nguoi_dung_core
     elif hasattr(request.user, "core_profile") and request.user.core_profile:
-        if ho_so.nguoi_tao == request.user.core_profile:
-            return True
-        if ho_so.nguoixulyhoso_set.filter(nguoi_xu_ly=request.user.core_profile).exists():
-            return True
-    return False
+        nd = request.user.core_profile
+    else:
+        return False
+        
+    return ho_so.nguoixulyhoso_set.filter(nguoi_xu_ly=nd).exists()
 
 @role_required(*Customer.Role.values)
 def sua_ho_so_van_ban(request, pk):
     ho_so = get_object_or_404(HoSoVanBan, pk=pk)
-    if not check_ho_so_permission(request, ho_so):
+    
+    if hasattr(request.user, "nguoi_dung_core") and request.user.nguoi_dung_core:
+        nd = request.user.nguoi_dung_core
+    elif hasattr(request.user, "core_profile") and request.user.core_profile:
+        nd = request.user.core_profile
+    else:
+        nd = None
+
+    # Chỉ người tạo (Văn thư) được sửa hồ sơ
+    if not (request.user.is_van_thu and ho_so.nguoi_tao == nd):
         messages.error(request, "Bạn không có quyền chỉnh sửa hồ sơ này.")
         return redirect("hosovanban:chi_tiet", pk=pk)
     if ho_so.trang_thai == 2:
@@ -316,7 +332,15 @@ def xoa_ho_so_van_ban(request, pk):
     if request.method == "POST":
         ho_so = get_object_or_404(HoSoVanBan, pk=pk)
         
-        if not check_ho_so_permission(request, ho_so):
+        if hasattr(request.user, "nguoi_dung_core") and request.user.nguoi_dung_core:
+            nd = request.user.nguoi_dung_core
+        elif hasattr(request.user, "core_profile") and request.user.core_profile:
+            nd = request.user.core_profile
+        else:
+            nd = None
+
+        # Chỉ người tạo (Văn thư) được xóa hồ sơ
+        if not (request.user.is_van_thu and ho_so.nguoi_tao == nd):
             messages.error(request, "Bạn không có quyền xóa hồ sơ này.")
         elif ho_so.trang_thai == 1 and ho_so.vanban_set.exists():
             messages.error(request, "Hồ sơ đang chứa văn bản đang hiện hành, không được phép xóa.")
@@ -378,7 +402,13 @@ def api_ds_ho_so_hien_hanh(request):
     ds = HoSoVanBan.objects.filter(trang_thai=1)
     if nd:
         from django.db.models import Q
-        ds = ds.filter(Q(nguoi_tao=nd) | Q(nguoixulyhoso__nguoi_xu_ly=nd)).distinct().order_by("-ho_so_van_ban_id")
+        if request.user.is_van_thu or request.user.is_lanh_dao:
+            # Văn thư và Lãnh đạo thấy tất cả hồ sơ hiện hành để xem
+            # Tuy nhiên has_permission trong API add doc sẽ kiểm tra kỹ hơn
+            ds = ds.order_by("-ho_so_van_ban_id")
+        else:
+            # Chuyên viên chỉ thấy hồ sơ được gán xử lý
+            ds = ds.filter(Q(nguoixulyhoso__nguoi_xu_ly=nd)).distinct().order_by("-ho_so_van_ban_id")
     else:
         ds = ds.none()
 
