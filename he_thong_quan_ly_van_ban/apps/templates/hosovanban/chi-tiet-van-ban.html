@@ -19,28 +19,22 @@
 
 {% block content %}
     <!-- Profile Header -->
-    <div class="page-header">
-        <h2 class="page-header-title">Quản lý hồ sơ</h2>
-        <p class="page-header-subtitle">{{ ho_so.tieu_de_ho_so }}</p>
+    <div style="background:#fff; padding:20px; border-bottom:1px solid #e5e7eb; margin-bottom: 0px">
+        <h2 style="margin:0 0 8px 0; font-size:20px; font-weight:700; color:#0f172a;">Quản lý hồ sơ</h2>
+        <div style="color:#64748b; font-size:14px;">{{ ho_so.tieu_de_ho_so }}</div>
     </div>
 
     <!-- THÔNG TIN VĂN BẢN -->
-    <div class="section-card">
-        <div class="section-card-header">
-            <h3 class="section-card-title">
+    <div class="filter-card" style="background:#fff; border:1px solid #e5e7eb; margin-bottom:15px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 8px; border-bottom:1px solid #e5e7eb;">
+            <h3 style="color:#0284C7; font-size:16px; font-weight:700; border-left:4px solid #0284C7; padding-left:12px; margin:0; text-transform:uppercase;">
                 THÔNG TIN VĂN BẢN
             </h3>
-            
-                {% if can_delete_doc %}
-                <form method="post" action="{% url 'hosovanban:xoa_van_ban_khoi_ho_so' ho_so.pk van_ban.pk %}" onsubmit="return confirm('Bạn có chắc chắn muốn gỡ văn bản này khỏi hồ sơ không?');" style="margin:0;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-icon-action danger" aria-label="Xoá văn bản khỏi hồ sơ">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                        Xoá văn bản
-                    </button>
-                </form>
-                {% else %}
-                <button type="button" class="btn-disabled" title="Chỉ được phép xóa khi hồ sơ Hiện hành và bạn có quyền xử lý" aria-label="Không thể xoá văn bản">
+
+            {% if can_delete_doc %}
+            <form method="post" action="{% url 'hosovanban:xoa_van_ban_khoi_ho_so' ho_so.pk van_ban.pk %}" onsubmit="return confirm('Bạn có chắc chắn muốn gỡ văn bản này khỏi hồ sơ không?');" style="margin:0;">
+                {% csrf_token %}
+                <button type="submit" class="btn" style="display:inline-flex; align-items:center; gap:6px; padding:6px 16px; background:#ef4444; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:600; font-size:13px;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                     Xoá văn bản
                 </button>
@@ -53,29 +47,29 @@
             {% endif %}
         </div>
 
-        <div class="section-card-body">
-            <div class="info-grid info-grid-3col">
+        <div style="padding:16px 8px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:24px; margin-bottom:32px;">
                 <!-- Column 1 -->
                 <div>
-                    <div class="info-row">
-                        <div class="detail-label">Trích yếu:</div>
-                        <div class="detail-value">{{ van_ban.trich_yeu }}</div>
+                    <div style="margin-bottom:16px;">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Trích yếu:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500; line-height:1.5;">{{ van_ban.trich_yeu }}</div>
                     </div>
-                    <div class="info-row">
-                        <div class="detail-label">Đơn vị ban hành:</div>
-                        <div class="detail-value">{{ van_ban.don_vi_ban_hanh|default:"--" }}</div>
+                    <div style="margin-bottom:16px;">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Đơn vị ban hành:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">{% if van_ban.don_vi_ban_hanh and van_ban.don_vi_ban_hanh != 'None' %}{{ van_ban.don_vi_ban_hanh }}{% else %}--{% endif %}</div>
                     </div>
-                    <div class="info-row">
-                        <div class="detail-label">Hình thức:</div>
-                        <div class="detail-value">{{ van_ban.hinh_thuc|default:"--" }}</div>
+                    <div style="margin-bottom:16px;">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Hình thức:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">{{ van_ban.hinh_thuc|default:"--" }}</div>
                     </div>
-                    <div class="info-row">
-                        <div class="detail-label">Ngày đến:</div>
-                        <div class="detail-value">{{ van_ban.ngay_den|date:"d/m/Y"|default:"--" }}</div>
+                    <div style="margin-bottom:16px;">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Ngày đến:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">{{ van_ban.ngay_den|date:"d/m/Y"|default:"--" }}</div>
                     </div>
                     <div>
-                        <div class="detail-label">Độ mật:</div>
-                        <div class="detail-value">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Độ mật:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">
                             {% if van_ban.do_mat == 1 %}Bình thường{% elif van_ban.do_mat == 2 %}Mật{% elif van_ban.do_mat == 3 %}Tối mật{% elif van_ban.do_mat == 4 %}Tuyệt mật{% else %}Bình thường{% endif %}
                         </div>
                     </div>
@@ -83,25 +77,25 @@
 
                 <!-- Column 2 -->
                 <div>
-                    <div class="info-row">
-                        <div class="detail-label">Số ký hiệu:</div>
-                        <div class="detail-value">{{ van_ban.so_ky_hieu }}</div>
+                    <div style="margin-bottom:16px;">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Số ký hiệu:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">{{ van_ban.so_ky_hieu }}</div>
                     </div>
-                    <div class="info-row">
-                        <div class="detail-label">Loại văn bản:</div>
-                        <div class="detail-value">{{ van_ban.loai_van_ban.ten_loai_van_ban|default:van_ban.loai_van_ban|default:"--" }}</div>
+                    <div style="margin-bottom:16px;">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Loại văn bản:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">{{ van_ban.loai_van_ban.ten_loai_van_ban|default:van_ban.loai_van_ban|default:"--" }}</div>
                     </div>
-                    <div class="info-row">
-                        <div class="detail-label">Ngày văn bản:</div>
-                        <div class="detail-value">{{ van_ban.ngay_van_ban|date:"d/m/Y"|default:"--" }}</div>
+                    <div style="margin-bottom:16px;">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Ngày văn bản:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">{{ van_ban.ngay_van_ban|date:"d/m/Y"|default:"--" }}</div>
                     </div>
-                    <div class="info-row">
-                        <div class="detail-label">Hạn xử lý:</div>
-                        <div class="detail-value">{{ van_ban.han_xu_ly|date:"d/m/Y"|default:"--" }}</div>
+                    <div style="margin-bottom:16px;">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Hạn xử lý:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">{{ van_ban.han_xu_ly|date:"d/m/Y"|default:"--" }}</div>
                     </div>
                     <div>
-                        <div class="detail-label">Độ khẩn:</div>
-                        <div class="detail-value">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Độ khẩn:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">
                             {% if van_ban.do_khan == 1 %}Bình thường{% elif van_ban.do_khan == 2 %}Khẩn{% elif van_ban.do_khan == 3 %}Thượng khẩn{% elif van_ban.do_khan == 4 %}Hỏa tốc{% else %}Bình thường{% endif %}
                         </div>
                     </div>
@@ -109,23 +103,449 @@
 
                 <!-- Column 3 -->
                 <div>
-                    <div class="info-row">
-                        <div class="detail-label">Lãnh đạo tiếp nhận:</div>
-                        <div class="detail-value">{{ van_ban.lanh_dao_duyet.ho_va_ten|default:"--" }}</div>
+                    <div style="margin-bottom:16px;">
+                        <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Lãnh đạo tiếp nhận:</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">{{ van_ban.lanh_dao_duyet.ho_va_ten|default:"--" }}</div>
                     </div>
                 </div>
             </div>
 
             <!-- Nội dung trình -->
-            <div class="content-highlight">
-                <div class="content-highlight-title">Nội dung trình lãnh đạo:</div>
-                <div class="detail-value">{{ van_ban.noi_dung|default:"--" }}</div>
+            <div style="background:#f8fafc; border-left:4px solid #0284C7; padding:16px; border-radius:0 4px 4px 0;">
+                <div style="color:#0284C7; font-size:14px; font-weight:700; margin-bottom:4px;">Nội dung trình lãnh đạo:</div>
+                <div style="color:#0f172a; font-size:14px; line-height:1.5;">{{ van_ban.noi_dung|default:"--" }}</div>
             </div>
         </div>
     </div>
 
     <!-- DANH SÁCH VĂN BẢN (File Preview) -->
-    {% with file_dinh_kem=van_ban.file_dinh_kem ds_file=ds_van_ban_lien_quan preview_id="docPreview" %}
-    {% include "components/file_preview.html" %}
-    {% endwith %}
+    <div class="filter-card" style="background:#fff; border:1px solid #e5e7eb; border-radius:8px;">
+        <div style="padding:12px 8px; border-bottom:1px solid #e5e7eb;">
+            <h3 style="color:#0284C7; font-size:16px; font-weight:700; border-left:4px solid #0284C7; padding-left:12px; margin:0; text-transform:uppercase;">
+                DANH SÁCH VĂN BẢN
+            </h3>
+        </div>
+
+        <div style="padding:16px 8px;">
+            <div style="color:#64748b; font-size:13px; margin-bottom:12px;">File đính kèm:</div>
+
+            <div id="fileListWrap" style="display:flex; flex-direction:column; gap:12px; margin-bottom:18px;">
+                {% if van_ban.file_dinh_kem %}
+                <button
+                    type="button"
+                    class="file-item-btn active"
+                    data-file-url="{{ van_ban.file_dinh_kem.url }}"
+                    data-file-name="{{ van_ban.file_dinh_kem.name }}"
+                    data-file-type="{% if van_ban.file_dinh_kem.name|lower|slice:'-4:' == '.pdf' %}pdf{% elif van_ban.file_dinh_kem.name|lower|slice:'-5:' == '.docx' %}docx{% elif van_ban.file_dinh_kem.name|lower|slice:'-5:' == '.xlsx' or van_ban.file_dinh_kem.name|lower|slice:'-4:' == '.xls' %}excel{% else %}other{% endif %}"
+                    style="display:flex; align-items:center; gap:12px; padding:12px 16px; border:1px solid #0284C7; border-radius:6px; background:#eff6ff; cursor:pointer; text-align:left;">
+                    {% if van_ban.file_dinh_kem.name|lower|slice:'-4:' == '.pdf' %}
+                    <div style="color:#ef4444; font-weight:bold; font-size:12px; border:1px solid #cbd5e1; padding:4px 6px; border-radius:4px; min-width:42px; text-align:center;">
+                        PDF
+                    </div>
+                    {% else %}
+                    <div style="color:#2563eb; font-weight:bold; font-size:12px; border:1px solid #cbd5e1; padding:4px 6px; border-radius:4px; min-width:42px; text-align:center;">
+                        {% if van_ban.file_dinh_kem.name|lower|slice:'-5:' == '.docx' %}DOCX{% elif van_ban.file_dinh_kem.name|lower|slice:'-5:' == '.xlsx' or van_ban.file_dinh_kem.name|lower|slice:'-4:' == '.xls' %}EXCEL{% else %}FILE{% endif %}
+                    </div>
+                    {% endif %}
+                    <div>
+                        <div style="color:#0f172a; font-weight:600; font-size:14px;">{{ van_ban.file_dinh_kem.name }}</div>
+                        <div style="color:#94a3b8; font-size:12px;">
+                            {% if van_ban.file_dinh_kem.name|lower|slice:'-4:' == '.pdf' %}PDF Document{% elif van_ban.file_dinh_kem.name|lower|slice:'-5:' == '.docx' %}Word Document{% elif van_ban.file_dinh_kem.name|lower|slice:'-5:' == '.xlsx' or van_ban.file_dinh_kem.name|lower|slice:'-4:' == '.xls' %}Excel Document{% else %}Tệp đính kèm{% endif %}
+                        </div>
+                    </div>
+                </button>
+                {% endif %}
+
+                {% for file in ds_van_ban_lien_quan %}
+                <button
+                    type="button"
+                    class="file-item-btn"
+                    data-file-url="{{ file.file_van_ban.url }}"
+                    data-file-name="{{ file.file_van_ban.name }}"
+                    data-file-type="{% if file.file_van_ban.name|lower|slice:'-4:' == '.pdf' %}pdf{% elif file.file_van_ban.name|lower|slice:'-5:' == '.docx' %}docx{% elif file.file_van_ban.name|lower|slice:'-5:' == '.xlsx' or file.file_van_ban.name|lower|slice:'-4:' == '.xls' %}excel{% else %}other{% endif %}"
+                    style="display:flex; align-items:center; gap:12px; padding:12px 16px; border:1px solid #e5e7eb; border-radius:6px; background:#fff; cursor:pointer; text-align:left;">
+                    {% if file.file_van_ban.name|lower|slice:'-4:' == '.pdf' %}
+                    <div style="color:#ef4444; font-weight:bold; font-size:12px; border:1px solid #cbd5e1; padding:4px 6px; border-radius:4px; min-width:42px; text-align:center;">
+                        PDF
+                    </div>
+                    {% else %}
+                    <div style="color:#2563eb; font-weight:bold; font-size:12px; border:1px solid #cbd5e1; padding:4px 6px; border-radius:4px; min-width:42px; text-align:center;">
+                        {% if file.file_van_ban.name|lower|slice:'-5:' == '.docx' %}DOCX{% elif file.file_van_ban.name|lower|slice:'-5:' == '.xlsx' or file.file_van_ban.name|lower|slice:'-4:' == '.xls' %}EXCEL{% else %}FILE{% endif %}
+                    </div>
+                    {% endif %}
+                    <div>
+                        <div style="color:#0f172a; font-weight:600; font-size:14px;">{{ file.file_van_ban.name }}</div>
+                        <div style="color:#94a3b8; font-size:12px;">
+                            {% if file.file_van_ban.name|lower|slice:'-4:' == '.pdf' %}PDF Document{% elif file.file_van_ban.name|lower|slice:'-5:' == '.docx' %}Word Document{% elif file.file_van_ban.name|lower|slice:'-5:' == '.xlsx' or file.file_van_ban.name|lower|slice:'-4:' == '.xls' %}Excel Document{% else %}Tệp đính kèm{% endif %}
+                        </div>
+                    </div>
+                </button>
+                {% endfor %}
+            </div>
+
+            <div style="margin-bottom:12px; color:#64748b; font-size:13px;">Xem trước</div>
+
+            <div style="background:#d1d5db; padding:22px; border-radius:6px;">
+                <div style="display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-bottom:14px;">
+                    <a id="downloadBtn" href="#" download
+                       style="display:inline-flex; align-items:center; gap:6px; padding:9px 14px; border:1px solid #93c5fd; background:#eff6ff; border-radius:2px; text-decoration:none; color:#2563eb; font-size:14px; font-weight:700;">
+                        ⬇ Tải xuống
+                    </a>
+
+                    <button type="button" id="printBtn"
+                            style="display:inline-flex; align-items:center; gap:6px; padding:9px 14px; border:1px solid #86efac; background:#f0fdf4; border-radius:2px; color:#16a34a; font-size:14px; font-weight:700; cursor:pointer;">
+                        🖨 In
+                    </button>
+
+                    <button type="button" id="prevPageBtn"
+                            style="padding:9px 13px; border:1px solid #e5e7eb; background:#f8fafc; border-radius:2px; cursor:pointer; font-weight:700; color:#64748b;">
+                        ◀
+                    </button>
+
+                    <span id="pageInfo" style="padding:0 10px; font-size:14px; font-weight:700; color:#1e3a8a;">
+                        Trang 1 / 1
+                    </span>
+
+                    <button type="button" id="nextPageBtn"
+                            style="padding:9px 13px; border:1px solid #e5e7eb; background:#f8fafc; border-radius:2px; cursor:pointer; font-weight:700; color:#64748b;">
+                        ▶
+                    </button>
+
+                    <a id="openNewTabBtn" href="#" target="_blank"
+                       style="padding:9px 16px; border:1px solid #e5e7eb; background:#fff; border-radius:2px; text-decoration:none; color:#0f172a; font-size:14px; font-weight:600;">
+                        Mở tab mới
+                    </a>
+                </div>
+
+                <div id="previewWrap" style="background:#4b5563; padding:16px; border-radius:4px; height:650px; overflow:auto;">
+                    <div id="pdfCanvasWrap" style="display:none; background:#fff; padding:24px; border-radius:4px; text-align:center; width:max-content; min-width:100%; margin:0 auto;">
+                        <canvas id="pdfCanvas" style="display:block; margin:0 auto; border:1px solid #e5e7eb; background:#fff;"></canvas>
+                    </div>
+
+                    <div id="docxPreviewWrap" style="display:none; background:#fff; min-height:400px; padding:32px; border-radius:4px; color:#0f172a; line-height:1.6; overflow:auto;">
+                    </div>
+
+                    <div id="excelPreviewWrap" style="display:none; background:#fff; min-height:400px; padding:20px; border-radius:4px; overflow:auto;">
+                    </div>
+
+                    <div id="docPreviewFallback" style="display:none; background:#fff; min-height:400px; padding:32px; border-radius:4px; text-align:center;">
+                        <div style="font-size:16px; font-weight:700; color:#0f172a; margin-bottom:10px;">Không hỗ trợ xem trực tiếp tệp này</div>
+                        <div id="docPreviewText" style="color:#64748b; font-size:14px; margin-bottom:16px;">
+                            Tệp Word/định dạng khác nên mở ở tab mới hoặc tải xuống để xem đầy đủ.
+                        </div>
+                        <a id="docOpenLink" href="#" target="_blank" style="display:inline-block; padding:10px 16px; background:#0284C7; color:#fff; border-radius:4px; text-decoration:none;">
+                            Mở tệp
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        #previewWrap {
+            scrollbar-width: auto;
+            scrollbar-color: #8b8f97 #f1f5f9;
+        }
+
+        #previewWrap::-webkit-scrollbar {
+            width: 14px;
+            height: 14px;
+        }
+
+        #previewWrap::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        #previewWrap::-webkit-scrollbar-thumb {
+            background: #8b8f97;
+            border-radius: 8px;
+            border: 3px solid #f1f5f9;
+        }
+
+        #previewWrap::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
+        #docxPreviewWrap img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        #docxPreviewWrap table,
+        #excelPreviewWrap table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        #docxPreviewWrap table td,
+        #docxPreviewWrap table th,
+        #excelPreviewWrap table td,
+        #excelPreviewWrap table th {
+            border: 1px solid #cbd5e1;
+            padding: 8px;
+            vertical-align: top;
+        }
+
+        #excelPreviewWrap table tr:first-child {
+            background: #f1f5f9;
+            font-weight: 700;
+        }
+
+        #prevPageBtn:disabled,
+        #nextPageBtn:disabled {
+            cursor: not-allowed;
+        }
+    </style>
+
+    <script src="{% static 'vendor/pdfjs/pdf.min.js' %}"></script>
+    <script src="{% static 'vendor/mammoth/mammoth.browser.min.js' %}"></script>
+    <script src="{% static 'vendor/sheetjs/xlsx.full.min.js' %}"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const fileButtons = document.querySelectorAll(".file-item-btn");
+
+            const prevPageBtn = document.getElementById("prevPageBtn");
+            const nextPageBtn = document.getElementById("nextPageBtn");
+            const pageInfo = document.getElementById("pageInfo");
+            const openNewTabBtn = document.getElementById("openNewTabBtn");
+            const downloadBtn = document.getElementById("downloadBtn");
+            const printBtn = document.getElementById("printBtn");
+            const previewWrap = document.getElementById("previewWrap");
+
+            const pdfCanvasWrap = document.getElementById("pdfCanvasWrap");
+            const pdfCanvas = document.getElementById("pdfCanvas");
+            const docxPreviewWrap = document.getElementById("docxPreviewWrap");
+            const excelPreviewWrap = document.getElementById("excelPreviewWrap");
+            const docPreviewFallback = document.getElementById("docPreviewFallback");
+            const docOpenLink = document.getElementById("docOpenLink");
+            const docPreviewText = document.getElementById("docPreviewText");
+
+            let pdfDoc = null;
+            let currentPage = 1;
+            let totalPages = 1;
+            let currentFileType = "";
+
+            if (typeof pdfjsLib !== "undefined") {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = "{% static 'vendor/pdfjs/pdf.worker.min.js' %}";
+            }
+
+            function hideAllPreview() {
+                pdfCanvasWrap.style.display = "none";
+                docxPreviewWrap.style.display = "none";
+                excelPreviewWrap.style.display = "none";
+                docPreviewFallback.style.display = "none";
+
+                docxPreviewWrap.innerHTML = "";
+                excelPreviewWrap.innerHTML = "";
+            }
+
+            function updatePageInfo() {
+                if (currentFileType === "pdf") {
+                    pageInfo.textContent = `Trang ${currentPage} / ${totalPages}`;
+
+                    prevPageBtn.disabled = currentPage <= 1;
+                    nextPageBtn.disabled = currentPage >= totalPages;
+
+                    prevPageBtn.style.opacity = prevPageBtn.disabled ? "0.5" : "1";
+                    nextPageBtn.style.opacity = nextPageBtn.disabled ? "0.5" : "1";
+                } else {
+                    pageInfo.textContent = "Trang 1 / 1";
+
+                    prevPageBtn.disabled = true;
+                    nextPageBtn.disabled = true;
+
+                    prevPageBtn.style.opacity = "0.5";
+                    nextPageBtn.style.opacity = "0.5";
+                }
+            }
+
+            async function renderPdfPage(pageNumber) {
+                if (!pdfDoc) return;
+
+                const page = await pdfDoc.getPage(pageNumber);
+
+                const containerWidth = previewWrap.clientWidth - 80;
+                const defaultViewport = page.getViewport({ scale: 1 });
+                const scale = Math.max(1.2, containerWidth / defaultViewport.width);
+                const viewport = page.getViewport({ scale: scale });
+
+                const context = pdfCanvas.getContext("2d");
+
+                pdfCanvas.height = viewport.height;
+                pdfCanvas.width = viewport.width;
+
+                await page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                }).promise;
+
+                previewWrap.scrollTop = 0;
+                previewWrap.scrollLeft = 0;
+
+                updatePageInfo();
+            }
+
+            async function loadPdf(fileUrl) {
+                hideAllPreview();
+                pdfCanvasWrap.style.display = "block";
+
+                if (typeof pdfjsLib === "undefined") {
+                    throw new Error("Không tải được thư viện PDFJS");
+                }
+
+                pdfDoc = await pdfjsLib.getDocument(fileUrl).promise;
+                totalPages = pdfDoc.numPages;
+                currentPage = 1;
+
+                await renderPdfPage(currentPage);
+            }
+
+            async function loadDocx(fileUrl) {
+                hideAllPreview();
+                docxPreviewWrap.style.display = "block";
+                updatePageInfo();
+
+                if (typeof mammoth === "undefined") {
+                    throw new Error("Không tải được thư viện Mammoth");
+                }
+
+                const response = await fetch(fileUrl);
+                const arrayBuffer = await response.arrayBuffer();
+
+                const result = await mammoth.convertToHtml({
+                    arrayBuffer: arrayBuffer
+                });
+
+                docxPreviewWrap.innerHTML = result.value || "<p>Không đọc được nội dung file Word.</p>";
+
+                previewWrap.scrollTop = 0;
+                previewWrap.scrollLeft = 0;
+            }
+
+            async function loadExcel(fileUrl) {
+                hideAllPreview();
+                excelPreviewWrap.style.display = "block";
+                updatePageInfo();
+
+                if (typeof XLSX === "undefined") {
+                    throw new Error("Không tải được thư viện SheetJS");
+                }
+
+                const response = await fetch(fileUrl);
+                const arrayBuffer = await response.arrayBuffer();
+
+                const workbook = XLSX.read(arrayBuffer, { type: "array" });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+
+                excelPreviewWrap.innerHTML = XLSX.utils.sheet_to_html(worksheet);
+
+                previewWrap.scrollTop = 0;
+                previewWrap.scrollLeft = 0;
+            }
+
+            function loadOtherFile(fileUrl, fileName) {
+                hideAllPreview();
+                updatePageInfo();
+
+                docPreviewFallback.style.display = "block";
+                docPreviewText.textContent = `Không hỗ trợ xem trực tiếp tệp "${fileName}". Bạn có thể mở ở tab mới hoặc tải xuống.`;
+                docOpenLink.href = fileUrl;
+
+                previewWrap.scrollTop = 0;
+                previewWrap.scrollLeft = 0;
+            }
+
+            async function previewFile(button) {
+                const fileUrl = button.dataset.fileUrl;
+                const fileName = button.dataset.fileName || "";
+                const fileType = button.dataset.fileType || "other";
+
+                currentFileType = fileType;
+
+                openNewTabBtn.href = fileUrl;
+                downloadBtn.href = fileUrl;
+                docOpenLink.href = fileUrl;
+
+                fileButtons.forEach(function (btn) {
+                    btn.classList.remove("active");
+                    btn.style.border = "1px solid #e5e7eb";
+                    btn.style.background = "#fff";
+                });
+
+                button.classList.add("active");
+                button.style.border = "1px solid #0284C7";
+                button.style.background = "#eff6ff";
+
+                try {
+                    if (fileType === "pdf") {
+                        await loadPdf(fileUrl);
+                    } else if (fileType === "docx") {
+                        await loadDocx(fileUrl);
+                    } else if (fileType === "excel") {
+                        await loadExcel(fileUrl);
+                    } else {
+                        loadOtherFile(fileUrl, fileName);
+                    }
+                } catch (error) {
+                    console.error(error);
+
+                    hideAllPreview();
+                    updatePageInfo();
+
+                    docPreviewFallback.style.display = "block";
+                    docPreviewText.textContent = "Không thể xem trước tệp này. Kiểm tra lại đường dẫn file, thư viện vendor hoặc cấu hình MEDIA_URL.";
+                    docOpenLink.href = fileUrl;
+                }
+            }
+
+            prevPageBtn.addEventListener("click", async function () {
+                if (currentFileType === "pdf" && currentPage > 1) {
+                    currentPage--;
+                    await renderPdfPage(currentPage);
+                }
+            });
+
+            nextPageBtn.addEventListener("click", async function () {
+                if (currentFileType === "pdf" && currentPage < totalPages) {
+                    currentPage++;
+                    await renderPdfPage(currentPage);
+                }
+            });
+
+            printBtn.addEventListener("click", function () {
+                if (!openNewTabBtn.href || openNewTabBtn.href === "#") {
+                    return;
+                }
+
+                const printWindow = window.open(openNewTabBtn.href, "_blank");
+
+                if (printWindow) {
+                    printWindow.onload = function () {
+                        printWindow.focus();
+                        printWindow.print();
+                    };
+                }
+            });
+
+            fileButtons.forEach(function (button) {
+                button.addEventListener("click", function () {
+                    previewFile(button);
+                });
+            });
+
+            if (fileButtons.length > 0) {
+                previewFile(fileButtons[0]);
+            } else {
+                hideAllPreview();
+                updatePageInfo();
+
+                docPreviewFallback.style.display = "block";
+                docPreviewText.textContent = "Chưa có file đính kèm để xem trước.";
+            }
+        });
+    </script>
 {% endblock %}

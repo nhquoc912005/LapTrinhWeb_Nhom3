@@ -159,6 +159,12 @@
                 <button type="button" class="btn-local btn-gray" disabled title="Văn bản đã được xử lý">💾 Lưu</button>
                 <button type="button" class="btn-local btn-gray" disabled title="Văn bản đã được xử lý">↩ Hoàn trả</button>
             {% endif %}
+
+            {% if vb.ho_so_van_ban %}
+                <a href="{% url 'hosovanban:chi_tiet' vb.ho_so_van_ban.pk %}" class="btn btn-primary" style="padding:8px 16px; text-decoration:none;">Xem hồ sơ</a>
+            {% else %}
+                <button type="button" class="btn btn-primary" style="padding:8px 16px;" onclick="openThemVanBanPopup()">Thêm hồ sơ</button>
+            {% endif %}
         </div>
     </div>
     <div class="info-grid">
@@ -169,7 +175,7 @@
             </div>
             <div class="field">
                 <div class="label">Đơn vị ban hành</div>
-                <div class="value">{{ vb.don_vi_ban_hanh|default:'-' }}</div>
+                <div class="value">{% if vb.don_vi_ban_hanh and vb.don_vi_ban_hanh != 'None' %}{{ vb.don_vi_ban_hanh }}{% else %}-{% endif %}</div>
             </div>
             <div class="field">
                 <div class="label">Ngày đến</div>
