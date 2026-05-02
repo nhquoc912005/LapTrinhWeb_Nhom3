@@ -115,12 +115,6 @@ class VanBanDenForm(forms.ModelForm):
         # Văn bản đến luôn phải có phan_loai này
         vb.phan_loai = 'Văn bản đến'
 
-        # Model chung bắt buộc có don_vi_soan_thao.
-        # Với văn bản đến, field này không quan trọng bằng don_vi_ban_hanh,
-        # nên tạm gán mặc định để không lỗi NOT NULL.
-        if not vb.don_vi_soan_thao:
-            vb.don_vi_soan_thao = 'Ban Giám Đốc'
-
         if commit:
             vb.save()
 

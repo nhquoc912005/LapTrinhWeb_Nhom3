@@ -493,43 +493,47 @@
   </div>
 </div>
 
+<script id="bh-initial-items" type="application/json">
+[
+  {% if instance and instance.pk %}
+    {% for nn in instance.noinhanvanban_set.all %}
+      {% if nn.phong_ban_id %}
+        {"id": "{{ nn.phong_ban_id }}", "ten": "{{ nn.phong_ban.ten_phong_ban|default:''|escapejs }}", "loai": "pb"}{% if not forloop.last %},{% endif %}
+      {% elif nn.don_vi_ngoai_id %}
+        {"id": "{{ nn.don_vi_ngoai_id }}", "ten": "{{ nn.don_vi_ngoai.ten_don_vi|default:''|escapejs }}", "loai": "ngoai"}{% if not forloop.last %},{% endif %}
+      {% endif %}
+    {% endfor %}
+  {% elif vb and vb.pk %}
+    {% for nn in vb.noinhanvanban_set.all %}
+      {% if nn.phong_ban_id %}
+        {"id": "{{ nn.phong_ban_id }}", "ten": "{{ nn.phong_ban.ten_phong_ban|default:''|escapejs }}", "loai": "pb"}{% if not forloop.last %},{% endif %}
+      {% elif nn.don_vi_ngoai_id %}
+        {"id": "{{ nn.don_vi_ngoai_id }}", "ten": "{{ nn.don_vi_ngoai.ten_don_vi|default:''|escapejs }}", "loai": "ngoai"}{% if not forloop.last %},{% endif %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+]
+</script>
+
 <script>
+
 (function () {
   "use strict";
 
   var API_PHONG_BAN = "{% url 'quanlyvanbandi:api_chi_nhanh_phong_ban' %}";
   var API_NGOAI     = "{% url 'quanlyvanbandi:api_don_vi_ngoai' %}";
 
-  var selectedItems = [];
   var INITIAL_SELECTED_ITEMS = (function () {
-    var items = [];
-
-    {% if instance and instance.pk %}
-      {% for nn in instance.noinhanvanban_set.all %}
-        {% if nn.phong_ban_id %}
-          items.push({ id: "{{ nn.phong_ban_id }}", ten: "{{ nn.phong_ban.ten_phong_ban|default:''|escapejs }}", loai: "pb" });
-        {% elif nn.don_vi_ngoai_id %}
-          items.push({ id: "{{ nn.don_vi_ngoai_id }}", ten: "{{ nn.don_vi_ngoai.ten_don_vi|default:''|escapejs }}", loai: "ngoai" });
-        {% endif %}
-      {% endfor %}
-    {% elif vb and vb.pk %}
-      {% for nn in vb.noinhanvanban_set.all %}
-        {% if nn.phong_ban_id %}
-          items.push({ id: "{{ nn.phong_ban_id }}", ten: "{{ nn.phong_ban.ten_phong_ban|default:''|escapejs }}", loai: "pb" });
-        {% elif nn.don_vi_ngoai_id %}
-          items.push({ id: "{{ nn.don_vi_ngoai_id }}", ten: "{{ nn.don_vi_ngoai.ten_don_vi|default:''|escapejs }}", loai: "ngoai" });
-        {% endif %}
-      {% endfor %}
-    {% endif %}
-
+    var raw = JSON.parse(document.getElementById('bh-initial-items').textContent || '[]');
     var seen = {};
-    return items.filter(function (it) {
+    return raw.filter(function (it) {
       var key = String(it.loai) + ":" + String(it.id);
       if (seen[key]) return false;
       seen[key] = true;
       return true;
     });
   })();
+
   var currentMode   = "";
   var pbList        = [];
   var ngoaiList     = [];

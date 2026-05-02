@@ -416,7 +416,7 @@
         {# Chỉ hiện Phê duyệt / Hoàn trả khi văn bản đang Chờ Xử Lý #}
         {% if vb.trang_thai == "Chờ Xử Lý" %}
         {% if vb.file_dinh_kem %}
-        <button type="button" class="btn btn-primary" style="padding:8px 16px; background:#4f46e5; border-color:#4f46e5;" onclick="openKySoModal('{{ vb.file_dinh_kem.url|escapejs }}')">Ký số</button>
+        <button type="button" class="btn btn-primary" style="padding:8px 16px; background:#4f46e5; border-color:#4f46e5;" data-file-url="{{ vb.file_dinh_kem.url|escapejs }}" onclick="openKySoModal(this.dataset.fileUrl)">Ký số</button>
         {% endif %}
         <button type="button" class="btn btn-success" style="padding:8px 16px;" id="openApprovalModal">Phê
           duyệt</button>
@@ -434,7 +434,6 @@
         <a href="{% url 'quanlycongviec:task_detail' task.pk %}" class="btn btn-info" style="padding:8px 16px; text-decoration:none;">Xem công việc</a>
         {% else %}
         <a href="{% url 'quanlycongviec:giao_viec' %}?van_ban_id={{ vb.pk }}&nguon_giao=Văn bản đi&ten_cv={{ vb.trich_yeu|urlencode }}" class="btn btn-info" style="padding:8px 16px; text-decoration:none;">Giao việc</a>
-        {% endif %}
         {% endif %}
 
         {# ===== CHUYÊN VIÊN ===== #}
@@ -729,7 +728,12 @@
 
 
   {% csrf_token %}
-  <script>var popupVanBanId = {{ vb.pk }}; var popupVanBanType = 'van_ban_di';</script>
+  <script id="popup-van-ban-data" type="application/json">{"id": {{ vb.pk }}, "type": "van_ban_di"}</script>
+  <script>
+    var _popupData = JSON.parse(document.getElementById('popup-van-ban-data').textContent);
+    var popupVanBanId = _popupData.id;
+    var popupVanBanType = _popupData.type;
+  </script>
   {% include "hosovanban/them-van-ban-popup.html" %}
 {% endblock %}
 

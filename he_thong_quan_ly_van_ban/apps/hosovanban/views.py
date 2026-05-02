@@ -20,6 +20,7 @@ from apps.core.models import (
 )
 
 from .forms import HoSoVanBanCreateForm, HoSoVanBanUpdateForm
+from apps.core.utils.activity_log import ghi_lich_su_ho_so
 
 
 @role_required(*Customer.Role.values)
@@ -157,6 +158,9 @@ def them_ho_so_van_ban(request):
                         )
 
                 messages.success(request, "Thêm hồ sơ văn bản thành công!")
+
+                ghi_lich_su_ho_so(user=request.user, ho_so=ho_so, hanh_dong="TAO")
+
                 return redirect("hosovanban:danh_sach")
 
             except Exception as e:
@@ -299,6 +303,8 @@ def sua_ho_so_van_ban(request, pk):
                     for nd in form.cleaned_data["nguoi_xu_ly"]:
                         NguoiXuLyHoSo.objects.create(ho_so_van_ban=ho_so, nguoi_xu_ly=nd)
 
+                ghi_lich_su_ho_so(user=request.user, ho_so=ho_so, hanh_dong="SUA")
+
                 messages.success(request, "Cập nhật hồ sơ thành công")
                 return redirect("hosovanban:chi_tiet", pk=pk)
             except Exception as e:
@@ -339,12 +345,13 @@ def xoa_ho_so_van_ban(request, pk):
         else:
             nd = None
 
-        # Chỉ người tạo (Văn thư) được xóa hồ sơ
+        # Chỉ cho xóa khi không còn văn bản nào trong hồ sơ
         if not (request.user.is_van_thu and ho_so.nguoi_tao == nd):
             messages.error(request, "Bạn không có quyền xóa hồ sơ này.")
-        elif ho_so.trang_thai == 1 and ho_so.vanban_set.exists():
-            messages.error(request, "Hồ sơ đang chứa văn bản đang hiện hành, không được phép xóa.")
+        elif ho_so.vanban_set.exists():
+            messages.error(request, "Không thể xóa hồ sơ đang chứa văn bản.")
         else:
+            ghi_lich_su_ho_so(user=request.user, ho_so=ho_so, hanh_dong="XOA")
             ho_so.delete()
             messages.success(request, "Xóa hồ sơ văn bản thành công!")
             
@@ -472,6 +479,11 @@ def api_them_van_ban_vao_ho_so(request):
 
     van_ban.ho_so_van_ban = ho_so
     van_ban.save(update_fields=["ho_so_van_ban_id"])
+
+    ghi_lich_su_ho_so(
+        user=request.user, ho_so=ho_so, hanh_dong="SUA",
+        mo_ta=f"Thêm văn bản [{van_ban.so_ky_hieu}] vào hồ sơ",
+    )
 
     return JsonResponse({
         "ok": True,

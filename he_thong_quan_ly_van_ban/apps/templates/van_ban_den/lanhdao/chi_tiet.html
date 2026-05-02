@@ -364,23 +364,23 @@
 {% include "van_ban_den/lanhdao/_modal_chuyen_tiep.html" %}
 {% include "van_ban_den/lanhdao/_modal_hoan_tra.html" %}
 
+<script id="popup-van-ban-data" type="application/json">{"id": {{ vb.pk }}, "type": "van_ban_den"}</script>
 <script>
-    var popupVanBanId = {{ vb.pk }};
-    var popupVanBanType = 'van_ban_den';
+    var _popupData = JSON.parse(document.getElementById('popup-van-ban-data').textContent);
+    var popupVanBanId = _popupData.id;
+    var popupVanBanType = _popupData.type;
 </script>
 {% include "hosovanban/them-van-ban-popup.html" %}
 {% endblock %}
 {% block extra_js %}
+<script id="chuyen-vien-ids-data" type="application/json">[{% for item in ds_chuyen_tiep %}{{ item.chuyen_vien.id }}{% if not forloop.last %},{% endif %}{% endfor %}]</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
 <script src="{% static 'vendor/sheetjs/xlsx.full.min.js' %}"></script>
 <script>
     // ===== DỮ LIỆU CHUYÊN VIÊN ĐÃ CHỌN =====
-    const selectedChuyenVienIds = [
-        {% for item in ds_chuyen_tiep %}
-            {{ item.chuyen_vien.id }}{% if not forloop.last %},{% endif %}
-        {% endfor %}
-    ];
+    const selectedChuyenVienIds = JSON.parse(document.getElementById('chuyen-vien-ids-data').textContent || '[]');
+
     // ===== MODAL =====
     function openModal(modalId) {
         const modal = document.getElementById(modalId);
