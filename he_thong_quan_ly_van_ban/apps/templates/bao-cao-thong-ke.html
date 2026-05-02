@@ -481,108 +481,110 @@
   };
 
   window.onload = function() {
-    {% if tab == 'van-ban' %}
-    // Pie Chart VB
-    const pieDataStr = '{{ pie_vb_json|escapejs }}';
-    if(pieDataStr) {
-      const pieData = JSON.parse(pieDataStr);
-      new Chart(document.getElementById('pieChart'), {
-        type: 'doughnut',
-        data: {
-          labels: ['Đã hoàn thành', 'Chờ xử lý', 'Chờ duyệt'],
-          datasets: [{
-            data: [pieData.da_ht || 0, pieData.cho_xu_ly || 0, pieData.cho_duyet || 0],
-            backgroundColor: ['#22c55e', '#eab308', '#ef4444'],
-            borderWidth: 1
-          }]
-        },
-        options: commonPieOptions
-      });
-    }
+    const currentTab = '{{ tab|escapejs }}';
 
-    // Bar Chart VB
-    const barLabelsStr = '{{ bar_vb_labels_json|escapejs }}';
-    if(barLabelsStr && barLabelsStr !== '[]') {
-      new Chart(document.getElementById('barChart'), {
-        type: 'bar',
-        data: {
-          labels: JSON.parse(barLabelsStr),
-          datasets: [
-            {
-              label: 'Chờ duyệt',
-              data: JSON.parse('{{ bar_cho_duyet_json|escapejs }}'),
-              backgroundColor: '#ef4444',
-              borderRadius: 2
-            },
-            {
-              label: 'Chờ xử lý',
-              data: JSON.parse('{{ bar_cho_xu_ly_json|escapejs }}'),
-              backgroundColor: '#eab308',
-              borderRadius: 2
-            },
-            {
-              label: 'Đã hoàn thành',
-              data: JSON.parse('{{ bar_hoan_thanh_json|escapejs }}'),
-              backgroundColor: '#22c55e',
-              borderRadius: 2
-            }
-          ]
-        },
-        options: commonBarOptions
-      });
-    }
+    if (currentTab === 'van-ban') {
+      // Pie Chart VB
+      const pieDataStr = '{{ pie_vb_json|escapejs }}';
+      if(pieDataStr) {
+        const pieData = JSON.parse(pieDataStr);
+        new Chart(document.getElementById('pieChart'), {
+          type: 'doughnut',
+          data: {
+            labels: ['Đã hoàn thành', 'Chờ xử lý', 'Chờ duyệt'],
+            datasets: [{
+              data: [pieData.da_ht || 0, pieData.cho_xu_ly || 0, pieData.cho_duyet || 0],
+              backgroundColor: ['#22c55e', '#eab308', '#ef4444'],
+              borderWidth: 1
+            }]
+          },
+          options: commonPieOptions
+        });
+      }
 
-    {% else %}
-    // Pie Chart CV
-    const pieCvStr = '{{ pie_cv_json|escapejs }}';
-    if(pieCvStr) {
-      const pieCv = JSON.parse(pieCvStr);
-      new Chart(document.getElementById('pieChart'), {
-        type: 'doughnut',
-        data: {
-          labels: ['Đã hoàn thành', 'Đang xử lý', 'Chờ xử lý', 'Hoàn trả'],
-          datasets: [{
-            data: [pieCv.hoan_thanh || 0, pieCv.dang_xu_ly || 0, pieCv.cho_xu_ly || 0, pieCv.hoan_tra || 0],
-            backgroundColor: ['#22c55e', '#0ea5e9', '#eab308', '#ef4444'],
-            borderWidth: 1
-          }]
-        },
-        options: commonPieOptions
-      });
-    }
+      // Bar Chart VB
+      const barLabelsStr = '{{ bar_vb_labels_json|escapejs }}';
+      if(barLabelsStr && barLabelsStr !== '[]') {
+        new Chart(document.getElementById('barChart'), {
+          type: 'bar',
+          data: {
+            labels: JSON.parse(barLabelsStr),
+            datasets: [
+              {
+                label: 'Chờ duyệt',
+                data: JSON.parse('{{ bar_cho_duyet_json|escapejs }}'),
+                backgroundColor: '#ef4444',
+                borderRadius: 2
+              },
+              {
+                label: 'Chờ xử lý',
+                data: JSON.parse('{{ bar_cho_xu_ly_json|escapejs }}'),
+                backgroundColor: '#eab308',
+                borderRadius: 2
+              },
+              {
+                label: 'Đã hoàn thành',
+                data: JSON.parse('{{ bar_hoan_thanh_json|escapejs }}'),
+                backgroundColor: '#22c55e',
+                borderRadius: 2
+              }
+            ]
+          },
+          options: commonBarOptions
+        });
+      }
 
-    // Bar Chart CV
-    const barCvLabelsStr = '{{ bar_cv_labels_json|escapejs }}';
-    if(barCvLabelsStr && barCvLabelsStr !== '[]') {
-      new Chart(document.getElementById('barChart'), {
-        type: 'bar',
-        data: {
-          labels: JSON.parse(barCvLabelsStr),
-          datasets: [
-            {
-              label: 'Chờ xử lý',
-              data: JSON.parse('{{ bar_cv_cho_json|escapejs }}'),
-              backgroundColor: '#eab308',
-              borderRadius: 2
-            },
-            {
-              label: 'Đang thực hiện',
-              data: JSON.parse('{{ bar_cv_dang_json|escapejs }}'),
-              backgroundColor: '#0ea5e9',
-              borderRadius: 2
-            },
-            {
-              label: 'Đã hoàn thành',
-              data: JSON.parse('{{ bar_cv_ht_json|escapejs }}'),
-              backgroundColor: '#22c55e',
-              borderRadius: 2
-            }
-          ]
-        },
-        options: commonBarOptions
-      });
+    } else {
+      // Pie Chart CV
+      const pieCvStr = '{{ pie_cv_json|escapejs }}';
+      if(pieCvStr) {
+        const pieCv = JSON.parse(pieCvStr);
+        new Chart(document.getElementById('pieChart'), {
+          type: 'doughnut',
+          data: {
+            labels: ['Đã hoàn thành', 'Đang xử lý', 'Chờ xử lý', 'Hoàn trả'],
+            datasets: [{
+              data: [pieCv.hoan_thanh || 0, pieCv.dang_xu_ly || 0, pieCv.cho_xu_ly || 0, pieCv.hoan_tra || 0],
+              backgroundColor: ['#22c55e', '#0ea5e9', '#eab308', '#ef4444'],
+              borderWidth: 1
+            }]
+          },
+          options: commonPieOptions
+        });
+      }
+
+      // Bar Chart CV
+      const barCvLabelsStr = '{{ bar_cv_labels_json|escapejs }}';
+      if(barCvLabelsStr && barCvLabelsStr !== '[]') {
+        new Chart(document.getElementById('barChart'), {
+          type: 'bar',
+          data: {
+            labels: JSON.parse(barCvLabelsStr),
+            datasets: [
+              {
+                label: 'Chờ xử lý',
+                data: JSON.parse('{{ bar_cv_cho_json|escapejs }}'),
+                backgroundColor: '#eab308',
+                borderRadius: 2
+              },
+              {
+                label: 'Đang thực hiện',
+                data: JSON.parse('{{ bar_cv_dang_json|escapejs }}'),
+                backgroundColor: '#0ea5e9',
+                borderRadius: 2
+              },
+              {
+                label: 'Đã hoàn thành',
+                data: JSON.parse('{{ bar_cv_ht_json|escapejs }}'),
+                backgroundColor: '#22c55e',
+                borderRadius: 2
+              }
+            ]
+          },
+          options: commonBarOptions
+        });
+      }
     }
-    {% endif %}
   };
 </script>
 {% endif %}

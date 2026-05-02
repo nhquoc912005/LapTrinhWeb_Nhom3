@@ -427,7 +427,11 @@
         <a href="{% url 'quanlyvanbandi:sua_van_ban_di' vb.pk %}" class="btn btn-primary"
           style="padding:8px 16px; text-decoration:none; background:#0284C7;">Chỉnh sửa</a>
         {% endif %}
-        <button class="btn btn-primary" style="padding:8px 16px;" onclick="openThemVanBanPopup()">Lưu hồ sơ</button>
+        {% if vb.ho_so_van_ban %}
+        <a href="{% url 'hosovanban:chi_tiet' vb.ho_so_van_ban.pk %}" class="btn btn-primary" style="padding:8px 16px; text-decoration:none;">Xem hồ sơ</a>
+        {% else %}
+        <button type="button" class="btn btn-primary" style="padding:8px 16px;" onclick="openThemVanBanPopup()">Thêm hồ sơ</button>
+        {% endif %}
         {% endif %}
         
         {% if task %}
