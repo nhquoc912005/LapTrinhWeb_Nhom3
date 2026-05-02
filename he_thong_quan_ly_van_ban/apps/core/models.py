@@ -372,6 +372,7 @@ class VanBanDuyet(models.Model):
         null=False,
     )
     ngay_duyet = models.DateField(auto_now_add=True)
+    ghi_chu = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "VanBanDuyet"
@@ -452,6 +453,7 @@ class VanBanHoanTra(models.Model):
         null=False,
     )
     ngay_hoan_tra = models.DateField(auto_now_add=True)
+    han_xu_ly_hoan_tra = models.DateField(null=True, blank=True)
     noi_dung = models.TextField(null=False)
 
     class Meta:
@@ -712,6 +714,8 @@ class LichSuKySo(models.Model):
     )
 
     hash_tai_lieu = models.CharField(max_length=255, null=False)
+    file_hash = models.CharField(max_length=64, null=True, blank=True)
+    hash_algorithm = models.CharField(max_length=20, default="SHA-256")
 
     file_da_ky = models.FileField(
         upload_to="file_da_ky/",
@@ -719,13 +723,21 @@ class LichSuKySo(models.Model):
         blank=True,
     )
 
+    signature_image = models.ImageField(
+        upload_to="chu_ky_so/",
+        null=True,
+        blank=True,
+    )
+
+    verified = models.BooleanField(default=True)
+
     thoi_gian_ky = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "LichSuKySo"
         constraints = [
             models.CheckConstraint(
-                check=(
+                condition=(
                     (
                         models.Q(van_ban__isnull=False)
                         & models.Q(cong_viec__isnull=True)

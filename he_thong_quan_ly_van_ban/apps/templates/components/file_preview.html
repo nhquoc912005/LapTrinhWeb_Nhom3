@@ -1,0 +1,156 @@
+{% comment %}
+  Component: File Preview
+  Usage:
+    {% include "components/file_preview.html" with preview_id="docPreview" %}
+  
+  Required context variables (set in template before include):
+    - Uses file_dinh_kem (main file) and ds_file (list of related files)
+    - preview_id: unique ID prefix for this preview instance
+  
+  Required JS libraries (loaded by parent template):
+    - pdf.js (for PDF rendering — optional, can use iframe)
+{% endcomment %}
+
+<div class="fp-container" id="{{ preview_id|default:'filePreview' }}">
+  <div class="section-card-header">
+    <h3 class="fp-section-title">DANH SÁCH VĂN BẢN</h3>
+  </div>
+
+  <div class="section-card-body">
+    <div class="detail-label">File đính kèm:</div>
+
+    <div class="fp-file-list" id="{{ preview_id|default:'filePreview' }}-fileList">
+      {% if file_dinh_kem %}
+      <button type="button"
+        class="fp-file-btn active"
+        data-file-url="{{ file_dinh_kem.url }}"
+        data-file-name="{{ file_dinh_kem.name }}"
+        data-file-type="{% if file_dinh_kem.name|lower|slice:'-4:' == '.pdf' %}pdf{% elif file_dinh_kem.name|lower|slice:'-5:' == '.docx' %}docx{% elif file_dinh_kem.name|lower|slice:'-5:' == '.xlsx' %}xlsx{% else %}other{% endif %}">
+        <div class="fp-file-badge {% if file_dinh_kem.name|lower|slice:'-4:' == '.pdf' %}pdf{% elif file_dinh_kem.name|lower|slice:'-5:' == '.docx' %}docx{% elif file_dinh_kem.name|lower|slice:'-5:' == '.xlsx' %}xlsx{% else %}other{% endif %}">
+          {% if file_dinh_kem.name|lower|slice:'-4:' == '.pdf' %}PDF{% elif file_dinh_kem.name|lower|slice:'-5:' == '.docx' %}DOCX{% elif file_dinh_kem.name|lower|slice:'-5:' == '.xlsx' %}XLSX{% else %}FILE{% endif %}
+        </div>
+        <div>
+          <div class="fp-file-name">{{ file_dinh_kem.name }}</div>
+          <div class="fp-file-desc">
+            {% if file_dinh_kem.name|lower|slice:'-4:' == '.pdf' %}PDF Document{% elif file_dinh_kem.name|lower|slice:'-5:' == '.docx' %}Word Document{% elif file_dinh_kem.name|lower|slice:'-5:' == '.xlsx' %}Excel Spreadsheet{% else %}Tệp đính kèm{% endif %}
+          </div>
+        </div>
+      </button>
+      {% endif %}
+
+      {% for file in ds_file %}
+      <button type="button"
+        class="fp-file-btn"
+        data-file-url="{{ file.file_van_ban.url }}"
+        data-file-name="{{ file.file_van_ban.name }}"
+        data-file-type="{% if file.file_van_ban.name|lower|slice:'-4:' == '.pdf' %}pdf{% elif file.file_van_ban.name|lower|slice:'-5:' == '.docx' %}docx{% elif file.file_van_ban.name|lower|slice:'-5:' == '.xlsx' %}xlsx{% else %}other{% endif %}">
+        <div class="fp-file-badge {% if file.file_van_ban.name|lower|slice:'-4:' == '.pdf' %}pdf{% elif file.file_van_ban.name|lower|slice:'-5:' == '.docx' %}docx{% elif file.file_van_ban.name|lower|slice:'-5:' == '.xlsx' %}xlsx{% else %}other{% endif %}">
+          {% if file.file_van_ban.name|lower|slice:'-4:' == '.pdf' %}PDF{% elif file.file_van_ban.name|lower|slice:'-5:' == '.docx' %}DOCX{% elif file.file_van_ban.name|lower|slice:'-5:' == '.xlsx' %}XLSX{% else %}FILE{% endif %}
+        </div>
+        <div>
+          <div class="fp-file-name">{{ file.file_van_ban.name }}</div>
+          <div class="fp-file-desc">
+            {% if file.file_van_ban.name|lower|slice:'-4:' == '.pdf' %}PDF Document{% elif file.file_van_ban.name|lower|slice:'-5:' == '.docx' %}Word Document{% elif file.file_van_ban.name|lower|slice:'-5:' == '.xlsx' %}Excel Spreadsheet{% else %}Tệp đính kèm{% endif %}
+          </div>
+        </div>
+      </button>
+      {% endfor %}
+    </div>
+
+    <div class="detail-label">Xem trước</div>
+
+    <div class="fp-preview-wrap">
+      <div class="fp-toolbar">
+        <button type="button" class="fp-toolbar-btn" id="{{ preview_id|default:'filePreview' }}-prevPage" aria-label="Trang trước">◀</button>
+        <span class="fp-page-info" id="{{ preview_id|default:'filePreview' }}-pageInfo">Trang 1 / 1</span>
+        <button type="button" class="fp-toolbar-btn" id="{{ preview_id|default:'filePreview' }}-nextPage" aria-label="Trang sau">▶</button>
+        <a class="fp-toolbar-btn" id="{{ preview_id|default:'filePreview' }}-openTab" href="#" target="_blank" rel="noopener">Mở tab mới</a>
+      </div>
+
+      <div class="fp-preview-area">
+        <iframe
+          id="{{ preview_id|default:'filePreview' }}-frame"
+          class="fp-preview-frame"
+          title="Xem trước tài liệu"
+          {% if file_dinh_kem %}src="{{ file_dinh_kem.url }}#page=1&zoom=page-width"{% endif %}>
+        </iframe>
+
+        <div class="fp-preview-fallback" id="{{ preview_id|default:'filePreview' }}-fallback">
+          <div class="fp-preview-fallback-title">Không hỗ trợ xem trực tiếp tệp này</div>
+          <div class="fp-preview-fallback-text">
+            Tệp Word/định dạng khác nên mở ở tab mới hoặc tải xuống để xem đầy đủ.
+          </div>
+          <a class="fp-open-link" id="{{ preview_id|default:'filePreview' }}-fallbackLink" href="#" target="_blank" rel="noopener">
+            Mở tệp
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var pid = '{{ preview_id|default:"filePreview" }}';
+  var container = document.getElementById(pid);
+  if (!container) return;
+
+  var frame = document.getElementById(pid + '-frame');
+  var fallback = document.getElementById(pid + '-fallback');
+  var openTab = document.getElementById(pid + '-openTab');
+  var fallbackLink = document.getElementById(pid + '-fallbackLink');
+  var fileButtons = container.querySelectorAll('.fp-file-btn');
+
+  function showFile(url, name, type) {
+    // Update active state
+    fileButtons.forEach(function(b) { b.classList.remove('active'); });
+    event.currentTarget && event.currentTarget.classList.add('active');
+
+    if (openTab) openTab.href = url;
+    if (fallbackLink) fallbackLink.href = url;
+
+    if (type === 'pdf') {
+      frame.style.display = 'block';
+      fallback.style.display = 'none';
+      frame.src = url + '#page=1&zoom=page-width';
+    } else {
+      frame.style.display = 'none';
+      fallback.style.display = 'block';
+    }
+  }
+
+  fileButtons.forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      var url = this.getAttribute('data-file-url');
+      var name = this.getAttribute('data-file-name');
+      var type = this.getAttribute('data-file-type');
+      fileButtons.forEach(function(b) { b.classList.remove('active'); });
+      this.classList.add('active');
+
+      if (openTab) openTab.href = url;
+      if (fallbackLink) fallbackLink.href = url;
+
+      if (type === 'pdf') {
+        frame.style.display = 'block';
+        fallback.style.display = 'none';
+        frame.src = url + '#page=1&zoom=page-width';
+      } else {
+        frame.style.display = 'none';
+        fallback.style.display = 'block';
+      }
+    });
+  });
+
+  // Set initial open-tab link
+  var firstActive = container.querySelector('.fp-file-btn.active');
+  if (firstActive && openTab) {
+    openTab.href = firstActive.getAttribute('data-file-url');
+    var fType = firstActive.getAttribute('data-file-type');
+    if (fType !== 'pdf') {
+      frame.style.display = 'none';
+      fallback.style.display = 'block';
+      if (fallbackLink) fallbackLink.href = firstActive.getAttribute('data-file-url');
+    }
+  }
+})();
+</script>

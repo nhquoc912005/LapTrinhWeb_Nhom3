@@ -373,7 +373,7 @@
         display:none;
         align-items:center;
         justify-content:center;
-        z-index:9999;
+        z-index:var(--z-modal, 1000);
     }
 
     .delete-modal{
@@ -514,12 +514,6 @@
         </div>
 
         <div class="action-btns">
-            {% if vb.ho_so_van_ban %}
-                <a href="{% url 'hosovanban:chi_tiet' vb.ho_so_van_ban.pk %}" class="btn-local btn-blue" style="text-decoration:none;">Xem hồ sơ</a>
-            {% else %}
-                <button type="button" class="btn-local btn-blue" onclick="openThemVanBanPopup()">Thêm hồ sơ</button>
-            {% endif %}
-
             {% if vb.trang_thai == 'Chờ Xử Lý' or vb.trang_thai == 'Hoàn Trả' %}
                 <a href="{% url 'quanlyvanbanden:sua' vb.pk %}" class="btn-local btn-blue">
                     Chỉnh sửa

@@ -1,5 +1,5 @@
 {% load static %}
-<!-- popup-hoan-tra.html: Popup hoan tra van ban -->
+<!-- popup-hoan-tra.html: Popup hoàn trả văn bản -->
 
 <style>
   .hoantra-overlay {
@@ -7,7 +7,7 @@
     position: fixed;
     inset: 0;
     background: rgba(15, 23, 42, 0.35);
-    z-index: 9999;
+    z-index: var(--z-modal, 1000);
     align-items: flex-start;
     justify-content: center;
     padding: 60px 16px;
@@ -52,6 +52,21 @@
     color: #333;
   }
 
+  .hoantra-input {
+    width: 100%;
+    height: 44px;
+    border: 1px solid #d1d5db;
+    padding: 10px 12px;
+    font-size: 15px;
+    color: #374151;
+    outline: none;
+    font-family: inherit;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+    background: #fff;
+  }
+  .hoantra-input:focus { border-color: #0077b6; }
+
   .hoantra-textarea {
     width: 100%;
     min-height: 126px;
@@ -95,7 +110,7 @@
 
 <div id="returnModal" class="hoantra-overlay">
   <div class="hoantra-modal">
-    <h2 class="hoantra-title">Hoan tra van ban</h2>
+    <h2 class="hoantra-title">Hoàn trả văn bản</h2>
 
     {% if messages %}
       {% for message in messages %}
@@ -105,17 +120,23 @@
     {% endif %}
 
     <div class="hoantra-info-box">
-      Chuyen vien: {{ vb.nguoi_tao.ho_va_ten|default:"-" }}
+      Chuyên viên: {{ vb.nguoi_tao.ho_va_ten|default:"-" }}
     </div>
 
     <form method="post" action="{% url 'quanlyvanbandi:hoan_tra_van_ban_di' vb.pk %}">
       {% csrf_token %}
-      <label for="ly_do" class="hoantra-label">Ly do / Yeu cau chinh sua</label>
+      <label for="ly_do" class="hoantra-label">Lý do / Yêu cầu chỉnh sửa</label>
       <textarea id="ly_do" name="ly_do" class="hoantra-textarea"
-                placeholder="Nhap ly do / Yeu cau chinh sua..." required></textarea>
+                placeholder="Nhập lý do / Yêu cầu chỉnh sửa..." required></textarea>
+
+      <div style="margin-top:16px;">
+        <label for="han_xu_ly_hoan_tra" class="hoantra-label">Hạn xử lý hoàn trả</label>
+        <input id="han_xu_ly_hoan_tra" name="han_xu_ly_hoan_tra" type="date" class="hoantra-input" required>
+      </div>
+
       <div class="hoantra-footer">
-        <button type="button" id="closeReturnModal" class="hoantra-btn hoantra-btn--cancel">Huy</button>
-        <button type="submit" class="hoantra-btn hoantra-btn--submit">Hoan tra</button>
+        <button type="button" id="closeReturnModal" class="hoantra-btn hoantra-btn--cancel">Hủy</button>
+        <button type="submit" class="hoantra-btn hoantra-btn--submit">Hoàn trả</button>
       </div>
     </form>
   </div>
@@ -127,10 +148,20 @@
     var overlay  = document.getElementById("returnModal");
     var openBtn  = document.getElementById("openReturnModal");
     var closeBtn = document.getElementById("closeReturnModal");
+    var hanXuLyInput = document.getElementById("han_xu_ly_hoan_tra");
     if (!overlay) return;
 
     function openModal()  { overlay.classList.add("active");    document.body.style.overflow = "hidden"; }
     function closeModal() { overlay.classList.remove("active"); document.body.style.overflow = ""; }
+
+    // Client-side guard: disallow picking past dates (server still validates).
+    if (hanXuLyInput) {
+      var today = new Date();
+      var yyyy = today.getFullYear();
+      var mm = String(today.getMonth() + 1).padStart(2, "0");
+      var dd = String(today.getDate()).padStart(2, "0");
+      hanXuLyInput.min = yyyy + "-" + mm + "-" + dd;
+    }
 
     if (openBtn)  openBtn.addEventListener("click",  openModal);
     if (closeBtn) closeBtn.addEventListener("click", closeModal);
@@ -144,3 +175,22 @@
   }
 })();
 </script>
+
+{% if open_return_modal %}
+<script>
+  (function () {
+    function openIfRequested() {
+      var overlay = document.getElementById("returnModal");
+      if (!overlay) return;
+      overlay.classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", openIfRequested);
+    } else {
+      openIfRequested();
+    }
+  })();
+</script>
+{% endif %}

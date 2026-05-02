@@ -5,12 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Hệ thống quản lý văn bản{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}?v=1.2">
     {% block extra_css %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
 <div class="app-layout">
     <header class="app-header">
+        <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Mở menu điều hướng" title="Menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+            </svg>
+        </button>
         <div class="header-brand">
             <div class="header-brand-icon" aria-hidden="true">
                 <svg width="20" height="20" viewBox="0 0 24 24">
@@ -35,11 +40,11 @@
                 <path d="M7 10l5 5 5-5H7z"/>
             </svg>
             <div class="user-dropdown" id="userDropdown">
-                <a href="#" onclick="return false;" aria-disabled="true">
+                <a href="{% url 'accounts:profile' %}">
                     <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                     </svg>
-                    Hồ sơ cá nhân
+                    Thông tin cá nhân
                 </a>
                 <hr class="dropdown-divider">
                 <a href="{% url 'accounts:logout' %}" class="logout-link">
@@ -70,7 +75,15 @@
     </nav>
 
     <div class="app-body">
-        <aside class="app-sidebar">
+        <aside class="app-sidebar" id="appSidebar">
+            <div class="mobile-sidebar-header">
+                <span class="mobile-sidebar-title">Menu</span>
+                <button type="button" class="mobile-close-btn" id="mobileCloseBtn" aria-label="Đóng menu">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
             <nav class="sidebar-nav" aria-label="Chức năng hệ thống">
                 {% for item in sidebar_menu_items %}
                     <div class="sidebar-nav-item">
@@ -88,6 +101,7 @@
                 {% endfor %}
             </nav>
         </aside>
+        <div class="mobile-overlay" id="mobileOverlay"></div>
 
         <main class="app-content">
             <div class="breadcrumb-bar">
@@ -247,6 +261,7 @@
         };
     });
 </script>
+<script src="{% static 'assets/js/app-ui.js' %}"></script>
 
 {% block extra_js %}{% endblock %}
 </body>

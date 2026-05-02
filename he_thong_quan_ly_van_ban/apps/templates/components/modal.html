@@ -1,0 +1,31 @@
+{% comment %}
+  Component: Modal Dialog
+  Usage:
+    {% include "components/modal.html" with modal_id="myModal" modal_title="Title" modal_size="modal-md" %}
+  
+  Sizes: modal-sm (400px), modal-md (560px), modal-lg (780px), modal-xl (1000px), modal-full (95vw)
+  
+  Open/close via JS:
+    document.getElementById('myModal').classList.add('active');
+    document.getElementById('myModal').classList.remove('active');
+{% endcomment %}
+<div class="app-modal-overlay" id="{{ modal_id }}" role="dialog" aria-modal="true" aria-labelledby="{{ modal_id }}-title">
+  <div class="app-modal {{ modal_size|default:'modal-md' }}">
+    <div class="app-modal-header">
+      <h3 class="app-modal-title" id="{{ modal_id }}-title">{{ modal_title }}</h3>
+      <button type="button" class="app-modal-close" aria-label="Đóng" onclick="document.getElementById('{{ modal_id }}').classList.remove('active')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="app-modal-body">
+      {{ modal_body }}
+    </div>
+    {% if modal_footer %}
+    <div class="app-modal-footer">
+      {{ modal_footer }}
+    </div>
+    {% endif %}
+  </div>
+</div>

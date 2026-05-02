@@ -101,6 +101,7 @@
                   value="{{ user.nguoi_dung_id }}"
                   {% if selected_van_thu_id == user.nguoi_dung_id %}checked{% endif %}
                   required
+                  onchange="enableApprovalSubmit()"
                 >
                 <span>
                   {{ user.ho_va_ten }}
@@ -119,11 +120,11 @@
       </div>
 
       <div class="approval-section">
-        <label class="approval-label">Ghi chú / Chỉ đạo</label>
+        <label class="approval-label">Ghi chú cho văn thư</label>
         <textarea
           name="ghi_chu"
           class="approval-textarea"
-          placeholder="Nhập ghi chú cho chuyên viên..."
+          placeholder="Nhập ghi chú cho văn thư..."
         >{{ ghi_chu_mac_dinh|default:'' }}</textarea>
       </div>
 
@@ -131,7 +132,7 @@
         <button type="button" class="approval-btn approval-btn--cancel" id="closeApprovalModal">
           Hủy
         </button>
-        <button type="submit" class="approval-btn approval-btn--submit">
+        <button type="submit" class="approval-btn approval-btn--submit" id="btnSubmitApproval" disabled>
           Lưu
         </button>
       </div>
@@ -148,7 +149,7 @@
     align-items: flex-start;
     justify-content: center;
     padding: 60px 16px;
-    z-index: 9999;
+    z-index: var(--z-modal, 1000);
     overflow-y: auto;
   }
 
@@ -324,6 +325,16 @@
   .approval-btn--submit {
     background: #9ca3af;
     color: #fff;
+    cursor: not-allowed;
+  }
+
+  .approval-btn--submit.ready {
+    background: #0076A2;
+    cursor: pointer;
+  }
+
+  .approval-btn--submit.ready:hover {
+    background: #005d80;
   }
 
   @media (max-width: 768px) {
@@ -337,3 +348,19 @@
     }
   }
 </style>
+
+<script>
+function enableApprovalSubmit() {
+  var btn = document.getElementById('btnSubmitApproval');
+  if (btn) {
+    btn.disabled = false;
+    btn.classList.add('ready');
+  }
+}
+document.addEventListener("DOMContentLoaded", function() {
+  var radios = document.querySelectorAll('input[name="van_thu_id"]');
+  radios.forEach(function(r) {
+    if (r.checked) enableApprovalSubmit();
+  });
+});
+</script>

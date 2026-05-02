@@ -1,0 +1,172 @@
+<!-- Modal Ký Số -->
+<div class="modal-overlay" id="kySoModal" style="display: none; z-index: 9999;">
+  <div class="modal-container" style="max-width: 900px; width: 90%; max-height: 90vh; display: flex; flex-direction: column;">
+    <div class="modal-header">
+      <h3>Ký số văn bản</h3>
+      <button type="button" class="modal-close" onclick="closeKySoModal()">&times;</button>
+    </div>
+    
+    <div class="modal-body" style="flex: 1; overflow: auto; background: #e5e7eb; padding: 20px; display: flex; justify-content: center; position: relative;">
+      
+      <!-- Container for PDF and Signature -->
+      <div id="pdfContainer" style="position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background: white;">
+        <canvas id="pdfCanvas"></canvas>
+        
+        <!-- Draggable Signature Image -->
+        {% if request.user.core_profile.chu_ky_so.anh_chu_ky %}
+          <img 
+            id="signatureImage" 
+            src="{{ request.user.core_profile.chu_ky_so.anh_chu_ky.url }}" 
+            style="position: absolute; top: 0; left: 0; width: 150px; height: 80px; cursor: move; border: 1px dashed #2563eb; background: rgba(255,255,255,0.5); object-fit: contain; z-index: 10;"
+            draggable="false"
+          >
+        {% else %}
+          <div id="signatureImage" style="display: none;"></div>
+          <div style="position: absolute; top: 10px; left: 10px; background: red; color: white; padding: 5px;">Bạn chưa có ảnh chữ ký số</div>
+        {% endif %}
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" onclick="closeKySoModal()">Hủy</button>
+      <button type="button" class="btn btn-primary" onclick="submitKySo()" id="btnSubmitKySo">Xác nhận ký</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+  let pdfDoc = null;
+  let canvas = document.getElementById('pdfCanvas');
+  let ctx = canvas.getContext('2d');
+  let sigImg = document.getElementById('signatureImage');
+  let pdfContainer = document.getElementById('pdfContainer');
+
+  function openKySoModal(pdfUrl) {
+    document.getElementById('kySoModal').style.display = 'flex';
+    
+    // Load PDF
+    pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+      pdfDoc = pdf;
+      // Yêu cầu: Luôn ký ở trang cuối cùng
+      let lastPage = pdf.numPages;
+      renderPage(lastPage);
+    });
+  }
+
+  function closeKySoModal() {
+    document.getElementById('kySoModal').style.display = 'none';
+  }
+
+  function renderPage(num) {
+    pdfDoc.getPage(num).then(function(page) {
+      let viewport = page.getViewport({ scale: 1.5 }); // Hiển thị to dễ nhìn
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      
+      let renderContext = {
+        canvasContext: ctx,
+        viewport: viewport
+      };
+      page.render(renderContext);
+      
+      // Reset signature position
+      sigImg.style.left = '10px';
+      sigImg.style.top = '10px';
+    });
+  }
+
+  // --- Logic kéo thả (Drag & Drop) ---
+  let isDragging = false;
+  let startX, startY, initialX, initialY;
+
+  sigImg.addEventListener('mousedown', function(e) {
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    initialX = sigImg.offsetLeft;
+    initialY = sigImg.offsetTop;
+    sigImg.style.cursor = 'grabbing';
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (!isDragging) return;
+    
+    let dx = e.clientX - startX;
+    let dy = e.clientY - startY;
+    
+    let newX = initialX + dx;
+    let newY = initialY + dy;
+    
+    // Ràng buộc trong canvas
+    if (newX < 0) newX = 0;
+    if (newY < 0) newY = 0;
+    if (newX + sigImg.offsetWidth > canvas.width) newX = canvas.width - sigImg.offsetWidth;
+    if (newY + sigImg.offsetHeight > canvas.height) newY = canvas.height - sigImg.offsetHeight;
+    
+    sigImg.style.left = newX + 'px';
+    sigImg.style.top = newY + 'px';
+  });
+
+  document.addEventListener('mouseup', function() {
+    isDragging = false;
+    sigImg.style.cursor = 'move';
+  });
+
+  // --- Logic Gửi Tọa Độ ---
+  function submitKySo() {
+    let btn = document.getElementById('btnSubmitKySo');
+    btn.disabled = true;
+    btn.innerText = 'Đang ký...';
+
+    // Tính ratio
+    let x_ratio = sigImg.offsetLeft / canvas.width;
+    let y_ratio = sigImg.offsetTop / canvas.height;
+
+    fetch("{% url 'quanlyvanbandi:api_ky_so_van_ban' vb.pk %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken")
+      },
+      body: JSON.stringify({
+        x_ratio: x_ratio,
+        y_ratio: y_ratio
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert(data.message);
+        window.location.reload();
+      } else {
+        alert("Lỗi: " + data.message);
+        btn.disabled = false;
+        btn.innerText = 'Xác nhận ký';
+      }
+    })
+    .catch(err => {
+      alert("Đã xảy ra lỗi hệ thống.");
+      btn.disabled = false;
+      btn.innerText = 'Xác nhận ký';
+    });
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      let cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        let cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+</script>

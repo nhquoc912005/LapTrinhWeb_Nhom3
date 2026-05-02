@@ -10,6 +10,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 
+def _get_csv_env(name, default=None):
+    value = os.getenv(name, "")
+    if not value:
+        return list(default or [])
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
@@ -19,7 +26,16 @@ SECRET_KEY = 'django-insecure-^ex&97v6!agmhn7!0(&(9*=9a6iuwreaeg3r&2zj!fvlzwp19!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = _get_csv_env(
+    "DJANGO_ALLOWED_HOSTS",
+    ["localhost", "127.0.0.1", "[::1]"],
+)
+CSRF_TRUSTED_ORIGINS = _get_csv_env(
+    "DJANGO_CSRF_TRUSTED_ORIGINS",
+    ["http://localhost:8000", "http://127.0.0.1:8000"],
+)
+CSRF_COOKIE_NAME = os.getenv("DJANGO_CSRF_COOKIE_NAME", "qlvb_csrftoken")
+SESSION_COOKIE_NAME = os.getenv("DJANGO_SESSION_COOKIE_NAME", "qlvb_sessionid")
 
 
 # Application definition
@@ -94,13 +110,13 @@ if DATABASE_URL:
         "default": dj_database_url.parse(
             DATABASE_URL,
             conn_max_age=0,
-            ssl_require=True,
         )
     }
     DATABASES["default"]["CONN_MAX_AGE"] = 0
     DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
-    DATABASES["default"].setdefault("OPTIONS", {})
-    DATABASES["default"]["OPTIONS"]["sslmode"] = "require"
+    if "postgresql" in DATABASES["default"].get("ENGINE", ""):
+        DATABASES["default"].setdefault("OPTIONS", {})
+        DATABASES["default"]["OPTIONS"]["sslmode"] = "require"
 else:
     DATABASES = {
         'default': {

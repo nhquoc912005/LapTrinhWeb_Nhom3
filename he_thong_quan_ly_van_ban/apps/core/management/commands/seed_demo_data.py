@@ -13,7 +13,6 @@ from django.utils.text import slugify
 from apps.accounts.role_groups import ensure_role_groups, sync_user_role_group
 from apps.core.models import (
     BanHanh,
-    BanHanhChiTiep,
     ChiNhanh,
     ChuyenTiep,
     ChuyenTiepChiTiet,
@@ -24,6 +23,7 @@ from apps.core.models import (
     HoanTraCongViec,
     NguoiDung,
     NguoiXuLyHoSo,
+    NoiNhanVanBan,
     PheDuyetCongViec,
     PhanCongCongViec,
     PhongBan,
@@ -1212,40 +1212,40 @@ class Command(BaseCommand):
         for branch_key, dept_key in issue_targets.get("departments", []):
             department = self.departments[(branch_key, dept_key)]
             desired_pairs.add((department.pk, None))
-            detail = BanHanhChiTiep.objects.filter(
-                ban_hanh=issue_record,
+            detail = NoiNhanVanBan.objects.filter(
+                van_ban=document,
                 phong_ban=department,
                 don_vi_ngoai__isnull=True,
             ).order_by("pk").first()
             created = detail is None
             if detail is None:
-                detail = BanHanhChiTiep(
-                    ban_hanh=issue_record,
+                detail = NoiNhanVanBan(
+                    van_ban=document,
                     phong_ban=department,
                     don_vi_ngoai=None,
                 )
                 detail.save()
-            self._track("BanHanhChiTiep", created)
+            self._track("NoiNhanVanBan", created)
 
         for outside_key in issue_targets.get("outside_units", []):
             outside_unit = self.outside_units[outside_key]
             desired_pairs.add((None, outside_unit.pk))
-            detail = BanHanhChiTiep.objects.filter(
-                ban_hanh=issue_record,
+            detail = NoiNhanVanBan.objects.filter(
+                van_ban=document,
                 phong_ban__isnull=True,
                 don_vi_ngoai=outside_unit,
             ).order_by("pk").first()
             created = detail is None
             if detail is None:
-                detail = BanHanhChiTiep(
-                    ban_hanh=issue_record,
+                detail = NoiNhanVanBan(
+                    van_ban=document,
                     phong_ban=None,
                     don_vi_ngoai=outside_unit,
                 )
                 detail.save()
-            self._track("BanHanhChiTiep", created)
+            self._track("NoiNhanVanBan", created)
 
-        for detail in BanHanhChiTiep.objects.filter(ban_hanh=issue_record):
+        for detail in NoiNhanVanBan.objects.filter(van_ban=document):
             pair = (detail.phong_ban_id, detail.don_vi_ngoai_id)
             if pair not in desired_pairs:
                 detail.delete()
@@ -1808,7 +1808,7 @@ class Command(BaseCommand):
             ("ChuyenTiep", ChuyenTiep),
             ("ChuyenTiepChiTiet", ChuyenTiepChiTiet),
             ("BanHanh", BanHanh),
-            ("BanHanhChiTiep", BanHanhChiTiep),
+            ("NoiNhanVanBan", NoiNhanVanBan),
             ("VanBanHoanTra", VanBanHoanTra),
             ("VanBanDen", VanBanDen),
             ("VanBanDenChuyenTiep", VanBanDenChuyenTiep),

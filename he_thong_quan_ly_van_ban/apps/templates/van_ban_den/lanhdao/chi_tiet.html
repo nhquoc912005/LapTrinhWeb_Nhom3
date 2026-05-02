@@ -134,12 +134,7 @@
             THÔNG TIN VĂN BẢN ĐẾN
         </div>
         <div class="action-btns">
-            {% if vb.ho_so_van_ban %}
-                <a href="{% url 'hosovanban:chi_tiet' vb.ho_so_van_ban.pk %}" class="btn-local btn-blue" style="text-decoration:none;">Xem hồ sơ</a>
-            {% else %}
-                <button type="button" class="btn-local btn-blue" onclick="openThemVanBanPopup()">Thêm hồ sơ</button>
-            {% endif %}
-            <!-- # GIAO VIỆC: CHỈ HIỂN THỊ -->
+            <!-- GIAO VIỆC -->
             {% if task %}
                 <a href="{% url 'quanlycongviec:task_detail' task.pk %}" class="btn-local btn-blue">Xem công việc</a>
             {% else %}
