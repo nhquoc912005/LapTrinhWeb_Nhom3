@@ -19,6 +19,7 @@ from apps.core.models import (
     VanBanDuyet,
     VanBanHoanTra,
     VanBanLienQuan,
+    HoSoVanBan,
 )
 
 from .forms import VanBanDenForm
@@ -429,11 +430,15 @@ def chi_tiet_van_ban_den(request, pk):
     file_dinh_kem_list = _lay_file_dinh_kem_list(vb)
     tai_lieu_lien_quan_list = _lay_tai_lieu_lien_quan_list(vb)
 
+    ds_ho_so = HoSoVanBan.objects.filter(trang_thai=1).order_by('-ho_so_van_ban_id')
+
     context = {
         'vb': vb,
         'file_dinh_kem_list': file_dinh_kem_list,
         'tai_lieu_lien_quan_list': tai_lieu_lien_quan_list,
         'task': CongViec.objects.filter(van_ban_den=vb).first(),
+        'ds_ho_so': ds_ho_so,
+        'is_van_thu': request.user.is_van_thu,
     }
 
     if request.user.is_lanh_dao:

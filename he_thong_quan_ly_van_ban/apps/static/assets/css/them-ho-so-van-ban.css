@@ -1,65 +1,3 @@
-.hoso-form-page {
-    padding: 0px;
-
-}
-
-.form-card {
-    background: #fff;
-    border: 1px solid #d9dee7;
-    margin-bottom: 18px;
-    padding: 22px 24px;
-}
-
-.section-title {
-    color: #1f2937;
-    font-size: 16px;
-    font-weight: 700;
-    border-left: none;
-    padding-left: 0;
-    margin-bottom: 16px;
-    text-transform: uppercase;
-}
-
-.form-group {
-    margin-bottom: 14px;
-}
-
-.form-group label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 4px;
-    color: #374151;
-}
-
-.required {
-    color: #dc2626;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-    width: 100%;
-    border: 1px solid #d1d5db;
-    padding: 10px 12px;
-    font-size: 14px;
-    border-radius: 0px;
-    outline: none;
-    background: #fff;
-    box-sizing: border-box;
-}
-
-.form-group input[type="text"],
-.form-group input[type="date"],
-.form-group input[type="number"],
-.form-group select {
-    height: 42px;
-}
-
-.form-group input[readonly] {
-    background: #f9fafb;
-}
-
 /* Unified Dropdown Arrow */
 .form-group select,
 .custom-dropdown .dropdown-header,
@@ -73,21 +11,6 @@
     background-size: 10px auto;
     padding-right: 32px !important;
 }
-
-select::-ms-expand {
-    display: none;
-}
-
-.dropdown-arrow {
-    display: none !important;
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-
 .retention-box {
     background: #eaf2ff;
     border: 1px solid #d6e5ff;
@@ -106,47 +29,6 @@ select::-ms-expand {
     color: #2563eb;
     font-size: 12px;
 }
-
-.form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 16px;
-    padding-top: 8px;
-}
-
-.btn-cancel,
-.btn-save {
-    min-width: 72px;
-    padding: 10px 16px;
-    border: none;
-    font-size: 14px;
-    text-decoration: none;
-    text-align: center;
-    cursor: pointer;
-}
-
-.btn-cancel {
-    background: #f3f4f6;
-    color: #374151;
-    border: 1px solid #d1d5db;
-}
-
-.btn-save {
-    background: #9ca3af;
-    color: #fff;
-}
-
-.btn-save.enabled {
-    background: #0284C7;
-}
-
-@media (max-width: 768px) {
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-}
-
 .user-picker {
     display: flex;
     gap: 8px;

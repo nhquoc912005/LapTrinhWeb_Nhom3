@@ -161,8 +161,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function filterNguoiXuLyRows() {
         const keyword = (searchNguoiXuLy.value || "").toLowerCase().trim();
+        const visiblePerDept = {};
 
         nguoiXuLyRows.forEach(function (row) {
+            // Reset inline style so that .hidden class takes effect correctly
+            row.style.display = "";
+
             const textSearch = [
                 row.dataset.userName || "",
                 row.dataset.chucVu || "",
@@ -173,6 +177,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const show = keyword === "" || textSearch.includes(keyword);
             row.classList.toggle("hidden", !show);
+
+            let deptClass = null;
+            row.classList.forEach(function(c) {
+                if (c.match(/^dept-\d+$/)) deptClass = c;
+            });
+
+            if (deptClass) {
+                if (!visiblePerDept[deptClass]) visiblePerDept[deptClass] = 0;
+                if (show) visiblePerDept[deptClass]++;
+            }
+        });
+
+        // Hide/Show department headers based on visible children
+        document.querySelectorAll(".department-group-row").forEach(function(deptRow) {
+            const cb = deptRow.querySelector(".popup-dept-checkbox");
+            const icon = deptRow.querySelector(".toggle-icon");
+            
+            if (cb) {
+                const target = cb.dataset.target;
+                if (keyword === "") {
+                    deptRow.style.display = "table-row";
+                } else {
+                    deptRow.style.display = (visiblePerDept[target] > 0) ? "table-row" : "none";
+                    if (icon) icon.textContent = "-"; // Force expanded state visually
+                }
+            }
         });
     }
 

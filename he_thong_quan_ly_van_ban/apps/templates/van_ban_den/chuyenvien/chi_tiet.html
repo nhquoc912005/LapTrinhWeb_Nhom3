@@ -347,6 +347,14 @@
         <div class="vbd-card-title">
             THÔNG TIN VĂN BẢN ĐẾN
         </div>
+
+        <div class="action-btns">
+            {% if vb.ho_so_van_ban %}
+                <a href="{% url 'hosovanban:chi_tiet' vb.ho_so_van_ban.pk %}" class="btn-local btn-blue" style="text-decoration:none;">Xem hồ sơ</a>
+            {% else %}
+                <button type="button" class="btn-local btn-blue" onclick="openThemVanBanPopup()">Thêm hồ sơ</button>
+            {% endif %}
+        </div>
     </div>
 
     <div class="info-grid">
@@ -466,6 +474,13 @@
         {% endfor %}
     </div>
 </div>
+
+<script>
+    var popupVanBanId = {{ vb.pk }};
+    var popupVanBanType = 'van_ban_den';
+</script>
+{% include "hosovanban/them-van-ban-popup.html" %}
+
 {% endblock %}
 
 {% block extra_js %}
