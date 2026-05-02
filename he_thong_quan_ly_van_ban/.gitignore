@@ -18,3 +18,9 @@ staticfiles/
 .mypy_cache/
 .coverage
 .DS_Store
+
+# Environment variables (NHẠY CẢM - không commit)
+.env
+
+# Compiled Python
+*.pyc

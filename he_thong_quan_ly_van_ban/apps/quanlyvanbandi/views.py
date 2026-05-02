@@ -22,6 +22,7 @@ from .forms import VanBanDiForm, validate_file_size, validate_file_extension
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from django.db import IntegrityError
+from apps.core.utils.activity_log import ghi_lich_su_van_ban
 
 
 def _current_core_user(request):
@@ -328,6 +329,14 @@ def van_ban_di_edit(request, vb_pk=None):
                             don_vi_ngoai=dv,
                         )
 
+            hanh_dong = "SUA" if is_edit else "TAO"
+            ghi_lich_su_van_ban(
+                user=request.user,
+                van_ban=updated_van_ban,
+                hanh_dong=hanh_dong,
+                mo_ta=f"{hanh_dong} văn bản đi [{updated_van_ban.so_ky_hieu}]",
+            )
+
             messages.success(
                 request,
                 f'Văn bản "{updated_van_ban.so_ky_hieu}" đã được lưu thành công.'
@@ -472,7 +481,7 @@ def phe_duyet_van_ban_di(request, vb_pk):
     if not _user_is_assigned_approver(request, vb):
         raise PermissionDenied
 
-    if vb.trang_thai in ["Đã Xử Lý", "Đã ban hành", "Xem Để Biết"]:
+    if vb.trang_thai in ["Chờ ban hành", "Đã Xử Lý", "Đã ban hành", "Xem Để Biết"]:
         messages.warning(request, "Văn bản này không thể phê duyệt.")
         return redirect("quanlyvanbandi:chi_tiet_van_ban_di", id=vb.pk)
 
@@ -507,6 +516,11 @@ def phe_duyet_van_ban_di(request, vb_pk):
     duyet.ghi_chu = ghi_chu or None
     duyet.save()
 
+    ghi_lich_su_van_ban(
+        user=request.user, van_ban=vb, hanh_dong="DUYET",
+        trang_thai_cu="Chờ Xử Lý", trang_thai_moi="Chờ ban hành",
+    )
+
     messages.success(request, "Phê duyệt văn bản thành công.")
     return redirect("quanlyvanbandi:chi_tiet_van_ban_di", id=vb.pk)
 
@@ -527,7 +541,7 @@ def hoan_tra_van_ban_di(request, vb_pk):
     if not _user_is_assigned_approver(request, vb):
         raise PermissionDenied
 
-    if vb.trang_thai in ["Chờ ban hành", "Đã ban hành"]:
+    if vb.trang_thai in ["Chờ ban hành", "Đã ban hành", "Đã Xử Lý", "Xem Để Biết"]:
         messages.warning(request, "Văn bản này không thể hoàn trả.")
         return redirect("quanlyvanbandi:chi_tiet_van_ban_di", id=vb.pk)
 
@@ -760,12 +774,16 @@ def ban_hanh_van_ban(request, vb_pk):
         messages.error(request, "Bạn không phải văn thư được lãnh đạo chọn để ban hành văn bản này.")
         return redirect("quanlyvanbandi:chi_tiet_van_ban_di", id=vb.pk)
 
-    # Sau khi ban hành, văn bản đi được chuyển sang trạng thái "Xem Để Biết"
-    # để các nhân viên được ban hành có thể xem (ẩn các khối nội dung nhạy cảm).
-    vb.trang_thai = "Xem Để Biết"
+    # Sau khi ban hành, văn bản đi gốc chuyển sang "Đã ban hành"
+    vb.trang_thai = "Đã ban hành"
     vb.save(update_fields=["trang_thai"])
 
     BanHanh.objects.create(van_ban=vb)
+
+    ghi_lich_su_van_ban(
+        user=request.user, van_ban=vb, hanh_dong="BAN_HANH",
+        trang_thai_cu="Chờ ban hành", trang_thai_moi="Đã ban hành",
+    )
 
     ds_noi_nhan_noi_bo = NoiNhanVanBan.objects.filter(
         van_ban=vb, phong_ban__isnull=False
@@ -861,6 +879,7 @@ def xoa_van_ban_di(request, vb_pk):
 
     # Xóa các bản ghi liên quan
     vb.vanbanlienquan_set.all().delete()
+    ghi_lich_su_van_ban(user=request.user, van_ban=vb, hanh_dong="XOA", trang_thai_cu=vb.trang_thai)
     vb.delete()
 
     messages.success(request, "Xóa văn bản thành công.")
@@ -870,9 +889,7 @@ import os
 from django.conf import settings
 from django.core.files import File
 from .utils_ky_so import sign_pdf_with_ratio
-from django.views.decorators.csrf import csrf_exempt
 
-@csrf_exempt
 @require_POST
 @role_required(Customer.Role.LANH_DAO)
 def api_ky_so_van_ban(request, vb_pk):
@@ -929,17 +946,19 @@ def api_ky_so_van_ban(request, vb_pk):
 
     with open(output_pdf_path, 'rb') as f:
         signed_file = File(f, name=output_filename)
-        
+
         # Cập nhật ghi đè file đính kèm của VanBan
         vb.file_dinh_kem.save(output_filename, signed_file, save=False)
         vb.kich_thuoc = signed_file.size
-        vb.save(update_fields=["file_dinh_kem", "kich_thuoc"])
+        # Sau ký số chuyển trạng thái sang Chờ ban hành
+        vb.trang_thai = "Chờ ban hành"
+        vb.save(update_fields=["file_dinh_kem", "kich_thuoc", "trang_thai"])
 
         # Lưu lịch sử ký số
         import hashlib
         f.seek(0)
         file_hash = hashlib.sha256(f.read()).hexdigest()
-        
+
         f.seek(0)
         LichSuKySo.objects.update_or_create(
             van_ban=vb,
@@ -954,4 +973,4 @@ def api_ky_so_van_ban(request, vb_pk):
     if os.path.exists(output_pdf_path):
         os.remove(output_pdf_path)
 
-    return JsonResponse({"success": True, "message": "Ký số thành công."})
+    return JsonResponse({"success": True, "message": "Ký số thành công. Văn bản đã chuyển sang trạng thái Chờ ban hành."})

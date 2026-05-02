@@ -22,6 +22,7 @@ from apps.core.models import (
 )
 
 from .forms import ProcessTaskForm, ReturnTaskForm, UpdateTaskResultForm
+from apps.core.utils.activity_log import ghi_lich_su_cong_viec
 
 
 def _task_queryset():
@@ -260,6 +261,11 @@ def add_task(request):
                 nguoi_phoi_hop = get_object_or_404(NguoiDung, pk=nguoi_phoi_hop_id)
                 PhanCongCongViec.objects.create(cong_viec=task, nguoi_phoi_hop=nguoi_phoi_hop)
 
+        ghi_lich_su_cong_viec(
+            user=request.user, cong_viec=task, hanh_dong="TAO",
+            trang_thai_moi=CongViec.TrangThai.CHO_XU_LY,
+        )
+
         messages.success(request, f"Đã giao việc '{ten_cv}' thành công.")
     except Exception as exc:
         messages.error(request, f"Lỗi hệ thống khi giao việc: {exc}")
@@ -281,6 +287,7 @@ def delete_task(request, task_id):
         return redirect("quanlycongviec:task_detail", task_id=task.pk)
 
     task.delete()
+    ghi_lich_su_cong_viec(user=request.user, cong_viec=task, hanh_dong="XOA")
     messages.success(request, "Đã xóa công việc.")
     return redirect("quanlycongviec:giao_viec")
 
@@ -382,6 +389,10 @@ def edit_task(request, task_id):
                 nguoi_tai_len=request.user.core_profile,
             )
 
+        ghi_lich_su_cong_viec(
+            user=request.user, cong_viec=task, hanh_dong="SUA",
+        )
+
         messages.success(request, f"Đã cập nhật công việc '{task.ten_cong_viec}' thành công.")
     except Exception as exc:
         messages.error(request, f"Lỗi khi cập nhật công việc: {exc}")
@@ -417,6 +428,12 @@ def process_task(request, task_id):
                         else CongViec.TrangThai.DA_HOAN_THANH
                     )
                     task.save()
+
+                    ghi_lich_su_cong_viec(
+                        user=request.user, cong_viec=task, hanh_dong="SUA",
+                        mo_ta="Xử lý công việc",
+                        trang_thai_moi=task.trang_thai,
+                    )
 
                     _create_assignment_files(
                         task,
@@ -550,6 +567,10 @@ def return_task(request, task_id):
                     nguoi_hoan_tra=request.user.core_profile,
                     noi_dung=form.cleaned_data["noi_dung"],
                 )
+                ghi_lich_su_cong_viec(
+                    user=request.user, cong_viec=task, hanh_dong="HOAN_TRA",
+                    trang_thai_moi=next_status,
+                )
             messages.success(request, success_message)
             return redirect("quanlycongviec:task_detail", task_id=task.pk)
 
@@ -581,6 +602,11 @@ def approve_task(request, task_id):
     task.trang_thai = CongViec.TrangThai.DA_HOAN_THANH
     task.save(update_fields=["trang_thai", "last_activity"])
     PheDuyetCongViec.objects.create(cong_viec=task)
+    ghi_lich_su_cong_viec(
+        user=request.user, cong_viec=task, hanh_dong="DUYET",
+        trang_thai_cu=CongViec.TrangThai.CHO_DUYET,
+        trang_thai_moi=CongViec.TrangThai.DA_HOAN_THANH,
+    )
     messages.success(request, "Đã duyệt công việc hoàn thành.")
     return redirect("quanlycongviec:task_detail", task_id=task.pk)
 
@@ -589,7 +615,7 @@ def approve_task(request, task_id):
 def get_task_detail(request, task_id):
     task = _get_task(task_id)
 
-    if not _user_is_task_manager(request, task):
+    if not _can_view_task(request, task):
         return JsonResponse({"detail": "Forbidden"}, status=403)
 
     collaborators = PhanCongCongViec.objects.filter(cong_viec=task)

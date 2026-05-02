@@ -24,6 +24,7 @@ from apps.core.models import (
 
 from .forms import VanBanDenForm
 from apps.core.models import CongViec
+from apps.core.utils.activity_log import ghi_lich_su_van_ban
 
 
 # =========================================================
@@ -497,9 +498,6 @@ def them_van_ban_den(request):
             vb.file_dinh_kem = file_chinh
             vb.kich_thuoc = file_chinh.size
 
-            if not vb.don_vi_soan_thao:
-                vb.don_vi_soan_thao = 'Ban Giám Đốc'
-
             vb.save()
 
             # Nếu input file_dinh_kem_files cho phép nhiều file,
@@ -517,6 +515,11 @@ def them_van_ban_den(request):
                     file_van_ban=f,
                     kich_thuoc=f.size
                 )
+
+            ghi_lich_su_van_ban(
+                user=request.user, van_ban=vb, hanh_dong="TAO",
+                mo_ta=f"Thêm văn bản đến [{vb.so_ky_hieu}]",
+            )
 
             messages.success(request, 'Trình văn bản đến thành công.')
             return redirect('quanlyvanbanden:danh_sach')
@@ -618,6 +621,11 @@ def sua_van_ban_den(request, pk):
                         kich_thuoc=f.size
                     )
 
+                ghi_lich_su_van_ban(
+                    user=request.user, van_ban=vb, hanh_dong="SUA",
+                    mo_ta=f"Sửa văn bản đến [{vb.so_ky_hieu}]",
+                )
+
                 messages.success(request, 'Chỉnh sửa văn bản đến thành công.')
                 return redirect('quanlyvanbanden:chi_tiet', pk=vb.pk)
     else:
@@ -651,6 +659,11 @@ def xoa_van_ban_den(request, pk):
     _gan_alias_van_ban(vb)
 
     if request.method == 'POST':
+        # Chỉ cho xóa khi văn bản chưa được xử lý
+        if vb.trang_thai not in [TRANG_THAI_CHO_XU_LY, TRANG_THAI_HOAN_TRA]:
+            messages.error(request, 'Chỉ được xóa văn bản đến ở trạng thái Chờ Xử Lý hoặc Hoàn Trả.')
+            return redirect('quanlyvanbanden:chi_tiet', pk=vb.pk)
+
         if vb.file_dinh_kem:
             _xoa_file_vat_ly(vb.file_dinh_kem)
 
@@ -658,6 +671,10 @@ def xoa_van_ban_den(request, pk):
             _xoa_file_vat_ly(tep.file_van_ban)
             tep.delete()
 
+        ghi_lich_su_van_ban(
+            user=request.user, van_ban=vb, hanh_dong="XOA",
+            trang_thai_cu=vb.trang_thai,
+        )
         vb.delete()
 
         messages.success(request, 'Xóa văn bản đến thành công.')
@@ -697,6 +714,11 @@ def lanh_dao_luu_van_ban_den(request, pk):
         vb.save()
 
         _lay_hoac_tao_van_ban_duyet(vb)
+
+        ghi_lich_su_van_ban(
+            user=request.user, van_ban=vb, hanh_dong="DUYET",
+            trang_thai_cu=TRANG_THAI_CHO_XU_LY, trang_thai_moi=TRANG_THAI_XEM_DE_BIET,
+        )
 
         messages.success(request, 'Đã lưu văn bản với trạng thái "Xem để biết".')
         return redirect('quanlyvanbanden:chi_tiet', pk=vb.pk)
@@ -825,6 +847,11 @@ def lanh_dao_hoan_tra_van_ban_den(request, pk):
 
         vb.trang_thai = TRANG_THAI_HOAN_TRA
         vb.save()
+
+        ghi_lich_su_van_ban(
+            user=request.user, van_ban=vb, hanh_dong="HOAN_TRA",
+            trang_thai_cu=TRANG_THAI_XEM_DE_BIET, trang_thai_moi=TRANG_THAI_HOAN_TRA,
+        )
 
         messages.success(request, 'Đã hoàn trả văn bản đến.')
         return redirect('quanlyvanbanden:chi_tiet', pk=vb.pk)

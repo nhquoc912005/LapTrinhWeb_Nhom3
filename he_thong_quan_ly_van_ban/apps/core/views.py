@@ -12,7 +12,9 @@ from .models import (
     ChuyenTiepChiTiet,
     CongViec,
     HoSoVanBan,
+    LichSuHoatDong,
     NguoiDung,
+    PhongBan,
     VanBan,
 )
 
@@ -707,4 +709,311 @@ def dashboard(request):
 
 @role_required(*Customer.Role.values)
 def bao_cao_thong_ke(request):
-    return render(request, "bao-cao-thong-ke.html")
+    """Báo cáo thống kê dựa trên dữ liệu thực từ database."""
+    import json as _json
+    from datetime import date, timedelta
+    from django.db.models import Count, F, Q
+
+    # ── Tab hiện tại ──────────────────────────────────────────────
+    tab = request.GET.get('tab', 'van-ban')  # 'van-ban' | 'cong-viec'
+
+    # ── Parse ngày ────────────────────────────────────────────────
+    tu_ngay_str = request.GET.get('tu_ngay', '').strip()
+    den_ngay_str = request.GET.get('den_ngay', '').strip()
+    tu_ngay = den_ngay = None
+    loi_ngay = ''
+    da_xem = bool(request.GET.get('xem', ''))
+
+    try:
+        if tu_ngay_str:
+            tu_ngay = date.fromisoformat(tu_ngay_str)
+        if den_ngay_str:
+            den_ngay = date.fromisoformat(den_ngay_str)
+    except ValueError:
+        pass
+
+    if da_xem and (not tu_ngay or not den_ngay):
+        loi_ngay = 'Vui lòng chọn khoảng thời gian thống kê.'
+
+    today = date.today()
+
+    # ── Dropdown choices ──────────────────────────────────────────
+    loai_van_ban_choices = VanBan.LOAI_VAN_BAN_CHOICES
+    hinh_thuc_choices = VanBan.HINH_THUC_CHOICES
+    don_vi_list = list(
+        VanBan.objects.exclude(don_vi_ban_hanh__isnull=True)
+                      .exclude(don_vi_ban_hanh='')
+                      .values_list('don_vi_ban_hanh', flat=True)
+                      .distinct().order_by('don_vi_ban_hanh')
+    )
+    phong_ban_list = PhongBan.objects.order_by('ten_phong_ban')
+    nguoi_dung_list = NguoiDung.objects.select_related('phong_ban').order_by('ho_va_ten')
+
+    # ── Filter params (Tab VB) ────────────────────────────────────
+    p_loai_vb  = request.GET.get('loai_van_ban', '')
+    p_don_vi   = request.GET.get('don_vi_ban_hanh', '')
+    p_tt_vb    = request.GET.get('trang_thai_vb', '')
+    p_tieu_chi = request.GET.get('tieu_chi', 'Tổng hợp')
+
+    # ── Filter params (Tab CV) ────────────────────────────────────
+    p_doi_tuong  = request.GET.get('doi_tuong', 'Đơn vị')
+    p_phong_ban  = request.GET.get('phong_ban', '')
+    p_nhan_vien  = request.GET.get('nhan_vien', '')
+    p_tt_cv      = request.GET.get('trang_thai_cv', '')
+
+    # ═══════════════════════════════════════════════════════════════
+    # TAB 1 – Thống kê văn bản
+    # ═══════════════════════════════════════════════════════════════
+    vb_qs = VanBan.objects.all()
+    if tu_ngay:
+        vb_qs = vb_qs.filter(ngay_van_ban__gte=tu_ngay)
+    if den_ngay:
+        vb_qs = vb_qs.filter(ngay_van_ban__lte=den_ngay)
+    if p_loai_vb:
+        vb_qs = vb_qs.filter(loai_van_ban=p_loai_vb)
+    if p_don_vi:
+        vb_qs = vb_qs.filter(don_vi_ban_hanh=p_don_vi)
+    if p_tt_vb:
+        vb_qs = vb_qs.filter(trang_thai=p_tt_vb)
+
+    tong_vb = vb_qs.count()
+
+    # Đúng hạn: đã xử lý/ban hành & (han_xu_ly là null HOẶC ngay_van_ban <= han_xu_ly)
+    TRANG_THAI_HOAN_THANH = ['Đã Xử Lý', 'Đã ban hành', 'Xem Để Biết']
+    dung_han_vb = vb_qs.filter(
+        Q(trang_thai__in=TRANG_THAI_HOAN_THANH) &
+        (Q(han_xu_ly__isnull=True) | Q(ngay_van_ban__lte=F('han_xu_ly')))
+    ).count()
+    tre_han_vb = vb_qs.filter(
+        Q(trang_thai__in=TRANG_THAI_HOAN_THANH) &
+        Q(han_xu_ly__isnull=False) &
+        Q(ngay_van_ban__gt=F('han_xu_ly'))
+    ).count()
+
+    # Tỷ lệ trạng thái cho pie chart
+    cho_xu_ly_vb = vb_qs.filter(trang_thai__in=['Chờ Xử Lý', 'Chờ ban hành']).count()
+    cho_duyet_vb = vb_qs.filter(trang_thai='Hoàn Trả').count()
+    da_ht_vb     = vb_qs.filter(trang_thai__in=TRANG_THAI_HOAN_THANH).count()
+
+    # Bar chart: breakdown theo hinh_thuc
+    HINH_THUC_LABELS = ['Quyết định', 'Công văn', 'Thông báo', 'Tờ trình', 'Báo cáo', 'Hợp đồng']
+    bar_vb_labels = []
+    bar_cho_duyet = []
+    bar_cho_xu_ly = []
+    bar_hoan_thanh = []
+
+    for ht in HINH_THUC_LABELS:
+        sub = vb_qs.filter(hinh_thuc=ht)
+        cnt = sub.count()
+        if cnt == 0:
+            continue
+        bar_vb_labels.append(ht)
+        bar_cho_duyet.append(sub.filter(trang_thai='Hoàn Trả').count())
+        bar_cho_xu_ly.append(sub.filter(trang_thai__in=['Chờ Xử Lý', 'Chờ ban hành']).count())
+        bar_hoan_thanh.append(sub.filter(trang_thai__in=TRANG_THAI_HOAN_THANH).count())
+
+    # Bảng chi tiết theo loai_van_ban
+    bang_vb = []
+    for loai, _ in VanBan.LOAI_VAN_BAN_CHOICES:
+        sub = vb_qs.filter(loai_van_ban=loai)
+        cnt = sub.count()
+        if cnt == 0:
+            continue
+        dh = sub.filter(
+            Q(trang_thai__in=TRANG_THAI_HOAN_THANH) &
+            (Q(han_xu_ly__isnull=True) | Q(ngay_van_ban__lte=F('han_xu_ly')))
+        ).count()
+        th = sub.filter(
+            Q(trang_thai__in=TRANG_THAI_HOAN_THANH) &
+            Q(han_xu_ly__isnull=False) &
+            Q(ngay_van_ban__gt=F('han_xu_ly'))
+        ).count()
+        cx = sub.filter(trang_thai__in=['Chờ Xử Lý', 'Chờ ban hành']).count()
+        bang_vb.append({'loai': loai, 'tong': cnt, 'dung_han': dh, 'tre_han': th, 'cho_xu_ly': cx})
+
+    # ═══════════════════════════════════════════════════════════════
+    # TAB 2 – Thống kê công việc
+    # ═══════════════════════════════════════════════════════════════
+    cv_qs = CongViec.objects.select_related('nguoi_thuc_hien__phong_ban')
+    if tu_ngay:
+        cv_qs = cv_qs.filter(ngay_bat_dau__gte=tu_ngay)
+    if den_ngay:
+        cv_qs = cv_qs.filter(ngay_bat_dau__lte=den_ngay)
+    if p_phong_ban:
+        cv_qs = cv_qs.filter(nguoi_thuc_hien__phong_ban__phong_ban_id=p_phong_ban)
+    if p_nhan_vien:
+        cv_qs = cv_qs.filter(nguoi_thuc_hien__nguoi_dung_id=p_nhan_vien)
+    if p_tt_cv:
+        cv_qs = cv_qs.filter(trang_thai=p_tt_cv)
+
+    tong_cv      = cv_qs.count()
+    hoan_thanh   = cv_qs.filter(trang_thai=CongViec.TrangThai.DA_HOAN_THANH).count()
+    dang_xu_ly   = cv_qs.filter(trang_thai=CongViec.TrangThai.CHO_DUYET).count()
+    cho_xu_ly_cv = cv_qs.filter(trang_thai=CongViec.TrangThai.CHO_XU_LY).count()
+    hoan_tra_cv  = cv_qs.filter(trang_thai__in=[CongViec.TrangThai.HOAN_TRA_CV, CongViec.TrangThai.HOAN_TRA_LD]).count()
+
+    # Pie chart CV
+    pie_cv = {
+        'hoan_thanh': hoan_thanh,
+        'dang_xu_ly': dang_xu_ly,
+        'cho_xu_ly':  cho_xu_ly_cv,
+        'hoan_tra':   hoan_tra_cv,
+    }
+
+    # Bar chart CV: theo cá nhân hoặc đơn vị
+    bar_cv_labels = []
+    bar_cv_cho    = []
+    bar_cv_dang   = []
+    bar_cv_ht     = []
+
+    if p_doi_tuong == 'Cá nhân':
+        from django.db.models import Subquery, OuterRef
+        people = (cv_qs.values('nguoi_thuc_hien__nguoi_dung_id', 'nguoi_thuc_hien__ho_va_ten')
+                       .annotate(cnt=Count('cong_viec_id'))
+                       .order_by('-cnt')[:8])
+        for p in people:
+            pid = p['nguoi_thuc_hien__nguoi_dung_id']
+            name = p['nguoi_thuc_hien__ho_va_ten'] or f'ID {pid}'
+            sub = cv_qs.filter(nguoi_thuc_hien__nguoi_dung_id=pid)
+            bar_cv_labels.append(name[:20])
+            bar_cv_cho.append(sub.filter(trang_thai=CongViec.TrangThai.CHO_XU_LY).count())
+            bar_cv_dang.append(sub.filter(trang_thai=CongViec.TrangThai.CHO_DUYET).count())
+            bar_cv_ht.append(sub.filter(trang_thai=CongViec.TrangThai.DA_HOAN_THANH).count())
+    else:
+        phong_bans = (cv_qs.values('nguoi_thuc_hien__phong_ban__phong_ban_id',
+                                   'nguoi_thuc_hien__phong_ban__ten_phong_ban')
+                           .annotate(cnt=Count('cong_viec_id'))
+                           .order_by('-cnt')[:8])
+        for pb in phong_bans:
+            pbid = pb['nguoi_thuc_hien__phong_ban__phong_ban_id']
+            name = pb['nguoi_thuc_hien__phong_ban__ten_phong_ban'] or 'Chưa phân công'
+            sub = cv_qs.filter(nguoi_thuc_hien__phong_ban__phong_ban_id=pbid)
+            bar_cv_labels.append(name[:25])
+            bar_cv_cho.append(sub.filter(trang_thai=CongViec.TrangThai.CHO_XU_LY).count())
+            bar_cv_dang.append(sub.filter(trang_thai=CongViec.TrangThai.CHO_DUYET).count())
+            bar_cv_ht.append(sub.filter(trang_thai=CongViec.TrangThai.DA_HOAN_THANH).count())
+
+    # Bảng chi tiết CV: per tên công việc
+    bang_cv = []
+    cv_group = (cv_qs.values('ten_cong_viec')
+                     .annotate(tong=Count('cong_viec_id'))
+                     .order_by('-tong')[:20])
+    for row in cv_group:
+        tcv = row['ten_cong_viec']
+        sub = cv_qs.filter(ten_cong_viec=tcv)
+        ht  = sub.filter(trang_thai=CongViec.TrangThai.DA_HOAN_THANH).count()
+        dh  = sub.filter(
+            trang_thai=CongViec.TrangThai.DA_HOAN_THANH,
+            han_xu_ly__gte=today
+        ).count()
+        th  = sub.filter(
+            trang_thai=CongViec.TrangThai.DA_HOAN_THANH,
+            han_xu_ly__lt=today
+        ).count()
+        pct = f'{ht/row["tong"]*100:.1f}%' if row['tong'] else '0.0%'
+        bang_cv.append({
+            'ten': tcv,
+            'tong': row['tong'],
+            'hoan_thanh': ht,
+            'dung_han': dh,
+            'tre_han': th,
+            'ty_le': pct,
+        })
+
+    # ── Context ────────────────────────────────────────────────────
+    context = {
+        'tab': tab,
+        'tu_ngay': tu_ngay_str,
+        'den_ngay': den_ngay_str,
+        'da_xem': da_xem,
+        'loi_ngay': loi_ngay,
+
+        # Dropdown
+        'loai_van_ban_choices': loai_van_ban_choices,
+        'hinh_thuc_choices': hinh_thuc_choices,
+        'don_vi_list': don_vi_list,
+        'phong_ban_list': phong_ban_list,
+        'nguoi_dung_list': nguoi_dung_list,
+
+        # Params hiện tại
+        'p_loai_vb': p_loai_vb,
+        'p_don_vi': p_don_vi,
+        'p_tt_vb': p_tt_vb,
+        'p_tieu_chi': p_tieu_chi,
+        'p_doi_tuong': p_doi_tuong,
+        'p_phong_ban': p_phong_ban,
+        'p_nhan_vien': p_nhan_vien,
+        'p_tt_cv': p_tt_cv,
+
+        # Tab VB - summary
+        'tong_vb': tong_vb,
+        'dung_han_vb': dung_han_vb,
+        'tre_han_vb': tre_han_vb,
+        'pct_dung_han_vb': f'{dung_han_vb/tong_vb*100:.1f}' if tong_vb else '0.0',
+        'pct_tre_han_vb':  f'{tre_han_vb/tong_vb*100:.1f}'  if tong_vb else '0.0',
+
+        # Tab VB - chart data (JSON for JS)
+        'bar_vb_labels_json':  _json.dumps(bar_vb_labels, ensure_ascii=False),
+        'bar_cho_duyet_json':  _json.dumps(bar_cho_duyet),
+        'bar_cho_xu_ly_json':  _json.dumps(bar_cho_xu_ly),
+        'bar_hoan_thanh_json': _json.dumps(bar_hoan_thanh),
+        'pie_vb_json': _json.dumps({
+            'da_ht': da_ht_vb,
+            'cho_xu_ly': cho_xu_ly_vb,
+            'cho_duyet': cho_duyet_vb,
+        }),
+
+        # Tab VB - bảng
+        'bang_vb': bang_vb,
+
+        # Tab CV - summary
+        'tong_cv': tong_cv,
+        'hoan_thanh': hoan_thanh,
+        'dang_xu_ly': dang_xu_ly,
+        'pct_hoan_thanh': f'{hoan_thanh/tong_cv*100:.1f}' if tong_cv else '0.0',
+        'pct_dang_xu_ly': f'{dang_xu_ly/tong_cv*100:.1f}' if tong_cv else '0.0',
+
+        # Tab CV - chart data (JSON for JS)
+        'bar_cv_labels_json': _json.dumps(bar_cv_labels, ensure_ascii=False),
+        'bar_cv_cho_json':   _json.dumps(bar_cv_cho),
+        'bar_cv_dang_json':  _json.dumps(bar_cv_dang),
+        'bar_cv_ht_json':    _json.dumps(bar_cv_ht),
+        'pie_cv_json': _json.dumps(pie_cv),
+
+        # Tab CV - bảng
+        'bang_cv': bang_cv,
+
+        # Legacy (giữ tương thích nếu có template cũ dùng)
+        'loai_bao_cao': tab,
+        'tong_vb_den': vb_qs.filter(phan_loai='Văn bản đến').count(),
+        'tong_vb_di':  vb_qs.filter(phan_loai='Văn bản đi').count(),
+    }
+    return render(request, 'bao-cao-thong-ke.html', context)
+
+
+@role_required(*Customer.Role.values)
+def lich_su_hoat_dong(request):
+    """Xem lịch sử hoạt động toàn hệ thống."""
+    from django.core.paginator import Paginator
+
+    ds = LichSuHoatDong.objects.select_related('nguoi_thuc_hien').order_by('-thoi_gian_thuc_hien')
+
+    # Lọc theo loại đối tượng nếu có
+    doi_tuong_loai = request.GET.get('doi_tuong_loai', '').strip()
+    hanh_dong = request.GET.get('hanh_dong', '').strip()
+    if doi_tuong_loai:
+        ds = ds.filter(doi_tuong_loai=doi_tuong_loai)
+    if hanh_dong:
+        ds = ds.filter(hanh_dong=hanh_dong)
+
+    paginator = Paginator(ds, 20)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    context = {
+        'page_obj': page_obj,
+        'doi_tuong_loai': doi_tuong_loai,
+        'hanh_dong': hanh_dong,
+        'loai_choices': LichSuHoatDong.DoiTuongLoai.choices,
+        'hanh_dong_choices': LichSuHoatDong.HanhDong.choices,
+    }
+    return render(request, 'core/lich-su-hoat-dong.html', context)

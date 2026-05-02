@@ -2,199 +2,588 @@
 
 {% block title %}Báo cáo thống kê - QLVB{% endblock %}
 
+{% block extra_css %}
+<style>
+  .stat-tab-bar {
+    display: flex;
+    background: #f1f5f9;
+    padding: 4px;
+    width: max-content;
+  }
+  .stat-tab-btn {
+    padding: 12px 24px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: all var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .stat-tab-btn:hover {
+    color: var(--primary);
+  }
+  .stat-tab-btn.active {
+    background: white;
+    color: var(--primary);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .filter-card {
+    border-top: none;
+  }
+  .stat-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: white;
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card-title {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+  .stat-card-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.2;
+  }
+  .stat-card-value.success { color: #10b981; }
+  .stat-card-value.danger { color: #ef4444; }
+  .stat-card-value.warning { color: #f59e0b; }
+  
+  .stat-card-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+  .stat-card-icon {
+    position: absolute;
+    right: 24px;
+    top: 24px;
+    width: 48px;
+    height: 48px;
+    background: #f1f5f9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .stat-card-icon.success { background: #dcfce7; color: #166534; }
+  .stat-card-icon.danger { background: #fee2e2; color: #991b1b; }
+  .stat-card-icon.warning { background: #fef3c7; color: #92400e; }
+  .stat-card-icon svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+  }
+  .charts-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  .chart-card {
+    background: white;
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .chart-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed var(--panel-border);
+  }
+  .chart-canvas-wrapper {
+    position: relative;
+    height: 300px;
+    width: 100%;
+  }
+  .stat-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .stat-table th, .stat-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--panel-border);
+    text-align: center;
+  }
+  .stat-table th:first-child, .stat-table td:first-child { text-align: left; }
+  .stat-table th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 13px;
+  }
+  .stat-table td { font-size: 14px; }
+  .text-success { color: #10b981; font-weight: 500; }
+  .text-danger { color: #ef4444; font-weight: 500; }
+  .text-warning { color: #f59e0b; font-weight: 500; }
+  
+  @media (max-width: 1024px) {
+    .charts-row { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .stat-summary-grid { grid-template-columns: 1fr; }
+    .filter-grid-cols-4 { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+{% endblock %}
+
 {% block breadcrumb %}
 <a href="{% url 'core:dashboard' %}">
-  <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-  </svg>
+  <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
   Trang chủ
 </a>
 <span class="breadcrumb-sep">›</span>
 <span>Báo cáo thống kê</span>
+<span class="breadcrumb-sep">›</span>
+<span>
+  {% if tab == 'van-ban' %}Thống kê tình hình xử lý văn bản
+  {% else %}Thống kê kết quả thực hiện Công việc{% endif %}
+</span>
 {% endblock %}
 
 {% block content %}
-<div class="filter-card">
-  <div class="filter-stack">
-    <div class="filter-controls-row">
-      <div class="tab-filter-group" id="reportTabs">
-        <button type="button" class="filter-tab active" data-report-tab="van-ban">
-          Thống kê tình hình xử lý văn bản
-        </button>
-        <button type="button" class="filter-tab" data-report-tab="cong-viec">
-          Thống kê kết quả thực hiện công việc
-        </button>
-      </div>
-    </div>
 
+<!-- Filter Form -->
+<div class="filter-card mb-16">
+  <!-- Tabs -->
+  <div class="stat-tab-bar">
+    <a href="?tab=van-ban" class="stat-tab-btn {% if tab == 'van-ban' %}active{% endif %}">
+      Thống kê tình hình xử lý văn bản
+    </a>
+    <a href="?tab=cong-viec" class="stat-tab-btn {% if tab == 'cong-viec' %}active{% endif %}">
+      Thống kê kết quả thực hiện công việc
+    </a>
+  </div>
+  
+  <div style="height: 16px;"></div>
+  <form method="get" action="" id="filterForm">
+    <input type="hidden" name="tab" value="{{ tab }}">
+    <input type="hidden" name="xem" value="1">
+    
     <div class="filter-grid filter-grid-cols-4">
       <div class="custom-select-wrap">
-        <label class="filter-label" for="reportUnit">Đơn vị</label>
-        <select id="reportUnit" class="form-control">
-          <option>Toàn công ty</option>
-          <option>Trụ sở Hà Nội</option>
-          <option>Chi nhánh TP.HCM</option>
-        </select>
+        <label class="filter-label" for="tu_ngay">Từ ngày <span class="required">*</span></label>
+        <input type="date" id="tu_ngay" name="tu_ngay" class="form-control" value="{{ tu_ngay }}">
       </div>
       <div class="custom-select-wrap">
-        <label class="filter-label" for="reportFrom">Từ ngày</label>
-        <input id="reportFrom" type="date" class="form-control">
+        <label class="filter-label" for="den_ngay">Đến ngày <span class="required">*</span></label>
+        <input type="date" id="den_ngay" name="den_ngay" class="form-control" value="{{ den_ngay }}">
       </div>
-      <div class="custom-select-wrap">
-        <label class="filter-label" for="reportTo">Đến ngày</label>
-        <input id="reportTo" type="date" class="form-control">
-      </div>
-      <div class="custom-select-wrap">
-        <label class="filter-label" for="reportStatus">Trạng thái</label>
-        <select id="reportStatus" class="form-control">
-          <option>Tất cả trạng thái</option>
-          <option>Chờ xử lý</option>
-          <option>Đã xử lý</option>
-          <option>Hoàn trả</option>
-        </select>
-      </div>
-    </div>
 
-    <div class="form-actions">
-      <button type="button" class="btn btn-primary" id="btnViewReport">Xem thống kê</button>
+      {% if tab == 'van-ban' %}
+      <div class="custom-select-wrap">
+        <label class="filter-label" for="loai_van_ban">Loại văn bản</label>
+        <select id="loai_van_ban" name="loai_van_ban" class="form-control">
+          <option value="">Tất cả</option>
+          {% for val, display in loai_van_ban_choices %}
+          <option value="{{ val }}" {% if p_loai_vb == val %}selected{% endif %}>{{ display }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="custom-select-wrap">
+        <label class="filter-label" for="don_vi_ban_hanh">Đơn vị ban hành</label>
+        <select id="don_vi_ban_hanh" name="don_vi_ban_hanh" class="form-control">
+          <option value="">Tất cả</option>
+          {% for dv in don_vi_list %}
+          <option value="{{ dv }}" {% if p_don_vi == dv %}selected{% endif %}>{{ dv }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="custom-select-wrap">
+        <label class="filter-label" for="trang_thai_vb">Trạng thái xử lý</label>
+        <select id="trang_thai_vb" name="trang_thai_vb" class="form-control">
+          <option value="">Tất cả</option>
+          <option value="Chờ Xử Lý" {% if p_tt_vb == 'Chờ Xử Lý' %}selected{% endif %}>Chờ xử lý</option>
+          <option value="Hoàn Trả" {% if p_tt_vb == 'Hoàn Trả' %}selected{% endif %}>Hoàn trả</option>
+          <option value="Đã Xử Lý" {% if p_tt_vb == 'Đã Xử Lý' %}selected{% endif %}>Đã xử lý</option>
+          <option value="Chờ ban hành" {% if p_tt_vb == 'Chờ ban hành' %}selected{% endif %}>Chờ ban hành</option>
+          <option value="Đã ban hành" {% if p_tt_vb == 'Đã ban hành' %}selected{% endif %}>Đã ban hành</option>
+        </select>
+      </div>
+      <div class="custom-select-wrap">
+        <label class="filter-label" for="tieu_chi">Tiêu chí phân loại</label>
+        <select id="tieu_chi" name="tieu_chi" class="form-control">
+          <option value="Tổng hợp" {% if p_tieu_chi == 'Tổng hợp' %}selected{% endif %}>Tổng hợp</option>
+          <option value="Theo loại văn bản" {% if p_tieu_chi == 'Theo loại văn bản' %}selected{% endif %}>Theo loại văn bản</option>
+          <option value="Theo đơn vị" {% if p_tieu_chi == 'Theo đơn vị' %}selected{% endif %}>Theo đơn vị</option>
+        </select>
+      </div>
+      {% else %}
+      <div class="custom-select-wrap">
+        <label class="filter-label" for="doi_tuong">Đối tượng thống kê</label>
+        <select id="doi_tuong" name="doi_tuong" class="form-control" onchange="document.getElementById('filterForm').submit()">
+          <option value="Đơn vị" {% if p_doi_tuong == 'Đơn vị' %}selected{% endif %}>Đơn vị</option>
+          <option value="Cá nhân" {% if p_doi_tuong == 'Cá nhân' %}selected{% endif %}>Cá nhân</option>
+        </select>
+      </div>
+      {% if p_doi_tuong == 'Cá nhân' %}
+      <div class="custom-select-wrap">
+        <label class="filter-label" for="nhan_vien">Nhân viên</label>
+        <select id="nhan_vien" name="nhan_vien" class="form-control">
+          <option value="">Tất cả</option>
+          {% for nv in nguoi_dung_list %}
+          <option value="{{ nv.nguoi_dung_id }}" {% if p_nhan_vien|stringformat:"s" == nv.nguoi_dung_id|stringformat:"s" %}selected{% endif %}>{{ nv.ho_va_ten }} ({{ nv.phong_ban.ten_phong_ban|default:"-" }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% else %}
+      <div class="custom-select-wrap">
+        <label class="filter-label" for="phong_ban">Phòng ban</label>
+        <select id="phong_ban" name="phong_ban" class="form-control">
+          <option value="">Tất cả</option>
+          {% for pb in phong_ban_list %}
+          <option value="{{ pb.phong_ban_id }}" {% if p_phong_ban|stringformat:"s" == pb.phong_ban_id|stringformat:"s" %}selected{% endif %}>{{ pb.ten_phong_ban }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
+      <div class="custom-select-wrap">
+        <label class="filter-label" for="trang_thai_cv">Trạng thái công việc</label>
+        <select id="trang_thai_cv" name="trang_thai_cv" class="form-control">
+          <option value="">Tất cả</option>
+          <option value="Chờ xử lý" {% if p_tt_cv == 'Chờ xử lý' %}selected{% endif %}>Chờ xử lý</option>
+          <option value="Chờ duyệt" {% if p_tt_cv == 'Chờ duyệt' %}selected{% endif %}>Chờ duyệt</option>
+          <option value="Hoàn trả_CV" {% if p_tt_cv == 'Hoàn trả_CV' %}selected{% endif %}>Hoàn trả CV</option>
+          <option value="Hoàn trả_LĐ" {% if p_tt_cv == 'Hoàn trả_LĐ' %}selected{% endif %}>Hoàn trả LĐ</option>
+          <option value="Đã hoàn thành" {% if p_tt_cv == 'Đã hoàn thành' %}selected{% endif %}>Đã hoàn thành</option>
+        </select>
+      </div>
+      {% endif %}
+    </div>
+    
+    <div class="form-actions mt-12">
+      <button type="submit" class="btn btn-primary">Xem thống kê</button>
+    </div>
+  </form>
+</div>
+
+{% if loi_ngay %}
+<div class="alert alert-danger mb-16" style="padding: 12px; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; border-radius: 4px;">
+  <svg width="16" height="16" viewBox="0 0 24 24" style="fill:currentColor; display:inline-block; vertical-align:text-bottom; margin-right:4px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+  {{ loi_ngay }}
+</div>
+{% elif not da_xem %}
+<div class="empty-state card">
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="#D1D5DC"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+  <h3 style="color:#64748b; font-size:16px;">Chọn kỳ thống kê</h3>
+  <p style="color:#94a3b8; font-size:14px; margin-top:4px;">Vui lòng chọn từ ngày và đến ngày để xem báo cáo.</p>
+</div>
+{% else %}
+
+{% if tab == 'van-ban' %}
+<!-- TAB VĂN BẢN -->
+<div class="stat-summary-grid">
+  <div class="stat-card">
+    <div class="stat-card-title">Tổng số văn bản</div>
+    <div class="stat-card-value">{{ tong_vb }}</div>
+    <div class="stat-card-icon">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-title">Đúng hạn</div>
+    <div class="stat-card-value success">{{ dung_han_vb }}</div>
+    <div class="stat-card-sub">{{ pct_dung_han_vb }}%</div>
+    <div class="stat-card-icon success">
+      <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-title">Trễ hạn</div>
+    <div class="stat-card-value danger">{{ tre_han_vb }}</div>
+    <div class="stat-card-sub">{{ pct_tre_han_vb }}%</div>
+    <div class="stat-card-icon danger">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
     </div>
   </div>
 </div>
 
-<div id="reportStatsGrid" class="summary-grid">
-  <div class="card">
-    <div class="card-body">
-      <div class="stat-label">Tổng văn bản</div>
-      <div class="stat-value">128</div>
-      <div class="stat-meta">Trong kỳ thống kê</div>
+<div class="charts-row">
+  <div class="chart-card">
+    <div class="chart-title">Thống kê tổng hợp</div>
+    <div class="chart-canvas-wrapper">
+      <canvas id="barChart"></canvas>
     </div>
   </div>
-  <div class="card">
-    <div class="card-body">
-      <div class="stat-label">Đã xử lý</div>
-      <div class="stat-value">96</div>
-      <div class="stat-meta">75% tổng số</div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-body">
-      <div class="stat-label">Chờ xử lý</div>
-      <div class="stat-value">24</div>
-      <div class="stat-meta">Cần theo dõi</div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-body">
-      <div class="stat-label">Quá hạn</div>
-      <div class="stat-value">8</div>
-      <div class="stat-meta">Ưu tiên xử lý</div>
-    </div>
-  </div>
-</div>
-
-<div class="report-grid">
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title" id="leftChartTitle">Thống kê tổng hợp</div>
-    </div>
-    <div class="card-body">
-      <div class="report-bars" aria-label="Biểu đồ thống kê tổng hợp">
-        <div class="report-bar-item">
-          <span class="report-bar" style="--bar-height: 78%;"></span>
-          <span>Văn bản đến</span>
-        </div>
-        <div class="report-bar-item">
-          <span class="report-bar report-bar--outgoing" style="--bar-height: 62%;"></span>
-          <span>Văn bản đi</span>
-        </div>
-        <div class="report-bar-item">
-          <span class="report-bar report-bar--task" style="--bar-height: 54%;"></span>
-          <span>Công việc</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title" id="rightChartTitle">Tỷ lệ trạng thái xử lý</div>
-    </div>
-    <div class="card-body">
-      <div class="report-status-list">
-        <div class="status-chart__row">
-          <span class="status-chart__dot" style="--dot-color:#0f80a9;"></span>
-          <span>Đã xử lý</span>
-          <span class="status-chart__meta"><strong>75%</strong></span>
-        </div>
-        <div class="status-chart__row">
-          <span class="status-chart__dot" style="--dot-color:#f6b10a;"></span>
-          <span>Chờ xử lý</span>
-          <span class="status-chart__meta"><strong>19%</strong></span>
-        </div>
-        <div class="status-chart__row">
-          <span class="status-chart__dot" style="--dot-color:#ef4444;"></span>
-          <span>Quá hạn</span>
-          <span class="status-chart__meta"><strong>6%</strong></span>
-        </div>
-      </div>
+  <div class="chart-card">
+    <div class="chart-title">Tỷ lệ trạng thái xử lý</div>
+    <div class="chart-canvas-wrapper">
+      <canvas id="pieChart"></canvas>
     </div>
   </div>
 </div>
 
 <div class="table-container">
   <div class="table-scroll">
-    <table class="data-table">
+    <table class="stat-table">
       <thead>
         <tr>
-          <th>Nhóm báo cáo</th>
+          <th>Loại văn bản</th>
           <th>Tổng số</th>
-          <th>Đã xử lý</th>
+          <th>Đúng hạn</th>
+          <th>Trễ hạn</th>
           <th>Chờ xử lý</th>
-          <th>Quá hạn</th>
-          <th>Tỷ lệ hoàn thành</th>
         </tr>
       </thead>
-      <tbody id="reportTableBody">
+      <tbody>
+        {% for row in bang_vb %}
         <tr>
-          <td>Văn bản đến</td>
-          <td>58</td>
-          <td>45</td>
-          <td>10</td>
-          <td>3</td>
-          <td>77.6%</td>
+          <td>{{ row.loai }}</td>
+          <td>{{ row.tong }}</td>
+          <td class="text-success">{{ row.dung_han }}</td>
+          <td class="text-danger">{{ row.tre_han }}</td>
+          <td class="text-warning">{{ row.cho_xu_ly }}</td>
         </tr>
+        {% empty %}
         <tr>
-          <td>Văn bản đi</td>
-          <td>42</td>
-          <td>34</td>
-          <td>6</td>
-          <td>2</td>
-          <td>80.9%</td>
+          <td colspan="5" style="text-align:center; padding: 30px; color:#94a3b8;">Không có dữ liệu văn bản cho tiêu chí đã chọn.</td>
         </tr>
-        <tr>
-          <td>Công việc</td>
-          <td>28</td>
-          <td>17</td>
-          <td>8</td>
-          <td>3</td>
-          <td>60.7%</td>
-        </tr>
+        {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
+{% else %}
+<!-- TAB CÔNG VIỆC -->
+<div class="stat-summary-grid">
+  <div class="stat-card">
+    <div class="stat-card-title">Tổng số công việc</div>
+    <div class="stat-card-value">{{ tong_cv }}</div>
+    <div class="stat-card-icon">
+      <svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-title">Đã hoàn thành</div>
+    <div class="stat-card-value success">{{ hoan_thanh }}</div>
+    <div class="stat-card-sub">{{ pct_hoan_thanh }}%</div>
+    <div class="stat-card-icon success">
+      <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-title">Đang xử lý</div>
+    <div class="stat-card-value warning">{{ dang_xu_ly }}</div>
+    <div class="stat-card-sub">{{ pct_dang_xu_ly }}%</div>
+    <div class="stat-card-icon warning">
+      <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+    </div>
+  </div>
+</div>
+
+<div class="charts-row">
+  <div class="chart-card">
+    <div class="chart-title">Thống kê theo {{ p_doi_tuong|lower }}</div>
+    <div class="chart-canvas-wrapper">
+      <canvas id="barChart"></canvas>
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">Tỷ lệ trạng thái công việc</div>
+    <div class="chart-canvas-wrapper">
+      <canvas id="pieChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="table-container">
+  <div class="table-scroll">
+    <table class="stat-table">
+      <thead>
+        <tr>
+          <th style="width:50px;">STT</th>
+          <th>Tên công việc</th>
+          <th>Tổng số</th>
+          <th>Đã hoàn thành</th>
+          <th>Đúng hạn</th>
+          <th>Trễ hạn</th>
+          <th>Tỷ lệ hoàn thành</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in bang_cv %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ row.ten }}</td>
+          <td>{{ row.tong }}</td>
+          <td class="text-success">{{ row.hoan_thanh }}</td>
+          <td class="text-success">{{ row.dung_han }}</td>
+          <td class="text-danger">{{ row.tre_han }}</td>
+          <td>{{ row.ty_le }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" style="text-align:center; padding: 30px; color:#94a3b8;">Không có dữ liệu công việc cho tiêu chí đã chọn.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const tabs = document.querySelectorAll("[data-report-tab]");
-    tabs.forEach(function (tab) {
-      tab.addEventListener("click", function () {
-        tabs.forEach(function (item) { item.classList.remove("active"); });
-        tab.classList.add("active");
+  Chart.register(ChartDataLabels);
+  const commonPieOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 20 } },
+      datalabels: {
+        color: '#fff',
+        font: { weight: 'bold', size: 12 },
+        formatter: (value, ctx) => {
+          let sum = 0;
+          let dataArr = ctx.chart.data.datasets[0].data;
+          dataArr.map(data => { sum += data; });
+          if(sum === 0 || value === 0) return '';
+          let percentage = (value*100 / sum).toFixed(0)+"%";
+          return percentage;
+        }
+      }
+    }
+  };
+
+  const commonBarOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: { stacked: false, grid: { display: false } },
+      y: { stacked: false, beginAtZero: true, border: { dash: [4, 4] }, grid: { color: '#e2e8f0' } }
+    },
+    plugins: {
+      legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 10, padding: 20 } },
+      datalabels: { display: false }
+    }
+  };
+
+  window.onload = function() {
+    {% if tab == 'van-ban' %}
+    // Pie Chart VB
+    const pieDataStr = '{{ pie_vb_json|escapejs }}';
+    if(pieDataStr) {
+      const pieData = JSON.parse(pieDataStr);
+      new Chart(document.getElementById('pieChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Đã hoàn thành', 'Chờ xử lý', 'Chờ duyệt'],
+          datasets: [{
+            data: [pieData.da_ht || 0, pieData.cho_xu_ly || 0, pieData.cho_duyet || 0],
+            backgroundColor: ['#22c55e', '#eab308', '#ef4444'],
+            borderWidth: 1
+          }]
+        },
+        options: commonPieOptions
       });
-    });
-  });
+    }
+
+    // Bar Chart VB
+    const barLabelsStr = '{{ bar_vb_labels_json|escapejs }}';
+    if(barLabelsStr && barLabelsStr !== '[]') {
+      new Chart(document.getElementById('barChart'), {
+        type: 'bar',
+        data: {
+          labels: JSON.parse(barLabelsStr),
+          datasets: [
+            {
+              label: 'Chờ duyệt',
+              data: JSON.parse('{{ bar_cho_duyet_json|escapejs }}'),
+              backgroundColor: '#ef4444',
+              borderRadius: 2
+            },
+            {
+              label: 'Chờ xử lý',
+              data: JSON.parse('{{ bar_cho_xu_ly_json|escapejs }}'),
+              backgroundColor: '#eab308',
+              borderRadius: 2
+            },
+            {
+              label: 'Đã hoàn thành',
+              data: JSON.parse('{{ bar_hoan_thanh_json|escapejs }}'),
+              backgroundColor: '#22c55e',
+              borderRadius: 2
+            }
+          ]
+        },
+        options: commonBarOptions
+      });
+    }
+
+    {% else %}
+    // Pie Chart CV
+    const pieCvStr = '{{ pie_cv_json|escapejs }}';
+    if(pieCvStr) {
+      const pieCv = JSON.parse(pieCvStr);
+      new Chart(document.getElementById('pieChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Đã hoàn thành', 'Đang xử lý', 'Chờ xử lý', 'Hoàn trả'],
+          datasets: [{
+            data: [pieCv.hoan_thanh || 0, pieCv.dang_xu_ly || 0, pieCv.cho_xu_ly || 0, pieCv.hoan_tra || 0],
+            backgroundColor: ['#22c55e', '#0ea5e9', '#eab308', '#ef4444'],
+            borderWidth: 1
+          }]
+        },
+        options: commonPieOptions
+      });
+    }
+
+    // Bar Chart CV
+    const barCvLabelsStr = '{{ bar_cv_labels_json|escapejs }}';
+    if(barCvLabelsStr && barCvLabelsStr !== '[]') {
+      new Chart(document.getElementById('barChart'), {
+        type: 'bar',
+        data: {
+          labels: JSON.parse(barCvLabelsStr),
+          datasets: [
+            {
+              label: 'Chờ xử lý',
+              data: JSON.parse('{{ bar_cv_cho_json|escapejs }}'),
+              backgroundColor: '#eab308',
+              borderRadius: 2
+            },
+            {
+              label: 'Đang thực hiện',
+              data: JSON.parse('{{ bar_cv_dang_json|escapejs }}'),
+              backgroundColor: '#0ea5e9',
+              borderRadius: 2
+            },
+            {
+              label: 'Đã hoàn thành',
+              data: JSON.parse('{{ bar_cv_ht_json|escapejs }}'),
+              backgroundColor: '#22c55e',
+              borderRadius: 2
+            }
+          ]
+        },
+        options: commonBarOptions
+      });
+    }
+    {% endif %}
+  };
 </script>
+{% endif %}
 {% endblock %}

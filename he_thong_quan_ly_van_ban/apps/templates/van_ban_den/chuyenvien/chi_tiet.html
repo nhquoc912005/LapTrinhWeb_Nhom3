@@ -477,9 +477,11 @@
     </div>
 </div>
 
+<script id="popup-van-ban-data" type="application/json">{"id": {{ vb.pk }}, "type": "van_ban_den"}</script>
 <script>
-    var popupVanBanId = {{ vb.pk }};
-    var popupVanBanType = 'van_ban_den';
+    var _popupData = JSON.parse(document.getElementById('popup-van-ban-data').textContent);
+    var popupVanBanId = _popupData.id;
+    var popupVanBanType = _popupData.type;
 </script>
 {% include "hosovanban/them-van-ban-popup.html" %}
 
