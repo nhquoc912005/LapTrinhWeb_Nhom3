@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Thông tin cá nhân{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'core:dashboard' %}">
+    <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+    </svg>
+    Trang chủ
+  </a>
+  <span>/ Thông tin cá nhân</span>
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+  <section class="profile-hero">
+    <div class="profile-avatar-lg">{{ profile_user.initials }}</div>
+    <div class="profile-heading">
+      <h2>{{ profile_user.display_name }}</h2>
+      <p>{{ profile_user.display_role }}</p>
+    </div>
+    <div class="profile-hero-actions">
+      <div class="profile-role-pill">{{ profile_user.get_role_display }}</div>
+      <button type="button" class="btn btn-info btn-sm" style="margin-top: 10px; width: 100%;">Chỉnh sửa</button>
+    </div>
+  </section>
+
+  <section class="profile-stats">
+    <div class="profile-stat">
+      <span>Văn bản đi</span>
+      <strong>{{ stats.outgoing_documents }}</strong>
+    </div>
+    <div class="profile-stat">
+      <span>Văn bản đến</span>
+      <strong>{{ stats.incoming_documents }}</strong>
+    </div>
+    <div class="profile-stat">
+      <span>Công việc</span>
+      <strong>{{ stats.tasks }}</strong>
+    </div>
+    <div class="profile-stat">
+      <span>Lịch sử ký</span>
+      <strong>{{ stats.signature_history }}</strong>
+    </div>
+  </section>
+
+  <div class="profile-layout">
+    <section class="profile-panel">
+      <div class="profile-panel-title">Thông tin tài khoản</div>
+      <dl class="profile-info-grid">
+        <dt>Tên đăng nhập</dt>
+        <dd>{{ profile_user.username }}</dd>
+        <dt>Email</dt>
+        <dd>{{ profile_user.email|default:"Chưa cập nhật" }}</dd>
+        <dt>Số điện thoại</dt>
+        <dd>{{ profile_user.sdt|default:"Chưa cập nhật" }}</dd>
+        <dt>Chi nhánh</dt>
+        <dd>{{ profile_user.chi_nhanh.ten_chi_nhanh|default:"Chưa gán" }}</dd>
+        <dt>Phòng ban</dt>
+        <dd>{{ profile_user.phong_ban.ten_phong_ban|default:"Chưa gán" }}</dd>
+        <dt>Trạng thái</dt>
+        <dd>{% if profile_user.is_active %}Đang hoạt động{% else %}Đã khóa{% endif %}</dd>
+      </dl>
+    </section>
+
+    <section class="profile-panel">
+      <div class="profile-panel-title">Hồ sơ nghiệp vụ</div>
+      <dl class="profile-info-grid">
+        <dt>Mã hồ sơ core</dt>
+        <dd>{{ core_profile.pk }}</dd>
+        <dt>Họ và tên</dt>
+        <dd>{{ core_profile.ho_va_ten }}</dd>
+        <dt>Chức vụ core</dt>
+        <dd>{{ core_profile.chuc_vu }}</dd>
+        <dt>Hồ sơ văn bản</dt>
+        <dd>{{ stats.records }}</dd>
+        <dt>Văn bản đến legacy</dt>
+        <dd>{{ stats.legacy_incoming_documents }}</dd>
+      </dl>
+    </section>
+  </div>
+
+  <section class="profile-panel profile-signature-panel">
+    <div class="profile-panel-title">Chữ ký số</div>
+    <div class="profile-signature-body">
+      <div class="profile-signature-preview">
+        {% if signature and signature.anh_chu_ky %}
+          <img src="{{ signature.anh_chu_ky.url }}" alt="Ảnh chữ ký số của {{ profile_user.display_name }}">
+        {% else %}
+          <div class="profile-signature-empty">Chưa có chữ ký số</div>
+        {% endif %}
+      </div>
+      <div class="profile-signature-history">
+        {% if recent_signatures %}
+          {% for item in recent_signatures %}
+            <div class="profile-signature-row">
+              <div>
+                <strong>
+                  {% if item.van_ban %}
+                    {{ item.van_ban.so_ky_hieu }}
+                  {% elif item.cong_viec %}
+                    {{ item.cong_viec.ten_cong_viec }}
+                  {% else %}
+                    Tài liệu không xác định
+                  {% endif %}
+                </strong>
+                <span>{{ item.thoi_gian_ky|date:"d/m/Y H:i" }}</span>
+                <span class="profile-signature-integrity {% if item.integrity.verified %}is-valid{% else %}is-invalid{% endif %}">
+                  {{ item.integrity.message }}
+                </span>
+                {% if item.file_hash %}
+                  <span class="profile-signature-hash">SHA-256: {{ item.file_hash|slice:":16" }}...</span>
+                {% endif %}
+              </div>
+              {% if item.file_da_ky %}
+                <a href="{{ item.file_da_ky.url }}" target="_blank">Xem file</a>
+              {% endif %}
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="profile-muted">Chưa có lịch sử ký số.</p>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

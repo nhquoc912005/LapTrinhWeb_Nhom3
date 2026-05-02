@@ -108,6 +108,38 @@ SPECIALIST_DEPARTMENT_KEYS = [
 BRANCH_KEYS = [spec["key"] for spec in BRANCH_SPECS]
 LEADER_BRANCH_KEYS = ["hn", "hcm", "dn", "hn", "hcm"]
 CLERK_DEPARTMENT_KEY = "hanh_chinh"
+SHORT_ACCOUNT_SPECS = [
+    {
+        "username": "chuyenvien",
+        "email": "chuyenvien@atax.demo",
+        "ho_va_ten": "Chuyên viên Demo",
+        "sdt": "0900000001",
+        "role": "CHUYEN_VIEN",
+        "chuc_vu": "Chuyên viên",
+        "branch_key": "hn",
+        "department_key": "ke_toan",
+    },
+    {
+        "username": "lanhdao",
+        "email": "lanhdao@atax.demo",
+        "ho_va_ten": "Lãnh đạo Demo",
+        "sdt": "0900000002",
+        "role": "LANH_DAO",
+        "chuc_vu": "Lãnh đạo Ban Giám đốc",
+        "branch_key": "hn",
+        "department_key": "ban_giam_doc",
+    },
+    {
+        "username": "vanthu",
+        "email": "vanthu@atax.demo",
+        "ho_va_ten": "Văn thư Demo",
+        "sdt": "0900000003",
+        "role": "VAN_THU",
+        "chuc_vu": "Văn thư",
+        "branch_key": "hn",
+        "department_key": CLERK_DEPARTMENT_KEY,
+    },
+]
 
 FAMILY_NAMES = [
     "Nguyễn",
@@ -362,6 +394,23 @@ class Command(BaseCommand):
             name_index += 1
             phone_number += 1
             return identity
+
+        for spec in SHORT_ACCOUNT_SPECS:
+            branch_key = spec["branch_key"]
+            account_specs.append(
+                {
+                    "username": spec["username"],
+                    "email": spec["email"],
+                    "ho_va_ten": spec["ho_va_ten"],
+                    "sdt": spec["sdt"],
+                    "role": getattr(User.Role, spec["role"]),
+                    "chuc_vu": spec["chuc_vu"],
+                    "chi_nhanh": self.branches[branch_key],
+                    "phong_ban": self.departments[
+                        (branch_key, spec["department_key"])
+                    ],
+                }
+            )
 
         for index in range(1, SPECIALIST_COUNT + 1):
             department_key = SPECIALIST_DEPARTMENT_KEYS[

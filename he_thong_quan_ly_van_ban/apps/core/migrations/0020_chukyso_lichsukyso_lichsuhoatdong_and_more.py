@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='lichsukyso',
-            constraint=models.CheckConstraint(check=models.Q(models.Q(('van_ban__isnull', False), ('cong_viec__isnull', True)), models.Q(('van_ban__isnull', True), ('cong_viec__isnull', False)), _connector='OR'), name='ck_lich_su_ky_so_chi_mot_doi_tuong'),
+            constraint=models.CheckConstraint(condition=models.Q(models.Q(('van_ban__isnull', False), ('cong_viec__isnull', True)), models.Q(('van_ban__isnull', True), ('cong_viec__isnull', False)), _connector='OR'), name='ck_lich_su_ky_so_chi_mot_doi_tuong'),
         ),
         migrations.AddIndex(
             model_name='lichsuhoatdong',

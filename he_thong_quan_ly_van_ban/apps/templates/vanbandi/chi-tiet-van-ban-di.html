@@ -353,7 +353,7 @@
       position: fixed;
       inset: 0;
       background: #fff;
-      z-index: 9999;
+      z-index: var(--z-modal, 1000);
       overflow: visible;
       padding: 0;
     }
@@ -415,13 +415,18 @@
         {% if request.user.role == "LANH_DAO" %}
         {# Chỉ hiện Phê duyệt / Hoàn trả khi văn bản đang Chờ Xử Lý #}
         {% if vb.trang_thai == "Chờ Xử Lý" %}
+        {% if vb.file_dinh_kem %}
+        <button type="button" class="btn btn-primary" style="padding:8px 16px; background:#4f46e5; border-color:#4f46e5;" onclick="openKySoModal('{{ vb.file_dinh_kem.url|escapejs }}')">Ký số</button>
+        {% endif %}
         <button type="button" class="btn btn-success" style="padding:8px 16px;" id="openApprovalModal">Phê
           duyệt</button>
         <button type="button" class="btn btn-warning" style="padding:8px 16px;" id="openReturnModal">Hoàn trả</button>
         {% endif %}
-        {% if vb.ho_so_van_ban %}
-        <a href="{% url 'hosovanban:chi_tiet' vb.ho_so_van_ban.pk %}" class="btn btn-primary" style="padding:8px 16px; text-decoration:none;">Xem hồ sơ</a>
-        {% else %}
+        {# Chỉnh sửa: cho phép Lãnh đạo chỉnh sửa khi Chờ Xử Lý hoặc Hoàn Trả #}
+        {% if vb.trang_thai == "Chờ Xử Lý" or vb.trang_thai == "Hoàn Trả" %}
+        <a href="{% url 'quanlyvanbandi:sua_van_ban_di' vb.pk %}" class="btn btn-primary"
+          style="padding:8px 16px; text-decoration:none; background:#0284C7;">Chỉnh sửa</a>
+        {% endif %}
         <button class="btn btn-primary" style="padding:8px 16px;" onclick="openThemVanBanPopup()">Lưu hồ sơ</button>
         {% endif %}
         
@@ -441,7 +446,10 @@
         {% endif %}
         {# Xóa: chỉ khi Chờ Xử Lý (chưa duyệt) #}
         {% if vb.trang_thai == "Chờ Xử Lý" %}
-        <button type="button" id="btnOpenDeleteModal" class="btn btn-danger" style="padding:8px 16px;">Xóa văn bản</button>
+        <form method="post" action="{% url 'quanlyvanbandi:xoa_van_ban_di' vb.pk %}" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa văn bản này hay không?\nHành động này không thể hoàn tác.');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger" style="padding:8px 16px;">Xóa văn bản</button>
+        </form>
         {% endif %}
         {% if vb.ho_so_van_ban %}
         <a href="{% url 'hosovanban:chi_tiet' vb.ho_so_van_ban.pk %}" class="btn btn-primary" style="padding:8px 16px; text-decoration:none;">Xem hồ sơ</a>
@@ -453,8 +461,11 @@
         {# ===== VĂN THƯ ===== #}
         {% if request.user.role == "VAN_THU" %}
         {# Nút Ban hành chỉ hiện khi đang Chờ ban hành #}
-        {% if vb.trang_thai == "Chờ ban hành" %}
-        <button id="openBanHanhModal" class="btn btn-success" style="padding:8px 16px;">Ban hành</button>
+        {% if vb.trang_thai == "Chờ ban hành" and duyet_record and duyet_record.van_thu_id == request.user.core_profile.pk %}
+        <form method="post" action="{% url 'quanlyvanbandi:ban_hanh_van_ban' vb.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success" style="padding:8px 16px;">Ban hành</button>
+        </form>
         {% endif %}
         {% if vb.ho_so_van_ban %}
         <a href="{% url 'hosovanban:chi_tiet' vb.ho_so_van_ban.pk %}" class="btn btn-primary" style="padding:8px 16px; text-decoration:none;">Xem hồ sơ</a>
@@ -470,7 +481,14 @@
     <div class="detail-info-grid">
       <div class="detail-col">
         <p><strong>Trích yếu</strong><br>{{ vb.trich_yeu|default:"-" }}</p>
-        <p><strong>Đơn vị soạn thảo</strong><br>{{ vb.don_vi_soan_thao|default:"-" }}</p>
+        <p><strong>Đơn vị soạn thảo</strong><br>
+          {% if vb.nguoi_tao %}
+            {% if vb.nguoi_tao.phong_ban %}{{ vb.nguoi_tao.phong_ban.ten_phong_ban }} - {% endif %}
+            {{ vb.nguoi_tao.ho_va_ten|default:"-" }}
+          {% else %}
+            -
+          {% endif %}
+        </p>
         <p><strong>Hình thức</strong><br>{{ vb.hinh_thuc|default:"-" }}</p>
         <p><strong>Độ khẩn</strong><br>{{ vb.do_khan|default:"-" }}</p>
       </div>
@@ -500,12 +518,6 @@
           {% endif %}
         </p>
 
-        {% if hoan_tra %}
-        <p><strong>Ngày hoàn trả</strong><br>
-          <span style="color:#dc2626; font-weight:600;">{{ hoan_tra.ngay_hoan_tra|date:"d/m/Y" }}</span>
-        </p>
-        {% endif %}
-
         {% if duyet_record %}
         <p><strong>Ngày duyệt</strong><br>
           <span style="color:#16a34a; font-weight:600;">{{ duyet_record.ngay_duyet|date:"d/m/Y" }}</span>
@@ -514,17 +526,82 @@
       </div>
     </div>
 
+    {% if can_view_sensitive_notes %}
     <div class="detail-note-box" style="border-left: 4px solid #0076A2; background: #F5F5F5">
       <strong style="color:#000080;">Nội dung trình lãnh đạo:</strong>
       <div style="margin-top:8px;">{{ vb.noi_dung|default:"-" }}</div>
     </div>
 
+    {% if duyet_record and duyet_record.ghi_chu %}
+    <div class="detail-note-box" style="margin-top:12px; background:#EFF6FF; border-left: 4px solid #0076A2;">
+      <strong style="color:#0f172a;">Ghi chú cho văn thư:</strong>
+      <div style="margin-top:8px;">{{ duyet_record.ghi_chu }}</div>
+    </div>
+    {% endif %}
+
     {% if hoan_tra %}
     <div class="detail-note-box" style="margin-top:12px; background:#FEF2F2; border-left: 4px solid #0076A2;">
       <strong style="color:#9F0736;">Ý kiến xử lý / hoàn trả:</strong>
+      <div style="margin-top:8px; display:flex; gap:24px; flex-wrap:wrap; font-size:13px;">
+        <div>
+          <strong>Ngày hoàn trả:</strong>
+          <span style="color:#dc2626; font-weight:700;">{{ hoan_tra.ngay_hoan_tra|date:"d/m/Y" }}</span>
+        </div>
+        <div>
+          <strong>Hạn xử lý hoàn trả:</strong>
+          <span style="color:#dc2626; font-weight:700;">
+            {{ hoan_tra.han_xu_ly_hoan_tra|date:"d/m/Y"|default:"-" }}
+          </span>
+        </div>
+      </div>
       <div style="margin-top:8px;">{{ hoan_tra.noi_dung }}</div>
     </div>
     {% endif %}
+    {% endif %}
+  </div>
+
+  <div class="card"
+    style="padding: 24px 32px; border: 1px solid var(--border-color); box-shadow: none; margin-bottom: 24px;">
+    <div class="detail-header-title">DANH SÁCH NƠI NHẬN</div>
+    <hr style="border:none; border-top:1px solid #F1F1F1; margin:12px 0 20px;">
+
+    <div style="font-size:14px; font-weight:800; color:#0076A2; margin-bottom:10px;">
+      Danh sách nội bộ
+    </div>
+    <div style="font-size:13px; color:var(--text-main); line-height:1.7;">
+      <ol style="margin:0; padding-left:22px; list-style: decimal;">
+        {% for nn in noi_nhan_noi_bo %}
+          <li style="margin: 4px 0;">
+            {{ nn.phong_ban.chi_nhanh.ten_chi_nhanh|default:"-" }} -
+            {{ nn.phong_ban.ten_phong_ban|default:"-" }} -
+            {{ nn.phong_ban.truong_phong.ho_va_ten|default:"-" }} -
+            {{ nn.phong_ban.truong_phong.sdt|default:"-" }} -
+            {{ nn.phong_ban.truong_phong.email|default:"-" }}
+          </li>
+        {% empty %}
+          <li style="color:var(--text-muted);">-</li>
+        {% endfor %}
+      </ol>
+    </div>
+
+    <hr style="border:none; border-top:1px solid #F1F1F1; margin:18px 0 16px;">
+
+    <div style="font-size:14px; font-weight:800; color:#0076A2; margin-bottom:10px;">
+      Danh sách đơn vị ngoài
+    </div>
+    <div style="font-size:13px; color:var(--text-main); line-height:1.7;">
+      <ol style="margin:0; padding-left:22px; list-style: decimal;">
+        {% for nn in noi_nhan_don_vi_ngoai %}
+          <li style="margin: 4px 0;">
+            {{ nn.don_vi_ngoai.ten_don_vi|default:"-" }} -
+            {{ nn.don_vi_ngoai.so_dien_thoai|default:"-" }} -
+            {{ nn.don_vi_ngoai.email|default:"-" }}{% if nn.don_vi_ngoai.dia_chi %} - {{ nn.don_vi_ngoai.dia_chi }}{% endif %}
+          </li>
+        {% empty %}
+          <li style="color:var(--text-muted);">-</li>
+        {% endfor %}
+      </ol>
+    </div>
   </div>
 
   <div class="card" style="padding: 24px 32px; border: 1px solid var(--border-color); box-shadow: none;">
@@ -647,55 +724,9 @@
 
   {% include "vanbandi/popup-hoan-tra.html" %}
 
-  {% if request.user.role == "VAN_THU" %}
-    {% include "vanbandi/popup-ban-hanh.html" %}
-  {% endif %}
+  {% include "vanbandi/_ky_so_modal.html" %}
 
-  <!-- Popup xác nhận xóa văn bản -->
-  {% if request.user.role == "CHUYEN_VIEN" and vb.trang_thai == "Chờ Xử Lý" %}
-  <div id="deleteModal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.45); z-index:9999; align-items:center; justify-content:center;">
-    <div style="width:100%; max-width:480px; background:#fff; box-shadow:0 8px 40px rgba(0,0,0,0.2); padding:32px 36px 28px; text-align:center;">
-      <div style="margin-bottom:20px;">
-        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-      </div>
-      <h3 style="margin:0 0 12px; font-size:18px; font-weight:700; color:#1e293b;">Xác nhận xóa</h3>
-      <p style="margin:0 0 28px; font-size:15px; color:#475569; line-height:1.6;">
-        Bạn có chắc chắn muốn xóa văn bản này hay không?<br>
-        <span style="color:#dc2626; font-size:13px;">Hành động này không thể hoàn tác.</span>
-      </p>
-      <div style="display:flex; justify-content:center; gap:16px;">
-        <form method="post" action="{% url 'quanlyvanbandi:xoa_van_ban_di' vb.pk %}">
-          {% csrf_token %}
-          <button type="submit" style="min-width:120px; padding:10px 24px; background:#dc2626; color:#fff; border:none; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;">Xóa</button>
-        </form>
-        <button type="button" id="btnCloseDeleteModal" style="min-width:120px; padding:10px 24px; background:#f3f4f6; color:#374151; border:1px solid #d1d5db; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit;">Hủy</button>
-      </div>
-    </div>
-  </div>
-  <script>
-  (function() {
-    var modal = document.getElementById("deleteModal");
-    var openBtn = document.getElementById("btnOpenDeleteModal");
-    var closeBtn = document.getElementById("btnCloseDeleteModal");
-    if (!modal || !openBtn) return;
-    openBtn.addEventListener("click", function() {
-      modal.style.display = "flex";
-      document.body.style.overflow = "hidden";
-    });
-    if (closeBtn) closeBtn.addEventListener("click", function() {
-      modal.style.display = "none";
-      document.body.style.overflow = "";
-    });
-    modal.addEventListener("click", function(e) {
-      if (e.target === modal) { modal.style.display = "none"; document.body.style.overflow = ""; }
-    });
-  })();
-  </script>
-  {% endif %}
+
 
   {% csrf_token %}
   <script>var popupVanBanId = {{ vb.pk }}; var popupVanBanType = 'van_ban_di';</script>
@@ -931,5 +962,35 @@
       resetPdfNav();
     }
   });
+</script>
+<script>
+  (function() {
+    var modal = document.getElementById("approvalModal");
+    var openBtn = document.getElementById("openApprovalModal");
+    var closeBtn = document.getElementById("closeApprovalModal");
+
+    if (modal && openBtn) {
+      openBtn.addEventListener("click", function() {
+        modal.style.display = "flex";
+        document.body.style.overflow = "hidden";
+      });
+    }
+
+    if (modal && closeBtn) {
+      closeBtn.addEventListener("click", function() {
+        modal.style.display = "none";
+        document.body.style.overflow = "";
+      });
+    }
+
+    if (modal) {
+      modal.addEventListener("click", function(e) {
+        if (e.target === modal) {
+          modal.style.display = "none";
+          document.body.style.overflow = "";
+        }
+      });
+    }
+  })();
 </script>
 {% endblock %}
