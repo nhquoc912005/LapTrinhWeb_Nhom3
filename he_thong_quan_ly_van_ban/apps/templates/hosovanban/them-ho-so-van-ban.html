@@ -33,12 +33,12 @@
     <form method="post" id="hoSoForm" class="form-sheet">
         {% csrf_token %}
 
-        <div class="form-card">
-            <h2 class="section-title">Thông tin cơ bản</h2>
+        <div class="card" style="padding: 22px 24px; margin-bottom: 18px;">
+            <h2 class="page-title" style="border-bottom:none; margin-bottom:16px; padding-bottom:0; font-size:16px;">Thông tin cơ bản</h2>
 
             <div class="form-group">
                 <label class="form-label">Tiêu đề hồ sơ <span class="required">*</span></label>
-                <input
+                <input class="form-control"
                     type="text"
                     name="tieu_de_ho_so"
                     id="tieu_de_ho_so"
@@ -50,10 +50,10 @@
                 {% endif %}
             </div>
 
-            <div class="form-row">
+            <div class="form-row cols-2">
                 <div class="form-group">
                     <label class="form-label">Ký hiệu hồ sơ <span class="required">*</span></label>
-                    <input
+                    <input class="form-control"
                         type="text"
                         name="ky_hieu_ho_so"
                         id="ky_hieu_ho_so"
@@ -67,18 +67,18 @@
 
                 <div class="form-group">
                     <label class="form-label">Ngày tạo hồ sơ</label>
-                    <input type="date" id="ngay_tao_ho_so" value="{{ today|date:'Y-m-d' }}" readonly>
+                    <input class="form-control" type="date" id="ngay_tao_ho_so" value="{{ today|date:'Y-m-d' }}" readonly>
                 </div>
             </div>
         </div>
 
-        <div class="form-card">
-            <h2 class="section-title">Bảo quản và phân quyền</h2>
+        <div class="card" style="padding: 22px 24px; margin-bottom: 18px;">
+            <h2 class="page-title" style="border-bottom:none; margin-bottom:16px; padding-bottom:0; font-size:16px;">Bảo quản và phân quyền</h2>
 
-            <div class="form-row">
+            <div class="form-row cols-2">
                 <div class="form-group">
                     <label class="form-label">Thời gian bảo quản <span class="required">*</span></label>
-                    <select name="thoi_gian_bao_quan" id="thoi_gian_bao_quan">
+                    <select class="form-control" name="thoi_gian_bao_quan" id="thoi_gian_bao_quan">
                         <option value="">-- Chọn khung thời gian --</option>
                         <option value="Tạm thời" {% if form.thoi_gian_bao_quan.value == "Tạm thời" %}selected{% endif %}>Tạm thời</option>
                         <option value="Theo quy định - 2 năm" {% if form.thoi_gian_bao_quan.value == "Theo quy định - 2 năm" %}selected{% endif %}>Theo quy định - 2 năm</option>
@@ -93,14 +93,14 @@
 
                 <div class="form-group">
                     <label class="form-label">Số năm lưu trữ <span class="required">*</span></label>
-                    <input type="number" name="so_nam_luu_tru" id="so_nam_luu_tru" value="{{ form.so_nam_luu_tru.value|default:'' }}">
+                    <input class="form-control" type="number" name="so_nam_luu_tru" id="so_nam_luu_tru" value="{{ form.so_nam_luu_tru.value|default:'' }}">
                     {% if form.so_nam_luu_tru.errors %}
                     <div class="field-error">{{ form.so_nam_luu_tru.errors.0 }}</div>
                     {% endif %}
                 </div>
             </div>
 
-            <div class="form-row">
+            <div class="form-row cols-2">
                 <div class="form-group">
                     <label class="form-label">Phòng ban <span class="required">*</span></label>
                     <div class="custom-dropdown" id="phongBanDropdown">
@@ -167,12 +167,12 @@
             </div>
         </div>
 
-        <div class="form-card">
-            <h2 class="section-title">Mô tả</h2>
+        <div class="card" style="padding: 22px 24px; margin-bottom: 18px;">
+            <h2 class="page-title" style="border-bottom:none; margin-bottom:16px; padding-bottom:0; font-size:16px;">Mô tả</h2>
 
             <div class="form-group">
                 <label class="form-label">Mô tả hồ sơ</label>
-                <textarea
+                <textarea class="form-control"
                     name="mo_ta"
                     rows="5"
                     placeholder="Ghi chú chi tiết về nội dung, mục đích hoặc phạm vi của hồ sơ..."
@@ -184,8 +184,8 @@
         </div>
 
         <div class="form-actions">
-            <a href="{% url 'hosovanban:danh_sach' %}" class="btn btn-cancel">Hủy</a>
-            <button type="submit" id="btnLuu" class="btn btn-save" disabled>Lưu</button>
+            <a href="{% url 'hosovanban:danh_sach' %}" class="btn btn-secondary">Hủy</a>
+            <button type="submit" id="btnLuu" class="btn btn-primary" disabled>Lưu</button>
         </div>
     </form>
 </div>
@@ -199,10 +199,10 @@
 
         <div class="popup-toolbar">
             <div class="popup-toolbar-left">
-                <input type="text" readonly value="Danh sách người dùng">
+                <input class="form-control" type="text" readonly value="Danh sách người dùng">
             </div>
             <div class="popup-toolbar-right">
-                <input type="text" id="searchNguoiXuLy" placeholder="Tìm nhanh nhân viên, email hoặc số điện thoại...">
+                <input class="form-control" type="text" id="searchNguoiXuLy" placeholder="Tìm nhanh nhân viên, email hoặc số điện thoại...">
             </div>
         </div>
 

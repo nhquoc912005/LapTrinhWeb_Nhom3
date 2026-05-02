@@ -711,6 +711,13 @@
         </div>
     </div>
 </div>
+
+<script>
+    var popupVanBanId = {{ vb.pk }};
+    var popupVanBanType = 'van_ban_den';
+</script>
+{% include "hosovanban/them-van-ban-popup.html" %}
+
 {% endblock %}
 
 {% block extra_js %}
