@@ -14,6 +14,9 @@ urlpatterns = [
     # ===== LÃNH ĐẠO =====
     # Nút Lưu -> trạng thái Xem để biết
     path('<int:pk>/luu/', views.lanh_dao_luu_van_ban_den, name='lanh_dao_luu'),
+    
+    # API Ký số
+    path('<int:vb_pk>/ky-so/', views.api_ky_so_van_ban, name='api_ky_so_van_ban'),
 
     # Nút Chuyển tiếp -> chọn danh sách chuyên viên
     path('<int:pk>/chuyen-tiep/', views.lanh_dao_chuyen_tiep_van_ban_den, name='lanh_dao_chuyen_tiep'),

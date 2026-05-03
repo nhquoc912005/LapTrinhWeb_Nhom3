@@ -153,6 +153,9 @@
             {% endif %}
 
             {% if vb.trang_thai == 'Chờ Xử Lý' or vb.trang_thai == 'Hoàn Trả' %}
+                {% if vb.file_dinh_kem %}
+                <button type="button" class="btn-local btn-blue" style="background:#4f46e5;" data-file-url="{{ vb.file_dinh_kem.url|escapejs }}" onclick="openKySoModal(this.dataset.fileUrl)">✍ Ký số</button>
+                {% endif %}
                 <button type="button" class="btn-local btn-gray" onclick="openModal('saveModal')">💾 Lưu</button>
                 <button type="button" class="btn-local btn-red" onclick="openModal('returnModal')">↩ Hoàn trả</button>
             {% else %}
@@ -369,6 +372,7 @@
 {% include "van_ban_den/lanhdao/_modal_luu.html" %}
 {% include "van_ban_den/lanhdao/_modal_chuyen_tiep.html" %}
 {% include "van_ban_den/lanhdao/_modal_hoan_tra.html" %}
+{% include "van_ban_den/lanhdao/_ky_so_modal.html" %}
 
 <script id="popup-van-ban-data" type="application/json">{"id": {{ vb.pk }}, "type": "van_ban_den"}</script>
 <script>

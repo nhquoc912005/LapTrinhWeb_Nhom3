@@ -1,13 +1,18 @@
 import os
+import json
 from datetime import timedelta
 from types import SimpleNamespace
 
+from django.conf import settings
+from django.core.files import File
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import role_required
 from apps.accounts.models import Customer
@@ -20,11 +25,14 @@ from apps.core.models import (
     VanBanHoanTra,
     VanBanLienQuan,
     HoSoVanBan,
+    ChuKySo,
+    LichSuKySo,
 )
 
 from .forms import VanBanDenForm
 from apps.core.models import CongViec
 from apps.core.utils.activity_log import ghi_lich_su_van_ban
+from apps.quanlyvanbandi.utils_ky_so import sign_pdf_with_ratio
 
 
 # =========================================================
@@ -857,3 +865,86 @@ def lanh_dao_hoan_tra_van_ban_den(request, pk):
         return redirect('quanlyvanbanden:chi_tiet', pk=vb.pk)
 
     return redirect('quanlyvanbanden:chi_tiet', pk=vb.pk)
+
+
+# =========================================================
+# LÃNH ĐẠO - KÝ SỐ
+# =========================================================
+
+@require_POST
+@role_required(Customer.Role.LANH_DAO)
+def api_ky_so_van_ban(request, vb_pk):
+    try:
+        data = json.loads(request.body)
+        x_ratio = float(data.get("x_ratio", 0))
+        y_ratio = float(data.get("y_ratio", 0))
+    except (ValueError, TypeError, json.JSONDecodeError):
+        return JsonResponse({"success": False, "message": "Tọa độ không hợp lệ."})
+
+    vb = get_object_or_404(VanBan, pk=vb_pk, phan_loai=PHAN_LOAI_VAN_BAN_DEN)
+    user = _kiem_tra_nguoi_dung_core(request)
+
+    if vb.lanh_dao_duyet_id != user.pk or vb.trang_thai not in [TRANG_THAI_CHO_XU_LY, TRANG_THAI_HOAN_TRA]:
+        return JsonResponse({"success": False, "message": "Bạn không có quyền ký văn bản này hoặc văn bản không ở trạng thái Chờ Xử Lý / Hoàn Trả."})
+
+    try:
+        chu_ky_so = ChuKySo.objects.get(nguoi_dung=user)
+        if not chu_ky_so.anh_chu_ky:
+            return JsonResponse({"success": False, "message": "Bạn chưa cấu hình ảnh chữ ký."})
+        signature_image_path = chu_ky_so.anh_chu_ky.path
+    except ChuKySo.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Bạn chưa có thông tin chữ ký số."})
+
+    if not vb.file_dinh_kem:
+        return JsonResponse({"success": False, "message": "Văn bản chưa có file đính kèm."})
+
+    input_pdf_path = vb.file_dinh_kem.path
+    pfx_path = os.path.join(settings.BASE_DIR, 'apps', 'core', 'certs', 'dummy_cert.pfx')
+    pfx_password = "123456"
+
+    timestamp = timezone.now().strftime("%Y%m%d%H%M%S")
+    output_filename = f"vanban_den_{vb.pk}_signed_{timestamp}.pdf"
+    
+    import tempfile
+    temp_dir = tempfile.gettempdir()
+    output_pdf_path = os.path.join(temp_dir, output_filename)
+
+    try:
+        sign_pdf_with_ratio(
+            input_pdf_path=input_pdf_path,
+            output_pdf_path=output_pdf_path,
+            signature_image_path=signature_image_path,
+            x_ratio=x_ratio,
+            y_ratio=y_ratio,
+            pfx_path=pfx_path,
+            pfx_password=pfx_password
+        )
+    except Exception as e:
+        return JsonResponse({"success": False, "message": f"Lỗi khi ký số: {str(e)}"})
+
+    with open(output_pdf_path, 'rb') as f:
+        signed_file = File(f, name=output_filename)
+
+        # Cập nhật ghi đè file đính kèm của VanBan
+        vb.file_dinh_kem.save(output_filename, signed_file, save=False)
+        vb.kich_thuoc = signed_file.size
+        # Không đổi trạng thái
+        vb.save(update_fields=["file_dinh_kem", "kich_thuoc"])
+
+        # Lưu lịch sử ký số
+        import hashlib
+        f.seek(0)
+        file_hash = hashlib.sha256(f.read()).hexdigest()
+
+        f.seek(0)
+        LichSuKySo.objects.update_or_create(
+            van_ban=vb,
+            defaults={
+                'chu_ky_so': chu_ky_so,
+                'hash_tai_lieu': file_hash,
+                'file_hash': file_hash,
+                'file_da_ky': signed_file
+            }
+        )
+
+    return JsonResponse({"success": True, "message": "Ký số thành công!"})
