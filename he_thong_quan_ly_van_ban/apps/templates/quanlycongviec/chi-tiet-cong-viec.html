@@ -364,6 +364,12 @@
                 </form>
                 {% endif %}
 
+                {% if can_ky_so %}
+                <button type="button" class="btn btn-primary" id="btnOpenKySoCongViec"
+                    style="background:#4f46e5; border-color:#4f46e5;"
+                    data-file-url="{{ main_attachment.file_van_ban.url|escapejs }}">&#9998; Ký số</button>
+                {% endif %}
+
                 {% if can_return %}
                 <a href="{% url 'quanlycongviec:return_task' task.pk %}" class="btn btn-danger">Hoàn trả công việc</a>
                 {% endif %}
@@ -481,7 +487,7 @@
         
         <div class="doc-label">File đính kèm:</div>
         {% if main_attachment %}
-        <div class="doc-card">
+        <div class="doc-card" style="position: relative;">
             <div class="doc-icon">
                 {% if ".pdf" in main_attachment.file_van_ban.name|lower %}
                 <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg" alt="PDF">
@@ -497,6 +503,11 @@
                     {% if ".pdf" in main_attachment.file_van_ban.name|lower %}PDF Document{% else %}Document{% endif %}
                 </div>
             </div>
+            {% if da_ky_so %}
+            <span style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px; background:#d9f4e5; color:#0d7a48; border-radius:999px; font-size:12px; font-weight:700; margin-left:auto;">
+                &#10003; Đã ký số
+            </span>
+            {% endif %}
         </div>
         {% else %}
         <div class="content-box" style="margin-bottom: 16px;">Không có file đính kèm chính.</div>
@@ -564,33 +575,211 @@
     {% endif %}
 
 
-
+    {% if da_ky_so %}
+    <div class="section" style="background:#d9f4e5; border:1px solid #6ee7b7; padding:14px 18px; margin-top:16px;">
+        <div style="display:flex; align-items:center; gap:10px; color:#0d7a48; font-weight:700; font-size:14px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Văn bản đã được ký số bởi <strong>{{ task.nguoi_giao.ho_va_ten }}</strong>
+            vào lúc <strong>{{ da_ky_so.thoi_gian_ky|date:"H:i d/m/Y" }}</strong>
+        </div>
+    </div>
+    {% endif %}
 
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const deleteButton = document.getElementById("btnDeleteTask");
-        const deleteForm = document.getElementById("deleteTaskForm");
-        if (!deleteButton || !deleteForm) {
-            return;
-        }
+<!-- Modal Ký Số Công Việc -->
+<div id="kySoCongViecModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center; flex-direction:column;">
+  <div style="background:#fff; width:92%; max-width:860px; max-height:92vh; display:flex; flex-direction:column; border-radius:6px; overflow:hidden; box-shadow:0 8px 40px rgba(0,0,0,0.3);">
+    <!-- Header -->
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:#1f2d3d; color:#fff;">
+      <div style="display:flex; align-items:center; gap:10px; font-size:16px; font-weight:700;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Ký số công việc
+      </div>
+      <button onclick="closeKySoCongViecModal()" style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer; line-height:1;">&times;</button>
+    </div>
+    <!-- Body -->
+    <div style="flex:1; overflow:auto; background:#e5e7eb; padding:20px; display:flex; justify-content:center; position:relative;">
+      <div id="cvPdfContainer" style="position:relative; box-shadow:0 4px 12px rgba(0,0,0,0.15); background:#fff; display:inline-block;">
+        <canvas id="cvPdfCanvas"></canvas>
+        {% if request.user.core_profile.chu_ky_so.anh_chu_ky %}
+        <img id="cvSigImg"
+             src="{{ request.user.core_profile.chu_ky_so.anh_chu_ky.url }}"
+             style="position:absolute; top:10px; left:10px; width:150px; height:80px; cursor:move; border:2px dashed #4f46e5; background:rgba(255,255,255,0.6); object-fit:contain; z-index:10;"
+             draggable="false">
+        {% else %}
+        <div id="cvSigImg" style="display:none;"></div>
+        <div style="position:absolute; top:10px; left:10px; background:#dc2626; color:#fff; padding:6px 12px; font-size:13px; border-radius:4px;">⚠ Bạn chưa có ảnh chữ ký số</div>
+        {% endif %}
+      </div>
+    </div>
+    <!-- Footer -->
+    <div style="padding:14px 24px; background:#f8f9fa; border-top:1px solid #dee2e6; display:flex; justify-content:flex-end; gap:12px;">
+      <button type="button" class="btn btn-secondary" onclick="closeKySoCongViecModal()">Hủy</button>
+      <button type="button" class="btn btn-primary" id="btnSubmitKySoCongViec"
+              style="background:#4f46e5; border-color:#4f46e5; min-width:120px;">
+          &#9998; Xác nhận ký
+      </button>
+    </div>
+  </div>
+</div>
 
-        deleteButton.addEventListener("click", function () {
-            if (window.confirmAction) {
-                window.confirmAction(
-                    "Xóa công việc",
-                    "Bạn có chắc chắn muốn xóa công việc này không?",
-                    function () {
-                        deleteForm.submit();
-                    }
-                );
-                return;
-            }
-            deleteForm.submit();
-        });
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script>
+(function() {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+  var cvPdfDoc = null;
+  var cvCanvas = document.getElementById('cvPdfCanvas');
+  var cvCtx    = cvCanvas ? cvCanvas.getContext('2d') : null;
+  var cvSigImg = document.getElementById('cvSigImg');
+  var cvModal  = document.getElementById('kySoCongViecModal');
+
+  /* ---- Mở modal ---- */
+  window.openKySoCongViecModal = function(pdfUrl) {
+    if (!cvModal) return;
+    cvModal.style.display = 'flex';
+    pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+      cvPdfDoc = pdf;
+      renderCvPage(pdf.numPages); // Luôn ký trang cuối
+    }).catch(function() {
+      alert('Không thể tải file PDF để xem trước.');
     });
+  };
+
+  window.closeKySoCongViecModal = function() {
+    if (cvModal) cvModal.style.display = 'none';
+  };
+
+  function renderCvPage(num) {
+    if (!cvPdfDoc || !cvCanvas || !cvCtx) return;
+    cvPdfDoc.getPage(num).then(function(page) {
+      var vp = page.getViewport({ scale: 1.4 });
+      cvCanvas.width  = vp.width;
+      cvCanvas.height = vp.height;
+      page.render({ canvasContext: cvCtx, viewport: vp });
+      if (cvSigImg) {
+        cvSigImg.style.left = '10px';
+        cvSigImg.style.top  = '10px';
+      }
+    });
+  }
+
+  /* ---- Drag & Drop ---- */
+  var isDragging = false, startX, startY, initLeft, initTop;
+
+  if (cvSigImg && cvSigImg.tagName === 'IMG') {
+    cvSigImg.addEventListener('mousedown', function(e) {
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      initLeft = cvSigImg.offsetLeft;
+      initTop  = cvSigImg.offsetTop;
+      cvSigImg.style.cursor = 'grabbing';
+      e.preventDefault();
+    });
+  }
+
+  document.addEventListener('mousemove', function(e) {
+    if (!isDragging || !cvSigImg) return;
+    var dx = e.clientX - startX;
+    var dy = e.clientY - startY;
+    var nx = Math.max(0, Math.min(initLeft + dx, cvCanvas.width  - cvSigImg.offsetWidth));
+    var ny = Math.max(0, Math.min(initTop  + dy, cvCanvas.height - cvSigImg.offsetHeight));
+    cvSigImg.style.left = nx + 'px';
+    cvSigImg.style.top  = ny + 'px';
+  });
+
+  document.addEventListener('mouseup', function() {
+    isDragging = false;
+    if (cvSigImg) cvSigImg.style.cursor = 'move';
+  });
+
+  /* ---- Gắn nút mở modal ---- */
+  document.addEventListener('DOMContentLoaded', function() {
+    var openBtn = document.getElementById('btnOpenKySoCongViec');
+    if (openBtn) {
+      openBtn.addEventListener('click', function() {
+        var pdfUrl = this.dataset.fileUrl;
+        if (!pdfUrl) {
+          alert('Không tìm thấy file PDF để ký số.');
+          return;
+        }
+        window.openKySoCongViecModal(pdfUrl);
+      });
+    }
+
+    /* ---- Xác nhận ký ---- */
+    var submitBtn = document.getElementById('btnSubmitKySoCongViec');
+    if (submitBtn) {
+      submitBtn.addEventListener('click', function() {
+        if (!cvSigImg || cvSigImg.tagName !== 'IMG') {
+          alert('Bạn chưa có ảnh chữ ký số. Vui lòng cấu hình trong tài khoản.');
+          return;
+        }
+        var xRatio = cvSigImg.offsetLeft / cvCanvas.width;
+        var yRatio = cvSigImg.offsetTop  / cvCanvas.height;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Đang ký...';
+
+        fetch("{% url 'quanlycongviec:api_ky_so_cong_viec' task.pk %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+          },
+          body: JSON.stringify({ x_ratio: xRatio, y_ratio: yRatio })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.success) {
+            alert(data.message);
+            window.location.reload();
+          } else {
+            alert('Lỗi: ' + data.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '&#9998; Xác nhận ký';
+          }
+        })
+        .catch(function() {
+          alert('Đã xảy ra lỗi hệ thống.');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '&#9998; Xác nhận ký';
+        });
+      });
+    }
+
+    /* ---- Nút xóa công việc ---- */
+    var deleteButton = document.getElementById('btnDeleteTask');
+    var deleteForm   = document.getElementById('deleteTaskForm');
+    if (deleteButton && deleteForm) {
+      deleteButton.addEventListener('click', function() {
+        if (window.confirmAction) {
+          window.confirmAction(
+            'Xóa công việc',
+            'Bạn có chắc chắn muốn xóa công việc này không?',
+            function() { deleteForm.submit(); }
+          );
+          return;
+        }
+        deleteForm.submit();
+      });
+    }
+  });
+
+  function getCsrfToken() {
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+      var c = cookies[i].trim();
+      if (c.startsWith('csrftoken=')) return decodeURIComponent(c.slice(10));
+    }
+    return '';
+  }
+
+})();
 </script>
 {% endblock %}
