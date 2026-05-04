@@ -13,15 +13,11 @@
         </div>
 
         <div class="modal-footer">
-            <button type="button"
-                    class="btn-modal-cancel"
-                    onclick="closeModal('saveModal')">
+            <button type="button" class="btn-modal-cancel" onclick="closeModal('saveModal')">
                 Hủy
             </button>
 
-            <form method="post"
-                  action="{% url 'quanlyvanbanden:lanh_dao_luu' vb.pk %}"
-                  style="margin:0;">
+            <form method="post" action="{% url 'quanlyvanbanden:lanh_dao_luu' vb.pk %}" style="margin:0;">
                 {% csrf_token %}
                 <button type="submit" class="btn-modal-save">Lưu</button>
             </form>

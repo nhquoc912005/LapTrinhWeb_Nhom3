@@ -384,10 +384,16 @@
             signal: controller.signal,
             headers: { 'X-CSRFToken': token }
         })
-        .then(function(response) { 
+        .then(function(response) {
             clearTimeout(timeoutId);
-            if (!response.ok) return response.text().then(text => { throw new Error(text) });
-            return response.json(); 
+            // Luôn parse JSON (kể cả khi lỗi 403, 400, 404...) để lấy trường error
+            return response.json().then(function(data) {
+                if (!response.ok) {
+                    // Ưu tiên lấy trường error từ JSON, fallback sang thông báo chung
+                    throw new Error(data.error || 'Bạn không có quyền xử lý hồ sơ này.');
+                }
+                return data;
+            });
         })
         .then(function(data) {
             if (data.ok) {
