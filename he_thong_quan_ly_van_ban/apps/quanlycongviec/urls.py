@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import (
     add_task,
+    api_ky_so_cong_viec,
     approve_task,
     delete_task,
     edit_task,
@@ -30,4 +31,5 @@ urlpatterns = [
     path("api/task/<int:task_id>/", get_task_detail, name="get_task_detail"),
     path("task/<int:task_id>/", task_detail, name="task_detail"),
     path("start/<int:task_id>/", start_task, name="start_task"),
+    path("task/<int:task_id>/ky-so/", api_ky_so_cong_viec, name="api_ky_so_cong_viec"),
 ]

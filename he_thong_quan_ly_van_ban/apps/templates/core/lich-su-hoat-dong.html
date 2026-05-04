@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Lịch sử hoạt động - QLVB{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'core:dashboard' %}">
+  <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+  Trang chủ
+</a>
+<span class="breadcrumb-sep">›</span>
+<span>Lịch sử hoạt động</span>
+{% endblock %}
+
+{% block content %}
+<div class="filter-card">
+  <form method="get" action="">
+    <div class="filter-grid filter-grid-cols-4">
+      <div class="custom-select-wrap">
+        <label class="filter-label" for="doi_tuong_loai">Loại đối tượng</label>
+        <select id="doi_tuong_loai" name="doi_tuong_loai" class="form-control">
+          <option value="">Tất cả</option>
+          {% for val, label in loai_choices %}
+          <option value="{{ val }}" {% if doi_tuong_loai == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="custom-select-wrap">
+        <label class="filter-label" for="hanh_dong">Hành động</label>
+        <select id="hanh_dong" name="hanh_dong" class="form-control">
+          <option value="">Tất cả</option>
+          {% for val, label in hanh_dong_choices %}
+          <option value="{{ val }}" {% if hanh_dong == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Lọc</button>
+      <a href="{% url 'core:lich_su_hoat_dong' %}" class="btn btn-secondary">Xóa lọc</a>
+    </div>
+  </form>
+</div>
+
+<div class="table-container">
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Thời gian</th>
+          <th>Người thực hiện</th>
+          <th>Hành động</th>
+          <th>Loại đối tượng</th>
+          <th>Mô tả</th>
+          <th>Trước</th>
+          <th>Sau</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ls in page_obj %}
+        <tr>
+          <td>{{ ls.thoi_gian_thuc_hien|date:"d/m/Y H:i" }}</td>
+          <td>{{ ls.nguoi_thuc_hien.ho_va_ten|default:"--" }}</td>
+          <td>
+            <span class="status-badge
+              {% if ls.hanh_dong == 'TAO' %}active
+              {% elif ls.hanh_dong == 'XOA' %}danger
+              {% elif ls.hanh_dong == 'HOAN_TRA' %}warning
+              {% elif ls.hanh_dong == 'BAN_HANH' or ls.hanh_dong == 'DUYET' %}success
+              {% else %}neutral{% endif %}">
+              {{ ls.get_hanh_dong_display }}
+            </span>
+          </td>
+          <td>{{ ls.get_doi_tuong_loai_display }}</td>
+          <td style="max-width:280px; white-space:normal;">{{ ls.mo_ta|default:"--" }}</td>
+          <td>
+            {% if ls.truoc_thay_doi %}
+              {{ ls.truoc_thay_doi.trang_thai|default:"--" }}
+            {% else %}--{% endif %}
+          </td>
+          <td>
+            {% if ls.sau_thay_doi %}
+              {{ ls.sau_thay_doi.trang_thai|default:"--" }}
+            {% else %}--{% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" style="text-align:center; padding:32px; color:#64748b;">
+            Chưa có lịch sử hoạt động nào.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if page_obj.has_other_pages %}
+<div class="pagination" style="margin-top:16px; display:flex; gap:8px; justify-content:center;">
+  {% if page_obj.has_previous %}
+    <a class="btn btn-secondary btn-sm" href="?page={{ page_obj.previous_page_number }}&doi_tuong_loai={{ doi_tuong_loai }}&hanh_dong={{ hanh_dong }}">‹ Trước</a>
+  {% endif %}
+  <span style="line-height:32px; font-size:14px; color:#64748b;">
+    Trang {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+  </span>
+  {% if page_obj.has_next %}
+    <a class="btn btn-secondary btn-sm" href="?page={{ page_obj.next_page_number }}&doi_tuong_loai={{ doi_tuong_loai }}&hanh_dong={{ hanh_dong }}">Sau ›</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

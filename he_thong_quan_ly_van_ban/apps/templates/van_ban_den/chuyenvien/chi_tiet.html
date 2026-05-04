@@ -350,9 +350,9 @@
 
         <div class="action-btns">
             {% if vb.ho_so_van_ban %}
-                <a href="{% url 'hosovanban:chi_tiet' vb.ho_so_van_ban.pk %}" class="btn-local btn-blue" style="text-decoration:none;">Xem hồ sơ</a>
+                <a href="{% url 'hosovanban:chi_tiet' vb.ho_so_van_ban.pk %}" class="btn btn-primary" style="padding:8px 16px; text-decoration:none;">Xem hồ sơ</a>
             {% else %}
-                <button type="button" class="btn-local btn-blue" onclick="openThemVanBanPopup()">Thêm hồ sơ</button>
+                <button type="button" class="btn btn-primary" style="padding:8px 16px;" onclick="openThemVanBanPopup()">Thêm hồ sơ</button>
             {% endif %}
         </div>
     </div>
@@ -360,7 +360,7 @@
     <div class="info-grid">
         <div>
             <div class="field"><div class="label">Trích yếu</div><div class="value">{{ vb.trich_yeu }}</div></div>
-            <div class="field"><div class="label">Đơn vị ban hành</div><div class="value">{{ vb.don_vi_ban_hanh|default:'-' }}</div></div>
+            <div class="field"><div class="label">Đơn vị ban hành</div><div class="value">{% if vb.don_vi_ban_hanh and vb.don_vi_ban_hanh != 'None' %}{{ vb.don_vi_ban_hanh }}{% else %}-{% endif %}</div></div>
             <div class="field"><div class="label">Ngày đến</div><div class="value">{{ vb.ngay_den|date:"d/m/Y" }}</div></div>
             <div class="field"><div class="label">Độ mật</div><div class="value">{{ vb.get_do_mat_display|default:vb.do_mat }}</div></div>
         </div>
@@ -477,9 +477,11 @@
     </div>
 </div>
 
+<script id="popup-van-ban-data" type="application/json">{"id": {{ vb.pk }}, "type": "van_ban_den"}</script>
 <script>
-    var popupVanBanId = {{ vb.pk }};
-    var popupVanBanType = 'van_ban_den';
+    var _popupData = JSON.parse(document.getElementById('popup-van-ban-data').textContent);
+    var popupVanBanId = _popupData.id;
+    var popupVanBanType = _popupData.type;
 </script>
 {% include "hosovanban/them-van-ban-popup.html" %}
 

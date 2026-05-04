@@ -1,27 +1,37 @@
+import hashlib
+import os
+import tempfile
 from datetime import datetime
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.files import File
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.timezone import make_aware
+from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import role_required
 from apps.accounts.models import Customer
 from apps.core.models import (
+    ChuKySo,
     CongViec,
     FileCVLienQuan,
     HoanTraCongViec,
+    LichSuKySo,
     NguoiDung,
     PheDuyetCongViec,
     PhanCongCongViec,
     VanBan,
 )
+from apps.quanlyvanbandi.utils_ky_so import sign_pdf_with_ratio
 
 from .forms import ProcessTaskForm, ReturnTaskForm, UpdateTaskResultForm
+from apps.core.utils.activity_log import ghi_lich_su_cong_viec
 
 
 def _task_queryset():
@@ -260,6 +270,11 @@ def add_task(request):
                 nguoi_phoi_hop = get_object_or_404(NguoiDung, pk=nguoi_phoi_hop_id)
                 PhanCongCongViec.objects.create(cong_viec=task, nguoi_phoi_hop=nguoi_phoi_hop)
 
+        ghi_lich_su_cong_viec(
+            user=request.user, cong_viec=task, hanh_dong="TAO",
+            trang_thai_moi=CongViec.TrangThai.CHO_XU_LY,
+        )
+
         messages.success(request, f"Đã giao việc '{ten_cv}' thành công.")
     except Exception as exc:
         messages.error(request, f"Lỗi hệ thống khi giao việc: {exc}")
@@ -281,6 +296,7 @@ def delete_task(request, task_id):
         return redirect("quanlycongviec:task_detail", task_id=task.pk)
 
     task.delete()
+    ghi_lich_su_cong_viec(user=request.user, cong_viec=task, hanh_dong="XOA")
     messages.success(request, "Đã xóa công việc.")
     return redirect("quanlycongviec:giao_viec")
 
@@ -382,6 +398,10 @@ def edit_task(request, task_id):
                 nguoi_tai_len=request.user.core_profile,
             )
 
+        ghi_lich_su_cong_viec(
+            user=request.user, cong_viec=task, hanh_dong="SUA",
+        )
+
         messages.success(request, f"Đã cập nhật công việc '{task.ten_cong_viec}' thành công.")
     except Exception as exc:
         messages.error(request, f"Lỗi khi cập nhật công việc: {exc}")
@@ -417,6 +437,12 @@ def process_task(request, task_id):
                         else CongViec.TrangThai.DA_HOAN_THANH
                     )
                     task.save()
+
+                    ghi_lich_su_cong_viec(
+                        user=request.user, cong_viec=task, hanh_dong="SUA",
+                        mo_ta="Xử lý công việc",
+                        trang_thai_moi=task.trang_thai,
+                    )
 
                     _create_assignment_files(
                         task,
@@ -550,6 +576,10 @@ def return_task(request, task_id):
                     nguoi_hoan_tra=request.user.core_profile,
                     noi_dung=form.cleaned_data["noi_dung"],
                 )
+                ghi_lich_su_cong_viec(
+                    user=request.user, cong_viec=task, hanh_dong="HOAN_TRA",
+                    trang_thai_moi=next_status,
+                )
             messages.success(request, success_message)
             return redirect("quanlycongviec:task_detail", task_id=task.pk)
 
@@ -581,6 +611,11 @@ def approve_task(request, task_id):
     task.trang_thai = CongViec.TrangThai.DA_HOAN_THANH
     task.save(update_fields=["trang_thai", "last_activity"])
     PheDuyetCongViec.objects.create(cong_viec=task)
+    ghi_lich_su_cong_viec(
+        user=request.user, cong_viec=task, hanh_dong="DUYET",
+        trang_thai_cu=CongViec.TrangThai.CHO_DUYET,
+        trang_thai_moi=CongViec.TrangThai.DA_HOAN_THANH,
+    )
     messages.success(request, "Đã duyệt công việc hoàn thành.")
     return redirect("quanlycongviec:task_detail", task_id=task.pk)
 
@@ -589,7 +624,7 @@ def approve_task(request, task_id):
 def get_task_detail(request, task_id):
     task = _get_task(task_id)
 
-    if not _user_is_task_manager(request, task):
+    if not _can_view_task(request, task):
         return JsonResponse({"detail": "Forbidden"}, status=403)
 
     collaborators = PhanCongCongViec.objects.filter(cong_viec=task)
@@ -682,6 +717,25 @@ def task_detail(request, task_id):
         "-pk",
     )
 
+    # Kiểm tra điều kiện ký số: lãnh đạo giao việc, task đã xử lý, có file PDF chính
+    _can_sign_statuses = {CongViec.TrangThai.CHO_DUYET, CongViec.TrangThai.DA_HOAN_THANH}
+    _has_pdf_main = (
+        main_attachment is not None
+        and main_attachment.file_van_ban
+        and main_attachment.file_van_ban.name.lower().endswith(".pdf")
+    )
+    can_ky_so = (
+        _user_is_task_manager(request, task)
+        and task.trang_thai in _can_sign_statuses
+        and _has_pdf_main
+    )
+
+    # Lịch sử ký số của công việc (nếu có)
+    try:
+        da_ky_so = LichSuKySo.objects.get(cong_viec=task)
+    except LichSuKySo.DoesNotExist:
+        da_ky_so = None
+
     context = {
         "task": task,
         "task_code": f"GV-{task.pk:03d}",
@@ -699,5 +753,124 @@ def task_detail(request, task_id):
         "can_edit": _user_is_task_manager(request, task)
         and task.trang_thai in {CongViec.TrangThai.CHO_XU_LY, CongViec.TrangThai.HOAN_TRA_LD},
         "can_delete": _user_is_task_manager(request, task) and task.trang_thai == CongViec.TrangThai.CHO_XU_LY,
+        "can_ky_so": can_ky_so,
+        "da_ky_so": da_ky_so,
     }
     return render(request, "quanlycongviec/chi-tiet-cong-viec.html", context)
+
+
+@require_POST
+@login_required
+@role_required(Customer.Role.LANH_DAO)
+def api_ky_so_cong_viec(request, task_id):
+    """Lãnh đạo ký số lên file đính kèm chính của công việc sau khi chuyên viên xử lý xong."""
+    import json
+    try:
+        data = json.loads(request.body)
+        x_ratio = float(data.get("x_ratio", 0))
+        y_ratio = float(data.get("y_ratio", 0))
+    except (ValueError, TypeError, json.JSONDecodeError):
+        return JsonResponse({"success": False, "message": "Tọa độ không hợp lệ."})
+
+    task = get_object_or_404(_task_queryset(), pk=task_id)
+    user = request.user.core_profile
+
+    # Chỉ người giao việc (lãnh đạo) mới được ký
+    if user.pk != task.nguoi_giao_id:
+        return JsonResponse({"success": False, "message": "Bạn không phải người giao công việc này."})
+
+    # Chỉ ký khi chuyên viên đã xử lý xong (Chờ duyệt hoặc Đã hoàn thành)
+    allowed_statuses = {CongViec.TrangThai.CHO_DUYET, CongViec.TrangThai.DA_HOAN_THANH}
+    if task.trang_thai not in allowed_statuses:
+        return JsonResponse({
+            "success": False,
+            "message": "Chỉ có thể ký số khi công việc đang ở trạng thái Chờ duyệt hoặc Đã hoàn thành."
+        })
+
+    # Lấy file đính kèm chính (loại CHINH do lãnh đạo giao)
+    main_attachment = FileCVLienQuan.objects.filter(
+        cong_viec=task,
+        loai_file=FileCVLienQuan.LoaiFile.CHINH,
+        nguon_tai_len=FileCVLienQuan.NguonTaiLen.GIAO_VIEC,
+    ).first()
+
+    if not main_attachment or not main_attachment.file_van_ban:
+        return JsonResponse({"success": False, "message": "Công việc không có file đính kèm chính để ký."})
+
+    # Kiểm tra file phải là PDF
+    if not main_attachment.file_van_ban.name.lower().endswith(".pdf"):
+        return JsonResponse({"success": False, "message": "Chỉ hỗ trợ ký số trên file PDF."})
+
+    # Lấy thông tin chữ ký số của lãnh đạo
+    try:
+        chu_ky_so = ChuKySo.objects.get(nguoi_dung=user)
+        if not chu_ky_so.anh_chu_ky:
+            return JsonResponse({"success": False, "message": "Bạn chưa cấu hình ảnh chữ ký."})
+        signature_image_path = chu_ky_so.anh_chu_ky.path
+    except ChuKySo.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Bạn chưa có thông tin chữ ký số."})
+
+    input_pdf_path = main_attachment.file_van_ban.path
+    pfx_path = os.path.join(settings.BASE_DIR, 'apps', 'core', 'certs', 'dummy_cert.pfx')
+    pfx_password = "123456"
+
+    if not os.path.exists(pfx_path):
+        return JsonResponse({"success": False, "message": "Không tìm thấy chứng thư số hệ thống."})
+
+    timestamp = timezone.now().strftime("%Y%m%d%H%M%S")
+    output_filename = f"congviec_{task.pk}_signed_{timestamp}.pdf"
+    temp_dir = tempfile.gettempdir()
+    output_pdf_path = os.path.join(temp_dir, output_filename)
+
+    try:
+        sign_pdf_with_ratio(
+            input_pdf_path=input_pdf_path,
+            output_pdf_path=output_pdf_path,
+            signature_image_path=signature_image_path,
+            x_ratio=x_ratio,
+            y_ratio=y_ratio,
+            pfx_path=pfx_path,
+            pfx_password=pfx_password,
+        )
+    except Exception as e:
+        return JsonResponse({"success": False, "message": f"Lỗi khi ký số: {str(e)}"})
+
+    try:
+        with open(output_pdf_path, 'rb') as f:
+            signed_file = File(f, name=output_filename)
+
+            # Ghi đè file đính kèm trong FileCVLienQuan
+            old_file = main_attachment.file_van_ban
+            main_attachment.file_van_ban.save(output_filename, signed_file, save=False)
+            main_attachment.kich_thuoc = os.path.getsize(output_pdf_path)
+            main_attachment.save(update_fields=["file_van_ban", "kich_thuoc"])
+
+            # Tính hash
+            f.seek(0)
+            file_hash = hashlib.sha256(f.read()).hexdigest()
+
+            f.seek(0)
+            LichSuKySo.objects.update_or_create(
+                cong_viec=task,
+                defaults={
+                    'chu_ky_so': chu_ky_so,
+                    'hash_tai_lieu': file_hash,
+                    'file_hash': file_hash,
+                    'file_da_ky': File(open(output_pdf_path, 'rb'), name=output_filename),
+                    'van_ban': None,
+                }
+            )
+    except Exception as e:
+        return JsonResponse({"success": False, "message": f"Lỗi khi lưu file đã ký: {str(e)}"})
+    finally:
+        if os.path.exists(output_pdf_path):
+            os.remove(output_pdf_path)
+
+    ghi_lich_su_cong_viec(
+        user=request.user,
+        cong_viec=task,
+        hanh_dong="KY_SO",
+        mo_ta="Lãnh đạo ký số file đính kèm công việc",
+    )
+
+    return JsonResponse({"success": True, "message": "Ký số thành công."})

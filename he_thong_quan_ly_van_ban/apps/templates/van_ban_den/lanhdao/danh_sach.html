@@ -21,92 +21,68 @@
         <h2 class="section-title">Tra cứu thông tin</h2>
 
         <div class="filter-controls-row">
-            <div class="tab-filter-group">
-                <a href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if selected_loai_van_ban %}loai_van_ban={{ selected_loai_van_ban|urlencode }}&{% endif %}{% if selected_hinh_thuc_van_ban %}hinh_thuc_van_ban={{ selected_hinh_thuc_van_ban|urlencode }}&{% endif %}{% if selected_do_mat %}do_mat={{ selected_do_mat|urlencode }}&{% endif %}{% if selected_do_khan %}do_khan={{ selected_do_khan|urlencode }}{% endif %}"
-                   class="tab-filter-btn {% if not selected_trang_thai %}active{% endif %}">
-                    Tất cả
-                </a>
-
-                <a href="?trang_thai=Chờ Xử Lý{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_loai_van_ban %}&loai_van_ban={{ selected_loai_van_ban|urlencode }}{% endif %}{% if selected_hinh_thuc_van_ban %}&hinh_thuc_van_ban={{ selected_hinh_thuc_van_ban|urlencode }}{% endif %}{% if selected_do_mat %}&do_mat={{ selected_do_mat|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}"
-                   class="tab-filter-btn {% if selected_trang_thai == 'Chờ Xử Lý' %}active{% endif %}">
-                    Chờ xử lý
-                </a>
-
-                <a href="?trang_thai=Đã Xử Lý{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_loai_van_ban %}&loai_van_ban={{ selected_loai_van_ban|urlencode }}{% endif %}{% if selected_hinh_thuc_van_ban %}&hinh_thuc_van_ban={{ selected_hinh_thuc_van_ban|urlencode }}{% endif %}{% if selected_do_mat %}&do_mat={{ selected_do_mat|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}"
-                   class="tab-filter-btn {% if selected_trang_thai == 'Đã Xử Lý' %}active{% endif %}">
-                    Đã xử lý
-                </a>
-
-                <a href="?trang_thai=Hoàn Trả{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_loai_van_ban %}&loai_van_ban={{ selected_loai_van_ban|urlencode }}{% endif %}{% if selected_hinh_thuc_van_ban %}&hinh_thuc_van_ban={{ selected_hinh_thuc_van_ban|urlencode }}{% endif %}{% if selected_do_mat %}&do_mat={{ selected_do_mat|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}"
-                   class="tab-filter-btn {% if selected_trang_thai == 'Hoàn Trả' %}active{% endif %}">
-                    Hoàn trả
-                </a>
-
-                <a href="?trang_thai=Xem Để Biết{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_loai_van_ban %}&loai_van_ban={{ selected_loai_van_ban|urlencode }}{% endif %}{% if selected_hinh_thuc_van_ban %}&hinh_thuc_van_ban={{ selected_hinh_thuc_van_ban|urlencode }}{% endif %}{% if selected_do_mat %}&do_mat={{ selected_do_mat|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}"
-                   class="tab-filter-btn {% if selected_trang_thai == 'Xem Để Biết' %}active{% endif %}">
-                    Xem để biết
-                </a>
+            <div class="tab-filter-group" id="tabFilter">
+                <button class="filter-tab active" data-tab="all">Tất cả</button>
+                <button class="filter-tab" data-tab="Chờ Xử Lý">Chờ xử lý</button>
+                <button class="filter-tab" data-tab="Đã Xử Lý">Đã xử lý</button>
+                <button class="filter-tab" data-tab="Hoàn Trả">Hoàn trả</button>
+                <button class="filter-tab" data-tab="Xem Để Biết">Xem để biết</button>
             </div>
         </div>
 
-        <form method="get" id="filterForm" class="filter-stack">
-            <input type="hidden" name="trang_thai" value="{{ selected_trang_thai }}">
+        <div class="custom-search-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            <input
+                type="text"
+                id="searchKeyword"
+                class="custom-search-input"
+                placeholder="Tìm theo số ký hiệu, trích yếu văn bản..."
+            >
+        </div>
 
-            <div class="custom-search-wrap">
-                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                </svg>
-                <input
-                    type="text"
-                    name="q"
-                    value="{{ q }}"
-                    class="custom-search-input"
-                    placeholder="Tìm theo số ký hiệu, trích yếu văn bản..."
-                >
+        <div class="filter-grid filter-grid-cols-4">
+            <div class="custom-select-wrap">
+                <label class="filter-label" for="filterLoaiVanBan">Loại văn bản</label>
+                <select id="filterLoaiVanBan" class="custom-select">
+                    <option value="">-- Loại văn bản --</option>
+                    {% for value, label in loai_van_ban_choices %}
+                        <option value="{{ label }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
             </div>
 
-            <div class="filter-grid filter-grid-cols-4">
-                <div class="custom-select-wrap">
-                    <label class="filter-label" for="filterLoaiVanBan">Loại văn bản</label>
-                    <select id="filterLoaiVanBan" name="loai_van_ban" onchange="document.getElementById('filterForm').submit()">
-                        <option value="">-- Loại văn bản --</option>
-                        {% for value, label in loai_van_ban_choices %}
-                            <option value="{{ value }}" {% if selected_loai_van_ban == value %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="custom-select-wrap">
-                    <label class="filter-label" for="filterHinhThucVanBan">Hình thức văn bản</label>
-                    <select id="filterHinhThucVanBan" name="hinh_thuc_van_ban" onchange="document.getElementById('filterForm').submit()">
-                        <option value="">-- Hình thức văn bản --</option>
-                        {% for value, label in hinh_thuc_van_ban_choices %}
-                            <option value="{{ value }}" {% if selected_hinh_thuc_van_ban == value %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="custom-select-wrap">
-                    <label class="filter-label" for="filterDoMat">Độ mật</label>
-                    <select id="filterDoMat" name="do_mat" onchange="document.getElementById('filterForm').submit()">
-                        <option value="">-- Độ mật --</option>
-                        {% for value, label in do_mat_choices %}
-                            <option value="{{ value }}" {% if selected_do_mat == value %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="custom-select-wrap">
-                    <label class="filter-label" for="filterDoKhan">Độ khẩn</label>
-                    <select id="filterDoKhan" name="do_khan" onchange="document.getElementById('filterForm').submit()">
-                        <option value="">-- Độ khẩn --</option>
-                        {% for value, label in do_khan_choices %}
-                            <option value="{{ value }}" {% if selected_do_khan == value %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+            <div class="custom-select-wrap">
+                <label class="filter-label" for="filterHinhThucVanBan">Hình thức văn bản</label>
+                <select id="filterHinhThucVanBan" class="custom-select">
+                    <option value="">-- Hình thức văn bản --</option>
+                    {% for value, label in hinh_thuc_van_ban_choices %}
+                        <option value="{{ label }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
             </div>
-        </form>
+
+            <div class="custom-select-wrap">
+                <label class="filter-label" for="filterDoMat">Độ mật</label>
+                <select id="filterDoMat" class="custom-select">
+                    <option value="">-- Độ mật --</option>
+                    {% for value, label in do_mat_choices %}
+                        <option value="{{ label }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="custom-select-wrap">
+                <label class="filter-label" for="filterDoKhan">Độ khẩn</label>
+                <select id="filterDoKhan" class="custom-select">
+                    <option value="">-- Độ khẩn --</option>
+                    {% for value, label in do_khan_choices %}
+                        <option value="{{ label }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -126,9 +102,20 @@
                     <th>Trạng thái</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="vanBanDenBody">
                 {% for vb in ds %}
-                <tr>
+                <tr
+                    data-url="{% url 'quanlyvanbanden:chi_tiet' vb.pk %}"
+                    style="cursor:pointer;"
+                    onclick="window.location=this.dataset.url"
+                    data-so-ky-hieu="{{ vb.so_ky_hieu|default:'' }}"
+                    data-trich-yeu="{{ vb.trich_yeu|default:'' }}"
+                    data-trang-thai="{{ vb.trang_thai|default:'' }}"
+                    data-loai-vb="{{ vb.get_loai_van_ban_display|default:vb.loai_van_ban|default:'' }}"
+                    data-hinh-thuc="{{ vb.get_hinh_thuc_display|default:vb.hinh_thuc|default:'' }}"
+                    data-do-mat="{{ vb.get_do_mat_display|default:vb.do_mat|default:'' }}"
+                    data-do-khan="{{ vb.get_do_khan_display|default:vb.do_khan|default:'' }}"
+                >
                     <td class="text-center">{{ ds.start_index|add:forloop.counter0 }}</td>
                     <td>
                         <a href="{% url 'quanlyvanbanden:chi_tiet' vb.pk %}">
@@ -137,10 +124,12 @@
                     </td>
                     <td>{{ vb.trich_yeu }}</td>
                     <td>{{ vb.ngay_van_ban|date:"d/m/Y" }}</td>
-                    <td>{{ vb.don_vi_ban_hanh|default:'-' }}</td>
+                    <td>{{ vb.don_vi_ban_hanh|default:"-" }}</td>
                     <td>
                         {{ vb.get_do_mat_display|default:vb.do_mat }} /
-                        <span class="do-khan-text">{{ vb.get_do_khan_display|default:vb.do_khan|upper }}</span>
+                        <span class="do-khan-text">
+                            {{ vb.get_do_khan_display|default:vb.do_khan|upper }}
+                        </span>
                     </td>
                     <td>
                         {% if vb.trang_thai == 'Chờ Xử Lý' %}
@@ -178,7 +167,7 @@
 
         <div class="pagination-btns">
             {% if ds.has_previous %}
-                <a href="?page={{ ds.previous_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_loai_van_ban %}&loai_van_ban={{ selected_loai_van_ban|urlencode }}{% endif %}{% if selected_hinh_thuc_van_ban %}&hinh_thuc_van_ban={{ selected_hinh_thuc_van_ban|urlencode }}{% endif %}{% if selected_do_mat %}&do_mat={{ selected_do_mat|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}{% if selected_trang_thai %}&trang_thai={{ selected_trang_thai|urlencode }}{% endif %}" class="page-btn">Trước</a>
+                <a href="?page={{ ds.previous_page_number }}" class="page-btn">Trước</a>
             {% else %}
                 <span class="page-btn disabled" aria-disabled="true">Trước</span>
             {% endif %}
@@ -186,11 +175,85 @@
             <span class="page-btn active">{{ ds.number }}</span>
 
             {% if ds.has_next %}
-                <a href="?page={{ ds.next_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_loai_van_ban %}&loai_van_ban={{ selected_loai_van_ban|urlencode }}{% endif %}{% if selected_hinh_thuc_van_ban %}&hinh_thuc_van_ban={{ selected_hinh_thuc_van_ban|urlencode }}{% endif %}{% if selected_do_mat %}&do_mat={{ selected_do_mat|urlencode }}{% endif %}{% if selected_do_khan %}&do_khan={{ selected_do_khan|urlencode }}{% endif %}{% if selected_trang_thai %}&trang_thai={{ selected_trang_thai|urlencode }}{% endif %}" class="page-btn">Sau</a>
+                <a href="?page={{ ds.next_page_number }}" class="page-btn">Sau</a>
             {% else %}
                 <span class="page-btn disabled" aria-disabled="true">Sau</span>
             {% endif %}
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var tabs = document.querySelectorAll('.filter-tab');
+    var rows = document.querySelectorAll('#vanBanDenBody tr[data-trang-thai]');
+    var searchInput = document.getElementById('searchKeyword');
+    var filterLoai = document.getElementById('filterLoaiVanBan');
+    var filterHinh = document.getElementById('filterHinhThucVanBan');
+    var filterMat = document.getElementById('filterDoMat');
+    var filterKhan = document.getElementById('filterDoKhan');
+
+    function norm(s) {
+        return (s || '').toString().toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    }
+
+    function filterRows() {
+        var activeTab = (document.querySelector('.filter-tab.active') || {}).dataset.tab || 'all';
+        var kw = norm(searchInput.value);
+        var loai = norm(filterLoai.value);
+        var hinh = norm(filterHinh.value);
+        var mat = norm(filterMat.value);
+        var khan = norm(filterKhan.value);
+        var visible = 0;
+
+        rows.forEach(function (row) {
+            var trangThai = (row.dataset.trangThai || '').trim();
+            var matchTab = activeTab === 'all' || trangThai === activeTab;
+            var matchKw = !kw ||
+                norm(row.dataset.soKyHieu).includes(kw) ||
+                norm(row.dataset.trichYeu).includes(kw);
+            var matchLoai = !loai || norm(row.dataset.loaiVb).includes(loai);
+            var matchHinh = !hinh || norm(row.dataset.hinhThuc).includes(hinh);
+            var matchMat = !mat || norm(row.dataset.doMat).includes(mat);
+            var matchKhan = !khan || norm(row.dataset.doKhan).includes(khan);
+
+            if (matchTab && matchKw && matchLoai && matchHinh && matchMat && matchKhan) {
+                row.style.display = '';
+                visible++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        var emptyMsg = document.getElementById('emptyFilterMsg');
+        if (visible === 0 && rows.length > 0) {
+            if (!emptyMsg) {
+                emptyMsg = document.createElement('tr');
+                emptyMsg.id = 'emptyFilterMsg';
+                emptyMsg.innerHTML = '<td colspan="7" class="text-center">Không tìm thấy văn bản phù hợp.</td>';
+                document.getElementById('vanBanDenBody').appendChild(emptyMsg);
+            }
+        } else if (emptyMsg) {
+            emptyMsg.remove();
+        }
+    }
+
+    tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            tabs.forEach(function (t) { t.classList.remove('active'); });
+            this.classList.add('active');
+            filterRows();
+        });
+    });
+
+    if (searchInput) searchInput.addEventListener('input', filterRows);
+    if (filterLoai) filterLoai.addEventListener('change', filterRows);
+    if (filterHinh) filterHinh.addEventListener('change', filterRows);
+    if (filterMat) filterMat.addEventListener('change', filterRows);
+    if (filterKhan) filterKhan.addEventListener('change', filterRows);
+});
+</script>
 {% endblock %}

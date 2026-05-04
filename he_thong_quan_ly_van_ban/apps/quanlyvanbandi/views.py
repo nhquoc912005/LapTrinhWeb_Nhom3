@@ -22,6 +22,7 @@ from .forms import VanBanDiForm, validate_file_size, validate_file_extension
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from django.db import IntegrityError
+from apps.core.utils.activity_log import ghi_lich_su_van_ban
 
 
 def _current_core_user(request):
@@ -129,31 +130,46 @@ def van_ban_di(request):
 
     # Cảnh báo văn bản sắp đến hạn (chỉ áp dụng cho Lãnh đạo/Chuyên viên)
     today = timezone.localdate()
-    han_canh_bao = today + timedelta(days=7)
+    han_canh_bao = today + timedelta(days=3)
 
-    canh_bao_van_ban_sap_het_han = []
     canh_bao_qs = VanBan.objects.filter(
         phan_loai="Văn bản đi",
-        han_xu_ly__isnull=False,
-        han_xu_ly__lte=han_canh_bao,
-    ).select_related("lanh_dao_duyet", "nguoi_tao")
+        trang_thai__in=["Chờ Xử Lý", "Hoàn Trả"],
+    ).select_related("lanh_dao_duyet", "nguoi_tao").prefetch_related("vanbanhoantra_set")
 
     if user.has_role(Customer.Role.LANH_DAO):
-        canh_bao_van_ban_sap_het_han = list(
+        canh_bao_van_ban_sap_het_han_raw = list(
             canh_bao_qs.filter(
                 lanh_dao_duyet=user.nguoi_dung_core,
-            ).order_by("han_xu_ly")[:20]
+            )
         )
     elif user.has_role(Customer.Role.CHUYEN_VIEN):
-        canh_bao_van_ban_sap_het_han = list(
+        canh_bao_van_ban_sap_het_han_raw = list(
             canh_bao_qs.filter(
                 nguoi_tao=user.nguoi_dung_core,
-            ).order_by("han_xu_ly")[:20]
+            )
         )
+    else:
+        canh_bao_van_ban_sap_het_han_raw = []
 
-    canh_bao_van_ban_sap_het_han = gan_thong_tin_canh_bao_han_xu_ly(
-        canh_bao_van_ban_sap_het_han
-    )
+    canh_bao_van_ban_sap_het_han = []
+    for vb in canh_bao_van_ban_sap_het_han_raw:
+        effective_deadline = vb.han_xu_ly
+        if vb.trang_thai == "Hoàn Trả":
+            hoan_tra_list = list(vb.vanbanhoantra_set.all())
+            if hoan_tra_list:
+                latest_hoan_tra = sorted(hoan_tra_list, key=lambda x: x.ngay_hoan_tra, reverse=True)[0]
+                effective_deadline = latest_hoan_tra.han_xu_ly_hoan_tra
+
+        if effective_deadline and effective_deadline <= han_canh_bao:
+            vb.han_xu_ly_hien_thi = effective_deadline
+            so_ngay_con_lai = (effective_deadline - today).days
+            vb.so_ngay_con_lai = so_ngay_con_lai
+            vb.so_ngay_qua_han = abs(so_ngay_con_lai) if so_ngay_con_lai < 0 else 0
+            canh_bao_van_ban_sap_het_han.append(vb)
+            
+    # Sort by nearest deadline and limit to 20
+    canh_bao_van_ban_sap_het_han = sorted(canh_bao_van_ban_sap_het_han, key=lambda x: x.han_xu_ly_hien_thi)[:20]
 
     # Danh sách đơn vị soạn thảo (người tạo) cho bộ lọc
     creator_ids = ds_van_ban_di_list.values_list("nguoi_tao_id", flat=True).distinct()
@@ -177,6 +193,10 @@ def van_ban_di(request):
         if trang_thai == "Đã Xử Lý" and not user.has_role(Customer.Role.VAN_THU):
             ds_van_ban_di_list = ds_van_ban_di_list.filter(
                 trang_thai__in=["Đã Xử Lý", "Chờ ban hành", "Đã ban hành"]
+            )
+        elif trang_thai == "Xem Để Biết":
+            ds_van_ban_di_list = ds_van_ban_di_list.filter(
+                trang_thai__in=["Xem Để Biết", "Đã ban hành"]
             )
         else:
             ds_van_ban_di_list = ds_van_ban_di_list.filter(trang_thai=trang_thai)
@@ -328,6 +348,14 @@ def van_ban_di_edit(request, vb_pk=None):
                             don_vi_ngoai=dv,
                         )
 
+            hanh_dong = "SUA" if is_edit else "TAO"
+            ghi_lich_su_van_ban(
+                user=request.user,
+                van_ban=updated_van_ban,
+                hanh_dong=hanh_dong,
+                mo_ta=f"{hanh_dong} văn bản đi [{updated_van_ban.so_ky_hieu}]",
+            )
+
             messages.success(
                 request,
                 f'Văn bản "{updated_van_ban.so_ky_hieu}" đã được lưu thành công.'
@@ -419,8 +447,15 @@ def chi_tiet_van_ban_di(request, id):
                 can_view_sensitive_notes = False
 
     # ── Hiển thị trạng thái theo role ──
-    # CV và LĐ thấy “Đã Xử Lý” khi status thực là “Chờ ban hành” hoặc “Đã ban hành”
-    if not user.has_role(Customer.Role.VAN_THU) and vb.trang_thai in ["Chờ ban hành", "Đã ban hành"]:
+    is_creator_or_approver_or_clerk = False
+    if _user_is_document_creator(request, vb) or _user_is_assigned_approver(request, vb):
+        is_creator_or_approver_or_clerk = True
+    elif user.has_role(Customer.Role.VAN_THU) and duyet_record and duyet_record.van_thu_id == core_user.pk:
+        is_creator_or_approver_or_clerk = True
+
+    if is_in_receiving_dept and not is_creator_or_approver_or_clerk:
+        hien_thi_trang_thai = "Xem Để Biết"
+    elif not user.has_role(Customer.Role.VAN_THU) and vb.trang_thai == "Chờ ban hành":
         hien_thi_trang_thai = "Đã Xử Lý"
     else:
         hien_thi_trang_thai = vb.trang_thai
@@ -472,7 +507,7 @@ def phe_duyet_van_ban_di(request, vb_pk):
     if not _user_is_assigned_approver(request, vb):
         raise PermissionDenied
 
-    if vb.trang_thai in ["Đã Xử Lý", "Đã ban hành", "Xem Để Biết"]:
+    if vb.trang_thai in ["Chờ ban hành", "Đã Xử Lý", "Đã ban hành", "Xem Để Biết"]:
         messages.warning(request, "Văn bản này không thể phê duyệt.")
         return redirect("quanlyvanbandi:chi_tiet_van_ban_di", id=vb.pk)
 
@@ -507,6 +542,11 @@ def phe_duyet_van_ban_di(request, vb_pk):
     duyet.ghi_chu = ghi_chu or None
     duyet.save()
 
+    ghi_lich_su_van_ban(
+        user=request.user, van_ban=vb, hanh_dong="DUYET",
+        trang_thai_cu="Chờ Xử Lý", trang_thai_moi="Chờ ban hành",
+    )
+
     messages.success(request, "Phê duyệt văn bản thành công.")
     return redirect("quanlyvanbandi:chi_tiet_van_ban_di", id=vb.pk)
 
@@ -527,7 +567,7 @@ def hoan_tra_van_ban_di(request, vb_pk):
     if not _user_is_assigned_approver(request, vb):
         raise PermissionDenied
 
-    if vb.trang_thai in ["Chờ ban hành", "Đã ban hành"]:
+    if vb.trang_thai in ["Chờ ban hành", "Đã ban hành", "Đã Xử Lý", "Xem Để Biết"]:
         messages.warning(request, "Văn bản này không thể hoàn trả.")
         return redirect("quanlyvanbandi:chi_tiet_van_ban_di", id=vb.pk)
 
@@ -760,83 +800,18 @@ def ban_hanh_van_ban(request, vb_pk):
         messages.error(request, "Bạn không phải văn thư được lãnh đạo chọn để ban hành văn bản này.")
         return redirect("quanlyvanbandi:chi_tiet_van_ban_di", id=vb.pk)
 
-    # Sau khi ban hành, văn bản đi được chuyển sang trạng thái "Xem Để Biết"
-    # để các nhân viên được ban hành có thể xem (ẩn các khối nội dung nhạy cảm).
-    vb.trang_thai = "Xem Để Biết"
+    # Sau khi ban hành, văn bản đi gốc chuyển sang "Đã ban hành"
+    vb.trang_thai = "Đã ban hành"
     vb.save(update_fields=["trang_thai"])
 
     BanHanh.objects.create(van_ban=vb)
 
-    ds_noi_nhan_noi_bo = NoiNhanVanBan.objects.filter(
-        van_ban=vb, phong_ban__isnull=False
-    ).select_related('phong_ban', 'phong_ban__truong_phong', 'phong_ban__chi_nhanh')
-
-    so_luong_gui = 0
-
-    for noi_nhan in ds_noi_nhan_noi_bo:
-        pb = noi_nhan.phong_ban
-        lanh_dao = pb.truong_phong if pb.truong_phong else vb.lanh_dao_duyet
-
-        ds_nv = NguoiDung.objects.filter(
-            phong_ban=pb,
-            chuc_vu=NguoiDung.ChucVu.CHUYEN_VIEN,
-        ).order_by('ho_va_ten')
-
-        for nv in ds_nv:
-            # Không tự gửi lại cho người tạo văn bản
-            if vb.nguoi_tao_id and nv.pk == vb.nguoi_tao_id:
-                continue
-
-            vb_den = VanBan.objects.create(
-                lanh_dao_duyet=lanh_dao,
-                nguoi_tao=user,
-                so_ky_hieu=vb.so_ky_hieu,
-                trich_yeu=vb.trich_yeu,
-                hinh_thuc=vb.hinh_thuc,
-                loai_van_ban=vb.loai_van_ban,
-                don_vi_ban_hanh=(
-                    vb.nguoi_tao.phong_ban.ten_phong_ban
-                    if vb.nguoi_tao and vb.nguoi_tao.phong_ban
-                    else 'Công ty'
-                ),
-                ngay_van_ban=vb.ngay_van_ban,
-                ngay_den=timezone.localdate(),
-                han_xu_ly=vb.han_xu_ly,
-                do_khan=vb.do_khan,
-                do_mat=vb.do_mat,
-                file_dinh_kem=vb.file_dinh_kem,
-                kich_thuoc=vb.kich_thuoc,
-                trang_thai='Xem Để Biết',
-                noi_dung=None,
-                phan_loai='Văn bản đến',
-            )
-
-            for lq in VanBanLienQuan.objects.filter(van_ban=vb):
-                VanBanLienQuan.objects.create(
-                    van_ban=vb_den,
-                    file_van_ban=lq.file_van_ban,
-                    kich_thuoc=lq.kich_thuoc,
-                )
-
-            # Tạo luồng duyệt/chuyển tiếp để chuyên viên thấy văn bản trong danh sách
-            duyet_den = VanBanDuyet.objects.create(
-                van_ban=vb_den,
-                van_thu=user,
-                ghi_chu=None,
-            )
-            chuyen = ChuyenTiep.objects.create(van_ban_duyet=duyet_den)
-            ChuyenTiepChiTiet.objects.create(
-                chuyen_tiep=chuyen,
-                nguoi_dung=nv,
-                phong_ban=pb,
-            )
-
-            so_luong_gui += 1
-
-    messages.success(
-        request,
-        f"Ban hành văn bản đi thành công. Đã gửi {so_luong_gui} văn bản 'Xem để biết' đến nhân viên nội bộ."
+    ghi_lich_su_van_ban(
+        user=request.user, van_ban=vb, hanh_dong="BAN_HANH",
+        trang_thai_cu="Chờ ban hành", trang_thai_moi="Đã ban hành",
     )
+
+    messages.success(request, "Ban hành văn bản đi thành công.")
     return redirect("quanlyvanbandi:chi_tiet_van_ban_di", id=vb.pk)
 
 
@@ -861,6 +836,7 @@ def xoa_van_ban_di(request, vb_pk):
 
     # Xóa các bản ghi liên quan
     vb.vanbanlienquan_set.all().delete()
+    ghi_lich_su_van_ban(user=request.user, van_ban=vb, hanh_dong="XOA", trang_thai_cu=vb.trang_thai)
     vb.delete()
 
     messages.success(request, "Xóa văn bản thành công.")
@@ -870,9 +846,7 @@ import os
 from django.conf import settings
 from django.core.files import File
 from .utils_ky_so import sign_pdf_with_ratio
-from django.views.decorators.csrf import csrf_exempt
 
-@csrf_exempt
 @require_POST
 @role_required(Customer.Role.LANH_DAO)
 def api_ky_so_van_ban(request, vb_pk):
@@ -929,7 +903,7 @@ def api_ky_so_van_ban(request, vb_pk):
 
     with open(output_pdf_path, 'rb') as f:
         signed_file = File(f, name=output_filename)
-        
+
         # Cập nhật ghi đè file đính kèm của VanBan
         vb.file_dinh_kem.save(output_filename, signed_file, save=False)
         vb.kich_thuoc = signed_file.size
@@ -939,7 +913,7 @@ def api_ky_so_van_ban(request, vb_pk):
         import hashlib
         f.seek(0)
         file_hash = hashlib.sha256(f.read()).hexdigest()
-        
+
         f.seek(0)
         LichSuKySo.objects.update_or_create(
             van_ban=vb,
