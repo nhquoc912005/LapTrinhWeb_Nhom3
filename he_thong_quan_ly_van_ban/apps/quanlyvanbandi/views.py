@@ -30,11 +30,16 @@ STATUS_XEM_DE_BIET = "Xem Để Biết"
 STATUS_DA_BAN_HANH = "Đã ban hành"
 
 
+# File này xử lý luồng văn bản đi: soạn thảo, duyệt, hoàn trả, ban hành, API người nhận và ký số.
+
+
 def _current_core_user(request):
+    # Lấy hồ sơ NguoiDung tương ứng với tài khoản đang đăng nhập.
     return request.user.core_profile
 
 
 def gan_thong_tin_canh_bao_han_xu_ly(ds_van_ban):
+    # Gắn số ngày còn lại/quá hạn cho danh sách văn bản đi.
     today = timezone.localdate()
 
     for vb in ds_van_ban:
@@ -50,18 +55,22 @@ def gan_thong_tin_canh_bao_han_xu_ly(ds_van_ban):
 
 
 def _user_is_document_creator(request, van_ban):
+    # Kiểm tra người dùng hiện tại có phải người soạn văn bản hay không.
     return van_ban.nguoi_tao_id == _current_core_user(request).pk
 
 
 def _user_is_assigned_approver(request, van_ban):
+    # Kiểm tra lãnh đạo hiện tại có phải người được giao duyệt văn bản hay không.
     return van_ban.lanh_dao_duyet_id == _current_core_user(request).pk
 
 
 def _empty_q():
+    # Q rỗng dùng để cộng dồn điều kiện lọc an toàn.
     return Q(pk__in=[])
 
 
 def _main_flow_q_for_user(user, core_user):
+    # Điều kiện lọc các văn bản người dùng tham gia trong luồng chính.
     if user.has_role(Customer.Role.ADMIN):
         return Q()
     if not core_user:
@@ -76,6 +85,7 @@ def _main_flow_q_for_user(user, core_user):
 
 
 def _recipient_q_for_user(core_user):
+    # Điều kiện lọc văn bản mà phòng ban của người dùng là nơi nhận.
     if not core_user or not core_user.phong_ban_id:
         return _empty_q()
     return Q(
@@ -85,6 +95,7 @@ def _recipient_q_for_user(core_user):
 
 
 def _safe_duyet_record(van_ban):
+    # Lấy bản ghi duyệt nếu có, tránh lỗi khi văn bản chưa vào luồng duyệt.
     try:
         return van_ban.vanbanduyet
     except VanBanDuyet.DoesNotExist:
@@ -92,6 +103,7 @@ def _safe_duyet_record(van_ban):
 
 
 def _recipient_record_for_user(van_ban, core_user):
+    # Lấy bản ghi nơi nhận tương ứng với phòng ban của user để hiển thị trạng thái riêng.
     if not core_user or not core_user.phong_ban_id:
         return None
     for noi_nhan in van_ban.noinhanvanban_set.all():
@@ -101,6 +113,7 @@ def _recipient_record_for_user(van_ban, core_user):
 
 
 def _is_main_flow_user(request, van_ban, duyet_record=None):
+    # Xác định user thuộc luồng chính: người tạo, lãnh đạo duyệt hoặc văn thư ban hành.
     user = request.user
     if user.has_role(Customer.Role.ADMIN):
         return True
@@ -116,6 +129,7 @@ def _is_main_flow_user(request, van_ban, duyet_record=None):
 
 
 def _display_status_for_user(request, van_ban, duyet_record=None):
+    # Chọn trạng thái hiển thị theo vai trò/ngữ cảnh người xem văn bản đi.
     core_user = _current_core_user(request)
     if _is_main_flow_user(request, van_ban, duyet_record):
         if not request.user.has_role(Customer.Role.VAN_THU) and van_ban.trang_thai == "Chờ ban hành":
@@ -130,6 +144,7 @@ def _display_status_for_user(request, van_ban, duyet_record=None):
 
 
 def _attach_display_statuses(request, documents):
+    # Gắn trạng thái hiển thị vào từng văn bản trước khi đưa sang template.
     for van_ban in documents:
         van_ban.hien_thi_trang_thai = _display_status_for_user(
             request,
@@ -141,6 +156,10 @@ def _attach_display_statuses(request, documents):
 
 @role_required(*Customer.Role.values)
 def van_ban_di(request):
+    """
+    Hiển thị danh sách văn bản đi theo role.
+    GET dùng bộ lọc/tìm kiếm và không ghi dữ liệu.
+    """
     trang_thai = request.GET.get("trang_thai", "").strip()
     keyword    = request.GET.get("keyword", "").strip()
     don_vi_soan_thao = request.GET.get("don_vi_soan_thao", "").strip()
@@ -322,6 +341,10 @@ def van_ban_di(request):
 
 @role_required(Customer.Role.CHUYEN_VIEN, Customer.Role.LANH_DAO)
 def van_ban_di_edit(request, vb_pk=None):
+    """
+    Thêm hoặc sửa văn bản đi.
+    GET hiển thị form, POST validate form, upload file chính/liên quan và ghi lịch sử.
+    """
     van_ban = None
     ds_chi_nhanh = ChiNhanh.objects.order_by("ten_chi_nhanh")
     user = request.user
@@ -501,6 +524,10 @@ def van_ban_di_edit(request, vb_pk=None):
 @role_required(*Customer.Role.values)
 @ensure_csrf_cookie
 def chi_tiet_van_ban_di(request, id):
+    """
+    Hiển thị chi tiết văn bản đi cho người thuộc luồng chính hoặc nơi nhận.
+    Template dùng dữ liệu này để hiện nút thao tác theo quyền.
+    """
     vb   = get_object_or_404(VanBan, pk=id, phan_loai="Văn bản đi")
     user = request.user
 
@@ -597,6 +624,10 @@ def chi_tiet_van_ban_di(request, id):
 @require_POST
 @role_required(Customer.Role.LANH_DAO)
 def phe_duyet_van_ban_di(request, vb_pk):
+    """
+    Lãnh đạo phê duyệt văn bản đi.
+    POST cập nhật trạng thái chờ ban hành và ghi lịch sử.
+    """
     vb = get_object_or_404(
         VanBan,
         pk=vb_pk,
@@ -657,6 +688,10 @@ def phe_duyet_van_ban_di(request, vb_pk):
 @require_POST
 @role_required(Customer.Role.LANH_DAO)
 def hoan_tra_van_ban_di(request, vb_pk):
+    """
+    Lãnh đạo hoàn trả văn bản đi.
+    POST lưu lý do hoàn trả, đổi trạng thái và ghi lịch sử.
+    """
     vb = get_object_or_404(
         VanBan,
         pk=vb_pk,
@@ -717,6 +752,7 @@ def hoan_tra_van_ban_di(request, vb_pk):
 # ─────────────────────────────────────────
 @role_required(*Customer.Role.values)
 def api_chi_nhanh_phong_ban(request):
+    # API trả JSON danh sách chi nhánh, phòng ban và đơn vị ngoài cho popup ban hành.
     """Trả về danh sách chi nhánh (kèm phòng ban nếu có chi_nhanh_id)."""
     chi_nhanh_id = request.GET.get("chi_nhanh_id")
 
@@ -765,6 +801,7 @@ def api_chi_nhanh_phong_ban(request):
 # ─────────────────────────────────────────
 @role_required(*Customer.Role.values)
 def api_nhan_vien_phong_ban(request):
+    # API trả JSON nhân viên theo phòng ban để frontend chọn người nhận/xử lý.
     """Trả về danh sách nhân viên trong phòng ban."""
     phong_ban_id = request.GET.get("phong_ban_id")
     if not phong_ban_id:
@@ -794,6 +831,7 @@ def api_nhan_vien_phong_ban(request):
 @role_required(*Customer.Role.values)
 @require_http_methods(["GET", "POST", "DELETE"])
 def api_don_vi_ngoai(request):
+    # API CRUD đơn vị ngoài phục vụ màn ban hành văn bản đi.
     """Danh sách / thêm / sửa / xóa đơn vị ngoài."""
     if request.method == "GET":
         q = request.GET.get("q", "").strip()
@@ -890,6 +928,10 @@ def api_don_vi_ngoai(request):
 @require_POST
 @role_required(Customer.Role.VAN_THU)
 def ban_hanh_van_ban(request, vb_pk):
+    """
+    Văn thư ban hành văn bản đi.
+    POST tạo nơi nhận, cập nhật trạng thái đã ban hành và ghi lịch sử.
+    """
     """Thực hiện ban hành văn bản đi."""
     vb = get_object_or_404(VanBan, pk=vb_pk, phan_loai="Văn bản đi")
 
@@ -929,6 +971,10 @@ def ban_hanh_van_ban(request, vb_pk):
 @require_POST
 @role_required(Customer.Role.CHUYEN_VIEN)
 def xoa_van_ban_di(request, vb_pk):
+    """
+    Chuyên viên xóa văn bản đi do mình tạo khi còn được phép.
+    POST xóa bản ghi và ghi lịch sử.
+    """
     """Chuyên viên xóa văn bản đi (chỉ khi Chờ Xử Lý)."""
     vb = get_object_or_404(VanBan, pk=vb_pk, phan_loai="Văn bản đi")
 
@@ -957,6 +1003,10 @@ from .utils_ky_so import sign_pdf_with_ratio
 @require_POST
 @login_required
 def api_ky_so_van_ban(request, vb_pk):
+    """
+    API ký số văn bản đi.
+    POST nhận tọa độ chữ ký, tạo file đã ký/hash và trả JSON cho frontend.
+    """
     if not request.user.has_role(Customer.Role.LANH_DAO):
         return JsonResponse({"success": False, "message": "Bạn không có quyền ký số văn bản này."}, status=403)
 

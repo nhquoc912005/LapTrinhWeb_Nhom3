@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "core/base.html" %}
 
 {% block title %}Lịch sử hoạt động - QLVB{% endblock %}
 
@@ -12,6 +12,7 @@
 {% endblock %}
 
 {% block content %}
+<!-- Màn lịch sử hoạt động: lọc audit log theo loại đối tượng và hành động -->
 <div class="filter-card">
   <form method="get" action="">
     <div class="filter-grid filter-grid-cols-4">
@@ -43,6 +44,7 @@
 
 <div class="table-container">
   <div class="table-scroll">
+    <!-- Bảng audit log ghi nhận thao tác trên văn bản, công việc và hồ sơ -->
     <table class="data-table">
       <thead>
         <tr>

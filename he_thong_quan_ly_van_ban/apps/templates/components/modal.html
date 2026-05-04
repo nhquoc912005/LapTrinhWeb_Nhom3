@@ -9,6 +9,7 @@
     document.getElementById('myModal').classList.add('active');
     document.getElementById('myModal').classList.remove('active');
 {% endcomment %}
+<!-- Component modal dùng chung; nội dung body/footer được truyền từ template gọi include -->
 <div class="app-modal-overlay" id="{{ modal_id }}" role="dialog" aria-modal="true" aria-labelledby="{{ modal_id }}-title">
   <div class="app-modal {{ modal_size|default:'modal-md' }}">
     <div class="app-modal-header">

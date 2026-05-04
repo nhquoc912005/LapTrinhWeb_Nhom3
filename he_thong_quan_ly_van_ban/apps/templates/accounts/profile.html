@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "core/base.html" %}
 
 {% block title %}Thông tin cá nhân{% endblock %}
 
@@ -22,6 +22,11 @@
     </div>
     <div class="profile-hero-actions">
       <div class="profile-role-pill">{{ profile_user.get_role_display }}</div>
+      {% if profile_user.is_admin_role %}
+        <a href="{% url 'core:lich_su_hoat_dong' %}" class="btn btn-primary btn-sm" style="margin-top: 10px; width: 100%;">
+          Lịch sử hoạt động
+        </a>
+      {% endif %}
       <button type="button" class="btn btn-info btn-sm" style="margin-top: 10px; width: 100%;">Chỉnh sửa</button>
     </div>
   </section>
@@ -75,8 +80,6 @@
         <dd>{{ core_profile.chuc_vu }}</dd>
         <dt>Hồ sơ văn bản</dt>
         <dd>{{ stats.records }}</dd>
-        <dt>Văn bản đến legacy</dt>
-        <dd>{{ stats.legacy_incoming_documents }}</dd>
       </dl>
     </section>
   </div>

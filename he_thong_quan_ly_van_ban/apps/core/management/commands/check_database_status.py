@@ -14,6 +14,7 @@ from ._data_audit import (
 )
 
 
+# Command kiểm tra nhanh trạng thái database và các bảng dữ liệu chính.
 class Command(BaseCommand):
     help = "Kiểm tra database hiện tại, media vật lý và nội dung old_data.json."
 

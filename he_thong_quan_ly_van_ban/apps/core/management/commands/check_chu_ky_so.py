@@ -11,6 +11,7 @@ from ._data_audit import configure_utf8_output, database_kind, safe_database_ide
 User = get_user_model()
 
 
+# Command kiểm tra dữ liệu chữ ký số mẫu và lịch sử ký số trong database hiện tại.
 class Command(BaseCommand):
     help = "Check digital signature seed data."
 

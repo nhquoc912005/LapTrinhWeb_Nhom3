@@ -8,6 +8,7 @@ from apps.core.utils.digital_signature import verify_signed_file
 from ._data_audit import configure_utf8_output, database_kind
 
 
+# Command quét toàn bộ LichSuKySo để kiểm tra hash SHA-256 của file đã ký.
 class Command(BaseCommand):
     help = "Verify SHA-256 integrity for all digital signature history records."
 

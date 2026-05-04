@@ -75,6 +75,7 @@ ROLE_USER_SPECS = {
 }
 
 
+# Command seed chữ ký số và lịch sử ký số demo.
 class Command(BaseCommand):
     help = "Seed digital signature data for each role."
 
@@ -102,6 +103,7 @@ class Command(BaseCommand):
         seeder.print_summary()
 
 
+# Lớp gom toàn bộ thao tác tạo ảnh chữ ký, file đã ký và bản ghi LichSuKySo.
 class DigitalSignatureSeeder:
     def __init__(self, command, per_role, password):
         self.command = command

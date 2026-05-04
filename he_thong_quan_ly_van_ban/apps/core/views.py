@@ -18,6 +18,8 @@ from .models import (
     VanBan,
 )
 
+# File này xử lý dashboard, báo cáo thống kê và lịch sử hoạt động toàn hệ thống.
+
 
 # =========================================================
 # HẰNG SỐ VĂN BẢN
@@ -89,6 +91,7 @@ def _lay_nguoi_dung_core(user):
 # =========================================================
 
 def _build_status_gradient(items):
+    # Tạo dữ liệu biểu đồ tròn trạng thái cho dashboard.
     total = sum(item["count"] for item in items)
 
     if total <= 0:
@@ -117,6 +120,7 @@ def _build_status_gradient(items):
 
 
 def _build_weekly_chart(series):
+    # Chuẩn hóa dữ liệu biểu đồ cột theo tuần thành phần trăm chiều cao.
     max_value = max(
         max(item["incoming"], item["outgoing"], item["tasks"])
         for item in series
@@ -147,6 +151,7 @@ def _build_weekly_chart(series):
 
 
 def _build_trend(current, previous):
+    # So sánh số liệu kỳ hiện tại với kỳ trước để hiển thị xu hướng.
     delta = current - previous
 
     if delta > 0:
@@ -159,6 +164,7 @@ def _build_trend(current, previous):
 
 
 def _window_totals(parts, current_start, current_end, previous_start, previous_end):
+    # Tính tổng bản ghi trong hai cửa sổ thời gian để so sánh dashboard.
     current_total = 0
     previous_total = 0
 
@@ -182,6 +188,7 @@ def _window_totals(parts, current_start, current_end, previous_start, previous_e
 
 
 def _document_status_badge(status_label):
+    # Trả class CSS tương ứng với trạng thái văn bản/công việc.
     normalized = (status_label or "").lower()
 
     if "đã" in normalized or "hoàn thành" in normalized:
@@ -194,6 +201,7 @@ def _document_status_badge(status_label):
 
 
 def _task_priority_meta(task, today):
+    # Xác định mức ưu tiên dựa trên số ngày còn lại tới hạn xử lý.
     remaining_days = (task.han_xu_ly.date() - today).days
 
     if remaining_days < 0:
@@ -210,6 +218,7 @@ def _task_priority_meta(task, today):
 # =========================================================
 
 def _incoming_queryset_for_user(user):
+    # Lọc văn bản đến theo vai trò và quan hệ chuyển tiếp của người dùng.
     """
     Văn bản đến bây giờ dùng model chung VanBan,
     lọc bằng phan_loai = 'Văn bản đến'.
@@ -245,6 +254,7 @@ def _incoming_queryset_for_user(user):
 
 
 def _outgoing_queryset_for_user(user):
+    # Lọc văn bản đi theo vai trò người tạo, lãnh đạo duyệt hoặc văn thư.
     queryset = VanBan.objects.select_related(
         "nguoi_tao",
         "lanh_dao_duyet",
@@ -277,6 +287,7 @@ def _outgoing_queryset_for_user(user):
 
 
 def _task_queryset_for_user(user):
+    # Lọc công việc theo người giao/người thực hiện tùy vai trò hiện tại.
     queryset = CongViec.objects.select_related(
         "nguoi_giao",
         "nguoi_thuc_hien",
@@ -308,6 +319,7 @@ def _task_queryset_for_user(user):
 # =========================================================
 
 def _build_weekly_series(today, incoming_queryset, outgoing_queryset, task_queryset):
+    # Gom số liệu văn bản/công việc theo 7 ngày gần nhất.
     week_days = [
         today - timedelta(days=offset)
         for offset in range(6, -1, -1)
@@ -347,6 +359,7 @@ def _build_weekly_series(today, incoming_queryset, outgoing_queryset, task_query
 
 
 def _build_status_breakdown(incoming_queryset, outgoing_queryset, task_queryset):
+    # Tính số lượng theo nhóm trạng thái để vẽ khối phân tích trên dashboard.
     pending_count = (
         incoming_queryset.filter(trang_thai=STATUS_CHO_XU_LY).count()
         + outgoing_queryset.filter(trang_thai=STATUS_CHO_XU_LY).count()
@@ -395,6 +408,7 @@ def _build_status_breakdown(incoming_queryset, outgoing_queryset, task_queryset)
 
 
 def _build_recent_documents(incoming_queryset, outgoing_queryset):
+    # Gộp văn bản đến và đi gần đây thành một danh sách hiển thị chung.
     documents = []
 
     for item in incoming_queryset.order_by("-ngay_cap_nhat", "-van_ban_id")[:6]:
@@ -430,6 +444,7 @@ def _build_recent_documents(incoming_queryset, outgoing_queryset):
 
 
 def _build_urgent_tasks(task_queryset, today):
+    # Lấy các công việc chưa hoàn thành gần hạn hoặc quá hạn.
     urgent_tasks = []
 
     for task in task_queryset.exclude(
@@ -449,6 +464,7 @@ def _build_urgent_tasks(task_queryset, today):
 
 
 def _dashboard_metrics(today, incoming_queryset, outgoing_queryset, task_queryset, record_queryset):
+    # Tính các thẻ KPI chính của dashboard và so sánh với kỳ trước.
     total_documents = incoming_queryset.count() + outgoing_queryset.count()
 
     incoming_pending = incoming_queryset.filter(
@@ -637,6 +653,7 @@ def _dashboard_metrics(today, incoming_queryset, outgoing_queryset, task_queryse
 
 
 def _recent_documents_url(user):
+    # Điều hướng nút xem văn bản gần đây theo quyền của người dùng.
     if user.has_role(Customer.Role.ADMIN):
         return reverse("quanlyvanbandi:van_ban_di")
 
@@ -644,6 +661,7 @@ def _recent_documents_url(user):
 
 
 def _urgent_tasks_url(user):
+    # Điều hướng nút xem công việc gấp theo role lãnh đạo/chuyên viên.
     if user.is_chuyen_vien:
         return reverse("quanlycongviec:xu_ly_cong_viec")
     if user.has_role(Customer.Role.LANH_DAO, Customer.Role.ADMIN):
@@ -658,6 +676,10 @@ def _urgent_tasks_url(user):
 
 @role_required(*Customer.Role.values)
 def dashboard(request):
+    """
+    Hiển thị dashboard tổng quan cho mọi role đã đăng nhập.
+    View gom số liệu văn bản, công việc và hồ sơ để render core/dashboard.html.
+    """
     today = timezone.localdate()
 
     incoming_queryset = _incoming_queryset_for_user(request.user)
@@ -711,6 +733,7 @@ def dashboard(request):
 
 @role_required(*Customer.Role.values)
 def bao_cao_thong_ke(request):
+    # Báo cáo thống kê dựa trên GET filter, không thay đổi dữ liệu.
     """Báo cáo thống kê dựa trên dữ liệu thực từ database."""
     import json as _json
     from datetime import date, timedelta
@@ -726,6 +749,7 @@ def bao_cao_thong_ke(request):
     loi_ngay = ''
     da_xem = bool(request.GET.get('xem', ''))
 
+    # Chuyển chuỗi ngày từ query string thành date để lọc báo cáo.
     try:
         if tu_ngay_str:
             tu_ngay = date.fromisoformat(tu_ngay_str)
@@ -767,6 +791,7 @@ def bao_cao_thong_ke(request):
     # TAB 1 – Thống kê văn bản
     # ═══════════════════════════════════════════════════════════════
     vb_qs = VanBan.objects.all()
+    # Áp dụng bộ lọc tab văn bản theo ngày, loại, đơn vị ban hành và trạng thái.
     if tu_ngay:
         vb_qs = vb_qs.filter(ngay_van_ban__gte=tu_ngay)
     if den_ngay:
@@ -837,6 +862,7 @@ def bao_cao_thong_ke(request):
     # TAB 2 – Thống kê công việc
     # ═══════════════════════════════════════════════════════════════
     cv_qs = CongViec.objects.select_related('nguoi_thuc_hien__phong_ban')
+    # Áp dụng bộ lọc tab công việc theo ngày, phòng ban, nhân viên và trạng thái.
     if tu_ngay:
         cv_qs = cv_qs.filter(ngay_bat_dau__gte=tu_ngay)
     if den_ngay:
@@ -924,6 +950,7 @@ def bao_cao_thong_ke(request):
 
     # ── Context ────────────────────────────────────────────────────
     context = {
+        # Context vừa phục vụ phần thống kê, vừa truyền JSON cho biểu đồ phía client.
         'tab': tab,
         'tu_ngay': tu_ngay_str,
         'den_ngay': den_ngay_str,
@@ -990,15 +1017,17 @@ def bao_cao_thong_ke(request):
         'tong_vb_den': vb_qs.filter(phan_loai='Văn bản đến').count(),
         'tong_vb_di':  vb_qs.filter(phan_loai='Văn bản đi').count(),
     }
-    return render(request, 'bao-cao-thong-ke.html', context)
+    return render(request, "core/bao-cao-thong-ke.html", context)
 
 
 @role_required(*Customer.Role.values)
 def lich_su_hoat_dong(request):
+    # Màn lịch sử hoạt động: chỉ đọc audit log, hỗ trợ lọc theo loại đối tượng/hành động.
     """Xem lịch sử hoạt động toàn hệ thống."""
     from django.core.paginator import Paginator
 
     ds = LichSuHoatDong.objects.select_related('nguoi_thuc_hien').order_by('-thoi_gian_thuc_hien')
+    # GET filter giúp người dùng tra cứu lịch sử theo nghiệp vụ cần xem.
 
     # Lọc theo loại đối tượng nếu có
     doi_tuong_loai = request.GET.get('doi_tuong_loai', '').strip()

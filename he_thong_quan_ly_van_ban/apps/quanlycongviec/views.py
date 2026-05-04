@@ -35,7 +35,11 @@ from .forms import ProcessTaskForm, ReturnTaskForm, UpdateTaskResultForm
 from apps.core.utils.activity_log import ghi_lich_su_cong_viec
 
 
+# File này xử lý giao việc, xử lý kết quả, duyệt/hoàn trả công việc và ký số công việc.
+
+
 def _task_queryset():
+    # Queryset chuẩn cho công việc, nạp trước các quan hệ dùng ở danh sách/chi tiết.
     return CongViec.objects.select_related("nguoi_giao", "nguoi_thuc_hien", "van_ban").prefetch_related(
         "filecvlienquan_set",
         "phancongcongviec_set__nguoi_phoi_hop",
@@ -44,10 +48,12 @@ def _task_queryset():
 
 
 def _get_task(task_id):
+    # Lấy công việc hoặc trả 404 nếu task_id không tồn tại.
     return get_object_or_404(_task_queryset(), pk=task_id)
 
 
 def _task_list_route_name(user):
+    # Chọn màn danh sách phù hợp sau khi thao tác xong theo vai trò.
     if user.is_chuyen_vien:
         return "quanlycongviec:xu_ly_cong_viec"
     if user.has_role(Customer.Role.LANH_DAO, Customer.Role.ADMIN):
@@ -56,10 +62,12 @@ def _task_list_route_name(user):
 
 
 def _redirect_task_list(request):
+    # Redirect về danh sách công việc tương ứng với user hiện tại.
     return redirect(_task_list_route_name(request.user))
 
 
 def _push_form_errors(request, form):
+    # Đưa lỗi form vào Django messages để template hiển thị.
     for error in form.non_field_errors():
         messages.error(request, error)
 
@@ -71,6 +79,7 @@ def _push_form_errors(request, form):
 
 
 def _nguoi_dung_la_lanh_dao(nguoi_dung):
+    # Kiểm tra một hồ sơ NguoiDung có chức vụ lãnh đạo hay không.
     tai_khoan = getattr(nguoi_dung, "tai_khoan", None)
     if tai_khoan:
         return tai_khoan.role == Customer.Role.LANH_DAO
@@ -78,20 +87,24 @@ def _nguoi_dung_la_lanh_dao(nguoi_dung):
 
 
 def _user_is_task_manager(request, task):
+    # Kiểm tra người dùng có quyền quản lý công việc này.
     return request.user.has_role(Customer.Role.ADMIN) or (
         request.user.is_lanh_dao and request.user.core_profile.pk == task.nguoi_giao_id
     )
 
 
 def _user_is_task_signer(request, task):
+    # Kiểm tra người dùng hiện tại có được ký số công việc này không.
     return request.user.is_lanh_dao and request.user.core_profile.pk == task.nguoi_giao_id
 
 
 def _user_is_assignee(request, task):
+    # Kiểm tra người dùng hiện tại có phải người thực hiện chính.
     return request.user.is_chuyen_vien and request.user.core_profile.pk == task.nguoi_thuc_hien_id
 
 
 def _task_has_result(task):
+    # Kiểm tra công việc đã có nội dung hoặc file kết quả xử lý.
     return bool(task.ket_qua_xu_ly) or FileCVLienQuan.objects.filter(
         cong_viec=task,
         nguon_tai_len=FileCVLienQuan.NguonTaiLen.KET_QUA_XU_LY,
@@ -99,6 +112,7 @@ def _task_has_result(task):
 
 
 def _can_view_task(request, task):
+    # Quyền xem chi tiết công việc cho quản lý, văn thư, người giao hoặc người thực hiện.
     if request.user.has_role(Customer.Role.ADMIN, Customer.Role.VAN_THU):
         return True
     user_core_id = request.user.core_profile.pk
@@ -106,10 +120,12 @@ def _can_view_task(request, task):
 
 
 def _can_process_task(request, task):
+    # Quyền chuyên viên gửi/cập nhật kết quả xử lý.
     return _user_is_assignee(request, task) and task.cho_phep_chuyen_vien_xu_ly
 
 
 def _can_return_to_leader(request, task):
+    # Quyền chuyên viên hoàn trả lại công việc cho lãnh đạo.
     return (
         _user_is_assignee(request, task)
         and task.trang_thai in {CongViec.TrangThai.CHO_XU_LY, CongViec.TrangThai.HOAN_TRA_CV}
@@ -118,10 +134,12 @@ def _can_return_to_leader(request, task):
 
 
 def _can_return_to_specialist(request, task):
+    # Quyền lãnh đạo trả công việc về chuyên viên để bổ sung.
     return _user_is_task_manager(request, task) and task.trang_thai == CongViec.TrangThai.CHO_DUYET
 
 
 def _parse_task_dates(ngay_bat_dau_str, han_xu_ly_str):
+    # Chuyển chuỗi ngày từ form giao việc thành date/datetime aware.
     ngay_bat_dau = datetime.strptime(ngay_bat_dau_str, "%Y-%m-%d").date()
     naive_han_xu_ly = datetime.strptime(han_xu_ly_str, "%Y-%m-%d").replace(
         hour=23,
@@ -132,6 +150,7 @@ def _parse_task_dates(ngay_bat_dau_str, han_xu_ly_str):
 
 
 def _validate_task_dates(ngay_bat_dau, han_xu_ly, *, allow_past_start=False):
+    # Validate ngày bắt đầu và hạn xử lý của công việc.
     today = timezone.now().date()
     if not allow_past_start and ngay_bat_dau < today:
         return "Ngày bắt đầu không được nhỏ hơn ngày hiện tại."
@@ -143,6 +162,7 @@ def _validate_task_dates(ngay_bat_dau, han_xu_ly, *, allow_past_start=False):
 
 
 def _create_assignment_files(task, files, *, loai_file, nguon_tai_len, nguoi_tai_len):
+    # Lưu các file giao việc/kết quả vào FileCVLienQuan.
     for uploaded_file in files:
         FileCVLienQuan.objects.create(
             cong_viec=task,
@@ -155,6 +175,7 @@ def _create_assignment_files(task, files, *, loai_file, nguon_tai_len, nguoi_tai
 
 
 def _get_collaborator_ids(request, assignee_id):
+    # Lấy người phối hợp từ POST và loại bỏ người thực hiện chính.
     ids = []
     seen = set()
     skipped_assignee = False
@@ -175,6 +196,7 @@ def _get_collaborator_ids(request, assignee_id):
 
 
 def _replace_task_collaborators(task, collaborator_ids):
+    # Thay thế toàn bộ danh sách người phối hợp của công việc.
     PhanCongCongViec.objects.filter(cong_viec=task).delete()
     if not collaborator_ids:
         return
@@ -193,6 +215,7 @@ def _replace_task_collaborators(task, collaborator_ids):
 
 
 def _result_files_queryset(task):
+    # Queryset file kết quả do chuyên viên upload.
     return FileCVLienQuan.objects.filter(
         cong_viec=task,
         nguon_tai_len=FileCVLienQuan.NguonTaiLen.KET_QUA_XU_LY,
@@ -200,6 +223,7 @@ def _result_files_queryset(task):
 
 
 def _original_files_queryset(task):
+    # Queryset file ban đầu của công việc khi lãnh đạo giao.
     return FileCVLienQuan.objects.filter(
         cong_viec=task,
         nguon_tai_len=FileCVLienQuan.NguonTaiLen.GIAO_VIEC,
@@ -209,6 +233,10 @@ def _original_files_queryset(task):
 @login_required
 @role_required(Customer.Role.LANH_DAO, Customer.Role.ADMIN)
 def giao_viec(request):
+    """
+    Hiển thị danh sách công việc do lãnh đạo/quản trị quản lý.
+    GET chỉ đọc dữ liệu và phân trang.
+    """
     tasks = _task_queryset().order_by("-last_activity")
 
     if request.user.is_lanh_dao:
@@ -234,6 +262,10 @@ def giao_viec(request):
 @login_required
 @role_required(Customer.Role.CHUYEN_VIEN)
 def xu_ly_cong_viec(request):
+    """
+    Hiển thị danh sách công việc của chuyên viên.
+    GET chỉ đọc các công việc được giao cho người dùng hiện tại.
+    """
     tasks = _task_queryset().filter(nguoi_thuc_hien=request.user.core_profile).order_by("-last_activity")
 
     paginator = Paginator(tasks, 10)
@@ -251,6 +283,10 @@ def xu_ly_cong_viec(request):
 @login_required
 @role_required(Customer.Role.LANH_DAO, Customer.Role.ADMIN)
 def add_task(request):
+    """
+    Lãnh đạo/quản trị tạo công việc mới.
+    POST validate ngày, người thực hiện, file giao việc và ghi lịch sử.
+    """
     if request.method != "POST":
         return redirect("quanlycongviec:giao_viec")
 
@@ -337,6 +373,10 @@ def add_task(request):
 @login_required
 @role_required(Customer.Role.LANH_DAO, Customer.Role.ADMIN)
 def delete_task(request, task_id):
+    """
+    Xóa công việc theo quyền quản lý.
+    POST xóa task và các quan hệ liên quan qua cascade.
+    """
     task = _get_task(task_id)
 
     if not _user_is_task_manager(request, task):
@@ -356,6 +396,10 @@ def delete_task(request, task_id):
 @login_required
 @role_required(Customer.Role.LANH_DAO, Customer.Role.ADMIN)
 def edit_task(request, task_id):
+    """
+    Sửa thông tin công việc.
+    GET hiển thị form hiện tại, POST cập nhật nội dung, người thực hiện, file và người phối hợp.
+    """
     task = _get_task(task_id)
 
     if not _user_is_task_manager(request, task):
@@ -466,6 +510,10 @@ def edit_task(request, task_id):
 @login_required
 @role_required(Customer.Role.CHUYEN_VIEN)
 def process_task(request, task_id):
+    """
+    Chuyên viên gửi kết quả xử lý công việc.
+    POST lưu mô tả, file kết quả và chuyển trạng thái chờ duyệt hoặc đã hoàn thành.
+    """
     task = _get_task(task_id)
 
     if not _can_process_task(request, task):
@@ -529,6 +577,10 @@ def process_task(request, task_id):
 @login_required
 @role_required(Customer.Role.CHUYEN_VIEN)
 def update_task_result(request, task_id):
+    """
+    Chuyên viên cập nhật lại kết quả công việc.
+    POST có thể xóa file cũ, thêm file mới và ghi lịch sử.
+    """
     task = _get_task(task_id)
 
     if not _can_process_task(request, task):
@@ -602,6 +654,10 @@ def update_task_result(request, task_id):
 @login_required
 @role_required(Customer.Role.LANH_DAO, Customer.Role.CHUYEN_VIEN, Customer.Role.ADMIN, Customer.Role.VAN_THU)
 def return_task(request, task_id):
+    """
+    Hoàn trả công việc giữa lãnh đạo và chuyên viên.
+    POST lưu lý do hoàn trả, cập nhật trạng thái và ghi lịch sử.
+    """
     task = _get_task(task_id)
 
     if _can_return_to_specialist(request, task):
@@ -652,6 +708,10 @@ def return_task(request, task_id):
 @login_required
 @role_required(Customer.Role.LANH_DAO, Customer.Role.ADMIN)
 def approve_task(request, task_id):
+    """
+    Lãnh đạo/quản trị duyệt kết quả công việc.
+    POST chuyển trạng thái hoàn thành, tạo PheDuyetCongViec và ghi lịch sử.
+    """
     task = _get_task(task_id)
 
     if not _user_is_task_manager(request, task):
@@ -676,6 +736,7 @@ def approve_task(request, task_id):
 
 @login_required
 def get_task_detail(request, task_id):
+    # API trả JSON chi tiết công việc cho modal/xử lý nhanh trên frontend.
     task = _get_task(task_id)
 
     if not _can_view_task(request, task):
@@ -719,6 +780,7 @@ def get_task_detail(request, task_id):
 
 @login_required
 def start_task(request, task_id):
+    # Đánh dấu bắt đầu xử lý công việc nếu người dùng có quyền.
     task = _get_task(task_id)
     if not _can_process_task(request, task):
         messages.error(request, "Bạn không có quyền xử lý công việc này.")
@@ -739,6 +801,7 @@ def _build_task_action_context(
     result_files=None,
     can_delete_result_files=False,
 ):
+    # Gom cờ quyền thao tác để template chi tiết hiển thị nút phù hợp.
     original_files = _original_files_queryset(task)
     context = {
         "task": task,
@@ -757,6 +820,10 @@ def _build_task_action_context(
 @login_required
 @ensure_csrf_cookie
 def task_detail(request, task_id):
+    """
+    Hiển thị trang chi tiết công việc.
+    GET chuẩn bị dữ liệu file, quyền thao tác, lịch sử hoàn trả và form xử lý.
+    """
     task = _get_task(task_id)
 
     if not _can_view_task(request, task):
@@ -837,6 +904,10 @@ def task_detail(request, task_id):
 @require_POST
 @login_required
 def api_ky_so_cong_viec(request, task_id):
+    """
+    API ký số công việc.
+    POST nhận tọa độ chữ ký, tạo file đã ký/hash và trả JSON cho frontend.
+    """
     if not request.user.has_role(Customer.Role.LANH_DAO):
         return JsonResponse({"success": False, "message": "Bạn không có quyền ký số công việc này."}, status=403)
 

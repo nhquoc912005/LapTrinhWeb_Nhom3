@@ -209,6 +209,7 @@ def normalize_label(value):
     return " ".join(alpha_numeric.split())
 
 
+# Command seed tài khoản demo theo vai trò, chi nhánh và phòng ban.
 class Command(BaseCommand):
     help = "Tao/cap nhat 95 tai khoan mau theo vai tro cho he thong."
 

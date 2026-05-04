@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "core/base.html" %}
 
 {% block title %}Trang chủ điều hành{% endblock %}
 
@@ -456,12 +456,14 @@
 
 {% block content %}
         <div class="dashboard-home">
+            <!-- Khối tiêu đề tổng quan của dashboard -->
             <section class="dashboard-home__hero" aria-label="Tong quan he thong">
                 <p class="dashboard-home__eyebrow">Trang chủ điều hành</p>
                 <h2 class="dashboard-home__title">TỔNG QUAN HỆ THỐNG</h2>
             </section>
 
             <section class="dashboard-home__section">
+                <!-- Các thẻ KPI tổng hợp văn bản, công việc và trạng thái xử lý -->
                 <div class="dashboard-home__stats">
                     {% for card in dashboard_metrics %}
                         <article class="summary-card">
@@ -482,6 +484,7 @@
                     {% endfor %}
                 </div>
 
+                <!-- Khu vực biểu đồ tuần và phân rã trạng thái -->
                 <div class="dashboard-home__analytics">
                     <article class="surface-card">
                         <div class="surface-card__header">
@@ -547,6 +550,7 @@
                     </article>
                 </div>
 
+                <!-- Danh sách nhanh: văn bản gần đây và công việc cần ưu tiên -->
                 <div class="dashboard-home__lists">
                     <article class="surface-card">
                         <div class="surface-card__header">

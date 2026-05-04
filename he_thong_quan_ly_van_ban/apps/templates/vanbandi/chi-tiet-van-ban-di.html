@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "core/base.html" %}
 {% load static %}
 
 {% block title %}Chi tiết văn bản{% endblock %}
@@ -410,6 +410,7 @@
 
 {% block content %}
 
+  <!-- Trang chi tiết văn bản đi: thông tin văn bản, file xem trước và nút thao tác theo quyền -->
   <div class="card"
     style="padding: 24px 32px; border: 1px solid var(--border-color); box-shadow: none; margin-bottom: 24px;">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
@@ -738,6 +739,7 @@
 
   {% include "vanbandi/popup-hoan-tra.html" %}
 
+  <!-- Modal ký số chỉ được mở khi view truyền quyền ký phù hợp -->
   {% include "vanbandi/_ky_so_modal.html" %}
 
 
@@ -753,6 +755,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- JS phía client dùng để xem trước file và gọi API ký số/phê duyệt khi cần -->
 <script src="{% static 'vendor/pdfjs/pdf.min.js' %}"></script>
 <script src="{% static 'vendor/mammoth/mammoth.browser.min.js' %}"></script>
 <script src="{% static 'vendor/sheetjs/xlsx.full.min.js' %}"></script>

@@ -282,6 +282,7 @@ USER_SPECS = [
 ]
 
 
+# Command seed dữ liệu demo đầy đủ cho văn bản, công việc, hồ sơ và file liên quan.
 class Command(BaseCommand):
     help = "Tạo dữ liệu demo đầy đủ để test tay toàn bộ hệ thống quản lý văn bản."
 

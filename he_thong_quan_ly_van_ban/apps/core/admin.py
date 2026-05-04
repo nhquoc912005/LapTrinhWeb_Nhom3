@@ -1,3 +1,3 @@
 from django.contrib import admin
 
-# Register your models here.
+# File admin của app core. Hiện chưa đăng ký model riêng ở đây.

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# File khởi động các lệnh quản trị Django như runserver, check, shell và test.
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
@@ -6,6 +7,7 @@ import sys
 
 def main():
     """Run administrative tasks."""
+    # Chọn file settings chính của project trước khi Django nạp ứng dụng.
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'he_thong_quan_ly_van_ban.settings')
     try:
         from django.core.management import execute_from_command_line

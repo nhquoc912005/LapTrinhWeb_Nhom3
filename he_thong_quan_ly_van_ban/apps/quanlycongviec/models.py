@@ -1,3 +1,3 @@
 from django.db import models
 
-# Create your models here.
+# App quản lý công việc hiện dùng model chung CongViec/FileCVLienQuan trong apps.core.models.

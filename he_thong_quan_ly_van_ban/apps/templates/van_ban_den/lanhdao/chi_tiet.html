@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "core/base.html" %}
 {% load static %}
 {% block title %}Chi tiết văn bản đến{% endblock %}
 {% block nav_van_ban_den_active %}active{% endblock %}
@@ -864,8 +864,7 @@
             </div>
             <div class="field">
                 <div class="label">Đơn vị ban hành</div>
-                <div class="value">{% if vb.don_vi_ban_hanh and vb.don_vi_ban_hanh != 'None' %}{{ vb.don_vi_ban_hanh
-                    }}{% else %}-{% endif %}</div>
+                <div class="value">{{ vb.don_vi_ban_hanh_hien_thi }}</div>
             </div>
             <div class="field">
                 <div class="label">Ngày đến</div>

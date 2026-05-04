@@ -1,10 +1,11 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import Customer
-# Register your models here.
+# File này cấu hình cách quản trị tài khoản Customer trong Django admin.
 
 @admin.register(Customer)
 class CustomerAdmin(UserAdmin):
+    # Hiển thị thêm thông tin vai trò, chức vụ và đơn vị để quản trị viên dễ kiểm tra.
     model = Customer
 
     list_display = (

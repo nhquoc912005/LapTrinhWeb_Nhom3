@@ -3,6 +3,10 @@ from django.db import models
 from django.utils import timezone
 
 
+# File này chứa các model dùng chung cho văn bản, hồ sơ, công việc, ký số và lịch sử.
+
+
+# Model ChiNhanh lưu thông tin chi nhánh/đơn vị cấp trên của phòng ban và người dùng.
 class ChiNhanh(models.Model):
     chi_nhanh_id = models.AutoField(primary_key=True)
     ten_chi_nhanh = models.CharField(max_length=255, null=False)
@@ -14,6 +18,7 @@ class ChiNhanh(models.Model):
         return self.ten_chi_nhanh
 
 
+# Model DonViNgoai lưu các đơn vị ngoài hệ thống có thể nhận hoặc ban hành văn bản.
 class DonViNgoai(models.Model):
     don_vi_ngoai_id = models.AutoField(primary_key=True)
     ten_don_vi = models.CharField(max_length=255, null=False)
@@ -28,6 +33,7 @@ class DonViNgoai(models.Model):
         return self.ten_don_vi
 
 
+# Model PhongBan lưu phòng ban nội bộ, thuộc một chi nhánh và có thể có trưởng phòng.
 class PhongBan(models.Model):
     phong_ban_id = models.AutoField(primary_key=True)
     chi_nhanh = models.ForeignKey(
@@ -52,7 +58,9 @@ class PhongBan(models.Model):
         return self.ten_phong_ban
 
 
+# Model NguoiDung là hồ sơ nghiệp vụ liên kết với tài khoản đăng nhập Customer.
 class NguoiDung(models.Model):
+    # Chức vụ nghiệp vụ dùng để lọc lãnh đạo, văn thư và chuyên viên trong các view.
     class ChucVu(models.TextChoices):
         QUAN_TRI = "Quản Trị Hệ Thống", "Quản Trị Hệ Thống"
         LANH_DAO = "Lãnh Đạo", "Lãnh Đạo"
@@ -93,6 +101,7 @@ class NguoiDung(models.Model):
         return self.ho_va_ten
 
 
+# Model HoSoVanBan lưu hồ sơ lưu trữ, người tạo và chính sách bảo quản văn bản.
 class HoSoVanBan(models.Model):
     THOI_GIAN_BAO_QUAN_CHOICES = (
         ("Theo quy định - 2 năm", "Theo quy định - 2 năm"),
@@ -138,6 +147,7 @@ class HoSoVanBan(models.Model):
         return self.ky_hieu_ho_so
 
 
+# Model NguoiXuLyHoSo lưu danh sách người được phân công xử lý một hồ sơ văn bản.
 class NguoiXuLyHoSo(models.Model):
     nguoi_xu_ly_ho_so_id = models.AutoField(primary_key=True)
     ho_so_van_ban = models.ForeignKey(
@@ -160,6 +170,7 @@ class NguoiXuLyHoSo(models.Model):
         return f"{self.nguoi_xu_ly} - {self.ho_so_van_ban}"
 
 
+# Model PhongXemHoSo lưu các phòng ban được quyền xem một hồ sơ văn bản.
 class PhongXemHoSo(models.Model):
     phong_xem_ho_so_id = models.AutoField(primary_key=True)
     ho_so_van_ban = models.ForeignKey(
@@ -182,7 +193,9 @@ class PhongXemHoSo(models.Model):
         return f"{self.phong_ban} - {self.ho_so_van_ban}"
 
 
+# Model VanBan đại diện cho cả văn bản đến và văn bản đi trong hệ thống.
 class VanBan(models.Model):
+    # Các choices dưới đây phục vụ form, bộ lọc và trạng thái nghiệp vụ văn bản.
     HINH_THUC_CHOICES = (
         ("Công văn", "Công văn"),
         ("Quyết định", "Quyết định"),
@@ -306,7 +319,16 @@ class VanBan(models.Model):
     def __str__(self):
         return self.so_ky_hieu
 
+    @property
+    def don_vi_ban_hanh_hien_thi(self):
+        # Chuẩn hóa giá trị đơn vị ban hành trước khi hiển thị trên giao diện.
+        value = (self.don_vi_ban_hanh or "").strip()
+        if not value or value.lower() in {"none", "null"} or "{{" in value or "}}" in value:
+            return "-"
+        return value
 
+
+# Model NoiNhanVanBan lưu phòng ban hoặc đơn vị ngoài nhận văn bản sau khi ban hành.
 class NoiNhanVanBan(models.Model):
     TRANG_THAI_XEM_DE_BIET = "Xem Để Biết"
 
@@ -345,6 +367,7 @@ class NoiNhanVanBan(models.Model):
     def __str__(self):
         return f"Nơi nhận văn bản {self.noi_nhan_id}"
 
+# Model VanBanLienQuan lưu các file tài liệu bổ sung gắn với một văn bản.
 class VanBanLienQuan(models.Model):
     van_ban_lien_quan_id = models.AutoField(primary_key=True)
     van_ban = models.ForeignKey(
@@ -363,6 +386,7 @@ class VanBanLienQuan(models.Model):
         return f"Văn bản liên quan {self.van_ban_lien_quan_id}"
 
 
+# Model VanBanDuyet ghi nhận văn bản đã được văn thư/lãnh đạo đưa vào luồng duyệt.
 class VanBanDuyet(models.Model):
     van_ban_duyet_id = models.AutoField(primary_key=True)
     van_ban = models.OneToOneField(
@@ -387,6 +411,7 @@ class VanBanDuyet(models.Model):
         return f"Văn bản duyệt {self.van_ban_duyet_id}"
 
 
+# Model ChuyenTiep là lần chuyển tiếp văn bản cho người/phòng ban xử lý.
 class ChuyenTiep(models.Model):
     chuyen_tiep_id = models.AutoField(primary_key=True)
     van_ban_duyet = models.ForeignKey(
@@ -404,6 +429,7 @@ class ChuyenTiep(models.Model):
         return f"Chuyển tiếp {self.chuyen_tiep_id}"
 
 
+# Model ChuyenTiepChiTiet lưu từng người nhận cụ thể trong một lần chuyển tiếp.
 class ChuyenTiepChiTiet(models.Model):
     chuyen_tiep_ct_id = models.AutoField(primary_key=True)
     chuyen_tiep = models.ForeignKey(
@@ -432,6 +458,7 @@ class ChuyenTiepChiTiet(models.Model):
         return f"Chi tiết chuyển tiếp {self.chuyen_tiep_ct_id}"
 
 
+# Model BanHanh ghi nhận thời điểm văn bản đi được văn thư ban hành chính thức.
 class BanHanh(models.Model):
     ban_hanh_id = models.AutoField(primary_key=True)
     van_ban = models.OneToOneField(
@@ -450,6 +477,7 @@ class BanHanh(models.Model):
 
 
 
+# Model VanBanHoanTra lưu lý do và hạn xử lý mới khi văn bản bị hoàn trả.
 class VanBanHoanTra(models.Model):
     van_ban_hoan_tra_id = models.AutoField(primary_key=True)
     van_ban = models.ForeignKey(
@@ -469,7 +497,9 @@ class VanBanHoanTra(models.Model):
         return f"Hoàn trả văn bản {self.van_ban_hoan_tra_id}"
 
 
+# Model CongViec lưu công việc được giao từ văn bản đến/văn bản đi và kết quả xử lý.
 class CongViec(models.Model):
+    # Nguồn giao giúp phân biệt công việc phát sinh từ văn bản đến hay văn bản đi.
     class NguonGiao(models.TextChoices):
         VAN_BAN_DEN = "Văn bản đến", "Văn bản đến"
         VAN_BAN_DI = "Văn bản đi", "Văn bản đi"
@@ -541,6 +571,7 @@ class CongViec(models.Model):
 
     @property
     def cho_phep_chuyen_vien_xu_ly(self):
+        # Chỉ cho chuyên viên xử lý khi công việc đang chờ xử lý hoặc bị trả về chuyên viên.
         return self.trang_thai in {
             self.TrangThai.CHO_XU_LY,
             self.TrangThai.HOAN_TRA_CV,
@@ -548,9 +579,11 @@ class CongViec(models.Model):
 
     @property
     def dang_cho_lanh_dao_xu_ly(self):
+        # Trạng thái này dùng để lãnh đạo tiếp tục xử lý sau khi chuyên viên hoàn trả.
         return self.trang_thai == self.TrangThai.HOAN_TRA_LD
 
 
+# Model PhanCongCongViec lưu người phối hợp ngoài người thực hiện chính.
 class PhanCongCongViec(models.Model):
     phan_cong_id = models.AutoField(primary_key=True)
     cong_viec = models.ForeignKey(
@@ -573,6 +606,7 @@ class PhanCongCongViec(models.Model):
         return f"Phân công {self.phan_cong_id}"
 
 
+# Model FileCVLienQuan lưu file giao việc hoặc file kết quả xử lý của công việc.
 class FileCVLienQuan(models.Model):
     class LoaiFile(models.TextChoices):
         CHINH = "CHINH", "Chính"
@@ -619,9 +653,11 @@ class FileCVLienQuan(models.Model):
 
     @property
     def la_file_ket_qua(self):
+        # Dùng để phân biệt file kết quả với file ban đầu khi hiển thị chi tiết công việc.
         return self.nguon_tai_len == self.NguonTaiLen.KET_QUA_XU_LY
 
 
+# Model HoanTraCongViec lưu nội dung hoàn trả công việc từ lãnh đạo hoặc chuyên viên.
 class HoanTraCongViec(models.Model):
     hoan_tra_cong_viec_id = models.AutoField(primary_key=True)
     cong_viec = models.ForeignKey(
@@ -648,6 +684,7 @@ class HoanTraCongViec(models.Model):
         return f"Hoàn trả công việc {self.hoan_tra_cong_viec_id}"
 
 
+# Model PheDuyetCongViec ghi nhận lần lãnh đạo duyệt kết quả công việc.
 class PheDuyetCongViec(models.Model):
     phe_duyet_cv_id = models.AutoField(primary_key=True)
     cong_viec = models.ForeignKey(
@@ -664,6 +701,7 @@ class PheDuyetCongViec(models.Model):
     def __str__(self):
         return f"Phê duyệt công việc {self.phe_duyet_cv_id}"
 
+# Model ChuKySo lưu ảnh chữ ký số của một người dùng nghiệp vụ.
 class ChuKySo(models.Model):
     chu_ky_so_id = models.AutoField(primary_key=True)
 
@@ -690,6 +728,7 @@ class ChuKySo(models.Model):
         return f"Chữ ký số của {self.nguoi_dung}"
 
 
+# Model LichSuKySo lưu mỗi lần ký số văn bản hoặc công việc và dữ liệu kiểm tra toàn vẹn.
 class LichSuKySo(models.Model):
     lich_su_ky_so_id = models.AutoField(primary_key=True)
 
@@ -742,6 +781,7 @@ class LichSuKySo(models.Model):
     class Meta:
         db_table = "LichSuKySo"
         constraints = [
+            # Mỗi bản ghi ký số chỉ được gắn với một trong hai đối tượng: văn bản hoặc công việc.
             models.CheckConstraint(
                 condition=(
                     (
@@ -762,6 +802,7 @@ class LichSuKySo(models.Model):
         return f"Lịch sử ký số {self.lich_su_ky_so_id}"
 
 
+# Model LichSuHoatDong lưu audit log cho thao tác trên văn bản, công việc và hồ sơ.
 class LichSuHoatDong(models.Model):
     class DoiTuongLoai(models.TextChoices):
         VAN_BAN = "VAN_BAN", "Văn bản"

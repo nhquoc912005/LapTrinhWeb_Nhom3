@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'core/base.html' %}
 
 {% block title %}Quản lý hồ sơ - QLVB{% endblock %}
 
@@ -14,6 +14,7 @@
 {% endblock %}
 
 {% block content %}
+<!-- Màn quản lý hồ sơ văn bản: lọc, danh sách hồ sơ và thao tác theo quyền -->
 <div class="filter-card">
     <div class="filter-stack">
         <h2 class="section-title">Tra cứu thông tin</h2>
@@ -128,6 +129,7 @@
 
 <div class="table-container">
     <div class="table-scroll">
+        <!-- Bảng danh sách hồ sơ văn bản -->
         <table class="data-table">
             <thead>
                 <tr>
@@ -205,6 +207,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- JS hỗ trợ tìm kiếm/lọc phía client và click dòng để xem chi tiết hồ sơ -->
 <script>
 (function() {
     var searchInput = document.getElementById('searchInputHoSo');

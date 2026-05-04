@@ -9,6 +9,9 @@ from django.db import connection
 from django.db.utils import DatabaseError, OperationalError, ProgrammingError
 
 
+# File tiện ích dùng chung cho các command kiểm tra dữ liệu seed/database.
+
+
 MEDIA_DIRECTORIES = (
     ("core.VanBan.file_dinh_kem", "van_ban"),
     ("core.VanBanLienQuan.file_van_ban", "van_ban_lien_quan"),
@@ -39,16 +42,19 @@ DOCUMENT_FIXTURE_MODELS = (
 
 
 def configure_utf8_output():
+    # Đảm bảo console Windows in tiếng Việt ổn định khi chạy command.
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8", errors="replace")
 
 
 def database_settings():
+    # Lấy cấu hình database mặc định từ Django connection.
     return connection.settings_dict
 
 
 def database_kind():
+    # Xác định loại database hiện tại để command in cảnh báo phù hợp.
     engine = str(database_settings().get("ENGINE", "")).lower()
     if "sqlite" in engine:
         return "SQLite"

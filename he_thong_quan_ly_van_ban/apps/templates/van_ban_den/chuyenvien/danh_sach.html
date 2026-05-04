@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "core/base.html" %}
 {% load static %}
 
 {% block title %}Văn bản đến{% endblock %}
@@ -34,6 +34,7 @@
 {% endblock %}
 
 {% block content %}
+<!-- Màn văn bản đến của chuyên viên: các văn bản được lãnh đạo chuyển tiếp -->
 <div class="filter-card">
     <div class="filter-stack">
         <h2 class="section-title">Tra cứu thông tin</h2>
@@ -108,6 +109,7 @@
 
 <div class="table-container">
     <div class="table-scroll">
+        <!-- Bảng danh sách văn bản đến chuyên viên cần xem/xử lý -->
         <table class="data-table">
             <thead>
                 <tr>
@@ -142,7 +144,7 @@
                     </td>
                     <td>{{ vb.trich_yeu }}</td>
                     <td>{{ vb.ngay_den|date:"d/m/Y" }}</td>
-                    <td>{{ vb.don_vi_ban_hanh|default:'-' }}</td>
+                    <td>{{ vb.don_vi_ban_hanh_hien_thi }}</td>
                     <td>
                         {{ vb.get_do_mat_display|default:vb.do_mat }} /
                         <span class="do-khan-text">{{ vb.get_do_khan_display|default:vb.do_khan }}</span>
@@ -184,6 +186,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- JS lọc nhanh danh sách văn bản đến được phân công -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var tabs = document.querySelectorAll('.filter-tab');

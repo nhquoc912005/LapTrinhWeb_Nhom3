@@ -7,6 +7,8 @@ from apps.core.validation import (
     normalize_document_text,
 )
 
+# File này chứa form thêm/sửa văn bản đến, dùng model chung VanBan.
+
 
 class VanBanDenForm(forms.ModelForm):
     """
@@ -96,6 +98,7 @@ class VanBanDenForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        # Chuẩn bị danh sách lãnh đạo xử lý và đổ dữ liệu alias khi sửa văn bản.
         super().__init__(*args, **kwargs)
 
         # Chỉ lấy người dùng lõi có chức vụ Lãnh Đạo
@@ -110,6 +113,7 @@ class VanBanDenForm(forms.ModelForm):
             self.fields['lanh_dao_xu_ly'].initial = self.instance.lanh_dao_duyet
 
     def clean(self):
+        # Validate trùng số ký hiệu + trích yếu trong nhóm văn bản đến.
         cleaned_data = super().clean()
         so_ky_hieu = normalize_document_text(cleaned_data.get('so_ky_hieu'))
         trich_yeu = normalize_document_text(cleaned_data.get('trich_yeu'))
@@ -128,6 +132,7 @@ class VanBanDenForm(forms.ModelForm):
         return cleaned_data
 
     def save(self, commit=True):
+        # Lưu dữ liệu từ field giao diện vào đúng field của model VanBan dùng chung.
         vb = super().save(commit=False)
 
         # Map field giao diện cũ sang model chung

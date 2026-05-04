@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "core/base.html" %}
 
 {% block title %}Xử lý công việc - Hệ thống quản lý văn bản{% endblock %}
 
@@ -274,6 +274,7 @@
 {% endblock %}
 
 {% block content %}
+<!-- Màn xử lý công việc của chuyên viên: thông tin task, form kết quả và file đính kèm -->
 <div class="process-card">
     <div class="process-title">{{ template_title }}</div>
 
@@ -372,6 +373,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- JS hỗ trợ chọn/xóa file kết quả và cập nhật trạng thái form xử lý -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const resultTextarea = document.getElementById("id_ket_qua_xu_ly");

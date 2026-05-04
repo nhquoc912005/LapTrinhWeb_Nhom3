@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'core/base.html' %}
 
 {% block title %}Chi tiết hồ sơ - QLVB{% endblock %}
 
@@ -148,7 +148,7 @@
                             <td style="padding:16px; font-size:14px;"><a href="{% url 'hosovanban:chi_tiet_van_ban' ho_so.pk vb.pk %}" style="color:#0284C7; text-decoration:none; font-weight:500;" onclick="event.stopPropagation();">{{ vb.so_ky_hieu }}</a></td>
                             <td style="padding:16px; font-size:14px; color:#333;">{{ vb.trich_yeu }}</td>
                             <td style="padding:16px; font-size:14px; color:#333;">
-                                {% if vb.don_vi_ban_hanh and vb.don_vi_ban_hanh != 'None' %}{{ vb.don_vi_ban_hanh }}{% else %}-{% endif %}
+                                {{ vb.don_vi_ban_hanh_hien_thi }}
                             </td>
                             <td style="padding:16px; font-size:14px; color:#333;">
                                 {% if vb.nguoi_tao.phong_ban %}{{ vb.nguoi_tao.phong_ban.ten_phong_ban }}{% else %}-{% endif %}

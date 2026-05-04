@@ -32,6 +32,7 @@ from ._data_audit import (
 )
 
 
+# Command dựng lại bản ghi media/file demo dựa trên dữ liệu hiện có.
 class Command(BaseCommand):
     help = "Tạo lại record tối thiểu từ các file vật lý trong media để UI hiển thị được."
 

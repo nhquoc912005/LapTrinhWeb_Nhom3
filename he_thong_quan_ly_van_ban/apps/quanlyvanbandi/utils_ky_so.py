@@ -1,7 +1,11 @@
 import os
 
 
+# File này hỗ trợ chèn ảnh chữ ký vào file PDF theo tọa độ từ giao diện ký số.
+
+
 def _clamp(value, minimum, maximum):
+    # Giữ tọa độ/kích thước nằm trong biên trang PDF.
     return max(minimum, min(value, maximum))
 
 
@@ -14,6 +18,7 @@ def sign_pdf_with_ratio(
     pfx_path=None,
     pfx_password=None,
 ):
+    # Tạo file PDF mới có ảnh chữ ký được đặt theo tỉ lệ vùng preview trên frontend.
     """Chèn ảnh chữ ký lên trang cuối của PDF theo tỷ lệ tọa độ người dùng chọn."""
     try:
         import fitz
@@ -54,6 +59,7 @@ def sign_pdf_with_ratio(
 
         sign_width = min(150.0, pdf_width)
         sign_height = min(80.0, pdf_height)
+        # Quy đổi tỉ lệ người dùng chọn sang tọa độ thật trên trang PDF cuối.
         max_x = max(0.0, pdf_width - sign_width)
         max_y = max(0.0, pdf_height - sign_height)
         x0 = _clamp(x_ratio, 0.0, 1.0) * pdf_width

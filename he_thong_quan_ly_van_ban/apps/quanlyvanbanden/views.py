@@ -36,6 +36,9 @@ from apps.core.utils.activity_log import ghi_lich_su_van_ban
 from apps.quanlyvanbandi.utils_ky_so import sign_pdf_with_ratio
 
 
+# File này xử lý luồng văn bản đến: danh sách, chi tiết, thêm/sửa/xóa, chuyển tiếp, hoàn trả và ký số.
+
+
 # =========================================================
 # HẰNG SỐ DÙNG CHUNG
 # =========================================================
@@ -53,6 +56,7 @@ TRANG_THAI_XEM_DE_BIET = 'Xem Để Biết'
 # =========================================================
 
 def _lay_nguoi_dung_core(user):
+    # Resolve tài khoản đăng nhập sang hồ sơ NguoiDung dùng bởi model chung.
     """
     Lấy NguoiDung trong app core từ tài khoản đang đăng nhập.
     Model chung VanBan dùng core.NguoiDung, không dùng trực tiếp accounts.Customer.
@@ -69,6 +73,7 @@ def _lay_nguoi_dung_core(user):
 
 
 def _kiem_tra_nguoi_dung_core(request):
+    # Chặn thao tác nghiệp vụ nếu tài khoản chưa có hồ sơ NguoiDung core.
     nguoi_dung = _lay_nguoi_dung_core(request.user)
 
     if not nguoi_dung:
@@ -82,17 +87,20 @@ def _kiem_tra_nguoi_dung_core(request):
 
 
 def _xoa_file_vat_ly(file_field):
+    # Xóa file vật lý khi xóa/sửa văn bản để tránh file mồ côi.
     if file_field:
         file_field.delete(save=False)
 
 
 def _ten_file(file_field):
+    # Lấy tên file an toàn để hiển thị trong template.
     if file_field:
         return os.path.basename(file_field.name)
     return ''
 
 
 def _gan_alias_van_ban(vb):
+    # Gắn alias tên cũ cho template văn bản đến khi model đã chuyển sang VanBan chung.
     """
     Giữ alias tên cũ để template cũ ít bị vỡ hơn.
 
@@ -130,6 +138,7 @@ def _gan_alias_van_ban(vb):
 
 
 def _gan_alias_danh_sach(ds_van_ban):
+    # Áp dụng alias cho từng văn bản trong danh sách.
     for vb in ds_van_ban:
         _gan_alias_van_ban(vb)
 
@@ -137,6 +146,7 @@ def _gan_alias_danh_sach(ds_van_ban):
 
 
 def _lanh_dao_co_quyen_xu_ly(vb, nguoi_dung_core):
+    # Kiểm tra văn bản đến có thuộc lãnh đạo hiện tại xử lý hay không.
     return (
         nguoi_dung_core
         and nguoi_dung_core.chuc_vu == NguoiDung.ChucVu.LANH_DAO
@@ -145,6 +155,7 @@ def _lanh_dao_co_quyen_xu_ly(vb, nguoi_dung_core):
 
 
 def _chuyen_vien_duoc_phan_cong(vb, nguoi_dung_core):
+    # Kiểm tra chuyên viên có nằm trong danh sách chuyển tiếp của văn bản.
     if not nguoi_dung_core:
         return False
 
@@ -155,6 +166,7 @@ def _chuyen_vien_duoc_phan_cong(vb, nguoi_dung_core):
 
 
 def _lay_file_dinh_kem_list(vb):
+    # Gom file chính và thông tin file để hiển thị ở trang chi tiết.
     """
     Model chung chỉ có 1 file chính: VanBan.file_dinh_kem.
     Hàm này bọc lại thành list để template cũ vẫn có thể for.
@@ -176,6 +188,7 @@ def _lay_file_dinh_kem_list(vb):
 
 
 def _lay_tai_lieu_lien_quan_list(vb):
+    # Lấy danh sách tài liệu liên quan của văn bản đến.
     ds_file = VanBanLienQuan.objects.filter(
         van_ban=vb
     ).order_by('van_ban_lien_quan_id')
@@ -194,6 +207,7 @@ def _lay_tai_lieu_lien_quan_list(vb):
 
 
 def _lay_ds_chuyen_tiep(vb):
+    # Lấy lịch sử chuyển tiếp và người nhận để lãnh đạo/chuyên viên xem.
     """
     Model chung:
     VanBan -> VanBanDuyet -> ChuyenTiep -> ChuyenTiepChiTiet
@@ -236,6 +250,7 @@ def _lay_ds_chuyen_tiep(vb):
 
 
 def _lay_chuyen_viens():
+    # Lấy danh sách chuyên viên phục vụ modal chuyển tiếp.
     ds = list(
         NguoiDung.objects.select_related(
             'phong_ban',
@@ -255,6 +270,7 @@ def _lay_chuyen_viens():
 
 
 def _lay_hoac_tao_van_ban_duyet(vb):
+    # Đảm bảo có bản ghi VanBanDuyet trước khi lưu/chuyển tiếp văn bản đến.
     van_thu = vb.nguoi_tao
 
     obj, created = VanBanDuyet.objects.get_or_create(
@@ -266,12 +282,14 @@ def _lay_hoac_tao_van_ban_duyet(vb):
 
 
 def _xoa_chuyen_tiep_cu(vb):
+    # Xóa dữ liệu chuyển tiếp cũ khi lãnh đạo chuyển lại danh sách chuyên viên.
     ChuyenTiep.objects.filter(
         van_ban_duyet__van_ban=vb
     ).delete()
 
 
 def gan_thong_tin_canh_bao_han_xu_ly(ds_van_ban):
+    # Gắn thông tin cảnh báo hạn xử lý để template đổi màu/huy hiệu.
     today = timezone.localdate()
 
     for vb in ds_van_ban:
@@ -295,6 +313,10 @@ def gan_thong_tin_canh_bao_han_xu_ly(ds_van_ban):
 @login_required
 @role_required(Customer.Role.VAN_THU, Customer.Role.LANH_DAO, Customer.Role.CHUYEN_VIEN)
 def danh_sach_van_ban_den(request):
+    """
+    Hiển thị danh sách văn bản đến theo vai trò.
+    GET dùng để tìm kiếm/lọc; không thay đổi dữ liệu.
+    """
     nguoi_dung_core = _kiem_tra_nguoi_dung_core(request)
 
     if not nguoi_dung_core:
@@ -417,6 +439,10 @@ def danh_sach_van_ban_den(request):
 @role_required(Customer.Role.VAN_THU, Customer.Role.LANH_DAO, Customer.Role.CHUYEN_VIEN)
 @ensure_csrf_cookie
 def chi_tiet_van_ban_den(request, pk):
+    """
+    Hiển thị chi tiết văn bản đến.
+    Quyền xem phụ thuộc vai trò văn thư, lãnh đạo hoặc chuyên viên được chuyển tiếp.
+    """
     nguoi_dung_core = _kiem_tra_nguoi_dung_core(request)
 
     if not nguoi_dung_core:
@@ -480,6 +506,10 @@ def chi_tiet_van_ban_den(request, pk):
 @login_required
 @role_required(Customer.Role.VAN_THU)
 def them_van_ban_den(request):
+    """
+    Văn thư thêm văn bản đến.
+    GET hiển thị form, POST validate form và upload file đính kèm/tài liệu liên quan.
+    """
     nguoi_dung_core = _kiem_tra_nguoi_dung_core(request)
 
     if not nguoi_dung_core:
@@ -571,6 +601,10 @@ def them_van_ban_den(request):
 @login_required
 @role_required(Customer.Role.VAN_THU)
 def sua_van_ban_den(request, pk):
+    """
+    Văn thư sửa văn bản đến.
+    GET hiển thị dữ liệu cũ, POST cập nhật thông tin và thay thế file nếu có upload mới.
+    """
     nguoi_dung_core = _kiem_tra_nguoi_dung_core(request)
 
     if not nguoi_dung_core:
@@ -704,6 +738,10 @@ def sua_van_ban_den(request, pk):
 @login_required
 @role_required(Customer.Role.VAN_THU)
 def xoa_van_ban_den(request, pk):
+    """
+    Văn thư xóa văn bản đến.
+    POST xóa bản ghi và file vật lý liên quan nếu người dùng xác nhận.
+    """
     vb = get_object_or_404(
         VanBan,
         pk=pk,
@@ -746,6 +784,10 @@ def xoa_van_ban_den(request, pk):
 @login_required
 @role_required(Customer.Role.LANH_DAO)
 def lanh_dao_luu_van_ban_den(request, pk):
+    """
+    Lãnh đạo lưu/xác nhận văn bản đến.
+    POST cập nhật trạng thái và ghi lịch sử thao tác.
+    """
     nguoi_dung_core = _kiem_tra_nguoi_dung_core(request)
 
     if not nguoi_dung_core:
@@ -790,6 +832,10 @@ lanh_dao_xem_de_biet_van_ban_den = lanh_dao_luu_van_ban_den
 @login_required
 @role_required(Customer.Role.LANH_DAO)
 def lanh_dao_chuyen_tiep_van_ban_den(request, pk):
+    """
+    Lãnh đạo chuyển tiếp văn bản đến cho chuyên viên xử lý.
+    POST tạo ChuyenTiep/ChuyenTiepChiTiet và ghi lịch sử.
+    """
     nguoi_dung_core = _kiem_tra_nguoi_dung_core(request)
 
     if not nguoi_dung_core:
@@ -870,6 +916,10 @@ def lanh_dao_chuyen_tiep_van_ban_den(request, pk):
 @login_required
 @role_required(Customer.Role.LANH_DAO)
 def lanh_dao_hoan_tra_van_ban_den(request, pk):
+    """
+    Lãnh đạo hoàn trả văn bản đến.
+    POST lưu lý do hoàn trả, cập nhật trạng thái và ghi lịch sử.
+    """
     nguoi_dung_core = _kiem_tra_nguoi_dung_core(request)
 
     if not nguoi_dung_core:
@@ -920,6 +970,10 @@ def lanh_dao_hoan_tra_van_ban_den(request, pk):
 @require_POST
 @login_required
 def api_ky_so_van_ban(request, vb_pk):
+    """
+    API ký số văn bản đến.
+    POST nhận tọa độ chữ ký, tạo file đã ký/hash và trả JSON cho frontend.
+    """
     if not request.user.has_role(Customer.Role.LANH_DAO):
         return JsonResponse({"success": False, "message": "Bạn không có quyền ký số văn bản này."}, status=403)
 

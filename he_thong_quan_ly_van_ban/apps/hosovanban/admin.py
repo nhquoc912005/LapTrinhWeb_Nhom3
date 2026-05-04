@@ -1,3 +1,3 @@
 from django.contrib import admin
 
-# Register your models here.
+# App hồ sơ văn bản đang dùng model chung HoSoVanBan nên chưa đăng ký admin riêng.

@@ -8,9 +8,12 @@ from apps.core.validation import (
 )
 from ..core.models import VanBan, NguoiDung
 
+# File này chứa form soạn thảo/sửa văn bản đi và validate file đính kèm.
+
 ALLOWED_EXTENSIONS = {".pdf", ".docx", ".xlsx"}
 
 def validate_file_size(file, max_mb=50):
+    # Giới hạn dung lượng file upload để tránh lưu file quá lớn.
     if file and file.size > max_mb * 1024 * 1024:
         raise forms.ValidationError(
             f'File "{file.name}" không được vượt quá {max_mb}MB.'
@@ -18,6 +21,7 @@ def validate_file_size(file, max_mb=50):
 
 
 def validate_file_extension(file):
+    # Chỉ cho phép các định dạng văn bản/bảng tính đang được hệ thống hỗ trợ.
     if file:
         ext = os.path.splitext(file.name)[1].lower()
         if ext not in ALLOWED_EXTENSIONS:
@@ -27,6 +31,7 @@ def validate_file_extension(file):
 
 
 class VanBanDiForm(forms.ModelForm):
+    # Form dùng cho màn thêm/sửa văn bản đi của chuyên viên/lãnh đạo.
     ngay_van_ban = forms.DateField(
         label="Ngày văn bản",
         required=True,
@@ -82,6 +87,7 @@ class VanBanDiForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        # Thiết lập choices và danh sách lãnh đạo duyệt cho form văn bản đi.
         super().__init__(*args, **kwargs)
 
         self.fields["lanh_dao_duyet"].queryset = NguoiDung.objects.filter(
@@ -109,6 +115,7 @@ class VanBanDiForm(forms.ModelForm):
         ] + list(VanBan.DO_KHAN_CHOICES)
 
     def clean_file_dinh_kem(self):
+        # Validate file chính được upload cho văn bản đi.
         file = self.cleaned_data.get("file_dinh_kem")
         if file and hasattr(file, 'name'):
             validate_file_size(file, 50)
@@ -116,6 +123,7 @@ class VanBanDiForm(forms.ModelForm):
         return file
 
     def clean(self):
+        # Kiểm tra ngày xử lý và trùng số ký hiệu + trích yếu trong văn bản đi.
         cleaned_data = super().clean()
         ngay_van_ban = cleaned_data.get("ngay_van_ban")
         han_xu_ly = cleaned_data.get("han_xu_ly")
@@ -139,6 +147,7 @@ class VanBanDiForm(forms.ModelForm):
         return cleaned_data
 
     def save(self, commit=True):
+        # Gán phan_loai/trạng thái mặc định và kích thước file trước khi lưu.
         instance = super().save(commit=False)
         instance.phan_loai = "Văn bản đi"
         if not instance.pk:

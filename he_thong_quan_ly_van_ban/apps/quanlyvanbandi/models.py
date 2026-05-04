@@ -1,3 +1,3 @@
 from django.db import models
 
-# Create your models here.
+# App văn bản đi hiện dùng model chung trong apps.core.models, chưa khai báo model riêng.

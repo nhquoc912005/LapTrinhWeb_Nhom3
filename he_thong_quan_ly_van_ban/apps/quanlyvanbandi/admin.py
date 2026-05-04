@@ -1,3 +1,3 @@
 from django.contrib import admin
 
-# Register your models here.
+# App văn bản đi đang dùng model chung VanBan nên chưa đăng ký admin riêng.

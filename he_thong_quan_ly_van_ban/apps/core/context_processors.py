@@ -3,8 +3,11 @@ from django.urls import NoReverseMatch, reverse
 from ..accounts.models import Customer
 
 
+# File này cung cấp dữ liệu layout chung: menu top, sidebar và thông tin user.
+
 ALL_ROLES = tuple(Customer.Role.values)
 
+# Định nghĩa menu trên cùng, mỗi item có URL, icon và nhóm role được phép thấy.
 TOP_MENU_DEFINITIONS = (
     {
         "label": "Trang chủ",
@@ -36,6 +39,7 @@ TOP_MENU_DEFINITIONS = (
     },
 )
 
+# Định nghĩa sidebar theo nghiệp vụ; active_namespaces giúp giữ active ở trang con.
 SIDEBAR_MENU_DEFINITIONS = (
     {
         "label": "Văn bản đến",
@@ -89,6 +93,7 @@ SIDEBAR_MENU_DEFINITIONS = (
 
 
 def _resolve_url(url_name):
+    # Reverse URL an toàn; nếu route chưa có thì trả về link tạm để layout không lỗi.
     if not url_name:
         return "#", False
     try:
@@ -98,6 +103,7 @@ def _resolve_url(url_name):
 
 
 def _is_active(definition, current_namespace, current_view_name):
+    # Xác định item menu đang active theo namespace hoặc view hiện tại.
     active_namespaces = definition.get("active_namespaces", ())
     if current_namespace in active_namespaces:
         return True
@@ -110,6 +116,7 @@ def _is_active(definition, current_namespace, current_view_name):
 
 
 def _build_navigation_items(request, definitions):
+    # Lọc menu theo role của user và gắn href/active cho template base.
     resolver_match = getattr(request, "resolver_match", None)
     current_namespace = getattr(resolver_match, "namespace", "") or ""
     current_view_name = getattr(resolver_match, "view_name", "") or ""
@@ -134,6 +141,7 @@ def _build_navigation_items(request, definitions):
 
 
 def auth_shell(request):
+    # Context processor được inject vào mọi template để render shell sau đăng nhập.
     if not getattr(request.user, "is_authenticated", False):
         return {
             "current_role": "",

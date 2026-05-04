@@ -1,3 +1,3 @@
 from django.db import models
 
-# Create your models here.
+# App hồ sơ văn bản hiện dùng model chung HoSoVanBan trong apps.core.models.

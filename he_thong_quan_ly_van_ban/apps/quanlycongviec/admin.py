@@ -1,3 +1,3 @@
 from django.contrib import admin
 
-# Register your models here.
+# App công việc đang dùng model chung CongViec nên chưa đăng ký admin riêng.

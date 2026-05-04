@@ -5,7 +5,11 @@ from django.utils import timezone
 from apps.core.models import HoSoVanBan, PhongBan, NguoiDung
 
 
+# File này chứa form tạo/sửa hồ sơ văn bản và phân quyền xem/xử lý hồ sơ.
+
+
 class HoSoVanBanCreateForm(forms.ModelForm):
+    # Form tạo hồ sơ: chọn phòng được xem, người xử lý và thông tin lưu trữ.
     phong_ban = forms.ModelMultipleChoiceField(
         queryset=PhongBan.objects.all().order_by("ten_phong_ban"),
         required=True,
@@ -31,12 +35,14 @@ class HoSoVanBanCreateForm(forms.ModelForm):
         ]
 
     def clean_ky_hieu_ho_so(self):
+        # Không cho tạo trùng ký hiệu hồ sơ.
         ky_hieu = self.cleaned_data.get("ky_hieu_ho_so", "").strip()
         if HoSoVanBan.objects.filter(ky_hieu_ho_so__iexact=ky_hieu).exists():
             raise ValidationError("Số ký hiệu đã tồn tại trong hệ thống.")
         return ky_hieu
 
     def clean(self):
+        # Tự suy ra số năm lưu trữ từ lựa chọn thời gian bảo quản nếu có quy định sẵn.
         cleaned_data = super().clean()
         thoi_gian_bao_quan = cleaned_data.get("thoi_gian_bao_quan")
         so_nam_luu_tru = cleaned_data.get("so_nam_luu_tru")
@@ -66,6 +72,7 @@ class HoSoVanBanCreateForm(forms.ModelForm):
         return cleaned_data
 
 class HoSoVanBanUpdateForm(HoSoVanBanCreateForm):
+    # Form sửa hồ sơ dùng lại validate tạo mới nhưng bỏ qua chính hồ sơ hiện tại.
     def clean_ky_hieu_ho_so(self):
         ky_hieu = self.cleaned_data.get("ky_hieu_ho_so", "").strip()
         qs = HoSoVanBan.objects.filter(ky_hieu_ho_so__iexact=ky_hieu)

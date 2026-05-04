@@ -128,6 +128,7 @@ USER_SPECS = {
 }
 
 
+# Command seed dữ liệu demo theo role để kiểm thử quyền và luồng nghiệp vụ.
 class Command(BaseCommand):
     help = "Seed role based demo data with Django ORM."
 
@@ -155,6 +156,7 @@ class Command(BaseCommand):
         seeder.print_summary()
 
 
+# Lớp gom logic tạo dữ liệu theo vai trò, hạn chế làm phình hàm handle.
 class RoleBasedSeeder:
     def __init__(self, command, per_role, password):
         self.command = command

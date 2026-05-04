@@ -23,8 +23,15 @@ from .forms import HoSoVanBanCreateForm, HoSoVanBanUpdateForm
 from apps.core.utils.activity_log import ghi_lich_su_ho_so
 
 
+# File này xử lý quản lý hồ sơ văn bản, phân quyền xem hồ sơ và API thêm văn bản vào hồ sơ.
+
+
 @role_required(*Customer.Role.values)
 def danh_sach(request):
+    """
+    Hiển thị danh sách hồ sơ văn bản theo quyền người dùng.
+    GET dùng để lọc/tìm kiếm/phân trang, không ghi dữ liệu.
+    """
     if hasattr(request.user, "nguoi_dung_core") and request.user.nguoi_dung_core:
         nd = request.user.nguoi_dung_core
     elif hasattr(request.user, "core_profile") and request.user.core_profile:
@@ -108,6 +115,10 @@ def danh_sach(request):
 
 @role_required(Customer.Role.VAN_THU)
 def them_ho_so_van_ban(request):
+    """
+    Văn thư tạo hồ sơ văn bản.
+    GET hiển thị form, POST lưu hồ sơ, phòng được xem, người xử lý và ghi lịch sử.
+    """
     ds_phong_ban = PhongBan.objects.all().order_by("ten_phong_ban")
     ds_nguoi_dung = (
         NguoiDung.objects.select_related("phong_ban")
@@ -183,6 +194,10 @@ def them_ho_so_van_ban(request):
 
 @role_required(*Customer.Role.values)
 def chi_tiet_ho_so_van_ban(request, pk):
+    """
+    Hiển thị chi tiết hồ sơ và danh sách văn bản thuộc hồ sơ.
+    Quyền xem phụ thuộc vai trò, người xử lý hoặc phòng ban được xem.
+    """
     ho_so = get_object_or_404(HoSoVanBan, pk=pk)
     
     if hasattr(request.user, "nguoi_dung_core") and request.user.nguoi_dung_core:
@@ -247,6 +262,7 @@ def chi_tiet_ho_so_van_ban(request, pk):
     )
 
 def check_ho_so_permission(request, ho_so):
+    # Kiểm tra user có được sửa/xóa/xem hồ sơ theo vai trò hoặc quan hệ phân quyền.
     """Kiểm tra quyền xử lý hồ sơ."""
     if request.user.is_van_thu:
         return True
@@ -262,6 +278,10 @@ def check_ho_so_permission(request, ho_so):
 
 @role_required(*Customer.Role.values)
 def sua_ho_so_van_ban(request, pk):
+    """
+    Sửa thông tin hồ sơ văn bản.
+    GET hiển thị dữ liệu cũ, POST cập nhật hồ sơ, phân quyền phòng/người xử lý và ghi lịch sử.
+    """
     ho_so = get_object_or_404(HoSoVanBan, pk=pk)
     
     if hasattr(request.user, "nguoi_dung_core") and request.user.nguoi_dung_core:
@@ -335,6 +355,10 @@ def sua_ho_so_van_ban(request, pk):
 
 @role_required(*Customer.Role.values)
 def xoa_ho_so_van_ban(request, pk):
+    """
+    Xóa hồ sơ văn bản nếu người dùng có quyền.
+    POST gỡ liên kết văn bản khỏi hồ sơ rồi xóa hồ sơ và ghi lịch sử.
+    """
     if request.method == "POST":
         ho_so = get_object_or_404(HoSoVanBan, pk=pk)
         
@@ -360,6 +384,7 @@ def xoa_ho_so_van_ban(request, pk):
 
 @role_required(*Customer.Role.values)
 def chi_tiet_van_ban_trong_ho_so(request, ho_so_id, vb_id):
+    # Hiển thị chi tiết một văn bản đang nằm trong hồ sơ.
     ho_so = get_object_or_404(HoSoVanBan, pk=ho_so_id)
     van_ban = get_object_or_404(VanBan, pk=vb_id, ho_so_van_ban=ho_so)
     ds_van_ban_lien_quan = van_ban.vanbanlienquan_set.all()
@@ -379,6 +404,7 @@ def chi_tiet_van_ban_trong_ho_so(request, ho_so_id, vb_id):
 
 @role_required(*Customer.Role.values)
 def xoa_van_ban_khoi_ho_so(request, ho_so_id, vb_id):
+    # Gỡ văn bản khỏi hồ sơ nhưng không xóa bản ghi văn bản gốc.
     if request.method == "POST":
         ho_so = get_object_or_404(HoSoVanBan, pk=ho_so_id)
         van_ban = get_object_or_404(VanBan, pk=vb_id, ho_so_van_ban=ho_so)
@@ -403,6 +429,7 @@ def xoa_van_ban_khoi_ho_so(request, ho_so_id, vb_id):
 @require_GET
 @role_required(Customer.Role.VAN_THU, Customer.Role.CHUYEN_VIEN, Customer.Role.LANH_DAO)
 def api_ds_ho_so_hien_hanh(request):
+    # API trả JSON danh sách hồ sơ hiện hành cho popup thêm văn bản vào hồ sơ.
     if hasattr(request.user, "nguoi_dung_core") and request.user.nguoi_dung_core:
         nd = request.user.nguoi_dung_core
     elif hasattr(request.user, "core_profile") and request.user.core_profile:
@@ -445,6 +472,7 @@ def api_ds_ho_so_hien_hanh(request):
 @require_POST
 @role_required(Customer.Role.VAN_THU, Customer.Role.CHUYEN_VIEN, Customer.Role.LANH_DAO)
 def api_them_van_ban_vao_ho_so(request):
+    # API POST thêm một văn bản vào hồ sơ được chọn và ghi lịch sử hồ sơ.
     """Liên kết một VanBan (core) vào một HoSoVanBan."""
     ho_so_id = request.POST.get("ho_so_id")
     van_ban_id = request.POST.get("van_ban_id")

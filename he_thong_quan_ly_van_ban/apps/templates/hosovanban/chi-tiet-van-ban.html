@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'core/base.html' %}
 {% load static %}
 
 {% block title %}Chi tiết văn bản - QLVB{% endblock %}
@@ -57,7 +57,7 @@
                     </div>
                     <div style="margin-bottom:16px;">
                         <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Đơn vị ban hành:</div>
-                        <div style="color:#0f172a; font-size:14px; font-weight:500;">{% if van_ban.don_vi_ban_hanh and van_ban.don_vi_ban_hanh != 'None' %}{{ van_ban.don_vi_ban_hanh }}{% else %}--{% endif %}</div>
+                        <div style="color:#0f172a; font-size:14px; font-weight:500;">{{ van_ban.don_vi_ban_hanh_hien_thi }}</div>
                     </div>
                     <div style="margin-bottom:16px;">
                         <div style="color:#64748b; font-size:13px; margin-bottom:4px;">Hình thức:</div>

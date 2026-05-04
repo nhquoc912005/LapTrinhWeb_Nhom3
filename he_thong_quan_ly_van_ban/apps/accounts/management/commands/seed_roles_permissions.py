@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand
 from ...role_groups import ensure_role_groups, get_role_permissions, sync_user_role_group
 
 
+# Command này tạo/cập nhật group quyền theo vai trò và đồng bộ user hiện có.
 class Command(BaseCommand):
     help = "Tao group va gan quyen cho he thong"
 

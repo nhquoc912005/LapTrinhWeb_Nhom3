@@ -2,6 +2,10 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 
 
+# File này chứa form đăng nhập cho màn hình core/index.html.
+
+
+# Form đăng nhập tùy chỉnh thông báo lỗi và class CSS theo giao diện hiện có.
 class CustomerLoginForm(AuthenticationForm):
     error_messages = {
         "invalid_login": "Tên đăng nhập hoặc mật khẩu không đúng.",

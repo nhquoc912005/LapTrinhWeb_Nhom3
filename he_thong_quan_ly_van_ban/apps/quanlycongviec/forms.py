@@ -3,15 +3,19 @@ from pathlib import Path
 from django import forms
 
 
+# File này chứa form xử lý kết quả công việc, upload file kết quả và hoàn trả.
+
 ALLOWED_RESULT_EXTENSIONS = {".pdf", ".doc", ".docx", ".xls", ".xlsx"}
 MAX_RESULT_FILE_SIZE = 50 * 1024 * 1024
 
 
 class MultipleFileInput(forms.ClearableFileInput):
+    # Widget cho phép chọn nhiều file trong cùng một field.
     allow_multiple_selected = True
 
 
 class MultipleFileField(forms.FileField):
+    # Field chuẩn hóa dữ liệu upload thành danh sách file.
     widget = MultipleFileInput
 
     def clean(self, data, initial=None):
@@ -24,6 +28,7 @@ class MultipleFileField(forms.FileField):
 
 
 class BaseTaskResultForm(forms.Form):
+    # Form nền cho luồng chuyên viên xử lý/cập nhật kết quả công việc.
     ket_qua_xu_ly = forms.CharField(
         label="Mô tả kết quả xử lý",
         required=True,
@@ -66,9 +71,11 @@ class BaseTaskResultForm(forms.Form):
         super().__init__(*args, **kwargs)
 
     def get_uploaded_files(self):
+        # Lấy danh sách file kết quả từ request.FILES.
         return self.files.getlist("tep_ket_qua")
 
     def clean(self):
+        # Validate file kết quả bắt buộc, định dạng và dung lượng.
         cleaned_data = super().clean()
         uploaded_files = self.get_uploaded_files()
 
@@ -86,14 +93,17 @@ class BaseTaskResultForm(forms.Form):
 
 
 class ProcessTaskForm(BaseTaskResultForm):
+    # Form xử lý lần đầu, bắt buộc có ít nhất một file kết quả.
     require_result_file = True
 
 
 class UpdateTaskResultForm(BaseTaskResultForm):
+    # Form cập nhật kết quả, có hidden field để đánh dấu file cần xóa.
     delete_file_ids = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
 class ReturnTaskForm(forms.Form):
+    # Form nhập lý do hoàn trả công việc.
     noi_dung = forms.CharField(
         label="Lý do hoàn trả",
         required=True,

@@ -13,7 +13,11 @@ from apps.core.utils.digital_signature import verify_signed_file
 from .forms import CustomerLoginForm
 
 
+# File này xử lý đăng nhập, đăng xuất và màn thông tin cá nhân.
+
+
 def _get_safe_redirect_url(request):
+    # Chỉ cho redirect tới URL an toàn cùng host, tránh redirect ra ngoài hệ thống.
     redirect_to = request.POST.get("next") or request.GET.get("next")
     if redirect_to and url_has_allowed_host_and_scheme(
         redirect_to,
@@ -28,6 +32,10 @@ def _get_safe_redirect_url(request):
 @never_cache
 @ensure_csrf_cookie
 def login_view(request):
+    """
+    Hiển thị và xử lý form đăng nhập.
+    GET trả về màn đăng nhập, POST kiểm tra tài khoản và đồng bộ hồ sơ/quyền.
+    """
     if request.user.is_authenticated:
         return redirect(_get_safe_redirect_url(request))
 
@@ -35,6 +43,7 @@ def login_view(request):
 
     if request.method == "POST" and form.is_valid():
         user = form.get_user()
+        # Đồng bộ group quyền và hồ sơ NguoiDung trước khi tạo session đăng nhập.
         user.sync_access_context()
         login(request, user)
         return redirect(_get_safe_redirect_url(request))
@@ -46,19 +55,25 @@ def login_view(request):
 @login_required
 @require_http_methods(["GET", "POST"])
 def logout_view(request):
+    # Kết thúc session hiện tại rồi đưa người dùng về màn đăng nhập.
     logout(request)
     return redirect(settings.LOGOUT_REDIRECT_URL)
 
 
 @login_required
 def profile_view(request):
+    """
+    Hiển thị thông tin cá nhân, thống kê theo vai trò và lịch sử ký số gần nhất.
+    Màn này dùng cho mọi tài khoản đã đăng nhập.
+    """
     user = request.user
+    # Đảm bảo tài khoản có hồ sơ core để các truy vấn nghiệp vụ dùng đúng người dùng.
     core_profile = user.sync_access_context()
 
     from apps.core.models import ChuKySo, CongViec, HoSoVanBan, LichSuKySo, VanBan
-    from apps.quanlyvanbanden.models import VanBanDen
 
     outgoing = VanBan.objects.filter(phan_loai=VanBan.PHAN_LOAI_CHOICES[0][0])
+    # Lọc văn bản đi theo vai trò để mỗi người chỉ thấy số liệu liên quan.
     if user.is_van_thu:
         outgoing = outgoing.filter(
             trang_thai__in=[
@@ -73,6 +88,7 @@ def profile_view(request):
         outgoing = outgoing.filter(lanh_dao_duyet=core_profile)
 
     incoming = VanBan.objects.filter(phan_loai=VanBan.PHAN_LOAI_CHOICES[1][0])
+    # Lọc văn bản đến theo quyền xử lý của lãnh đạo hoặc chuyên viên.
     if user.is_lanh_dao:
         incoming = incoming.filter(lanh_dao_duyet=core_profile)
     elif user.is_chuyen_vien:
@@ -81,26 +97,21 @@ def profile_view(request):
         ).distinct()
 
     tasks = CongViec.objects.all()
+    # Thống kê công việc dựa trên người giao hoặc người thực hiện.
     if user.is_lanh_dao:
         tasks = tasks.filter(nguoi_giao=core_profile)
     elif user.is_chuyen_vien:
         tasks = tasks.filter(nguoi_thuc_hien=core_profile)
 
     records = HoSoVanBan.objects.filter(
+        # Hồ sơ được tính khi người dùng tạo, xử lý hoặc thuộc phòng được xem.
         Q(nguoi_tao=core_profile)
         | Q(nguoixulyhoso__nguoi_xu_ly=core_profile)
         | Q(phongxemhoso__phong_ban=core_profile.phong_ban)
     ).distinct()
 
-    legacy_incoming = VanBanDen.objects.all()
-    if user.is_lanh_dao:
-        legacy_incoming = legacy_incoming.filter(lanh_dao_xu_ly=user)
-    elif user.is_van_thu:
-        legacy_incoming = legacy_incoming.filter(nguoi_tao=user)
-    elif user.is_chuyen_vien:
-        legacy_incoming = legacy_incoming.filter(ds_chuyen_tiep__chuyen_vien=user).distinct()
-
     signature = ChuKySo.objects.filter(nguoi_dung=core_profile).first()
+    # Lấy lịch sử ký số gần nhất và kiểm tra toàn vẹn file đã ký để hiển thị profile.
     signature_history = LichSuKySo.objects.filter(
         chu_ky_so__nguoi_dung=core_profile
     ).select_related("van_ban", "cong_viec").order_by("-thoi_gian_ky")
@@ -116,7 +127,6 @@ def profile_view(request):
         "stats": {
             "outgoing_documents": outgoing.count(),
             "incoming_documents": incoming.count(),
-            "legacy_incoming_documents": legacy_incoming.count(),
             "tasks": tasks.count(),
             "records": records.count(),
             "signature_history": signature_history.count(),

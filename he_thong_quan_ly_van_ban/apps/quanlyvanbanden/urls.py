@@ -3,6 +3,7 @@ from . import views
 
 app_name = 'quanlyvanbanden'
 
+# URL văn bản đến: danh sách, thêm/sửa/xóa, chi tiết và thao tác lãnh đạo.
 urlpatterns = [
     # ===== DÙNG CHUNG =====
     path('', views.danh_sach_van_ban_den, name='danh_sach'),

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "core/base.html" %}
 {% load static %}
 
 {% block title %}Văn bản đến{% endblock %}
@@ -16,6 +16,7 @@
 {% endblock %}
 
 {% block content %}
+<!-- Màn văn bản đến của văn thư: lọc danh sách, thêm/sửa/xóa văn bản đến -->
 <div class="filter-card">
     <div class="filter-stack">
         <h2 class="section-title">Tra cứu thông tin</h2>
@@ -94,6 +95,7 @@
 
 <div class="table-container">
     <div class="table-scroll">
+        <!-- Bảng danh sách văn bản đến dành cho văn thư -->
         <table class="data-table">
             <thead>
                 <tr>
@@ -128,7 +130,7 @@
                     </td>
                     <td>{{ vb.trich_yeu }}</td>
                     <td>{{ vb.ngay_van_ban|date:"d/m/Y" }}</td>
-                    <td>{{ vb.don_vi_ban_hanh|default:"-" }}</td>
+                    <td>{{ vb.don_vi_ban_hanh_hien_thi }}</td>
                     <td>
                         {{ vb.get_do_mat_display|default:vb.do_mat }} /
                         <span class="do-khan-text">
@@ -177,6 +179,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- JS lọc nhanh bảng văn bản đến theo keyword/trạng thái/bộ lọc -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var tabs = document.querySelectorAll('.filter-tab');

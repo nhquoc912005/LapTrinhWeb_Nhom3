@@ -32,6 +32,7 @@ from ._data_audit import configure_utf8_output, database_kind, safe_database_ide
 User = get_user_model()
 
 
+# Command kiểm tra dữ liệu seed/demo đang có trong database.
 class Command(BaseCommand):
     help = "Check role based seed data visibility."
 

@@ -2,7 +2,11 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
 
 
+# File này tạo và đồng bộ group quyền Django theo vai trò nghiệp vụ của tài khoản.
+
+
 def get_role_permissions(user_model=None):
+    # Khai báo các quyền chi tiết tương ứng với từng role trong hệ thống.
     User = user_model or get_user_model()
     return {
         User.Role.ADMIN: [
@@ -54,6 +58,7 @@ def get_role_permissions(user_model=None):
 
 
 def ensure_role_groups(user_model=None):
+    # Đảm bảo các group role tồn tại và được gán đúng permission.
     role_permissions = get_role_permissions(user_model)
     groups = {}
 
@@ -67,6 +72,7 @@ def ensure_role_groups(user_model=None):
 
 
 def sync_user_role_group(user, role_groups=None):
+    # Cập nhật group của một user theo role hiện tại, tránh giữ group role cũ.
     role_groups = role_groups or ensure_role_groups(user.__class__)
     role_names = list(role_groups.keys())
     preserved_groups = list(user.groups.exclude(name__in=role_names))

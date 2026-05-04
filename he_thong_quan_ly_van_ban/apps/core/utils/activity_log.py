@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def _lay_nguoi_dung_core(user):
+    # Resolve Customer sang NguoiDung để lịch sử hoạt động lưu đúng người thực hiện.
     """Lấy NguoiDung từ request.user (dùng nội bộ)."""
     if not user or not user.is_authenticated:
         return None
@@ -34,6 +35,7 @@ def ghi_lich_su(
     truoc_thay_doi: dict = None,
     sau_thay_doi: dict = None,
 ):
+    # Hàm ghi audit log dùng chung; lỗi ghi log không được làm hỏng nghiệp vụ chính.
     """
     Ghi một bản ghi vào LichSuHoatDong.
 
@@ -70,6 +72,7 @@ def ghi_lich_su(
 # ─── Shortcut wrappers theo loại đối tượng ────────────────────────────────────
 
 def ghi_lich_su_van_ban(*, user=None, nguoi_dung=None, van_ban, hanh_dong: str, mo_ta: str = "", trang_thai_cu: str = "", trang_thai_moi: str = ""):
+    # Shortcut ghi lịch sử cho thao tác trên văn bản.
     truoc = {"trang_thai": trang_thai_cu} if trang_thai_cu else None
     sau = {"trang_thai": trang_thai_moi} if trang_thai_moi else None
     ghi_lich_su(
@@ -85,6 +88,7 @@ def ghi_lich_su_van_ban(*, user=None, nguoi_dung=None, van_ban, hanh_dong: str, 
 
 
 def ghi_lich_su_cong_viec(*, user=None, nguoi_dung=None, cong_viec, hanh_dong: str, mo_ta: str = "", trang_thai_cu: str = "", trang_thai_moi: str = ""):
+    # Shortcut ghi lịch sử cho thao tác trên công việc.
     truoc = {"trang_thai": trang_thai_cu} if trang_thai_cu else None
     sau = {"trang_thai": trang_thai_moi} if trang_thai_moi else None
     ghi_lich_su(
@@ -100,6 +104,7 @@ def ghi_lich_su_cong_viec(*, user=None, nguoi_dung=None, cong_viec, hanh_dong: s
 
 
 def ghi_lich_su_ho_so(*, user=None, nguoi_dung=None, ho_so, hanh_dong: str, mo_ta: str = ""):
+    # Shortcut ghi lịch sử cho thao tác trên hồ sơ văn bản.
     ghi_lich_su(
         user=user,
         nguoi_dung=nguoi_dung,

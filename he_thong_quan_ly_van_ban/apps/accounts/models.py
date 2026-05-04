@@ -6,7 +6,12 @@ from django.db import models
 from .role_groups import sync_user_role_group
 
 
+# File này định nghĩa tài khoản đăng nhập và ánh xạ tài khoản sang hồ sơ nghiệp vụ.
+
+
+# Model Customer mở rộng User mặc định để lưu vai trò, phòng ban và quyền truy cập.
 class Customer(AbstractUser):
+    # Các vai trò chính quyết định menu và quyền thao tác trong hệ thống.
     class Role(models.TextChoices):
         ADMIN = "ADMIN", "Quản trị hệ thống"
         LANH_DAO = "LANH_DAO", "Lãnh đạo"
@@ -95,18 +100,22 @@ class Customer(AbstractUser):
 
     @property
     def is_admin_role(self):
+        # Kiểm tra nhanh tài khoản có vai trò quản trị hay không.
         return self.role == self.Role.ADMIN
 
     @property
     def is_lanh_dao(self):
+        # Dùng trong view/template để giới hạn chức năng của lãnh đạo.
         return self.role == self.Role.LANH_DAO
 
     @property
     def is_van_thu(self):
+        # Dùng trong view/template để giới hạn chức năng của văn thư.
         return self.role == self.Role.VAN_THU
 
     @property
     def is_chuyen_vien(self):
+        # Dùng trong view/template để giới hạn chức năng của chuyên viên.
         return self.role == self.Role.CHUYEN_VIEN
 
     @property
@@ -128,12 +137,15 @@ class Customer(AbstractUser):
 
     @property
     def access_permission_codename(self):
+        # Trả về codename quyền tương ứng với role để đồng bộ group/permission.
         return self.ROLE_PERMISSION_MAP.get(self.role, "")
 
     def has_role(self, *roles):
+        # Superuser luôn được phép, các tài khoản khác phải khớp role.
         return self.is_superuser or self.role in roles
 
     def get_core_chuc_vu(self):
+        # Chuẩn hóa chức vụ trước khi đồng bộ sang model NguoiDung của core.
         nguoi_dung_model = apps.get_model("core", "NguoiDung")
         valid_chuc_vu_values = {
             value for value, _ in nguoi_dung_model.CHUC_VU_CHOICES
@@ -147,6 +159,7 @@ class Customer(AbstractUser):
         )
 
     def sync_core_profile(self):
+        # Tạo hoặc cập nhật hồ sơ NguoiDung tương ứng với tài khoản đăng nhập.
         nguoi_dung_model = apps.get_model("core", "NguoiDung")
 
         try:
@@ -173,14 +186,17 @@ class Customer(AbstractUser):
         return core_profile
 
     def sync_permission_group(self):
+        # Đồng bộ group Django theo role để phần kiểm quyền dùng chung hoạt động.
         return sync_user_role_group(self)
 
     def sync_access_context(self):
+        # Gọi khi đăng nhập/profile để đảm bảo quyền và hồ sơ nghiệp vụ đã sẵn sàng.
         self.sync_permission_group()
         return self.sync_core_profile()
 
     @property
     def core_profile(self):
+        # Trả về hồ sơ nghiệp vụ; nếu chưa có thì tự tạo từ thông tin tài khoản.
         try:
             return self.nguoi_dung_core
         except ObjectDoesNotExist:

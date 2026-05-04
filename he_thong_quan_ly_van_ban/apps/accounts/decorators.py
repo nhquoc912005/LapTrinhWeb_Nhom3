@@ -5,7 +5,11 @@ from django.contrib.auth.mixins import AccessMixin
 from django.core.exceptions import PermissionDenied
 
 
+# File này gom logic kiểm tra role để dùng lại cho view function và class-based view.
+
+
 def user_has_role(user, *allowed_roles):
+    # Trả về True nếu user đã đăng nhập và có một trong các vai trò được phép.
     if not getattr(user, "is_authenticated", False):
         return False
     if getattr(user, "is_superuser", False):
@@ -14,6 +18,7 @@ def user_has_role(user, *allowed_roles):
 
 
 def role_required(*allowed_roles):
+    # Decorator dùng trên view để chặn người không đúng vai trò trước khi vào xử lý.
     def decorator(view_func):
         @login_required
         @wraps(view_func)
@@ -28,6 +33,7 @@ def role_required(*allowed_roles):
 
 
 class RoleRequiredMixin(AccessMixin):
+    # Mixin tương đương role_required dành cho class-based view nếu cần mở rộng sau này.
     allowed_roles = ()
 
     def dispatch(self, request, *args, **kwargs):

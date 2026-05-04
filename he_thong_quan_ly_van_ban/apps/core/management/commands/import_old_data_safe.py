@@ -11,6 +11,7 @@ from ._data_audit import (
 )
 
 
+# Command import dữ liệu cũ theo hướng an toàn, tránh ghi đè dữ liệu đang có.
 class Command(BaseCommand):
     help = "Import old_data.json vào PostgreSQL/Supabase hiện tại, không cho import nhầm vào SQLite."
 

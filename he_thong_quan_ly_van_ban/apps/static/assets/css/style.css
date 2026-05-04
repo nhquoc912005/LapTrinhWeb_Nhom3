@@ -44,8 +44,8 @@
   --badge-cho-xu-ly-color: #854D0E;
   --badge-hoan-tra-bg: #FEE2E2;
   --badge-hoan-tra-color: #991B1B;
-  --badge-da-xu-ly-bg: #DCFCE7;
-  --badge-da-xu-ly-color: #166534;
+  --badge-da-xu-ly-bg: #DBEAFE;
+  --badge-da-xu-ly-color: #1D4ED8;
   --badge-cho-ban-hanh-bg: #DBEAFE;
   --badge-cho-ban-hanh-color: #1E40AF;
   --badge-da-ban-hanh-bg: #D1FAE5;
@@ -2454,10 +2454,14 @@ table.data-table td a,
 }
 
 .badge-da-hoan-thanh,
-.badge-hoan-thanh,
-.badge-da-xu-ly {
+.badge-hoan-thanh {
   background: #dcfce7;
   color: #166534;
+}
+
+.badge-da-xu-ly {
+  background: #dbeafe;
+  color: #1d4ed8;
 }
 
 .badge-hien-hanh {

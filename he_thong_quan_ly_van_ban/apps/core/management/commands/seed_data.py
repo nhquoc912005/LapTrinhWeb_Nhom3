@@ -269,6 +269,7 @@ PHAN_BO_TCT = [
 PHAN_BO_CN = [0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5]
 
 
+# Command seed dữ liệu nền như chi nhánh, phòng ban và người dùng nghiệp vụ.
 class Command(BaseCommand):
     help = "Seed du lieu mau cho he thong"
 

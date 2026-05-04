@@ -4,7 +4,11 @@ from django.contrib.admin.sites import AlreadyRegistered
 from apps.core.models import VanBan, VanBanLienQuan
 
 
+# File này đăng ký quản trị admin cho văn bản đến đang dùng model chung VanBan.
+
+
 class VanBanDenAdmin(admin.ModelAdmin):
+    # Admin chỉ hiển thị các bản ghi VanBan có phan_loai là văn bản đến.
     list_display = (
         'van_ban_id',
         'so_ky_hieu',
@@ -27,11 +31,13 @@ class VanBanDenAdmin(admin.ModelAdmin):
     )
 
     def get_queryset(self, request):
+        # Lọc queryset admin để không lẫn văn bản đi.
         qs = super().get_queryset(request)
         return qs.filter(phan_loai='Văn bản đến')
 
 
 class VanBanLienQuanAdmin(admin.ModelAdmin):
+    # Admin cho file/tài liệu liên quan gắn với văn bản.
     list_display = (
         'van_ban_lien_quan_id',
         'van_ban',
