@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.files.base import ContentFile
 from django.core.paginator import Paginator
-from django.db import transaction
+from django.db import models, transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -774,17 +774,33 @@ def task_detail(request, task_id):
         "-pk",
     )
 
-    # Kiểm tra điều kiện ký số: lãnh đạo giao việc, task đã xử lý, có file PDF chính
+    # Kiểm tra điều kiện ký số: lãnh đạo giao việc, task đã xử lý, có file kết quả PDF của chuyên viên
     _can_sign_statuses = {CongViec.TrangThai.CHO_DUYET, CongViec.TrangThai.DA_HOAN_THANH}
-    _has_pdf_main = (
-        main_attachment is not None
-        and main_attachment.file_van_ban
-        and main_attachment.file_van_ban.name.lower().endswith(".pdf")
+    # Lấy file kết quả chuyên viên upload (KET_QUA_XU_LY), uu tiên loại CHINH
+    _ket_qua_file_to_sign = (
+        FileCVLienQuan.objects.filter(
+            cong_viec=task,
+            nguon_tai_len=FileCVLienQuan.NguonTaiLen.KET_QUA_XU_LY,
+        )
+        .order_by(
+            # CHINH được xếp trước LIEN_QUAN
+            models.Case(
+                models.When(loai_file=FileCVLienQuan.LoaiFile.CHINH, then=0),
+                default=1,
+                output_field=models.IntegerField(),
+            )
+        )
+        .first()
+    )
+    _has_pdf_result = (
+        _ket_qua_file_to_sign is not None
+        and _ket_qua_file_to_sign.file_van_ban
+        and _ket_qua_file_to_sign.file_van_ban.name.lower().endswith(".pdf")
     )
     can_ky_so = (
         _user_is_task_signer(request, task)
         and task.trang_thai in _can_sign_statuses
-        and _has_pdf_main
+        and _has_pdf_result
     )
 
     # Lịch sử ký số của công việc (nếu có)
@@ -812,6 +828,8 @@ def task_detail(request, task_id):
         "can_delete": _user_is_task_manager(request, task) and task.trang_thai == CongViec.TrangThai.CHO_XU_LY,
         "can_ky_so": can_ky_so,
         "da_ky_so": da_ky_so,
+        # File kết quả xử lý được dùng để ký số
+        "ket_qua_file_to_sign": _ket_qua_file_to_sign,
     }
     return render(request, "quanlycongviec/chi-tiet-cong-viec.html", context)
 
@@ -848,18 +866,31 @@ def api_ky_so_cong_viec(request, task_id):
             "message": "Chỉ có thể ký số khi công việc đang ở trạng thái Chờ duyệt hoặc Đã hoàn thành."
         }, status=400)
 
-    # Lấy file đính kèm chính (loại CHINH do lãnh đạo giao)
-    main_attachment = FileCVLienQuan.objects.filter(
-        cong_viec=task,
-        loai_file=FileCVLienQuan.LoaiFile.CHINH,
-        nguon_tai_len=FileCVLienQuan.NguonTaiLen.GIAO_VIEC,
-    ).first()
+    # --- Lấy file kết quả chuyên viên đã upload (ưu tiên loại CHINH) ---
+    from django.db import models as django_models
+    ket_qua_file = (
+        FileCVLienQuan.objects.filter(
+            cong_viec=task,
+            nguon_tai_len=FileCVLienQuan.NguonTaiLen.KET_QUA_XU_LY,
+        )
+        .order_by(
+            django_models.Case(
+                django_models.When(loai_file=FileCVLienQuan.LoaiFile.CHINH, then=0),
+                default=1,
+                output_field=django_models.IntegerField(),
+            )
+        )
+        .first()
+    )
 
-    if not main_attachment or not main_attachment.file_van_ban:
-        return JsonResponse({"success": False, "message": "Công việc không có file đính kèm chính để ký."}, status=400)
+    if not ket_qua_file or not ket_qua_file.file_van_ban:
+        return JsonResponse(
+            {"success": False, "message": "Chuyên viên chưa upload file kết quả xử lý. Không có file nào để ký."},
+            status=400
+        )
 
     # Kiểm tra file phải là PDF
-    if not main_attachment.file_van_ban.name.lower().endswith(".pdf"):
+    if not ket_qua_file.file_van_ban.name.lower().endswith(".pdf"):
         return JsonResponse({"success": False, "message": "Chỉ hỗ trợ ký số trên file PDF."}, status=400)
 
     # Lấy thông tin chữ ký số của lãnh đạo
@@ -871,9 +902,9 @@ def api_ky_so_cong_viec(request, task_id):
     except ChuKySo.DoesNotExist:
         return JsonResponse({"success": False, "message": "Tài khoản chưa có thông tin chữ ký số."}, status=400)
 
-    input_pdf_path = main_attachment.file_van_ban.path
+    input_pdf_path = ket_qua_file.file_van_ban.path
     if not os.path.exists(input_pdf_path):
-        return JsonResponse({"success": False, "message": "Không tìm thấy file PDF gốc."}, status=404)
+        return JsonResponse({"success": False, "message": "Không tìm thấy file PDF kết quả xử lý trên server."}, status=404)
     if not os.path.exists(signature_image_path):
         return JsonResponse({"success": False, "message": "Không tìm thấy file ảnh chữ ký."}, status=404)
 
@@ -901,10 +932,17 @@ def api_ky_so_cong_viec(request, task_id):
         with open(output_pdf_path, "rb") as f:
             signed_bytes = f.read()
 
-        main_attachment.file_van_ban.save(output_filename, ContentFile(signed_bytes), save=False)
-        main_attachment.kich_thuoc = len(signed_bytes)
-        main_attachment.save(update_fields=["file_van_ban", "kich_thuoc"])
+        # --- Ghi đè file kết quả xử lý bằng file đã ký ---
+        # Khi bấm vào "File kết quả xử lý" sẽ hiển thị bản đã có chữ ký
+        ket_qua_file.file_van_ban.save(
+            output_filename,
+            ContentFile(signed_bytes),
+            save=False,
+        )
+        ket_qua_file.kich_thuoc = len(signed_bytes)
+        ket_qua_file.save(update_fields=["file_van_ban", "kich_thuoc"])
 
+        # Lưu lịch sử ký số
         file_hash = hashlib.sha256(signed_bytes).hexdigest()
         LichSuKySo.objects.update_or_create(
             cong_viec=task,

@@ -279,9 +279,6 @@
 <div class="card" style="padding:24px;">
     <div class="vbd-card-title">CHỈNH SỬA VĂN BẢN ĐẾN</div>
 
-    {% if form.errors %}
-        <div class="errors">{{ form.errors }}</div>
-    {% endif %}
 
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
@@ -295,6 +292,11 @@
             <div class="form-group">
                 <label class="form-label">Số ký hiệu <span class="required">*</span></label>
                 {{ form.so_ky_hieu }}
+                {% if form.so_ky_hieu.errors %}
+                    {% for error in form.so_ky_hieu.errors %}
+                        <span style="color:#dc2626;font-size:12px;margin-top:4px;display:block;">{{ error }}</span>
+                    {% endfor %}
+                {% endif %}
             </div>
             <div class="form-group">
                 <label class="form-label">Đơn vị ban hành <span class="required">*</span></label>
@@ -313,6 +315,11 @@
         <div class="form-group">
             <label class="form-label">Trích yếu <span class="required">*</span></label>
             {{ form.trich_yeu }}
+            {% if form.trich_yeu.errors %}
+                {% for error in form.trich_yeu.errors %}
+                    <span style="color:#dc2626;font-size:12px;margin-top:4px;display:block;">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
         </div>
 
         <div class="form-row-5">

@@ -500,39 +500,61 @@ def them_van_ban_den(request):
         if not file_chinh:
             messages.error(request, 'Vui lòng chọn ít nhất 1 file đính kèm chính.')
         elif form.is_valid():
-            vb = form.save(commit=False)
+            so_ky_hieu = form.cleaned_data.get('so_ky_hieu', '').strip()
+            trich_yeu = form.cleaned_data.get('trich_yeu', '').strip()
 
-            vb.nguoi_tao = nguoi_dung_core
-            vb.trang_thai = TRANG_THAI_CHO_XU_LY
-            vb.phan_loai = PHAN_LOAI_VAN_BAN_DEN
-            vb.file_dinh_kem = file_chinh
-            vb.kich_thuoc = file_chinh.size
+            # --- Validate trùng số ký hiệu ---
+            if VanBan.objects.filter(
+                phan_loai=PHAN_LOAI_VAN_BAN_DEN,
+                so_ky_hieu__iexact=so_ky_hieu,
+            ).exists():
+                form.add_error(
+                    'so_ky_hieu',
+                    f'Số ký hiệu "{so_ky_hieu}" đã tồn tại.'
+                )
+            # --- Validate trùng trích yếu ---
+            elif VanBan.objects.filter(
+                phan_loai=PHAN_LOAI_VAN_BAN_DEN,
+                trich_yeu__iexact=trich_yeu,
+            ).exists():
+                form.add_error(
+                    'trich_yeu',
+                    f'Trích yếu "{trich_yeu}" đã tồn tại. Vui lòng nhập trích yếu khác.'
+                )
+            else:
+                vb = form.save(commit=False)
 
-            vb.save()
+                vb.nguoi_tao = nguoi_dung_core
+                vb.trang_thai = TRANG_THAI_CHO_XU_LY
+                vb.phan_loai = PHAN_LOAI_VAN_BAN_DEN
+                vb.file_dinh_kem = file_chinh
+                vb.kich_thuoc = file_chinh.size
 
-            # Nếu input file_dinh_kem_files cho phép nhiều file,
-            # file đầu tiên là file chính, các file còn lại lưu vào văn bản liên quan.
-            for f in file_dinh_kem_files[1:]:
-                VanBanLienQuan.objects.create(
-                    van_ban=vb,
-                    file_van_ban=f,
-                    kich_thuoc=f.size
+                vb.save()
+
+                # Nếu input file_dinh_kem_files cho phép nhiều file,
+                # file đầu tiên là file chính, các file còn lại lưu vào văn bản liên quan.
+                for f in file_dinh_kem_files[1:]:
+                    VanBanLienQuan.objects.create(
+                        van_ban=vb,
+                        file_van_ban=f,
+                        kich_thuoc=f.size
+                    )
+
+                for f in request.FILES.getlist('tai_lieu_lien_quan_files'):
+                    VanBanLienQuan.objects.create(
+                        van_ban=vb,
+                        file_van_ban=f,
+                        kich_thuoc=f.size
+                    )
+
+                ghi_lich_su_van_ban(
+                    user=request.user, van_ban=vb, hanh_dong="TAO",
+                    mo_ta=f"Thêm văn bản đến [{vb.so_ky_hieu}]",
                 )
 
-            for f in request.FILES.getlist('tai_lieu_lien_quan_files'):
-                VanBanLienQuan.objects.create(
-                    van_ban=vb,
-                    file_van_ban=f,
-                    kich_thuoc=f.size
-                )
-
-            ghi_lich_su_van_ban(
-                user=request.user, van_ban=vb, hanh_dong="TAO",
-                mo_ta=f"Thêm văn bản đến [{vb.so_ky_hieu}]",
-            )
-
-            messages.success(request, 'Trình văn bản đến thành công.')
-            return redirect('quanlyvanbanden:danh_sach')
+                messages.success(request, 'Trình văn bản đến thành công.')
+                return redirect('quanlyvanbanden:danh_sach')
     else:
         form = VanBanDenForm()
 
@@ -582,62 +604,84 @@ def sua_van_ban_den(request, pk):
         form = VanBanDenForm(request.POST, request.FILES, instance=vb)
 
         if form.is_valid():
-            vb = form.save(commit=False)
+            so_ky_hieu = form.cleaned_data.get('so_ky_hieu', '').strip()
+            trich_yeu = form.cleaned_data.get('trich_yeu', '').strip()
 
-            if old_trang_thai == TRANG_THAI_HOAN_TRA:
-                vb.trang_thai = TRANG_THAI_CHO_XU_LY
-
-            file_dinh_kem_files = request.FILES.getlist('file_dinh_kem_files')
-            file_dinh_kem_don = request.FILES.get('file_dinh_kem')
-            file_chinh_moi = file_dinh_kem_files[0] if file_dinh_kem_files else file_dinh_kem_don
-
-            if file_chinh_moi:
-                if vb.file_dinh_kem:
-                    _xoa_file_vat_ly(vb.file_dinh_kem)
-
-                vb.file_dinh_kem = file_chinh_moi
-                vb.kich_thuoc = file_chinh_moi.size
-
-            if not vb.file_dinh_kem:
-                messages.error(request, 'Văn bản phải có file đính kèm chính.')
-            else:
-                vb.save()
-
-                delete_lien_quan_ids = request.POST.getlist('delete_tai_lieu_lien_quan_ids')
-
-                if delete_lien_quan_ids:
-                    tep_xoa = VanBanLienQuan.objects.filter(
-                        van_ban_lien_quan_id__in=delete_lien_quan_ids,
-                        van_ban=vb,
-                    )
-
-                    for tep in tep_xoa:
-                        _xoa_file_vat_ly(tep.file_van_ban)
-                        tep.delete()
-
-                # Nếu có nhiều file đính kèm mới, file đầu là file chính,
-                # các file còn lại thêm vào tài liệu liên quan.
-                for f in file_dinh_kem_files[1:]:
-                    VanBanLienQuan.objects.create(
-                        van_ban=vb,
-                        file_van_ban=f,
-                        kich_thuoc=f.size
-                    )
-
-                for f in request.FILES.getlist('tai_lieu_lien_quan_files'):
-                    VanBanLienQuan.objects.create(
-                        van_ban=vb,
-                        file_van_ban=f,
-                        kich_thuoc=f.size
-                    )
-
-                ghi_lich_su_van_ban(
-                    user=request.user, van_ban=vb, hanh_dong="SUA",
-                    mo_ta=f"Sửa văn bản đến [{vb.so_ky_hieu}]",
+            # --- Validate trùng số ký hiệu (loại trừ bản ghi đang sửa) ---
+            if VanBan.objects.filter(
+                phan_loai=PHAN_LOAI_VAN_BAN_DEN,
+                so_ky_hieu__iexact=so_ky_hieu,
+            ).exclude(pk=vb.pk).exists():
+                form.add_error(
+                    'so_ky_hieu',
+                    f'Số ký hiệu "{so_ky_hieu}" đã tồn tại. Vui lòng nhập số ký hiệu khác.'
                 )
+            # --- Validate trùng trích yếu (loại trừ bản ghi đang sửa) ---
+            elif VanBan.objects.filter(
+                phan_loai=PHAN_LOAI_VAN_BAN_DEN,
+                trich_yeu__iexact=trich_yeu,
+            ).exclude(pk=vb.pk).exists():
+                form.add_error(
+                    'trich_yeu',
+                    f'Trích yếu "{trich_yeu}" đã tồn tại. Vui lòng nhập trích yếu khác.'
+                )
+            else:
+                vb = form.save(commit=False)
 
-                messages.success(request, 'Chỉnh sửa văn bản đến thành công.')
-                return redirect('quanlyvanbanden:chi_tiet', pk=vb.pk)
+                if old_trang_thai == TRANG_THAI_HOAN_TRA:
+                    vb.trang_thai = TRANG_THAI_CHO_XU_LY
+
+                file_dinh_kem_files = request.FILES.getlist('file_dinh_kem_files')
+                file_dinh_kem_don = request.FILES.get('file_dinh_kem')
+                file_chinh_moi = file_dinh_kem_files[0] if file_dinh_kem_files else file_dinh_kem_don
+
+                if file_chinh_moi:
+                    if vb.file_dinh_kem:
+                        _xoa_file_vat_ly(vb.file_dinh_kem)
+
+                    vb.file_dinh_kem = file_chinh_moi
+                    vb.kich_thuoc = file_chinh_moi.size
+
+                if not vb.file_dinh_kem:
+                    messages.error(request, 'Văn bản phải có file đính kèm chính.')
+                else:
+                    vb.save()
+
+                    delete_lien_quan_ids = request.POST.getlist('delete_tai_lieu_lien_quan_ids')
+
+                    if delete_lien_quan_ids:
+                        tep_xoa = VanBanLienQuan.objects.filter(
+                            van_ban_lien_quan_id__in=delete_lien_quan_ids,
+                            van_ban=vb,
+                        )
+
+                        for tep in tep_xoa:
+                            _xoa_file_vat_ly(tep.file_van_ban)
+                            tep.delete()
+
+                    # Nếu có nhiều file đính kèm mới, file đầu là file chính,
+                    # các file còn lại thêm vào tài liệu liên quan.
+                    for f in file_dinh_kem_files[1:]:
+                        VanBanLienQuan.objects.create(
+                            van_ban=vb,
+                            file_van_ban=f,
+                            kich_thuoc=f.size
+                        )
+
+                    for f in request.FILES.getlist('tai_lieu_lien_quan_files'):
+                        VanBanLienQuan.objects.create(
+                            van_ban=vb,
+                            file_van_ban=f,
+                            kich_thuoc=f.size
+                        )
+
+                    ghi_lich_su_van_ban(
+                        user=request.user, van_ban=vb, hanh_dong="SUA",
+                        mo_ta=f"Sửa văn bản đến [{vb.so_ky_hieu}]",
+                    )
+
+                    messages.success(request, 'Chỉnh sửa văn bản đến thành công.')
+                    return redirect('quanlyvanbanden:chi_tiet', pk=vb.pk)
     else:
         form = VanBanDenForm(instance=vb)
 

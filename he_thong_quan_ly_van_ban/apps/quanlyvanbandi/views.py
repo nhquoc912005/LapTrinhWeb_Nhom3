@@ -343,6 +343,45 @@ def van_ban_di_edit(request, vb_pk=None):
         files_lien_quan = request.FILES.getlist("file_lien_quan")
 
         if form.is_valid():
+            so_ky_hieu = form.cleaned_data.get('so_ky_hieu', '').strip()
+            trich_yeu = form.cleaned_data.get('trich_yeu', '').strip()
+
+            # --- Validate trùng số ký hiệu ---
+            qs_check = VanBan.objects.filter(phan_loai="Văn bản đi")
+            if is_edit:
+                qs_check = qs_check.exclude(pk=van_ban.pk)
+
+            if qs_check.filter(so_ky_hieu__iexact=so_ky_hieu).exists():
+                form.add_error(
+                    'so_ky_hieu',
+                    f'Số ký hiệu "{so_ky_hieu}" đã tồn tại. Vui lòng nhập số ký hiệu khác.'
+                )
+                return render(request, "vanbandi/them-van-ban-di.html", {
+                    "form": form,
+                    "instance": van_ban,
+                    "is_edit": is_edit,
+                    "model_type": "VanBanDi",
+                    "existing_file": van_ban.file_dinh_kem if is_edit else None,
+                    "existing_lien_quan": van_ban.vanbanlienquan_set.all() if is_edit else [],
+                    "ds_chi_nhanh": ds_chi_nhanh,
+                })
+
+            # --- Validate trùng trích yếu ---
+            if qs_check.filter(trich_yeu__iexact=trich_yeu).exists():
+                form.add_error(
+                    'trich_yeu',
+                    f'Trích yếu "{trich_yeu}" đã tồn tại. Vui lòng nhập trích yếu khác.'
+                )
+                return render(request, "vanbandi/them-van-ban-di.html", {
+                    "form": form,
+                    "instance": van_ban,
+                    "is_edit": is_edit,
+                    "model_type": "VanBanDi",
+                    "existing_file": van_ban.file_dinh_kem if is_edit else None,
+                    "existing_lien_quan": van_ban.vanbanlienquan_set.all() if is_edit else [],
+                    "ds_chi_nhanh": ds_chi_nhanh,
+                })
+
             file_errors = []
             for f in files_lien_quan:
                 try:
