@@ -57,7 +57,7 @@ SIDEBAR_MENU_DEFINITIONS = (
         "label": "Quản lý công việc",
         "url_name": "quanlycongviec:giao_viec",
         "active_namespaces": ("quanlycongviec",),
-        "roles": (Customer.Role.ADMIN, Customer.Role.LANH_DAO, Customer.Role.VAN_THU),
+        "roles": (Customer.Role.ADMIN, Customer.Role.LANH_DAO),
         "icon_path": "M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8zM4 8h16v10H4zm3 3h10v2H7zm0 4h7v2H7z",
         "help_text": "",
     },

@@ -135,19 +135,7 @@
                             {{ vb.get_do_khan_display|default:vb.do_khan|upper }}
                         </span>
                     </td>
-                    <td>
-                        {% if vb.trang_thai == 'Chờ Xử Lý' %}
-                            <span class="badge badge-cho-xu-ly">Chờ xử lý</span>
-                        {% elif vb.trang_thai == 'Hoàn Trả' %}
-                            <span class="badge badge-hoan-tra">Hoàn trả</span>
-                        {% elif vb.trang_thai == 'Xem Để Biết' %}
-                            <span class="badge badge-xem-de-biet">Xem để biết</span>
-                        {% elif vb.trang_thai == 'Đã Xử Lý' %}
-                            <span class="badge badge-da-xu-ly">Đã xử lý</span>
-                        {% else %}
-                            <span class="badge badge-cho-xu-ly">{{ vb.trang_thai }}</span>
-                        {% endif %}
-                    </td>
+                    <td>{% include "van_ban_den/_status_badge.html" with status=vb.trang_thai %}</td>
                 </tr>
                 {% empty %}
                 <tr>

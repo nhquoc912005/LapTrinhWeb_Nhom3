@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Thông tin chi tiết công việc - Hệ thống quản lý văn bản{% endblock %}
 
@@ -365,9 +366,13 @@
                 {% endif %}
 
                 {% if can_ky_so %}
-                <button type="button" class="btn btn-primary" id="btnOpenKySoCongViec"
-                    style="background:#4f46e5; border-color:#4f46e5;"
-                    data-file-url="{{ main_attachment.file_van_ban.url|escapejs }}">&#9998; Ký số</button>
+                    {% if request.user.core_profile.chu_ky_so.anh_chu_ky %}
+                    <button type="button" class="btn btn-primary" id="btnOpenKySoCongViec"
+                        style="background:#4f46e5; border-color:#4f46e5;"
+                        data-file-url="{{ main_attachment.file_van_ban.url|escape }}">&#9998; Ký số</button>
+                    {% else %}
+                    <button type="button" class="btn btn-secondary" disabled title="Tài khoản chưa cấu hình ảnh chữ ký">&#9998; Ký số</button>
+                    {% endif %}
                 {% endif %}
 
                 {% if can_return %}
@@ -611,14 +616,16 @@
              draggable="false">
         {% else %}
         <div id="cvSigImg" style="display:none;"></div>
-        <div style="position:absolute; top:10px; left:10px; background:#dc2626; color:#fff; padding:6px 12px; font-size:13px; border-radius:4px;">⚠ Bạn chưa có ảnh chữ ký số</div>
+        <div style="position:absolute; top:10px; left:10px; background:#dc2626; color:#fff; padding:6px 12px; font-size:13px; border-radius:4px;">Tài khoản chưa cấu hình ảnh chữ ký</div>
         {% endif %}
+        <div id="cvKySoMessage" style="display:none; position:absolute; right:10px; bottom:10px; max-width:360px; background:#111827; color:#fff; padding:8px 12px; font-size:13px;"></div>
       </div>
     </div>
     <!-- Footer -->
     <div style="padding:14px 24px; background:#f8f9fa; border-top:1px solid #dee2e6; display:flex; justify-content:flex-end; gap:12px;">
       <button type="button" class="btn btn-secondary" onclick="closeKySoCongViecModal()">Hủy</button>
       <button type="button" class="btn btn-primary" id="btnSubmitKySoCongViec"
+              {% if not request.user.core_profile.chu_ky_so.anh_chu_ky %}disabled title="Tài khoản chưa cấu hình ảnh chữ ký"{% endif %}
               style="background:#4f46e5; border-color:#4f46e5; min-width:120px;">
           &#9998; Xác nhận ký
       </button>
@@ -626,27 +633,68 @@
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<input type="hidden" id="taskKySoCsrfToken" value="{{ csrf_token }}">
+<script src="{% static 'vendor/pdfjs/pdf.min.js' %}"></script>
 <script>
 (function() {
+  var taskKySoTemplateCsrfToken = '{{ csrf_token|escapejs }}';
   pdfjsLib.GlobalWorkerOptions.workerSrc =
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+    "{% static 'vendor/pdfjs/pdf.worker.min.js' %}";
 
   var cvPdfDoc = null;
   var cvCanvas = document.getElementById('cvPdfCanvas');
   var cvCtx    = cvCanvas ? cvCanvas.getContext('2d') : null;
   var cvSigImg = document.getElementById('cvSigImg');
   var cvModal  = document.getElementById('kySoCongViecModal');
+  var canUseCvSignature = cvSigImg && cvSigImg.tagName === 'IMG';
+
+  function encodePathSegment(segment) {
+    try {
+      return encodeURIComponent(decodeURIComponent(segment));
+    } catch (error) {
+      return encodeURIComponent(segment);
+    }
+  }
+
+  function encodeFileUrl(rawUrl) {
+    var raw = (rawUrl || '').trim();
+    if (!raw) return '';
+    var absoluteMatch = raw.match(/^([a-z][a-z\d+.-]*:\/\/[^/]+)(.*)$/i);
+    var origin = absoluteMatch ? absoluteMatch[1] : '';
+    var rest = absoluteMatch ? (absoluteMatch[2] || '/') : raw;
+    var queryIndex = rest.indexOf('?');
+    var path = queryIndex >= 0 ? rest.slice(0, queryIndex) : rest;
+    var query = queryIndex >= 0 ? rest.slice(queryIndex) : '';
+    return origin + path.split('/').map(encodePathSegment).join('/') + query;
+  }
+
+  function setCvKySoMessage(message) {
+    var box = document.getElementById('cvKySoMessage');
+    if (!box) return;
+    box.textContent = message || '';
+    box.style.display = message ? 'block' : 'none';
+  }
 
   /* ---- Mở modal ---- */
   window.openKySoCongViecModal = function(pdfUrl) {
     if (!cvModal) return;
     cvModal.style.display = 'flex';
-    pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+    setCvKySoMessage('');
+    if (!canUseCvSignature) {
+      setCvKySoMessage('Tài khoản chưa cấu hình ảnh chữ ký.');
+      return;
+    }
+    var safePdfUrl = encodeFileUrl(pdfUrl);
+    if (!safePdfUrl) {
+      setCvKySoMessage('Đường dẫn PDF không hợp lệ.');
+      return;
+    }
+    pdfjsLib.getDocument({ url: safePdfUrl, withCredentials: true }).promise.then(function(pdf) {
       cvPdfDoc = pdf;
       renderCvPage(pdf.numPages); // Luôn ký trang cuối
-    }).catch(function() {
-      alert('Không thể tải file PDF để xem trước.');
+    }).catch(function(error) {
+      console.error('PDF ký số công việc load error:', error);
+      setCvKySoMessage('Không tải được PDF để ký. Hãy kiểm tra file hoặc mở file thủ công.');
     });
   };
 
@@ -661,7 +709,7 @@
       cvCanvas.width  = vp.width;
       cvCanvas.height = vp.height;
       page.render({ canvasContext: cvCtx, viewport: vp });
-      if (cvSigImg) {
+      if (canUseCvSignature) {
         cvSigImg.style.left = '10px';
         cvSigImg.style.top  = '10px';
       }
@@ -671,7 +719,7 @@
   /* ---- Drag & Drop ---- */
   var isDragging = false, startX, startY, initLeft, initTop;
 
-  if (cvSigImg && cvSigImg.tagName === 'IMG') {
+  if (canUseCvSignature) {
     cvSigImg.addEventListener('mousedown', function(e) {
       isDragging = true;
       startX = e.clientX;
@@ -716,8 +764,12 @@
     var submitBtn = document.getElementById('btnSubmitKySoCongViec');
     if (submitBtn) {
       submitBtn.addEventListener('click', function() {
-        if (!cvSigImg || cvSigImg.tagName !== 'IMG') {
-          alert('Bạn chưa có ảnh chữ ký số. Vui lòng cấu hình trong tài khoản.');
+        if (!canUseCvSignature) {
+          alert('Tài khoản chưa cấu hình ảnh chữ ký.');
+          return;
+        }
+        if (!cvCanvas.width || !cvCanvas.height) {
+          alert('PDF chưa sẵn sàng để ký.');
           return;
         }
         var xRatio = cvSigImg.offsetLeft / cvCanvas.width;
@@ -732,9 +784,24 @@
             'Content-Type': 'application/json',
             'X-CSRFToken': getCsrfToken()
           },
+          credentials: 'same-origin',
           body: JSON.stringify({ x_ratio: xRatio, y_ratio: yRatio })
         })
-        .then(function(r) { return r.json(); })
+        .then(async function(r) {
+          var data = null;
+          try {
+            data = await r.json();
+          } catch (error) {
+            if (r.status === 403) {
+              throw new Error('Phiên xác thực đã hết hạn hoặc CSRF không hợp lệ. Hãy tải lại trang rồi ký lại.');
+            }
+            throw new Error('Máy chủ trả về lỗi ' + r.status + '.');
+          }
+          if (!r.ok && data && data.message) {
+            throw new Error(data.message);
+          }
+          return data;
+        })
         .then(function(data) {
           if (data.success) {
             alert(data.message);
@@ -745,8 +812,8 @@
             submitBtn.innerHTML = '&#9998; Xác nhận ký';
           }
         })
-        .catch(function() {
-          alert('Đã xảy ra lỗi hệ thống.');
+        .catch(function(error) {
+          alert('Không gửi được yêu cầu ký số: ' + (error.message || 'Lỗi không xác định.'));
           submitBtn.disabled = false;
           submitBtn.innerHTML = '&#9998; Xác nhận ký';
         });
@@ -772,12 +839,16 @@
   });
 
   function getCsrfToken() {
+    var tokenInput = document.getElementById('taskKySoCsrfToken');
+    if (tokenInput && tokenInput.value) return tokenInput.value;
+
     var cookies = document.cookie.split(';');
     for (var i = 0; i < cookies.length; i++) {
       var c = cookies[i].trim();
+      if (c.startsWith('qlvb_csrftoken=')) return decodeURIComponent(c.slice(15));
       if (c.startsWith('csrftoken=')) return decodeURIComponent(c.slice(10));
     }
-    return '';
+    return taskKySoTemplateCsrfToken;
   }
 
 })();

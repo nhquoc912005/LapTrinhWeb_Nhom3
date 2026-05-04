@@ -308,6 +308,8 @@ class VanBan(models.Model):
 
 
 class NoiNhanVanBan(models.Model):
+    TRANG_THAI_XEM_DE_BIET = "Xem Để Biết"
+
     noi_nhan_id = models.AutoField(primary_key=True)
 
     van_ban = models.ForeignKey(
@@ -331,6 +333,10 @@ class NoiNhanVanBan(models.Model):
         db_column="don_vi_ngoai_id",
         null=True,
         blank=True,
+    )
+    trang_thai_nguoi_nhan = models.CharField(
+        max_length=50,
+        default=TRANG_THAI_XEM_DE_BIET,
     )
 
     class Meta:

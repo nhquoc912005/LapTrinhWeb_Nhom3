@@ -6,13 +6,14 @@ from datetime import datetime
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.files import File
+from django.core.files.base import ContentFile
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.timezone import make_aware
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import role_required
@@ -47,7 +48,11 @@ def _get_task(task_id):
 
 
 def _task_list_route_name(user):
-    return "quanlycongviec:xu_ly_cong_viec" if user.is_chuyen_vien else "quanlycongviec:giao_viec"
+    if user.is_chuyen_vien:
+        return "quanlycongviec:xu_ly_cong_viec"
+    if user.has_role(Customer.Role.LANH_DAO, Customer.Role.ADMIN):
+        return "quanlycongviec:giao_viec"
+    return "core:dashboard"
 
 
 def _redirect_task_list(request):
@@ -73,6 +78,12 @@ def _nguoi_dung_la_lanh_dao(nguoi_dung):
 
 
 def _user_is_task_manager(request, task):
+    return request.user.has_role(Customer.Role.ADMIN) or (
+        request.user.is_lanh_dao and request.user.core_profile.pk == task.nguoi_giao_id
+    )
+
+
+def _user_is_task_signer(request, task):
     return request.user.is_lanh_dao and request.user.core_profile.pk == task.nguoi_giao_id
 
 
@@ -143,6 +154,44 @@ def _create_assignment_files(task, files, *, loai_file, nguon_tai_len, nguoi_tai
         )
 
 
+def _get_collaborator_ids(request, assignee_id):
+    ids = []
+    seen = set()
+    skipped_assignee = False
+
+    for raw_id in request.POST.getlist("nguoi_phoi_hop"):
+        raw_id = (raw_id or "").strip()
+        if not raw_id or not raw_id.isdigit():
+            continue
+        if raw_id == str(assignee_id):
+            skipped_assignee = True
+            continue
+        if raw_id in seen:
+            continue
+        seen.add(raw_id)
+        ids.append(raw_id)
+
+    return ids, skipped_assignee
+
+
+def _replace_task_collaborators(task, collaborator_ids):
+    PhanCongCongViec.objects.filter(cong_viec=task).delete()
+    if not collaborator_ids:
+        return
+
+    users_by_id = {
+        str(user.pk): user
+        for user in NguoiDung.objects.filter(pk__in=collaborator_ids)
+    }
+    PhanCongCongViec.objects.bulk_create(
+        [
+            PhanCongCongViec(cong_viec=task, nguoi_phoi_hop=users_by_id[raw_id])
+            for raw_id in collaborator_ids
+            if raw_id in users_by_id
+        ]
+    )
+
+
 def _result_files_queryset(task):
     return FileCVLienQuan.objects.filter(
         cong_viec=task,
@@ -158,7 +207,7 @@ def _original_files_queryset(task):
 
 
 @login_required
-@role_required(Customer.Role.LANH_DAO, Customer.Role.VAN_THU, Customer.Role.ADMIN)
+@role_required(Customer.Role.LANH_DAO, Customer.Role.ADMIN)
 def giao_viec(request):
     tasks = _task_queryset().order_by("-last_activity")
 
@@ -176,6 +225,7 @@ def giao_viec(request):
         "all_users": NguoiDung.objects.all(),
         "van_ban_list": VanBan.objects.all().order_by("-ngay_den"),
         "is_lanh_dao": request.user.is_lanh_dao,
+        "can_assign_task": request.user.has_role(Customer.Role.LANH_DAO, Customer.Role.ADMIN),
         "status_choices": CongViec.TrangThai.choices,
     }
     return render(request, "quanlycongviec/giao-viec.html", context)
@@ -199,7 +249,7 @@ def xu_ly_cong_viec(request):
 
 
 @login_required
-@role_required(Customer.Role.LANH_DAO)
+@role_required(Customer.Role.LANH_DAO, Customer.Role.ADMIN)
 def add_task(request):
     if request.method != "POST":
         return redirect("quanlycongviec:giao_viec")
@@ -207,7 +257,6 @@ def add_task(request):
     try:
         ten_cv = (request.POST.get("ten_cv") or "").strip()
         nguoi_thuc_hien_id = request.POST.get("nguoi_thuc_hien")
-        nguoi_phoi_hop_id = request.POST.get("nguoi_phoi_hop")
         nguon_giao = request.POST.get("nguon_giao")
         ngay_bat_dau_str = request.POST.get("ngay_bat_dau")
         han_xu_ly_str = request.POST.get("han_xu_ly")
@@ -222,6 +271,10 @@ def add_task(request):
             return redirect("quanlycongviec:giao_viec")
 
         nguoi_thuc_hien = get_object_or_404(NguoiDung, pk=nguoi_thuc_hien_id)
+        nguoi_phoi_hop_ids, skipped_assignee_collaborator = _get_collaborator_ids(
+            request,
+            nguoi_thuc_hien_id,
+        )
 
         try:
             ngay_bat_dau, han_xu_ly = _parse_task_dates(ngay_bat_dau_str, han_xu_ly_str)
@@ -265,10 +318,7 @@ def add_task(request):
                 nguoi_tai_len=request.user.core_profile,
             )
 
-            PhanCongCongViec.objects.filter(cong_viec=task).delete()
-            if nguoi_phoi_hop_id:
-                nguoi_phoi_hop = get_object_or_404(NguoiDung, pk=nguoi_phoi_hop_id)
-                PhanCongCongViec.objects.create(cong_viec=task, nguoi_phoi_hop=nguoi_phoi_hop)
+            _replace_task_collaborators(task, nguoi_phoi_hop_ids)
 
         ghi_lich_su_cong_viec(
             user=request.user, cong_viec=task, hanh_dong="TAO",
@@ -276,6 +326,8 @@ def add_task(request):
         )
 
         messages.success(request, f"Đã giao việc '{ten_cv}' thành công.")
+        if skipped_assignee_collaborator:
+            messages.warning(request, "Người phối hợp trùng với người thực hiện chính đã được bỏ qua.")
     except Exception as exc:
         messages.error(request, f"Lỗi hệ thống khi giao việc: {exc}")
 
@@ -283,7 +335,7 @@ def add_task(request):
 
 
 @login_required
-@role_required(Customer.Role.LANH_DAO)
+@role_required(Customer.Role.LANH_DAO, Customer.Role.ADMIN)
 def delete_task(request, task_id):
     task = _get_task(task_id)
 
@@ -302,7 +354,7 @@ def delete_task(request, task_id):
 
 
 @login_required
-@role_required(Customer.Role.LANH_DAO)
+@role_required(Customer.Role.LANH_DAO, Customer.Role.ADMIN)
 def edit_task(request, task_id):
     task = _get_task(task_id)
 
@@ -326,7 +378,10 @@ def edit_task(request, task_id):
         ngay_bat_dau_str = request.POST.get("ngay_bat_dau")
         han_xu_ly_str = request.POST.get("han_xu_ly")
         nguoi_thuc_hien_id = request.POST.get("nguoi_thuc_hien")
-        nguoi_phoi_hop_id = request.POST.get("nguoi_phoi_hop")
+        nguoi_phoi_hop_ids, skipped_assignee_collaborator = _get_collaborator_ids(
+            request,
+            nguoi_thuc_hien_id,
+        )
 
         if not all([ten_cv, noi_dung, ngay_bat_dau_str, han_xu_ly_str, nguoi_thuc_hien_id]):
             messages.error(request, "Vui lòng nhập đầy đủ các trường bắt buộc.")
@@ -356,10 +411,7 @@ def edit_task(request, task_id):
                 task.trang_thai = CongViec.TrangThai.CHO_XU_LY
             task.save()
 
-            PhanCongCongViec.objects.filter(cong_viec=task).delete()
-            if nguoi_phoi_hop_id:
-                nguoi_phoi_hop = get_object_or_404(NguoiDung, pk=nguoi_phoi_hop_id)
-                PhanCongCongViec.objects.create(cong_viec=task, nguoi_phoi_hop=nguoi_phoi_hop)
+            _replace_task_collaborators(task, nguoi_phoi_hop_ids)
 
             delete_ids = [item for item in (request.POST.get("delete_files") or "").split(",") if item.strip()]
             if delete_ids:
@@ -403,6 +455,8 @@ def edit_task(request, task_id):
         )
 
         messages.success(request, f"Đã cập nhật công việc '{task.ten_cong_viec}' thành công.")
+        if skipped_assignee_collaborator:
+            messages.warning(request, "Người phối hợp trùng với người thực hiện chính đã được bỏ qua.")
     except Exception as exc:
         messages.error(request, f"Lỗi khi cập nhật công việc: {exc}")
 
@@ -629,6 +683,7 @@ def get_task_detail(request, task_id):
 
     collaborators = PhanCongCongViec.objects.filter(cong_viec=task)
     collab_first = collaborators.first()
+    collaborator_ids = [collab.nguoi_phoi_hop_id for collab in collaborators]
     original_files = _original_files_queryset(task)
 
     attachments = [
@@ -653,6 +708,7 @@ def get_task_detail(request, task_id):
         "start_date": task.ngay_bat_dau.strftime("%Y-%m-%d"),
         "end_date": task.han_xu_ly.strftime("%Y-%m-%d"),
         "source": task.nguon_giao or "",
+        "nguoi_phoi_hop_ids": collaborator_ids,
         "collaborator_id": collab_first.nguoi_phoi_hop.pk if collab_first else "",
         "attachments": attachments,
         "ghi_chu": task.ghi_chu or "",
@@ -699,6 +755,7 @@ def _build_task_action_context(
 
 
 @login_required
+@ensure_csrf_cookie
 def task_detail(request, task_id):
     task = _get_task(task_id)
 
@@ -725,7 +782,7 @@ def task_detail(request, task_id):
         and main_attachment.file_van_ban.name.lower().endswith(".pdf")
     )
     can_ky_so = (
-        _user_is_task_manager(request, task)
+        _user_is_task_signer(request, task)
         and task.trang_thai in _can_sign_statuses
         and _has_pdf_main
     )
@@ -761,8 +818,10 @@ def task_detail(request, task_id):
 
 @require_POST
 @login_required
-@role_required(Customer.Role.LANH_DAO)
 def api_ky_so_cong_viec(request, task_id):
+    if not request.user.has_role(Customer.Role.LANH_DAO):
+        return JsonResponse({"success": False, "message": "Bạn không có quyền ký số công việc này."}, status=403)
+
     """Lãnh đạo ký số lên file đính kèm chính của công việc sau khi chuyên viên xử lý xong."""
     import json
     try:
@@ -770,14 +829,16 @@ def api_ky_so_cong_viec(request, task_id):
         x_ratio = float(data.get("x_ratio", 0))
         y_ratio = float(data.get("y_ratio", 0))
     except (ValueError, TypeError, json.JSONDecodeError):
-        return JsonResponse({"success": False, "message": "Tọa độ không hợp lệ."})
+        return JsonResponse({"success": False, "message": "Tọa độ không hợp lệ."}, status=400)
 
-    task = get_object_or_404(_task_queryset(), pk=task_id)
+    task = _task_queryset().filter(pk=task_id).first()
+    if not task:
+        return JsonResponse({"success": False, "message": "Không tìm thấy công việc cần ký."}, status=404)
     user = request.user.core_profile
 
     # Chỉ người giao việc (lãnh đạo) mới được ký
-    if user.pk != task.nguoi_giao_id:
-        return JsonResponse({"success": False, "message": "Bạn không phải người giao công việc này."})
+    if not _user_is_task_signer(request, task):
+        return JsonResponse({"success": False, "message": "Bạn không phải người giao công việc này."}, status=403)
 
     # Chỉ ký khi chuyên viên đã xử lý xong (Chờ duyệt hoặc Đã hoàn thành)
     allowed_statuses = {CongViec.TrangThai.CHO_DUYET, CongViec.TrangThai.DA_HOAN_THANH}
@@ -785,7 +846,7 @@ def api_ky_so_cong_viec(request, task_id):
         return JsonResponse({
             "success": False,
             "message": "Chỉ có thể ký số khi công việc đang ở trạng thái Chờ duyệt hoặc Đã hoàn thành."
-        })
+        }, status=400)
 
     # Lấy file đính kèm chính (loại CHINH do lãnh đạo giao)
     main_attachment = FileCVLienQuan.objects.filter(
@@ -795,27 +856,32 @@ def api_ky_so_cong_viec(request, task_id):
     ).first()
 
     if not main_attachment or not main_attachment.file_van_ban:
-        return JsonResponse({"success": False, "message": "Công việc không có file đính kèm chính để ký."})
+        return JsonResponse({"success": False, "message": "Công việc không có file đính kèm chính để ký."}, status=400)
 
     # Kiểm tra file phải là PDF
     if not main_attachment.file_van_ban.name.lower().endswith(".pdf"):
-        return JsonResponse({"success": False, "message": "Chỉ hỗ trợ ký số trên file PDF."})
+        return JsonResponse({"success": False, "message": "Chỉ hỗ trợ ký số trên file PDF."}, status=400)
 
     # Lấy thông tin chữ ký số của lãnh đạo
     try:
         chu_ky_so = ChuKySo.objects.get(nguoi_dung=user)
         if not chu_ky_so.anh_chu_ky:
-            return JsonResponse({"success": False, "message": "Bạn chưa cấu hình ảnh chữ ký."})
+            return JsonResponse({"success": False, "message": "Tài khoản chưa cấu hình ảnh chữ ký."}, status=400)
         signature_image_path = chu_ky_so.anh_chu_ky.path
     except ChuKySo.DoesNotExist:
-        return JsonResponse({"success": False, "message": "Bạn chưa có thông tin chữ ký số."})
+        return JsonResponse({"success": False, "message": "Tài khoản chưa có thông tin chữ ký số."}, status=400)
 
     input_pdf_path = main_attachment.file_van_ban.path
+    if not os.path.exists(input_pdf_path):
+        return JsonResponse({"success": False, "message": "Không tìm thấy file PDF gốc."}, status=404)
+    if not os.path.exists(signature_image_path):
+        return JsonResponse({"success": False, "message": "Không tìm thấy file ảnh chữ ký."}, status=404)
+
     pfx_path = os.path.join(settings.BASE_DIR, 'apps', 'core', 'certs', 'dummy_cert.pfx')
     pfx_password = "123456"
 
     if not os.path.exists(pfx_path):
-        return JsonResponse({"success": False, "message": "Không tìm thấy chứng thư số hệ thống."})
+        return JsonResponse({"success": False, "message": "Không tìm thấy chứng thư số hệ thống."}, status=500)
 
     timestamp = timezone.now().strftime("%Y%m%d%H%M%S")
     output_filename = f"congviec_{task.pk}_signed_{timestamp}.pdf"
@@ -832,36 +898,26 @@ def api_ky_so_cong_viec(request, task_id):
             pfx_path=pfx_path,
             pfx_password=pfx_password,
         )
+        with open(output_pdf_path, "rb") as f:
+            signed_bytes = f.read()
+
+        main_attachment.file_van_ban.save(output_filename, ContentFile(signed_bytes), save=False)
+        main_attachment.kich_thuoc = len(signed_bytes)
+        main_attachment.save(update_fields=["file_van_ban", "kich_thuoc"])
+
+        file_hash = hashlib.sha256(signed_bytes).hexdigest()
+        LichSuKySo.objects.update_or_create(
+            cong_viec=task,
+            defaults={
+                'chu_ky_so': chu_ky_so,
+                'hash_tai_lieu': file_hash,
+                'file_hash': file_hash,
+                'file_da_ky': ContentFile(signed_bytes, name=output_filename),
+                'van_ban': None,
+            }
+        )
     except Exception as e:
-        return JsonResponse({"success": False, "message": f"Lỗi khi ký số: {str(e)}"})
-
-    try:
-        with open(output_pdf_path, 'rb') as f:
-            signed_file = File(f, name=output_filename)
-
-            # Ghi đè file đính kèm trong FileCVLienQuan
-            old_file = main_attachment.file_van_ban
-            main_attachment.file_van_ban.save(output_filename, signed_file, save=False)
-            main_attachment.kich_thuoc = os.path.getsize(output_pdf_path)
-            main_attachment.save(update_fields=["file_van_ban", "kich_thuoc"])
-
-            # Tính hash
-            f.seek(0)
-            file_hash = hashlib.sha256(f.read()).hexdigest()
-
-            f.seek(0)
-            LichSuKySo.objects.update_or_create(
-                cong_viec=task,
-                defaults={
-                    'chu_ky_so': chu_ky_so,
-                    'hash_tai_lieu': file_hash,
-                    'file_hash': file_hash,
-                    'file_da_ky': File(open(output_pdf_path, 'rb'), name=output_filename),
-                    'van_ban': None,
-                }
-            )
-    except Exception as e:
-        return JsonResponse({"success": False, "message": f"Lỗi khi lưu file đã ký: {str(e)}"})
+        return JsonResponse({"success": False, "message": f"Lỗi khi ký số: {str(e)}"}, status=500)
     finally:
         if os.path.exists(output_pdf_path):
             os.remove(output_pdf_path)

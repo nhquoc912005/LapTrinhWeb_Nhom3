@@ -646,8 +646,10 @@ def _recent_documents_url(user):
 def _urgent_tasks_url(user):
     if user.is_chuyen_vien:
         return reverse("quanlycongviec:xu_ly_cong_viec")
+    if user.has_role(Customer.Role.LANH_DAO, Customer.Role.ADMIN):
+        return reverse("quanlycongviec:giao_viec")
 
-    return reverse("quanlycongviec:giao_viec")
+    return reverse("core:dashboard")
 
 
 # =========================================================
@@ -1016,4 +1018,4 @@ def lich_su_hoat_dong(request):
         'loai_choices': LichSuHoatDong.DoiTuongLoai.choices,
         'hanh_dong_choices': LichSuHoatDong.HanhDong.choices,
     }
-    return render(request, 'core/lich-su-hoat-dong.html', context)
+    return render(request, 'core/lich-su-hoat-dong.html', context)

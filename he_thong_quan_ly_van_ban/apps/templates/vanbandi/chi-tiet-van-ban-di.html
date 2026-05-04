@@ -78,6 +78,11 @@
     color: #166534;
   }
 
+  .status-badge-detail.badge-xem-de-biet {
+    background: #F3E8FF;
+    color: #6B21A8;
+  }
+
   .status-badge-detail.badge-hoan-tra {
     background: #FEE2E2;
     color: #991B1B;
@@ -416,7 +421,11 @@
         {# Chỉ hiện Phê duyệt / Hoàn trả khi văn bản đang Chờ Xử Lý #}
         {% if vb.trang_thai == "Chờ Xử Lý" %}
         {% if vb.file_dinh_kem %}
-        <button type="button" class="btn btn-primary" style="padding:8px 16px; background:#4f46e5; border-color:#4f46e5;" data-file-url="{{ vb.file_dinh_kem.url|escapejs }}" onclick="openKySoModal(this.dataset.fileUrl)">Ký số</button>
+          {% if request.user.core_profile.chu_ky_so.anh_chu_ky %}
+          <button type="button" class="btn btn-primary" style="padding:8px 16px; background:#4f46e5; border-color:#4f46e5;" data-file-url="{{ vb.file_dinh_kem.url|escape }}" onclick="openKySoModal(this.dataset.fileUrl)">Ký số</button>
+          {% else %}
+          <button type="button" class="btn btn-secondary" style="padding:8px 16px;" disabled title="Tài khoản chưa cấu hình ảnh chữ ký">Ký số</button>
+          {% endif %}
         {% endif %}
         <button type="button" class="btn btn-success" style="padding:8px 16px;" id="openApprovalModal">Phê
           duyệt</button>
@@ -436,7 +445,7 @@
         
         {% if task %}
         <a href="{% url 'quanlycongviec:task_detail' task.pk %}" class="btn btn-info" style="padding:8px 16px; text-decoration:none;">Xem công việc</a>
-        {% else %}
+        {% elif request.user.role == "LANH_DAO" or request.user.role == "ADMIN" %}
         <a href="{% url 'quanlycongviec:giao_viec' %}?van_ban_id={{ vb.pk }}&nguon_giao=Văn bản đi&ten_cv={{ vb.trich_yeu|urlencode }}" class="btn btn-info" style="padding:8px 16px; text-decoration:none;">Giao việc</a>
         {% endif %}
 
@@ -513,7 +522,9 @@
           {% elif hien_thi_trang_thai|lower == "chờ ban hành" %}
             <span class="status-badge-detail badge-cho-ban-hanh">{{ hien_thi_trang_thai }}</span>
           {% elif hien_thi_trang_thai|lower == "đã ban hành" %}
-            <span class="status-badge-detail badge-da-ban-hanh">{{ hien_thi_trang_thai }}</span>
+            <span class="status-badge-detail badge-da-ban-hanh">Đã Ban Hành</span>
+          {% elif hien_thi_trang_thai|lower == "xem để biết" %}
+            <span class="status-badge-detail badge-xem-de-biet">Xem để biết</span>
           {% elif hien_thi_trang_thai|lower == "hoàn trả" %}
             <span class="status-badge-detail badge-hoan-tra">{{ hien_thi_trang_thai }}</span>
           {% else %}
@@ -616,7 +627,7 @@
       {% if vb.file_dinh_kem %}
       {% with file_name=vb.file_dinh_kem.name|lower %}
       <a href="#" class="file-item file-preview-trigger" style="text-decoration:none;"
-        data-file-url="{{ vb.file_dinh_kem.url }}" data-file-name="{{ vb.file_dinh_kem.name|cut:'uploads/' }}"
+        data-file-url="{{ vb.file_dinh_kem.url|escape }}" data-file-name="{{ vb.file_dinh_kem.name|cut:'uploads/' }}"
         data-file-ext="{{ vb.file_dinh_kem.name|lower }}">
         {% if ".pdf" in file_name %}
         <span class="file-item-icon file-icon-pdf">PDF</span>
@@ -646,7 +657,7 @@
     <div style="font-size:14px; color:var(--text-secondary); margin-bottom:8px;">Xem trước</div>
 
     <div class="preview-shell" id="smart-preview"
-      {% if vb.file_dinh_kem %}data-file-url="{{ vb.file_dinh_kem.url }}" data-file-name="{{ vb.file_dinh_kem.name|cut:'uploads/' }}" data-file-ext="{{ vb.file_dinh_kem.name|lower }}"{% endif %}>
+      {% if vb.file_dinh_kem %}data-file-url="{{ vb.file_dinh_kem.url|escape }}" data-file-name="{{ vb.file_dinh_kem.name|cut:'uploads/' }}" data-file-ext="{{ vb.file_dinh_kem.name|lower }}"{% endif %}>
       <div class="preview-toolbar">
         <a id="btn-download" href="#" download class="toolbar-btn toolbar-btn-download" style="display:none;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
@@ -673,7 +684,7 @@
         <button type="button" id="pdf-next-btn" class="toolbar-btn" disabled>▶</button>
 
         {% if vb.file_dinh_kem %}
-        <a href="{{ vb.file_dinh_kem.url }}" target="_blank" class="preview-open-link" id="preview-open-link">Mở tab
+        <a href="#" target="_blank" class="preview-open-link" id="preview-open-link">Mở tab
           mới</a>
         {% endif %}
       </div>
@@ -693,7 +704,7 @@
       {% for lq in ds_lien_quan %}
       {% with file_name=lq.file_van_ban.name|lower %}
       <a href="#" class="file-item file-preview-trigger" style="text-decoration:none;"
-        data-file-url="{{ lq.file_van_ban.url }}" data-file-name="{{ lq.file_van_ban.name|cut:'uploads/' }}"
+        data-file-url="{{ lq.file_van_ban.url|escape }}" data-file-name="{{ lq.file_van_ban.name|cut:'uploads/' }}"
         data-file-ext="{{ lq.file_van_ban.name|lower }}">
         {% if ".pdf" in file_name %}
         <span class="file-item-icon file-icon-pdf">PDF</span>
@@ -762,6 +773,36 @@
     let currentPdfDoc = null;
     let currentPdfPage = 0;
     let totalPdfPages = 0;
+    let currentSafeFileUrl = "";
+
+    function escapeHtml(value) {
+      const div = document.createElement("div");
+      div.textContent = value || "";
+      return div.innerHTML;
+    }
+
+    function encodePathSegment(segment) {
+      try {
+        return encodeURIComponent(decodeURIComponent(segment));
+      } catch (error) {
+        return encodeURIComponent(segment);
+      }
+    }
+
+    function encodeFileUrl(rawUrl) {
+      const raw = (rawUrl || "").trim();
+      if (!raw) return "";
+
+      const absoluteMatch = raw.match(/^([a-z][a-z\d+.-]*:\/\/[^/]+)(.*)$/i);
+      const origin = absoluteMatch ? absoluteMatch[1] : "";
+      const rest = absoluteMatch ? (absoluteMatch[2] || "/") : raw;
+      const queryIndex = rest.indexOf("?");
+      const path = queryIndex >= 0 ? rest.slice(0, queryIndex) : rest;
+      const query = queryIndex >= 0 ? rest.slice(queryIndex) : "";
+      const encodedPath = path.split("/").map(encodePathSegment).join("/");
+
+      return origin + encodedPath + query;
+    }
 
     function showLoading(text = "Đang tải xem trước...") {
       previewBody.innerHTML = `<div class="preview-loading">${text}</div>`;
@@ -781,7 +822,10 @@
     }
 
     function showError(text = "Không thể xem trước tệp này.") {
-      previewBody.innerHTML = `<div class="preview-error">${text}</div>`;
+      const manualLink = currentSafeFileUrl
+        ? `<a href="${currentSafeFileUrl}" target="_blank" rel="noopener" class="preview-open-link" style="margin-top:10px;">Mở file / Tải file</a>`
+        : "";
+      previewBody.innerHTML = `<div class="preview-error"><div>${escapeHtml(text)}</div>${manualLink}</div>`;
       hideToolbarBtns();
       resetPdfNav();
     }
@@ -844,7 +888,7 @@
           window.pdfjsLib.GlobalWorkerOptions.workerSrc =
             "{% static 'vendor/pdfjs/pdf.worker.min.js' %}";
         }
-        const response = await fetch(encodeURI(fileUrl), { method: "GET", credentials: "same-origin" });
+        const response = await fetch(fileUrl, { method: "GET", credentials: "same-origin" });
         if (!response.ok) throw new Error(`Fetch PDF failed: ${response.status}`);
         const contentType = (response.headers.get("content-type") || "").toLowerCase();
         if (contentType && !contentType.includes("pdf") && !contentType.includes("octet-stream")) {
@@ -908,13 +952,16 @@
     }
 
     function loadPreview(fileUrl, fileName, fileExtRaw) {
+      const safeFileUrl = encodeFileUrl(fileUrl);
+      currentSafeFileUrl = safeFileUrl;
       currentFileExt = (fileExtRaw || "").toLowerCase();
       currentPdfDoc = null;
       resetPdfNav();
       hideToolbarBtns();
-      if (currentFileExt.endsWith(".pdf")) { loadPdf(fileUrl, fileName); return; }
-      if (currentFileExt.endsWith(".docx") || currentFileExt.endsWith(".doc")) { renderDocx(fileUrl, fileName); return; }
-      if (currentFileExt.endsWith(".xlsx") || currentFileExt.endsWith(".xls")) { renderXlsx(fileUrl, fileName); return; }
+      if (!safeFileUrl) { showError("Đường dẫn file không hợp lệ."); return; }
+      if (currentFileExt.endsWith(".pdf")) { loadPdf(safeFileUrl, fileName); return; }
+      if (currentFileExt.endsWith(".docx") || currentFileExt.endsWith(".doc")) { renderDocx(safeFileUrl, fileName); return; }
+      if (currentFileExt.endsWith(".xlsx") || currentFileExt.endsWith(".xls")) { renderXlsx(safeFileUrl, fileName); return; }
       showError("Định dạng này chưa hỗ trợ xem trước.");
     }
 

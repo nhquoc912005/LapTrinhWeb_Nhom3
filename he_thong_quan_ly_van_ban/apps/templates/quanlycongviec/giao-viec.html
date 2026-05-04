@@ -32,7 +32,7 @@
                     <button class="filter-tab" data-tab="Đã hoàn thành">Đã hoàn thành</button>
                 </div>
 
-                {% if is_lanh_dao %}
+                {% if can_assign_task %}
                 <button class="btn btn-primary" id="btnThemCongViec" onclick="showForm()">
                     + Giao việc
                 </button>
@@ -177,8 +177,7 @@
                 </div>
                 <div>
                     <label class="form-label">Người phối hợp</label>
-                    <select name="nguoi_phoi_hop" class="form-control">
-                        <option value="">-- Chọn người phối hợp --</option>
+                    <select name="nguoi_phoi_hop" class="form-control" multiple size="5">
                         {% for u in all_users %}
                         <option value="{{ u.pk }}">{{ u.ho_va_ten }}</option>
                         {% endfor %}
@@ -321,7 +320,11 @@
                 form.elements['han_xu_ly'].value = data.end_date;
                 form.elements['ten_cv'].value = data.title;
                 form.elements['nguoi_thuc_hien'].value = data.assignee_id;
-                form.elements['nguoi_phoi_hop'].value = data.collaborator_id || '';
+                const collaboratorSelect = form.elements['nguoi_phoi_hop'];
+                const collaboratorIds = (data.nguoi_phoi_hop_ids || []).map(String);
+                Array.from(collaboratorSelect.options).forEach(option => {
+                    option.selected = collaboratorIds.includes(option.value);
+                });
                 form.elements['noi_dung'].value = data.content;
                 form.elements['ghi_chu'].value = data.ghi_chu || '';
                 form.elements['yeu_cau_phe_duyet'].checked = !!data.yeu_cau_phe_duyet;

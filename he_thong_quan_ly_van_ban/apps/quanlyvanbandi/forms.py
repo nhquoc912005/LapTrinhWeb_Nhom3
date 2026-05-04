@@ -1,6 +1,11 @@
 import os
 from django import forms
 from django.utils import timezone
+from apps.core.validation import (
+    DUPLICATE_SO_KY_HIEU_TRICH_YEU_MESSAGE,
+    document_pair_exists,
+    normalize_document_text,
+)
 from ..core.models import VanBan, NguoiDung
 
 ALLOWED_EXTENSIONS = {".pdf", ".docx", ".xlsx"}
@@ -114,17 +119,31 @@ class VanBanDiForm(forms.ModelForm):
         cleaned_data = super().clean()
         ngay_van_ban = cleaned_data.get("ngay_van_ban")
         han_xu_ly = cleaned_data.get("han_xu_ly")
+        so_ky_hieu = normalize_document_text(cleaned_data.get("so_ky_hieu"))
+        trich_yeu = normalize_document_text(cleaned_data.get("trich_yeu"))
+
+        cleaned_data["so_ky_hieu"] = so_ky_hieu
+        cleaned_data["trich_yeu"] = trich_yeu
 
         if ngay_van_ban and han_xu_ly and han_xu_ly <= ngay_van_ban:
             self.add_error("han_xu_ly", "Hạn xử lý phải lớn hơn ngày văn bản.")
+
+        if document_pair_exists(
+            phan_loai="Văn bản đi",
+            so_ky_hieu=so_ky_hieu,
+            trich_yeu=trich_yeu,
+            exclude_pk=self.instance.pk,
+        ):
+            raise forms.ValidationError(DUPLICATE_SO_KY_HIEU_TRICH_YEU_MESSAGE)
 
         return cleaned_data
 
     def save(self, commit=True):
         instance = super().save(commit=False)
         instance.phan_loai = "Văn bản đi"
-        instance.trang_thai = "Chờ Xử Lý"
-        instance.ngay_den = timezone.now().date()
+        if not instance.pk:
+            instance.trang_thai = "Chờ Xử Lý"
+            instance.ngay_den = timezone.now().date()
         
         # Manually assign the date from the form field
         instance.ngay_van_ban = self.cleaned_data['ngay_van_ban']

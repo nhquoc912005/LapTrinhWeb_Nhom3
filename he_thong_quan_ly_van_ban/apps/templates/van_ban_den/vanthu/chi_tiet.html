@@ -559,19 +559,7 @@
 
             <div class="field">
                 <div class="label">Trạng thái</div>
-                <div class="value">
-                    {% if vb.trang_thai == 'Chờ Xử Lý' %}
-                        <span class="badge badge-cho-xu-ly">Chờ xử lý</span>
-                    {% elif vb.trang_thai == 'Đã Xử Lý' %}
-                        <span class="badge badge-da-xu-ly">Đã xử lý</span>
-                    {% elif vb.trang_thai == 'Hoàn Trả' %}
-                        <span class="badge badge-hoan-tra">Hoàn trả</span>
-                    {% elif vb.trang_thai == 'Xem Để Biết' %}
-                        <span class="badge badge-xem-de-biet">Xem để biết</span>
-                    {% else %}
-                        <span class="badge">{{ vb.trang_thai }}</span>
-                    {% endif %}
-                </div>
+                <div class="value">{% include "van_ban_den/_status_badge.html" with status=vb.trang_thai %}</div>
             </div>
 
             {% if vb.ngay_hoan_tra %}
@@ -729,7 +717,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="{% static 'vendor/pdfjs/pdf.min.js' %}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
 <script src="{% static 'vendor/sheetjs/xlsx.full.min.js' %}"></script>
 
@@ -752,7 +740,7 @@
 
     if (window.pdfjsLib) {
         pdfjsLib.GlobalWorkerOptions.workerSrc =
-            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+            "{% static 'vendor/pdfjs/pdf.worker.min.js' %}";
     }
 
     let pdfDoc = null;

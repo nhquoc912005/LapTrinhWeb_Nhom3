@@ -4,7 +4,7 @@ from datetime import timedelta
 from types import SimpleNamespace
 
 from django.conf import settings
-from django.core.files import File
+from django.core.files.base import ContentFile
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -12,6 +12,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import role_required
@@ -414,6 +415,7 @@ def danh_sach_van_ban_den(request):
 
 @login_required
 @role_required(Customer.Role.VAN_THU, Customer.Role.LANH_DAO, Customer.Role.CHUYEN_VIEN)
+@ensure_csrf_cookie
 def chi_tiet_van_ban_den(request, pk):
     nguoi_dung_core = _kiem_tra_nguoi_dung_core(request)
 
@@ -872,35 +874,51 @@ def lanh_dao_hoan_tra_van_ban_den(request, pk):
 # =========================================================
 
 @require_POST
-@role_required(Customer.Role.LANH_DAO)
+@login_required
 def api_ky_so_van_ban(request, vb_pk):
+    if not request.user.has_role(Customer.Role.LANH_DAO):
+        return JsonResponse({"success": False, "message": "Bạn không có quyền ký số văn bản này."}, status=403)
+
     try:
         data = json.loads(request.body)
         x_ratio = float(data.get("x_ratio", 0))
         y_ratio = float(data.get("y_ratio", 0))
     except (ValueError, TypeError, json.JSONDecodeError):
-        return JsonResponse({"success": False, "message": "Tọa độ không hợp lệ."})
+        return JsonResponse({"success": False, "message": "Tọa độ không hợp lệ."}, status=400)
 
-    vb = get_object_or_404(VanBan, pk=vb_pk, phan_loai=PHAN_LOAI_VAN_BAN_DEN)
+    vb = VanBan.objects.filter(pk=vb_pk, phan_loai=PHAN_LOAI_VAN_BAN_DEN).first()
+    if not vb:
+        return JsonResponse({"success": False, "message": "Không tìm thấy văn bản đến cần ký."}, status=404)
     user = _kiem_tra_nguoi_dung_core(request)
+    if not user:
+        return JsonResponse({"success": False, "message": "Tài khoản chưa liên kết hồ sơ người dùng."}, status=400)
 
     if vb.lanh_dao_duyet_id != user.pk or vb.trang_thai not in [TRANG_THAI_CHO_XU_LY, TRANG_THAI_HOAN_TRA]:
-        return JsonResponse({"success": False, "message": "Bạn không có quyền ký văn bản này hoặc văn bản không ở trạng thái Chờ Xử Lý / Hoàn Trả."})
+        return JsonResponse({"success": False, "message": "Bạn không có quyền ký văn bản này hoặc văn bản không ở trạng thái Chờ Xử Lý / Hoàn Trả."}, status=403)
 
     try:
         chu_ky_so = ChuKySo.objects.get(nguoi_dung=user)
         if not chu_ky_so.anh_chu_ky:
-            return JsonResponse({"success": False, "message": "Bạn chưa cấu hình ảnh chữ ký."})
+            return JsonResponse({"success": False, "message": "Tài khoản chưa cấu hình ảnh chữ ký."}, status=400)
         signature_image_path = chu_ky_so.anh_chu_ky.path
     except ChuKySo.DoesNotExist:
-        return JsonResponse({"success": False, "message": "Bạn chưa có thông tin chữ ký số."})
+        return JsonResponse({"success": False, "message": "Tài khoản chưa có thông tin chữ ký số."}, status=400)
 
     if not vb.file_dinh_kem:
-        return JsonResponse({"success": False, "message": "Văn bản chưa có file đính kèm."})
+        return JsonResponse({"success": False, "message": "Văn bản chưa có file đính kèm."}, status=400)
 
     input_pdf_path = vb.file_dinh_kem.path
+    if not vb.file_dinh_kem.name.lower().endswith(".pdf"):
+        return JsonResponse({"success": False, "message": "Chỉ hỗ trợ ký số trên file PDF."}, status=400)
+    if not os.path.exists(input_pdf_path):
+        return JsonResponse({"success": False, "message": "Không tìm thấy file PDF gốc."}, status=404)
+    if not os.path.exists(signature_image_path):
+        return JsonResponse({"success": False, "message": "Không tìm thấy file ảnh chữ ký."}, status=404)
+
     pfx_path = os.path.join(settings.BASE_DIR, 'apps', 'core', 'certs', 'dummy_cert.pfx')
     pfx_password = "123456"
+    if not os.path.exists(pfx_path):
+        return JsonResponse({"success": False, "message": "Không tìm thấy chứng thư số hệ thống."}, status=500)
 
     timestamp = timezone.now().strftime("%Y%m%d%H%M%S")
     output_filename = f"vanban_den_{vb.pk}_signed_{timestamp}.pdf"
@@ -919,32 +937,31 @@ def api_ky_so_van_ban(request, vb_pk):
             pfx_path=pfx_path,
             pfx_password=pfx_password
         )
-    except Exception as e:
-        return JsonResponse({"success": False, "message": f"Lỗi khi ký số: {str(e)}"})
+        with open(output_pdf_path, "rb") as f:
+            signed_bytes = f.read()
 
-    with open(output_pdf_path, 'rb') as f:
-        signed_file = File(f, name=output_filename)
+        import hashlib
+        file_hash = hashlib.sha256(signed_bytes).hexdigest()
 
-        # Cập nhật ghi đè file đính kèm của VanBan
-        vb.file_dinh_kem.save(output_filename, signed_file, save=False)
-        vb.kich_thuoc = signed_file.size
+        vb.file_dinh_kem.save(output_filename, ContentFile(signed_bytes), save=False)
+        vb.kich_thuoc = len(signed_bytes)
         # Không đổi trạng thái
         vb.save(update_fields=["file_dinh_kem", "kich_thuoc"])
 
-        # Lưu lịch sử ký số
-        import hashlib
-        f.seek(0)
-        file_hash = hashlib.sha256(f.read()).hexdigest()
-
-        f.seek(0)
         LichSuKySo.objects.update_or_create(
             van_ban=vb,
             defaults={
                 'chu_ky_so': chu_ky_so,
                 'hash_tai_lieu': file_hash,
                 'file_hash': file_hash,
-                'file_da_ky': signed_file
+                'file_da_ky': ContentFile(signed_bytes, name=output_filename),
+                'cong_viec': None,
             }
         )
+    except Exception as e:
+        return JsonResponse({"success": False, "message": f"Lỗi khi ký số: {str(e)}"}, status=500)
+    finally:
+        if os.path.exists(output_pdf_path):
+            os.remove(output_pdf_path)
 
     return JsonResponse({"success": True, "message": "Ký số thành công!"})

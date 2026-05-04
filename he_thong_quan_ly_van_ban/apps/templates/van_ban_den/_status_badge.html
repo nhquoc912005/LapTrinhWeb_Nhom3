@@ -1,0 +1,13 @@
+{% if status == "Chờ Xử Lý" %}
+    <span class="badge badge-cho-xu-ly">Chờ xử lý</span>
+{% elif status == "Đã Xử Lý" %}
+    <span class="badge badge-da-xu-ly">Đã xử lý</span>
+{% elif status == "Hoàn Trả" %}
+    <span class="badge badge-hoan-tra">Hoàn trả</span>
+{% elif status == "Xem Để Biết" %}
+    <span class="badge badge-xem-de-biet">Xem để biết</span>
+{% elif status %}
+    <span class="badge badge-cho-xu-ly">{{ status }}</span>
+{% else %}
+    <span class="badge" style="background:#F1F5F9;color:#64748b;">Chưa xác định</span>
+{% endif %}

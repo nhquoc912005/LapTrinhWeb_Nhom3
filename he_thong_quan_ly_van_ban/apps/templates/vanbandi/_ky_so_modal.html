@@ -1,3 +1,4 @@
+{% load static %}
 <!-- Modal Ký Số -->
 <div class="modal-overlay" id="kySoModal" style="display: none; z-index: 9999;">
   <div class="modal-container" style="max-width: 900px; width: 90%; max-height: 90vh; display: flex; flex-direction: column;">
@@ -22,38 +23,82 @@
           >
         {% else %}
           <div id="signatureImage" style="display: none;"></div>
-          <div style="position: absolute; top: 10px; left: 10px; background: red; color: white; padding: 5px;">Bạn chưa có ảnh chữ ký số</div>
+          <div style="position: absolute; top: 10px; left: 10px; background: #b91c1c; color: white; padding: 8px 12px;">Tài khoản chưa cấu hình ảnh chữ ký</div>
         {% endif %}
+        <div id="kySoMessage" style="display:none; position:absolute; right:10px; bottom:10px; max-width:360px; background:#111827; color:#fff; padding:8px 12px; font-size:13px;"></div>
       </div>
 
     </div>
 
     <div class="modal-footer">
       <button type="button" class="btn btn-secondary" onclick="closeKySoModal()">Hủy</button>
-      <button type="button" class="btn btn-primary" onclick="submitKySo()" id="btnSubmitKySo">Xác nhận ký</button>
+      <button type="button" class="btn btn-primary" onclick="submitKySo()" id="btnSubmitKySo" {% if not request.user.core_profile.chu_ky_so.anh_chu_ky %}disabled title="Tài khoản chưa cấu hình ảnh chữ ký"{% endif %}>Xác nhận ký</button>
     </div>
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<input type="hidden" id="kySoCsrfToken" value="{{ csrf_token }}">
+<script src="{% static 'vendor/pdfjs/pdf.min.js' %}"></script>
 <script>
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "{% static 'vendor/pdfjs/pdf.worker.min.js' %}";
+  const kySoTemplateCsrfToken = "{{ csrf_token|escapejs }}";
 
   let pdfDoc = null;
   let canvas = document.getElementById('pdfCanvas');
   let ctx = canvas.getContext('2d');
   let sigImg = document.getElementById('signatureImage');
   let pdfContainer = document.getElementById('pdfContainer');
+  let canUseSignature = sigImg && sigImg.tagName === 'IMG';
+
+  function encodePathSegment(segment) {
+    try {
+      return encodeURIComponent(decodeURIComponent(segment));
+    } catch (error) {
+      return encodeURIComponent(segment);
+    }
+  }
+
+  function encodeFileUrl(rawUrl) {
+    const raw = (rawUrl || "").trim();
+    if (!raw) return "";
+    const absoluteMatch = raw.match(/^([a-z][a-z\d+.-]*:\/\/[^/]+)(.*)$/i);
+    const origin = absoluteMatch ? absoluteMatch[1] : "";
+    const rest = absoluteMatch ? (absoluteMatch[2] || "/") : raw;
+    const queryIndex = rest.indexOf("?");
+    const path = queryIndex >= 0 ? rest.slice(0, queryIndex) : rest;
+    const query = queryIndex >= 0 ? rest.slice(queryIndex) : "";
+    return origin + path.split("/").map(encodePathSegment).join("/") + query;
+  }
+
+  function setKySoMessage(message) {
+    const box = document.getElementById('kySoMessage');
+    if (!box) return;
+    box.textContent = message || "";
+    box.style.display = message ? "block" : "none";
+  }
 
   function openKySoModal(pdfUrl) {
     document.getElementById('kySoModal').style.display = 'flex';
-    
-    // Load PDF
-    pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+    setKySoMessage("");
+
+    if (!canUseSignature) {
+      setKySoMessage("Tài khoản chưa cấu hình ảnh chữ ký.");
+      return;
+    }
+
+    const safePdfUrl = encodeFileUrl(pdfUrl);
+    if (!safePdfUrl) {
+      setKySoMessage("Đường dẫn PDF không hợp lệ.");
+      return;
+    }
+
+    pdfjsLib.getDocument({ url: safePdfUrl, withCredentials: true }).promise.then(function(pdf) {
       pdfDoc = pdf;
-      // Yêu cầu: Luôn ký ở trang cuối cùng
       let lastPage = pdf.numPages;
       renderPage(lastPage);
+    }).catch(function(error) {
+      console.error("PDF ký số load error:", error);
+      setKySoMessage("Không tải được PDF để ký. Hãy kiểm tra file hoặc mở file thủ công.");
     });
   }
 
@@ -74,8 +119,10 @@
       page.render(renderContext);
       
       // Reset signature position
-      sigImg.style.left = '10px';
-      sigImg.style.top = '10px';
+      if (canUseSignature) {
+        sigImg.style.left = '10px';
+        sigImg.style.top = '10px';
+      }
     });
   }
 
@@ -83,14 +130,16 @@
   let isDragging = false;
   let startX, startY, initialX, initialY;
 
-  sigImg.addEventListener('mousedown', function(e) {
-    isDragging = true;
-    startX = e.clientX;
-    startY = e.clientY;
-    initialX = sigImg.offsetLeft;
-    initialY = sigImg.offsetTop;
-    sigImg.style.cursor = 'grabbing';
-  });
+  if (canUseSignature) {
+    sigImg.addEventListener('mousedown', function(e) {
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      initialX = sigImg.offsetLeft;
+      initialY = sigImg.offsetTop;
+      sigImg.style.cursor = 'grabbing';
+    });
+  }
 
   document.addEventListener('mousemove', function(e) {
     if (!isDragging) return;
@@ -119,6 +168,14 @@
   // --- Logic Gửi Tọa Độ ---
   function submitKySo() {
     let btn = document.getElementById('btnSubmitKySo');
+    if (!canUseSignature) {
+      alert("Tài khoản chưa cấu hình ảnh chữ ký.");
+      return;
+    }
+    if (!canvas.width || !canvas.height) {
+      alert("PDF chưa sẵn sàng để ký.");
+      return;
+    }
     btn.disabled = true;
     btn.innerText = 'Đang ký...';
 
@@ -130,14 +187,29 @@
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-CSRFToken": getCookie("csrftoken")
+        "X-CSRFToken": getCsrfToken()
       },
+      credentials: "same-origin",
       body: JSON.stringify({
         x_ratio: x_ratio,
         y_ratio: y_ratio
       })
     })
-    .then(response => response.json())
+    .then(async response => {
+      let data = null;
+      try {
+        data = await response.json();
+      } catch (error) {
+        if (response.status === 403) {
+          throw new Error("Phiên xác thực đã hết hạn hoặc CSRF không hợp lệ. Hãy tải lại trang rồi ký lại.");
+        }
+        throw new Error(`Máy chủ trả về lỗi ${response.status}.`);
+      }
+      if (!response.ok && data && data.message) {
+        throw new Error(data.message);
+      }
+      return data;
+    })
     .then(data => {
       if (data.success) {
         alert(data.message);
@@ -149,10 +221,18 @@
       }
     })
     .catch(err => {
-      alert("Đã xảy ra lỗi hệ thống.");
+      alert("Không gửi được yêu cầu ký số: " + (err.message || "Lỗi không xác định."));
       btn.disabled = false;
       btn.innerText = 'Xác nhận ký';
     });
+  }
+
+  function getCsrfToken() {
+    const tokenInput = document.getElementById("kySoCsrfToken");
+    return getCookie("qlvb_csrftoken")
+      || getCookie("csrftoken")
+      || (tokenInput ? tokenInput.value : "")
+      || kySoTemplateCsrfToken;
   }
 
   function getCookie(name) {

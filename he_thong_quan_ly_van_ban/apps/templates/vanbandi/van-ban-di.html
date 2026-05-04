@@ -120,7 +120,7 @@
             style="cursor:pointer;"
             data-so-ky-hieu="{{ vb.so_ky_hieu|default:'' }}"
             data-trich-yeu="{{ vb.trich_yeu|default:'' }}"
-            data-trang-thai="{% if vb.trang_thai == 'Đã ban hành' %}{% if request.user.core_profile.pk == vb.nguoi_tao_id or request.user.core_profile.pk == vb.lanh_dao_duyet_id or request.user.is_van_thu %}Đã ban hành{% else %}Xem Để Biết{% endif %}{% else %}{{ vb.trang_thai|default:'' }}{% endif %}"
+            data-trang-thai="{{ vb.hien_thi_trang_thai|default:vb.trang_thai|default:'' }}"
             data-don-vi="{% if vb.nguoi_tao %}{% if vb.nguoi_tao.phong_ban %}{{ vb.nguoi_tao.phong_ban.ten_phong_ban }} - {% endif %}{{ vb.nguoi_tao.ho_va_ten|default:'' }}{% endif %}"
             data-loai-vb="{{ vb.get_loai_van_ban_display|default:vb.loai_van_ban|default:'' }}"
             data-hinh-thuc="{{ vb.get_hinh_thuc_display|default:vb.hinh_thuc|default:'' }}"
@@ -170,29 +170,27 @@
               {% endif %}
             </td>
             <td>
-              {% if vb.trang_thai == "Đã ban hành" %}
-                {% if request.user.core_profile.pk == vb.nguoi_tao_id or request.user.core_profile.pk == vb.lanh_dao_duyet_id or request.user.is_van_thu %}
-                  <span class="badge badge-da-ban-hanh">Đã ban hành</span>
-                {% else %}
-                  <span class="badge badge-xem-de-biet">Xem để biết</span>
-                {% endif %}
-              {% elif vb.trang_thai == "Xem Để Biết" %}
+              {% with status=vb.hien_thi_trang_thai|default:vb.trang_thai %}
+              {% if status == "Đã ban hành" %}
+                <span class="badge badge-da-ban-hanh">Đã Ban Hành</span>
+              {% elif status == "Xem Để Biết" %}
                 <span class="badge badge-xem-de-biet">Xem để biết</span>
-              {% elif vb.trang_thai == "Chờ ban hành" %}
+              {% elif status == "Chờ ban hành" %}
                 {% if request.user.is_van_thu %}
                   <span class="badge badge-cho-ban-hanh">Chờ ban hành</span>
                 {% else %}
                   <span class="badge badge-da-xu-ly">Đã xử lý</span>
                 {% endif %}
-              {% elif vb.trang_thai|lower == "chờ xử lý" %}
-                <span class="badge badge-cho-xu-ly">{{ vb.trang_thai }}</span>
-              {% elif vb.trang_thai|lower == "đã xử lý" %}
-                <span class="badge badge-da-xu-ly">{{ vb.trang_thai }}</span>
-              {% elif vb.trang_thai|lower == "hoàn trả" %}
-                <span class="badge badge-hoan-tra">{{ vb.trang_thai }}</span>
+              {% elif status|lower == "chờ xử lý" %}
+                <span class="badge badge-cho-xu-ly">{{ status }}</span>
+              {% elif status|lower == "đã xử lý" %}
+                <span class="badge badge-da-xu-ly">{{ status }}</span>
+              {% elif status|lower == "hoàn trả" %}
+                <span class="badge badge-hoan-tra">{{ status }}</span>
               {% else %}
-                <span class="badge">{{ vb.trang_thai }}</span>
+                <span class="badge">{{ status }}</span>
               {% endif %}
+              {% endwith %}
             </td>
           </tr>
         {% empty %}

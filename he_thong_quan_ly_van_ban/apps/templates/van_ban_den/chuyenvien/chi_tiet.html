@@ -377,9 +377,7 @@
             <div class="field"><div class="label">Người gửi</div><div class="value">{{ vb.lanh_dao_xu_ly.ho_va_ten|default:vb.lanh_dao_xu_ly.email }}</div></div>
             <div class="field">
                 <div class="label">Trạng thái</div>
-                <div class="value">
-                    <span class="badge badge-xem-de-biet">Xem để biết</span>
-                </div>
+                <div class="value">{% include "van_ban_den/_status_badge.html" with status=vb.trang_thai %}</div>
             </div>
         </div>
     </div>
@@ -488,14 +486,14 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="{% static 'vendor/pdfjs/pdf.min.js' %}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
 <script src="{% static 'vendor/sheetjs/xlsx.full.min.js' %}"></script>
 
 <script>
     if (window.pdfjsLib) {
         pdfjsLib.GlobalWorkerOptions.workerSrc =
-            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+            "{% static 'vendor/pdfjs/pdf.worker.min.js' %}";
     }
 
     let pdfDoc = null;

@@ -1,6 +1,11 @@
 from django import forms
 
 from apps.core.models import NguoiDung, VanBan
+from apps.core.validation import (
+    DUPLICATE_SO_KY_HIEU_TRICH_YEU_MESSAGE,
+    document_pair_exists,
+    normalize_document_text,
+)
 
 
 class VanBanDenForm(forms.ModelForm):
@@ -103,6 +108,24 @@ class VanBanDenForm(forms.ModelForm):
             self.fields['hinh_thuc_van_ban'].initial = self.instance.hinh_thuc
             self.fields['noi_dung_xu_ly'].initial = self.instance.noi_dung
             self.fields['lanh_dao_xu_ly'].initial = self.instance.lanh_dao_duyet
+
+    def clean(self):
+        cleaned_data = super().clean()
+        so_ky_hieu = normalize_document_text(cleaned_data.get('so_ky_hieu'))
+        trich_yeu = normalize_document_text(cleaned_data.get('trich_yeu'))
+
+        cleaned_data['so_ky_hieu'] = so_ky_hieu
+        cleaned_data['trich_yeu'] = trich_yeu
+
+        if document_pair_exists(
+            phan_loai='Văn bản đến',
+            so_ky_hieu=so_ky_hieu,
+            trich_yeu=trich_yeu,
+            exclude_pk=self.instance.pk,
+        ):
+            raise forms.ValidationError(DUPLICATE_SO_KY_HIEU_TRICH_YEU_MESSAGE)
+
+        return cleaned_data
 
     def save(self, commit=True):
         vb = super().save(commit=False)

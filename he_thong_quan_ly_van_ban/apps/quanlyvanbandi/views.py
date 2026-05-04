@@ -3,11 +3,13 @@ from datetime import timedelta, date
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.utils import timezone
 from django import forms
 from django.views.decorators.http import require_POST, require_http_methods
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import JsonResponse
 
 from ..accounts.decorators import role_required
@@ -23,6 +25,9 @@ from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from django.db import IntegrityError
 from apps.core.utils.activity_log import ghi_lich_su_van_ban
+
+STATUS_XEM_DE_BIET = "Xem Để Biết"
+STATUS_DA_BAN_HANH = "Đã ban hành"
 
 
 def _current_core_user(request):
@@ -50,6 +55,88 @@ def _user_is_document_creator(request, van_ban):
 
 def _user_is_assigned_approver(request, van_ban):
     return van_ban.lanh_dao_duyet_id == _current_core_user(request).pk
+
+
+def _empty_q():
+    return Q(pk__in=[])
+
+
+def _main_flow_q_for_user(user, core_user):
+    if user.has_role(Customer.Role.ADMIN):
+        return Q()
+    if not core_user:
+        return _empty_q()
+    if user.has_role(Customer.Role.CHUYEN_VIEN):
+        return Q(nguoi_tao=core_user)
+    if user.has_role(Customer.Role.LANH_DAO):
+        return Q(lanh_dao_duyet=core_user)
+    if user.has_role(Customer.Role.VAN_THU):
+        return Q(vanbanduyet__van_thu=core_user)
+    return _empty_q()
+
+
+def _recipient_q_for_user(core_user):
+    if not core_user or not core_user.phong_ban_id:
+        return _empty_q()
+    return Q(
+        trang_thai=STATUS_DA_BAN_HANH,
+        noinhanvanban__phong_ban_id=core_user.phong_ban_id,
+    )
+
+
+def _safe_duyet_record(van_ban):
+    try:
+        return van_ban.vanbanduyet
+    except VanBanDuyet.DoesNotExist:
+        return None
+
+
+def _recipient_record_for_user(van_ban, core_user):
+    if not core_user or not core_user.phong_ban_id:
+        return None
+    for noi_nhan in van_ban.noinhanvanban_set.all():
+        if noi_nhan.phong_ban_id == core_user.phong_ban_id:
+            return noi_nhan
+    return None
+
+
+def _is_main_flow_user(request, van_ban, duyet_record=None):
+    user = request.user
+    if user.has_role(Customer.Role.ADMIN):
+        return True
+    core_user = _current_core_user(request)
+    if van_ban.nguoi_tao_id == core_user.pk or van_ban.lanh_dao_duyet_id == core_user.pk:
+        return True
+    duyet_record = duyet_record if duyet_record is not None else _safe_duyet_record(van_ban)
+    return bool(
+        user.has_role(Customer.Role.VAN_THU)
+        and duyet_record
+        and duyet_record.van_thu_id == core_user.pk
+    )
+
+
+def _display_status_for_user(request, van_ban, duyet_record=None):
+    core_user = _current_core_user(request)
+    if _is_main_flow_user(request, van_ban, duyet_record):
+        if not request.user.has_role(Customer.Role.VAN_THU) and van_ban.trang_thai == "Chờ ban hành":
+            return "Đã Xử Lý"
+        return van_ban.trang_thai
+
+    recipient_record = _recipient_record_for_user(van_ban, core_user)
+    if recipient_record:
+        return recipient_record.trang_thai_nguoi_nhan or STATUS_XEM_DE_BIET
+
+    return van_ban.trang_thai
+
+
+def _attach_display_statuses(request, documents):
+    for van_ban in documents:
+        van_ban.hien_thi_trang_thai = _display_status_for_user(
+            request,
+            van_ban,
+            _safe_duyet_record(van_ban),
+        )
+    return documents
 
 
 @role_required(*Customer.Role.values)
@@ -97,36 +184,17 @@ def van_ban_di(request):
         trang_thai__in=allowed_statuses,
     ).order_by("-van_ban_id")
 
+    core_user = _current_core_user(request)
+    main_flow_q = _main_flow_q_for_user(user, core_user)
+    recipient_q = _recipient_q_for_user(core_user)
+
     # ── Lọc theo quyền xem ──
     if user.has_role(Customer.Role.CHUYEN_VIEN):
-        core_user = _current_core_user(request)
-
-        q_role = Q(nguoi_tao=core_user)
-        if core_user and core_user.phong_ban_id:
-            q_role |= Q(
-                trang_thai__in=["Xem Để Biết", "Đã ban hành"],
-                noinhanvanban__phong_ban_id=core_user.phong_ban_id,
-            )
-
-        ds_van_ban_di_list = ds_van_ban_di_list.filter(q_role).distinct()
+        ds_van_ban_di_list = ds_van_ban_di_list.filter(main_flow_q | recipient_q).distinct()
     elif user.has_role(Customer.Role.LANH_DAO):
-        core_user = _current_core_user(request)
-        q_role = Q(lanh_dao_duyet=core_user)
-        if core_user and core_user.phong_ban_id:
-            q_role |= Q(
-                trang_thai__in=["Xem Để Biết", "Đã ban hành"],
-                noinhanvanban__phong_ban_id=core_user.phong_ban_id,
-            )
-        ds_van_ban_di_list = ds_van_ban_di_list.filter(q_role).distinct()
+        ds_van_ban_di_list = ds_van_ban_di_list.filter(main_flow_q | recipient_q).distinct()
     elif user.has_role(Customer.Role.VAN_THU):
-        core_user = _current_core_user(request)
-        q_role = Q(vanbanduyet__van_thu=core_user)
-        if core_user and core_user.phong_ban_id:
-            q_role |= Q(
-                trang_thai__in=["Xem Để Biết", "Đã ban hành"],
-                noinhanvanban__phong_ban_id=core_user.phong_ban_id,
-            )
-        ds_van_ban_di_list = ds_van_ban_di_list.filter(q_role).distinct()
+        ds_van_ban_di_list = ds_van_ban_di_list.filter(main_flow_q | recipient_q).distinct()
 
     # Cảnh báo văn bản sắp đến hạn (chỉ áp dụng cho Lãnh đạo/Chuyên viên)
     today = timezone.localdate()
@@ -192,12 +260,13 @@ def van_ban_di(request):
     if trang_thai:
         if trang_thai == "Đã Xử Lý" and not user.has_role(Customer.Role.VAN_THU):
             ds_van_ban_di_list = ds_van_ban_di_list.filter(
+                main_flow_q,
                 trang_thai__in=["Đã Xử Lý", "Chờ ban hành", "Đã ban hành"]
             )
-        elif trang_thai == "Xem Để Biết":
-            ds_van_ban_di_list = ds_van_ban_di_list.filter(
-                trang_thai__in=["Xem Để Biết", "Đã ban hành"]
-            )
+        elif trang_thai == STATUS_XEM_DE_BIET:
+            ds_van_ban_di_list = ds_van_ban_di_list.filter(recipient_q).exclude(main_flow_q)
+        elif trang_thai == STATUS_DA_BAN_HANH:
+            ds_van_ban_di_list = ds_van_ban_di_list.filter(main_flow_q, trang_thai=STATUS_DA_BAN_HANH)
         else:
             ds_van_ban_di_list = ds_van_ban_di_list.filter(trang_thai=trang_thai)
 
@@ -221,6 +290,8 @@ def van_ban_di(request):
     ds_van_ban_di_list = ds_van_ban_di_list.select_related(
         "nguoi_tao",
         "nguoi_tao__phong_ban",
+        "lanh_dao_duyet",
+        "vanbanduyet",
     ).prefetch_related(
         "noinhanvanban_set__phong_ban",
         "noinhanvanban_set__don_vi_ngoai",
@@ -229,6 +300,7 @@ def van_ban_di(request):
     paginator    = Paginator(ds_van_ban_di_list, 10)
     page_number  = request.GET.get("page")
     ds_van_ban_di = paginator.get_page(page_number)
+    _attach_display_statuses(request, ds_van_ban_di.object_list)
 
     context = {
         "ds_van_ban_di": ds_van_ban_di,
@@ -337,6 +409,7 @@ def van_ban_di_edit(request, vb_pk=None):
                             van_ban=updated_van_ban,
                             phong_ban=pb,
                             don_vi_ngoai=None,
+                            trang_thai_nguoi_nhan=STATUS_XEM_DE_BIET,
                         )
 
                 for dv_id in dict.fromkeys(don_vi_ngoai_ids):
@@ -346,6 +419,7 @@ def van_ban_di_edit(request, vb_pk=None):
                             van_ban=updated_van_ban,
                             phong_ban=None,
                             don_vi_ngoai=dv,
+                            trang_thai_nguoi_nhan=STATUS_XEM_DE_BIET,
                         )
 
             hanh_dong = "SUA" if is_edit else "TAO"
@@ -386,6 +460,7 @@ def van_ban_di_edit(request, vb_pk=None):
 
 
 @role_required(*Customer.Role.values)
+@ensure_csrf_cookie
 def chi_tiet_van_ban_di(request, id):
     vb   = get_object_or_404(VanBan, pk=id, phan_loai="Văn bản đi")
     user = request.user
@@ -393,10 +468,10 @@ def chi_tiet_van_ban_di(request, id):
     core_user = _current_core_user(request)
 
     # ── Cho phép xem nếu văn bản đã ban hành và người dùng thuộc phòng ban nhận ──
-    is_in_receiving_dept = False
-    if vb.trang_thai in ["Xem Để Biết", "Đã ban hành"] and core_user and core_user.phong_ban_id:
-        if vb.noinhanvanban_set.filter(phong_ban_id=core_user.phong_ban_id).exists():
-            is_in_receiving_dept = True
+    recipient_record = None
+    if vb.trang_thai == STATUS_DA_BAN_HANH:
+        recipient_record = _recipient_record_for_user(vb, core_user)
+    is_in_receiving_dept = recipient_record is not None
 
     # ── Kiểm tra quyền xem chi tiết ──
     if not is_in_receiving_dept:
@@ -446,19 +521,9 @@ def chi_tiet_van_ban_di(request, id):
             if not duyet or duyet.van_thu_id != core_user.pk:
                 can_view_sensitive_notes = False
 
-    # ── Hiển thị trạng thái theo role ──
-    is_creator_or_approver_or_clerk = False
-    if _user_is_document_creator(request, vb) or _user_is_assigned_approver(request, vb):
-        is_creator_or_approver_or_clerk = True
-    elif user.has_role(Customer.Role.VAN_THU) and duyet_record and duyet_record.van_thu_id == core_user.pk:
-        is_creator_or_approver_or_clerk = True
-
-    if is_in_receiving_dept and not is_creator_or_approver_or_clerk:
-        hien_thi_trang_thai = "Xem Để Biết"
-    elif not user.has_role(Customer.Role.VAN_THU) and vb.trang_thai == "Chờ ban hành":
-        hien_thi_trang_thai = "Đã Xử Lý"
-    else:
-        hien_thi_trang_thai = vb.trang_thai
+    # ── Hiển thị trạng thái theo vai trò: luồng xử lý dùng trạng thái chính,
+    # người nhận dùng trạng thái riêng trên quan hệ nơi nhận.
+    hien_thi_trang_thai = _display_status_for_user(request, vb, duyet_record)
 
     ds_chi_nhanh = ChiNhanh.objects.order_by("ten_chi_nhanh")
 
@@ -800,15 +865,18 @@ def ban_hanh_van_ban(request, vb_pk):
         messages.error(request, "Bạn không phải văn thư được lãnh đạo chọn để ban hành văn bản này.")
         return redirect("quanlyvanbandi:chi_tiet_van_ban_di", id=vb.pk)
 
-    # Sau khi ban hành, văn bản đi gốc chuyển sang "Đã ban hành"
-    vb.trang_thai = "Đã ban hành"
+    # Sau khi ban hành, văn bản đi gốc giữ đúng luồng Văn bản đi.
+    vb.trang_thai = STATUS_DA_BAN_HANH
     vb.save(update_fields=["trang_thai"])
 
-    BanHanh.objects.create(van_ban=vb)
+    BanHanh.objects.get_or_create(van_ban=vb)
+    NoiNhanVanBan.objects.filter(van_ban=vb).update(
+        trang_thai_nguoi_nhan=STATUS_XEM_DE_BIET,
+    )
 
     ghi_lich_su_van_ban(
         user=request.user, van_ban=vb, hanh_dong="BAN_HANH",
-        trang_thai_cu="Chờ ban hành", trang_thai_moi="Đã ban hành",
+        trang_thai_cu="Chờ ban hành", trang_thai_moi=STATUS_DA_BAN_HANH,
     )
 
     messages.success(request, "Ban hành văn bản đi thành công.")
@@ -844,42 +912,54 @@ def xoa_van_ban_di(request, vb_pk):
 
 import os
 from django.conf import settings
-from django.core.files import File
+from django.core.files.base import ContentFile
 from .utils_ky_so import sign_pdf_with_ratio
 
 @require_POST
-@role_required(Customer.Role.LANH_DAO)
+@login_required
 def api_ky_so_van_ban(request, vb_pk):
+    if not request.user.has_role(Customer.Role.LANH_DAO):
+        return JsonResponse({"success": False, "message": "Bạn không có quyền ký số văn bản này."}, status=403)
+
     try:
         data = json.loads(request.body)
         x_ratio = float(data.get("x_ratio", 0))
         y_ratio = float(data.get("y_ratio", 0))
     except (ValueError, TypeError, json.JSONDecodeError):
-        return JsonResponse({"success": False, "message": "Tọa độ không hợp lệ."})
+        return JsonResponse({"success": False, "message": "Tọa độ không hợp lệ."}, status=400)
 
-    vb = get_object_or_404(VanBan, pk=vb_pk, phan_loai="Văn bản đi")
+    vb = VanBan.objects.filter(pk=vb_pk, phan_loai="Văn bản đi").first()
+    if not vb:
+        return JsonResponse({"success": False, "message": "Không tìm thấy văn bản đi cần ký."}, status=404)
     user = _current_core_user(request)
 
     if vb.lanh_dao_duyet_id != user.pk or vb.trang_thai != "Chờ Xử Lý":
-        return JsonResponse({"success": False, "message": "Bạn không có quyền ký văn bản này hoặc văn bản không ở trạng thái Chờ Xử Lý."})
+        return JsonResponse({"success": False, "message": "Bạn không có quyền ký văn bản này hoặc văn bản không ở trạng thái Chờ Xử Lý."}, status=403)
 
     try:
         chu_ky_so = ChuKySo.objects.get(nguoi_dung=user)
         if not chu_ky_so.anh_chu_ky:
-            return JsonResponse({"success": False, "message": "Bạn chưa cấu hình ảnh chữ ký."})
+            return JsonResponse({"success": False, "message": "Tài khoản chưa cấu hình ảnh chữ ký."}, status=400)
         signature_image_path = chu_ky_so.anh_chu_ky.path
     except ChuKySo.DoesNotExist:
-        return JsonResponse({"success": False, "message": "Bạn chưa có thông tin chữ ký số."})
+        return JsonResponse({"success": False, "message": "Tài khoản chưa có thông tin chữ ký số."}, status=400)
 
     if not vb.file_dinh_kem:
-        return JsonResponse({"success": False, "message": "Văn bản chưa có file đính kèm."})
+        return JsonResponse({"success": False, "message": "Văn bản chưa có file đính kèm."}, status=400)
 
     input_pdf_path = vb.file_dinh_kem.path
+    if not vb.file_dinh_kem.name.lower().endswith(".pdf"):
+        return JsonResponse({"success": False, "message": "Chỉ hỗ trợ ký số trên file PDF."}, status=400)
+    if not os.path.exists(input_pdf_path):
+        return JsonResponse({"success": False, "message": "Không tìm thấy file PDF gốc."}, status=404)
+    if not os.path.exists(signature_image_path):
+        return JsonResponse({"success": False, "message": "Không tìm thấy file ảnh chữ ký."}, status=404)
+
     pfx_path = os.path.join(settings.BASE_DIR, 'apps', 'core', 'certs', 'dummy_cert.pfx')
     pfx_password = "123456"
 
     if not os.path.exists(pfx_path):
-        return JsonResponse({"success": False, "message": "Không tìm thấy chứng thư số hệ thống."})
+        return JsonResponse({"success": False, "message": "Không tìm thấy chứng thư số hệ thống."}, status=500)
 
     timestamp = timezone.now().strftime("%Y%m%d%H%M%S")
     output_filename = f"vanban_{vb.pk}_signed_{timestamp}.pdf"
@@ -898,34 +978,30 @@ def api_ky_so_van_ban(request, vb_pk):
             pfx_path=pfx_path,
             pfx_password=pfx_password
         )
-    except Exception as e:
-        return JsonResponse({"success": False, "message": f"Lỗi khi ký số: {str(e)}"})
+        with open(output_pdf_path, "rb") as f:
+            signed_bytes = f.read()
 
-    with open(output_pdf_path, 'rb') as f:
-        signed_file = File(f, name=output_filename)
+        import hashlib
+        file_hash = hashlib.sha256(signed_bytes).hexdigest()
 
-        # Cập nhật ghi đè file đính kèm của VanBan
-        vb.file_dinh_kem.save(output_filename, signed_file, save=False)
-        vb.kich_thuoc = signed_file.size
+        vb.file_dinh_kem.save(output_filename, ContentFile(signed_bytes), save=False)
+        vb.kich_thuoc = len(signed_bytes)
         vb.save(update_fields=["file_dinh_kem", "kich_thuoc"])
 
-        # Lưu lịch sử ký số
-        import hashlib
-        f.seek(0)
-        file_hash = hashlib.sha256(f.read()).hexdigest()
-
-        f.seek(0)
         LichSuKySo.objects.update_or_create(
             van_ban=vb,
             defaults={
                 'chu_ky_so': chu_ky_so,
                 'hash_tai_lieu': file_hash,
                 'file_hash': file_hash,
-                'file_da_ky': signed_file
+                'file_da_ky': ContentFile(signed_bytes, name=output_filename),
+                'cong_viec': None,
             }
         )
-
-    if os.path.exists(output_pdf_path):
-        os.remove(output_pdf_path)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": f"Lỗi khi ký số: {str(e)}"}, status=500)
+    finally:
+        if os.path.exists(output_pdf_path):
+            os.remove(output_pdf_path)
 
     return JsonResponse({"success": True, "message": "Ký số thành công."})

@@ -219,8 +219,8 @@ def chi_tiet_ho_so_van_ban(request, pk):
     elif nd and ho_so.nguoixulyhoso_set.filter(nguoi_xu_ly=nd).exists():
         has_permission = True
 
-    # Quyền gỡ văn bản (Chỉ Văn thư)
-    can_remove_doc = request.user.is_van_thu
+    # Quyền gỡ văn bản khỏi hồ sơ dùng cùng logic quyền xử lý hồ sơ.
+    can_remove_doc = check_ho_so_permission(request, ho_so)
 
     can_edit = False
     if request.user.is_van_thu and ho_so.nguoi_tao == nd and ho_so.trang_thai == 1:
@@ -247,7 +247,7 @@ def chi_tiet_ho_so_van_ban(request, pk):
     )
 
 def check_ho_so_permission(request, ho_so):
-    """Kiểm tra quyền thêm văn bản vào hồ sơ."""
+    """Kiểm tra quyền xử lý hồ sơ."""
     if request.user.is_van_thu:
         return True
         
@@ -382,11 +382,15 @@ def xoa_van_ban_khoi_ho_so(request, ho_so_id, vb_id):
     if request.method == "POST":
         ho_so = get_object_or_404(HoSoVanBan, pk=ho_so_id)
         van_ban = get_object_or_404(VanBan, pk=vb_id, ho_so_van_ban=ho_so)
-        
+
         if not check_ho_so_permission(request, ho_so):
             messages.error(request, "Bạn không có quyền gỡ văn bản khỏi hồ sơ này.")
             return redirect("hosovanban:chi_tiet", pk=ho_so_id)
-        
+
+        if ho_so.trang_thai != 1:
+            messages.error(request, "Không thể gỡ văn bản khỏi hồ sơ đã lưu trữ.")
+            return redirect("hosovanban:chi_tiet", pk=ho_so_id)
+
         van_ban.ho_so_van_ban = None
         van_ban.save()
         
